@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ক্লায়েন্ট ড্যাশবোর্ড ও ডাটা এন্ট্রি</title>
+    <!-- Tailwind CSS (UI Design) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JavaScript SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <!-- হেডার -->
+    <header class="bg-slate-900 text-white p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">ক্লায়েন্ট পোর্টাল (ডাটা এন্ট্রি ও রিপোর্ট)</h1>
+            <span id="userStatus" class="text-sm bg-slate-800 px-3 py-1 rounded">লগইন অবস্থায় নেই</span>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- ১. ডাটা এন্ট্রি ফর্ম (ক্লায়েন্টদের জন্য) -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4 border-b pb-2 text-indigo-700">দৈনিক হিসাব ডাটা এন্ট্রি</h2>
+            <form id="entryForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">তারিখ</label>
+                    <input type="date" id="entryDate" required class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">বিবরণ / খাত</label>
+                    <input type="text" id="description" placeholder="যেমন: মালামাল ক্রয় বা বিক্রয়" required class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">পরিমাণ (টাকা)</label>
+                    <input type="number" id="amount" placeholder="0.00" step="0.01" required class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">লেনদেনের ধরন</label>
+                    <select id="type" class="w-full border p-2 rounded focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="income">জমা (Income)</option>
+                        <option value="expense">খরচ (Expense)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded transition">
+                    ডাটা জমা দিন
+                </button>
+            </form>
+            <p id="formMessage" class="mt-3 text-sm font-medium"></p>
+        </div>
+
+        <!-- ২. প্রসেস করা রিপোর্ট ও সামারি -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4 border-b pb-2 text-emerald-700">প্রসেস করা সাম্প্রতিক রিপোর্ট</h2>
+            
+            <!-- সামারি কার্ড -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-emerald-50 p-4 rounded border border-emerald-200">
+                    <p class="text-xs text-emerald-600 font-bold uppercase">মোট জমা</p>
+                    <p id="totalIncome" class="text-xl font-bold text-emerald-800">৳ ০.০০</p>
+                </div>
+                <div class="bg-rose-50 p-4 rounded border border-rose-200">
+                    <p class="text-xs text-rose-600 font-bold uppercase">মোট খরচ</p>
+                    <p id="totalExpense" class="text-xl font-bold text-rose-800">৳ ০.০০</p>
+                </div>
+            </div>
+
+            <!-- ডাটা টেবিল -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 border-b">
+                            <th class="p-2">তারিখ</th>
+                            <th class="p-2">বিবরণ</th>
+                            <th class="p-2">ধরন</th>
+                            <th class="p-2 text-right">পরিমাণ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTable">
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-gray-500">কোনো ডাটা পাওয়া যায়নি</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Supabase সংযোগের স্কিপ্ট -->
+    <script>
+        // Supabase কাস্টিম ক্র্যাডেনশিয়ালস
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ডাটা সাবমিট হ্যান্ডলার
+        document.getElementById('entryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('formMessage');
+            msg.innerText = "ডাটা সেভ হচ্ছে...";
+            msg.className = "mt-3 text-sm text-blue-600";
+
+            const date = document.getElementById('entryDate').value;
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const type = document.getElementById('type').value;
+
+            const { data, error } = await supabase
+                .from('client_logbooks')
+                .insert([{ entry_date: date, description: description, amount: amount, type: type }]);
+
+            if (error) {
+                msg.innerText = "ত্রুটি: " + error.message;
+                msg.className = "mt-3 text-sm text-red-600";
+            } else {
+                msg.innerText = "ডাটা সফলভাবে সংরক্ষিত হয়েছে!";
+                msg.className = "mt-3 text-sm text-green-600";
+                document.getElementById('entryForm').reset();
+                loadReports(); // টেবিল রিফ্রেশ
+            }
+        });
+
+        // রিপোর্ট লোড করার ফাংশন
+        async function loadReports() {
+            const { data, error } = await supabase
+                .from('client_logbooks')
+                .select('*')
+                .order('entry_date', { ascending: false });
+
+            if (error || !data) return;
+
+            const tableBody = document.getElementById('reportTable');
+            tableBody.innerHTML = '';
+
+            let income = 0;
+            let expense = 0;
+
+            data.forEach(row => {
+                if (row.type === 'income') income += row.amount;
+                if (row.type === 'expense') expense += row.amount;
+
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="p-2">${row.entry_date}</td>
+                    <td class="p-2">${row.description}</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded text-xs ${row.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${row.type === 'income' ? 'জমা' : 'খরচ'}</span></td>
+                    <td class="p-2 text-right font-medium">৳ ${row.amount.toFixed(2)}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById('totalIncome').innerText = ৳ ${income.toFixed(2)};
+            document.getElementById('totalExpense').innerText = ৳ ${expense.toFixed(2)};
+        }
+
+        // পেজ লোড হলে ডাটা দেখাবে
+        loadReports();
+    </script>
+</body>
+</html>
