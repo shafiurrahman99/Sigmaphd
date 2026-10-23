@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্টুডেন্ট পোর্টাল - নমুনা ৫</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- ১. স্টুডেন্ট লগইন ভিউ -->
+    <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg border w-full max-w-md">
+            <h2 class="text-2xl font-bold text-indigo-600 text-center mb-1">স্টুডেন্ট ড্যাশবোর্ড</h2>
+            <p class="text-xs text-gray-500 text-center mb-6">ইউজার আইডি ও পাসওয়ার্ড দিয়ে প্রবেশ করুন</p>
+            
+            <form onsubmit="loginStudent(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">স্টুডেন্ট আইডি</label>
+                    <input type="text" id="studentIdInput" placeholder="student01" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">পাসওয়ার্ড</label>
+                    <input type="password" id="passwordInput" placeholder="pass123" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition">লগইন</button>
+            </form>
+            <p id="errorMsg" class="text-red-500 text-xs text-center mt-3 hidden">ভুল আইডি বা পাসওয়ার্ড দেওয়া হয়েছে!</p>
+            
+            <div class="mt-6 p-3 bg-indigo-50 rounded-lg text-xs text-indigo-800">
+                📌 <b>টেস্ট আইডি:</b> student01 থেকে student10 <br>
+                🔑 <b>পাসওয়ার্ড:</b> pass123
+            </div>
+        </div>
+    </div>
+
+    <!-- ২. পোর্টাল ড্যাশবোর্ড ভিউ -->
+    <div id="dashboardView" class="hidden min-h-screen">
+        <!-- হেডার -->
+        <header class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-md">
+            <div>
+                <h1 class="font-bold text-lg">স্টুডেন্ট অ্যাকাডেমিক পোর্টাল</h1>
+                <p id="studentNameDisplay" class="text-xs text-indigo-200"></p>
+            </div>
+            <button onclick="logout()" class="bg-indigo-700 hover:bg-indigo-800 text-xs px-3 py-1.5 rounded transition">লগআউট</button>
+        </header>
+
+        <main class="max-w-5xl mx-auto p-6 space-y-8">
+            <!-- বিষয়ের তালিকা ও কী কী পড়া আছে -->
+            <section>
+                <h3 class="text-md font-bold mb-3 text-gray-700">📘 সাবজেক্ট ও পড়ার সিলেবাস</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg border shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-indigo-600">Web Development</span>
+                            <span class="text-xs bg-gray-100 px-2 py-0.5 rounded">CSE-101</span>
+                        </div>
+                        <ul class="text-xs text-gray-600 list-disc list-inside space-y-1">
+                            <li>HTML5 Semantic Tags & Layout</li>
+                            <li>Tailwind CSS Component Design</li>
+                            <li>JavaScript Event Handling</li>
+                            <li>Supabase Database REST Query</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-indigo-600">Database Systems</span>
+                            <span class="text-xs bg-gray-100 px-2 py-0.5 rounded">CSE-102</span>
+                        </div>
+                        <ul class="text-xs text-gray-600 list-disc list-inside space-y-1">
+                            <li>PostgreSQL Basics</li>
+                            <li>Table Creation & Data Insertion</li>
+                            <li>Supabase Row Level Security (RLS)</li>
+                            <li>Realtime Auto-Update Queries</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- হোমওয়ার্ক ও গিটহাব টাস্ক টেবিল -->
+            <section class="bg-white rounded-lg border shadow-sm p-5">
+                <h3 class="text-md font-bold mb-4 text-gray-700">📂 হোমওয়ার্ক ও গিটহাব লিংক</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-100 text-gray-600 text-xs uppercase">
+                            <tr>
+                                <th class="p-3">টাস্ক / হোমওয়ার্ক</th>
+                                <th class="p-3">বিষয়</th>
+                                <th class="p-3">গিটহাব লিংক</th>
+                                <th class="p-3">ডেডলাইন</th>
+                                <th class="p-3">স্ট্যাটাস (অটো আপডেট)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskRows" class="divide-y text-xs">
+                            <!-- JS ডাটা দিয়ে পূর্ণ হবে -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // ডেমো ১০ জন স্টুডেন্ট
+        const studentsList = Array.from({ length: 10 }, (_, i) => {
+            const idNum = String(i + 1).padStart(2, '0');
+            return { id: `student${idNum}`, pass: 'pass123', name: `স্টুডেন্ট ${idNum}` };
+        });
+
+        // ডেমো টাস্কের ডাটা
+        let tasksData = [
+            { id: 1, title: 'HTML & Responsive Layout', subject: 'Web Development', github: 'https://github.com', deadline: '2026-11-05', status: 'Pending' },
+            { id: 2, title: 'JavaScript DOM Manipulation', subject: 'Web Development', github: 'https://github.com', deadline: '2026-11-10', status: 'Submitted' },
+            { id: 3, title: 'Supabase Database Query Task', subject: 'Database System', github: 'https://github.com', deadline: '2026-11-15', status: 'Pending' }
+        ];
+
+        // লগইন ফাংশন
+        function loginStudent(e) {
+            e.preventDefault();
+            const idVal = document.getElementById('studentIdInput').value.trim();
+            const passVal = document.getElementById('passwordInput').value.trim();
+
+            const foundStudent = studentsList.find(s => s.id === idVal && s.pass === passVal);
+
+            if (foundStudent) {
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('dashboardView').classList.remove('hidden');
+                document.getElementById('studentNameDisplay').innerText = `স্বাগতম, ${foundStudent.name} (${foundStudent.id})`;
+                document.getElementById('errorMsg').classList.add('hidden');
+                loadTasks();
+            } else {
+                document.getElementById('errorMsg').classList.remove('hidden');
+            }
+        }
+
+        // লগআউট
+        function logout() {
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('loginView').classList.remove('hidden');
+        }
+
+        // টাস্ক টেবিল লোড
+        function loadTasks() {
+            const tableBody = document.getElementById('taskRows');
+            tableBody.innerHTML = tasksData.map(task => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3 font-semibold text-gray-700">${task.title}</td>
+                    <td class="p-3 text-gray-500">${task.subject}</td>
+                    <td class="p-3">
+                        <a href="${task.github}" target="_blank" class="text-indigo-600 hover:underline">
+                            GitHub Repository ↗
+                        </a>
+                    </td>
+                    <td class="p-3 text-gray-500">${task.deadline}</td>
+                    <td class="p-3">
+                        <select onchange="changeTaskStatus(${task.id}, this.value)" class="border rounded px-2 py-1 text-xs font-medium cursor-pointer ${
+                            task.status === 'Completed' ? 'bg-green-50 text-green-700 border-green-200' :
+                            task.status === 'Submitted' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                        }">
+                            <option value="Pending" ${task.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Submitted" ${task.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
+                            <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                        </select>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ব্যাকএন্ড সুপ্রা বেস কুয়েরি অটোমেটিক স্ট্যাটাস আপডেট লজিক
+        function changeTaskStatus(taskId, newStatus) {
+            const targetTask = tasksData.find(t => t.id === taskId);
+            if (targetTask) {
+                targetTask.status = newStatus;
+                
+                /* Supabase SDK কানেক্ট করা থাকলে ডাটাবেজে অটো আপডেট হওয়ার আসল কুয়েরি:
+                const { data, error } = await supabase
+                    .from('tasks')
+                    .update({ status: newStatus })
+                    .eq('id', taskId);
+                */
+
+                alert(`স্ট্যাটাস পরিবর্তন সফল হয়েছে: ${newStatus}`);
+                loadTasks();
+            }
+        }
+    </script>
+</body>
+</html>
