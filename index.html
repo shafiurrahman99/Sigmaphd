@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Supabase JS Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 bg-slate-950 text-slate-100 font-sans">
 
@@ -26,7 +28,7 @@
 
         <!-- PAGE 1: LOGIN BLOCK & PUBLIC AI CHATBOX -->
         <div id="page1View" class="fade-in w-full max-w-md mx-auto relative pt-4 space-y-6">
-            <div class="glass-card bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-6">
                 <div class="relative z-10 space-y-6">
                     <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                         <div>
@@ -64,7 +66,7 @@
                 </div>
             </div>
 
-            <div class="glass-card bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
+            <div class="glass-card rounded-3xl p-5 shadow-xl space-y-3">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></span>
@@ -112,7 +114,7 @@
 
         <!-- PAGE 2: MAIN SYSTEM MODULES & TABS -->
         <div id="page2View" class="hidden fade-in space-y-6 w-full">
-            <div class="glass-card bg-slate-900 border border-slate-800 p-4 px-6 rounded-3xl space-y-3">
+            <div class="glass-card p-4 px-6 rounded-3xl space-y-3">
                 <div class="flex flex-wrap justify-between items-center border-b border-slate-800/80 pb-2 text-xs">
                     <div class="flex items-center gap-2">
                         <span class="text-slate-400">Sign in by:</span>
@@ -168,24 +170,28 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-2 justify-center bg-slate-900 p-2 rounded-2xl border border-slate-800">
-                <button type="button" onclick="switchTab('dashboard')" id="tabDashBtn" class="px-5 py-2.5 bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+            <!-- TABS NAVIGATION (Updated core IDs & functions) -->
+            <div class="flex flex-wrap gap-2 justify-center glass-card p-2 rounded-2xl">
+                <button type="button" onclick="switchTab('Dashboard')" id="tabDashboardBtn" class="px-5 py-2.5 bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-chart-pie pointer-events-none"></i> Dashboard
                 </button>
-                <button type="button" onclick="switchTab('cashMemo')" id="tabCashMemoBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+                <button type="button" onclick="switchTab('CashMemo')" id="tabCashMemoBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-receipt pointer-events-none"></i> My Cash Memo
                 </button>
-                <button type="button" onclick="switchTab('myChat')" id="tabMyChatBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+                <button type="button" onclick="switchTab('MyChat')" id="tabMyChatBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-comments pointer-events-none"></i> My Chat
                 </button>
-                <button type="button" onclick="switchTab('security')" id="tabSecBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+                <button type="button" onclick="switchTab('Sec')" id="tabSecBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-shield-halved pointer-events-none"></i> Backup
+                </button>
+                <button type="button" onclick="switchTab('Payment')" id="tabPaymentBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-credit-card pointer-events-none"></i> Payment History
                 </button>
             </div>
 
             <!-- TAB 1: DASHBOARD VIEW -->
             <div id="tabDashboardView" class="space-y-6">
-                <div class="glass-card bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+                <div class="glass-card p-5 rounded-3xl space-y-4">
                     <div class="border-b border-slate-800 pb-3 flex flex-wrap justify-between items-center gap-3">
                         <div>
                             <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -226,23 +232,23 @@
                                     <td class="p-3 font-sans text-amber-400 flex items-center gap-2">
                                         <span>2026 Grand Summary</span>
                                     </td>
-                                    <td id="displayNovIncome" class="p-3 text-emerald-400">৳ 0.00</td>
-                                    <td id="displayNovExpense" class="p-3 text-rose-400">৳ 0.00</td>
-                                    <td id="grandTotalPao" class="p-3 text-amber-400">৳ 0.00</td>
-                                    <td id="grandTotalRin" class="p-3 text-rose-400">৳ 0.00</td>
-                                    <td id="displayWalletTop" class="p-3 text-emerald-300 font-black">৳ 0.00</td>
+                                    <td id="displayNovIncome" class="p-3 text-emerald-400">0.00</td>
+                                    <td id="displayNovExpense" class="p-3 text-rose-400">0.00</td>
+                                    <td id="grandTotalPao" class="p-3 text-amber-400">0.00</td>
+                                    <td id="grandTotalRin" class="p-3 text-rose-400">0.00</td>
+                                    <td id="displayWalletTop" class="p-3 text-emerald-300 font-black">0.00</td>
                                     <td class="p-3 text-center text-[10px] text-slate-400 font-sans">Synced DB</td>
-                                    <td id="displayCashBalance" class="p-3 text-emerald-300">৳ 0.00</td>
-                                    <td class="p-3 text-sky-400">৳ 10,000.00</td>
-                                    <td class="p-3 text-sky-400">৳ 8,000.00</td>
-                                    <td class="p-3 text-sky-400">৳ 4,000.00</td>
+                                    <td id="displayCashBalance" class="p-3 text-emerald-300">0.00</td>
+                                    <td class="p-3 text-sky-400">10,000.00</td>
+                                    <td class="p-3 text-sky-400">8,000.00</td>
+                                    <td class="p-3 text-sky-400">4,000.00</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="glass-card bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+                <div class="glass-card p-5 rounded-3xl space-y-4">
                     <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                         <div>
                             <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -256,57 +262,33 @@
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-                            <div class="flex justify-between border-b border-slate-800 pb-2 text-xs">
-                                <span class="font-bold text-amber-400 flex items-center gap-1">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Loans Given (Receivable)
-                                </span>
-                            </div>
-                            <div id="loanGivenList" class="space-y-2 text-xs">
-                                <p class="text-slate-500 text-xs">Loading receivables...</p>
-                            </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="flex justify-between border-b border-slate-800 pb-2 text-xs">
+                            <span class="font-bold text-amber-400 flex items-center gap-1">
+                                <i class="fa-solid fa-list"></i> All Receivables & Payables
+                            </span>
                         </div>
-                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-                            <div class="flex justify-between border-b border-slate-800 pb-2 text-xs">
-                                <span class="font-bold text-rose-400 flex items-center gap-1">
-                                    <i class="fa-solid fa-arrow-down-left-and-up-right-to-center"></i> Loans Taken (Payable)
-                                </span>
-                            </div>
-                            <div id="loanTakenList" class="space-y-2 text-xs">
-                                <p class="text-slate-500 text-xs">Loading payables...</p>
-                            </div>
+                        <div id="loanListContainer" class="space-y-2 text-xs">
+                            <p class="text-slate-500 text-xs">Loading loan records...</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-card bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+                <div class="glass-card p-5 rounded-3xl space-y-4">
                     <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                         <h3 class="text-sm font-bold text-white flex items-center gap-2">
                             <i class="fa-solid fa-cart-shopping text-indigo-400"></i>
                             <span>Daily Expense Log (Vault Transactions)</span>
                         </h3>
-                        <button type="button" onclick="openMarketEntryModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
-                            <i class="fa-solid fa-plus"></i> Add Expense
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="openMarketEntryModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-plus"></i> Add Expense
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="bg-slate-950 border-b border-slate-800 text-slate-400">
-                                    <th class="p-3">Category / Date</th>
-                                    <th class="p-3">Details / Item</th>
-                                    <th class="p-3">Amount (৳)</th>
-                                    <th class="p-3 text-right">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="marketLogTableBody" class="divide-y divide-slate-800/60 font-mono">
-                                <tr class="bg-slate-950">
-                                    <td colspan="4" class="p-3 text-center text-slate-500">Loading vault transactions...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div id="vaultLogContainer" class="space-y-2 text-xs">
+                        <p class="text-slate-500">No transactions recorded yet.</p>
                     </div>
                 </div>
             </div>
@@ -314,7 +296,7 @@
             <!-- TAB 2: MY CASH MEMO VIEW -->
             <div id="tabCashMemoView" class="hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div class="lg:col-span-5 glass-card bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                    <div class="lg:col-span-5 glass-card p-6 rounded-2xl space-y-4">
                         <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">My Cash Memo & Store Setup</h3>
                         
                         <div class="space-y-2 border-b border-slate-800/80 pb-3">
@@ -342,7 +324,7 @@
                         </div>
                     </div>
 
-                    <div class="lg:col-span-7 glass-card bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div class="lg:col-span-7 glass-card p-6 rounded-2xl flex flex-col justify-between space-y-4">
                         <div>
                             <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2 flex justify-between">
                                 <span>Sales Memo Cart</span>
@@ -368,55 +350,41 @@
                                 <span>Grand Total:</span>
                                 <span class="text-emerald-400">৳ <span id="posGrandTotal">0.00</span></span>
                             </div>
-                            <button type="button" onclick="generateCashMemoModal()" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-bold rounded-xl text-xs shadow-lg cursor-pointer">Print / Save PDF Memo</button>
+                            <button type="button" onclick="generateCashMemoModal()" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-bold rounded-xl text-xs shadow-lg cursor-pointer printable-area">Print / Save PDF Memo</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- TAB 3: MY CHAT VIEW -->
-            <div id="tabMyChatView" class="hidden glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+            <div id="tabMyChatView" class="hidden glass-card p-6 rounded-3xl space-y-4">
                 <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                     <div>
                         <h3 class="text-sm font-bold text-white flex items-center gap-2">
                             <i class="fa-solid fa-comments text-emerald-400"></i>
-                            <span>Internal Messaging</span>
+                            <span>Internal Messaging & Public Forum</span>
                         </h3>
                     </div>
-                    <button id="exitChatBtn" onclick="exitDirectChat()" class="hidden px-3 py-1.5 bg-rose-600 text-white font-bold text-xs rounded-xl transition cursor-pointer">
-                        <i class="fa-solid fa-arrow-left"></i> Exit Direct Chat
-                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div id="chatMemberListPanel" class="md:col-span-4 bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2 h-80 overflow-y-auto">
-                        <span class="text-[10px] text-slate-400 font-bold block mb-1">Channel Members</span>
-                        <div onclick="startDirectChat('Karim Ahmed (01711223344)')" class="p-2.5 bg-slate-900 hover:bg-slate-800 rounded-xl cursor-pointer flex items-center justify-between border border-slate-800 transition">
-                            <span class="text-xs text-slate-200 font-bold">Karim Ahmed</span>
-                            <span class="text-[9px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800">Online</span>
-                        </div>
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 h-64 overflow-y-auto space-y-2.5 text-xs" id="tier1PublicChatBox">
+                    <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800/80">
+                        <span class="text-emerald-400 font-bold block text-[10px]">👤 User</span>
+                        <p class="text-slate-200">Welcome to community messaging.</p>
                     </div>
+                </div>
 
-                    <div class="md:col-span-8 bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between h-80">
-                        <div id="chatWindowHeader" class="border-b border-slate-800 pb-2 text-xs font-bold text-emerald-400">
-                            Public Group Channel
-                        </div>
-                        <div id="internalChatMessages" class="flex-1 overflow-y-auto my-2 space-y-2 text-xs pr-1">
-                            <div class="bg-slate-900 p-2 rounded-xl text-slate-300 border border-slate-800">
-                                <span class="text-[10px] text-amber-400 font-bold block">System</span>
-                                Internal group chat active.
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="internalChatInput" placeholder="Type message..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-xs">
-                            <button type="button" onclick="sendInternalMessage()" class="px-4 py-2 bg-emerald-600 text-slate-950 font-bold rounded-xl text-xs cursor-pointer">Send</button>
-                        </div>
-                    </div>
+                <div class="flex gap-2">
+                    <input type="text" id="tier1PublicMsgInput" placeholder="Type message..." class="flex-1 px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-emerald-500" onkeypress="if(event.key==='Enter') sendTier1PublicMsg()">
+                    <button type="button" onclick="sendTier1PublicMsg()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- TAB 4: BACKUP VIEW -->
-            <div id="tabSecurityView" class="hidden glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+            <!-- TAB 4: BACKUP / SECURITY VIEW -->
+            <div id="tabSecurityView" class="hidden glass-card p-6 rounded-3xl space-y-4">
                 <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">Backup & Data Recovery</h3>
                 <div class="flex gap-4">
                     <button type="button" onclick="exportAppData()" class="px-5 py-3 bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl shadow cursor-pointer">Export Data (JSON)</button>
@@ -426,12 +394,20 @@
                     </label>
                 </div>
             </div>
+
+            <!-- TAB 5: PAYMENT HISTORY VIEW -->
+            <div id="tabPaymentView" class="hidden glass-card p-6 rounded-3xl space-y-4">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">Payment Gateway History</h3>
+                <div id="paymentHistoryContainer" class="space-y-2 text-xs">
+                    <p class="text-slate-500">No gateway payments recorded.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- MODALS SECTION -->
     <div id="agentAuthModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-user-shield text-emerald-400"></i>
@@ -457,7 +433,7 @@
     </div>
 
     <div id="validityPaymentOptionsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-circle-plus text-emerald-400"></i>
@@ -491,7 +467,7 @@
     </div>
 
     <div id="p2pTransferModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-right-left text-indigo-400"></i>
@@ -507,7 +483,7 @@
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Transfer Amount (BDT)</label>
-                    <input type="number" id="transferAmount" oninput="calculateTransferFee()" placeholder="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white font-mono">
+                    <input type="number" id="transferAmount" placeholder="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white font-mono">
                 </div>
             </div>
             <button type="button" onclick="executeTransfer()" class="w-full py-3 bg-emerald-600 text-slate-950 font-bold rounded-xl text-xs cursor-pointer">Confirm P2P Transfer</button>
@@ -515,7 +491,7 @@
     </div>
 
     <div id="paymentGatewayModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-mobile-screen text-emerald-400"></i>
@@ -542,7 +518,7 @@
     </div>
 
     <div id="accountSettingsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-gear text-indigo-400"></i>
@@ -562,7 +538,7 @@
     </div>
 
     <div id="bankSetupModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4">
             <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">Bank Account Setup</h3>
             <input type="text" id="bank1NameInput" placeholder="Al-Arafah Islami Bank" class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200">
             <div class="flex gap-2">
@@ -573,7 +549,7 @@
     </div>
 
     <div id="incomeEntryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">New Income Entry</h3>
             <div class="space-y-3">
                 <input type="text" id="incDescInput" placeholder="Source / Client Name" class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200">
@@ -587,7 +563,7 @@
     </div>
 
     <div id="loanEntryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">New Loan Entry (Receivable / Payable)</h3>
             <div class="space-y-3 text-xs">
                 <select id="loanTypeSelect" class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white">
@@ -605,7 +581,7 @@
     </div>
 
     <div id="marketEntryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-card bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
             <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">New Expense Entry</h3>
             <div class="space-y-3">
                 <input type="text" id="mktDescInput" placeholder="Expense description" class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200">
@@ -618,9 +594,37 @@
         </div>
     </div>
 
+    <div id="memoModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="glass-card p-6 rounded-3xl max-w-lg w-full space-y-4 shadow-2xl printable-area bg-white text-slate-900">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-sm font-bold">Sales Cash Memo</h3>
+                <button type="button" onclick="closeModal('memoModal')" class="cursor-pointer no-print"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-2 text-xs">
+                <p id="memoModalStore" class="font-bold">M/S Al-Nawa Digital Store</p>
+                <table class="w-full text-left border-collapse border border-slate-300 text-xs">
+                    <thead>
+                        <tr class="bg-slate-100">
+                            <th class="border border-slate-300 p-2">Item</th>
+                            <th class="border border-slate-300 p-2 text-center">Qty</th>
+                            <th class="border border-slate-300 p-2 text-right">Price</th>
+                            <th class="border border-slate-300 p-2 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memoModalBody"></tbody>
+                </table>
+                <div class="text-right font-bold pt-2">Grand Total: ৳<span id="memoModalGrandTotal">0.00</span></div>
+            </div>
+            <div class="flex gap-2 pt-2 no-print">
+                <button type="button" onclick="window.print()" class="flex-1 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs cursor-pointer">Print Memo</button>
+                <button type="button" onclick="closeModal('memoModal')" class="px-4 py-2.5 bg-slate-300 text-slate-800 font-bold rounded-xl text-xs cursor-pointer">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SUPABASE CLIENT & MODULAR JAVASCRIPT LOGIC -->
     <script>
-        // Supabase Initialization (Replace with your actual keys if needed)
+        // Supabase Initialization
         const SUPABASE_URL = 'https://your-supabase-url.supabase.co';
         const SUPABASE_ANON_KEY = 'your-supabase-anon-key';
         let supabaseClient = null;
@@ -637,28 +641,29 @@
         let currentUserId = 'USR-1001';
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("App Initialized successfully.");
-            loadFinancialSummary();
-            loadTransactionsFromDB();
-            loadInvestmentsFromDB();
+            if (typeof loadFinancialSummary === 'function') loadFinancialSummary();
+            if (typeof loadTransactionsFromDB === 'function') loadTransactionsFromDB();
+            if (typeof loadInvestmentsFromDB === 'function') loadInvestmentsFromDB();
+            if (typeof loadPaymentHistory === 'function') loadPaymentHistory();
         });
 
         // Tab Switching Logic
         function switchTab(tabName) {
-            const tabs = ['dashboard', 'cashMemo', 'myChat', 'security'];
+            const tabs = ['Dashboard', 'CashMemo', 'MyChat', 'Sec', 'Payment'];
             tabs.forEach(t => {
-                const el = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}View`);
-                const btn = document.getElementById(`tab${t === 'dashboard' ? 'Dash' : t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
+                const el = document.getElementById(`tab${t}View`);
+                const btn = document.getElementById(`tab${t}Btn`);
                 if(el) el.classList.add('hidden');
                 if(btn) btn.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
             });
 
             let currentViewId = 'tabDashboardView';
-            let currentBtnId = 'tabDashBtn';
+            let currentBtnId = 'tabDashboardBtn';
 
-            if (tabName === 'cashMemo') { currentViewId = 'tabCashMemoView'; currentBtnId = 'tabCashMemoBtn'; }
-            else if (tabName === 'myChat') { currentViewId = 'tabMyChatView'; currentBtnId = 'tabMyChatBtn'; }
-            else if (tabName === 'security') { currentViewId = 'tabSecurityView'; currentBtnId = 'tabSecBtn'; }
+            if (tabName === 'cashMemo' || tabName === 'CashMemo') { currentViewId = 'tabCashMemoView'; currentBtnId = 'tabCashMemoBtn'; }
+            else if (tabName === 'myChat' || tabName === 'MyChat') { currentViewId = 'tabMyChatView'; currentBtnId = 'tabMyChatBtn'; }
+            else if (tabName === 'security' || tabName === 'Sec') { currentViewId = 'tabSecurityView'; currentBtnId = 'tabSecBtn'; }
+            else if (tabName === 'payment' || tabName === 'Payment') { currentViewId = 'tabPaymentView'; currentBtnId = 'tabPaymentBtn'; }
 
             const activeView = document.getElementById(currentViewId);
             const activeBtn = document.getElementById(currentBtnId);
@@ -667,7 +672,7 @@
         }
 
         // Login Handler
-        function handleLogin(e) {
+        function handleSignIn(e) {
             if (e) e.preventDefault();
             const idVal = document.getElementById('inputUserId').value;
             const passVal = document.getElementById('inputPassword').value;
@@ -682,9 +687,10 @@
             document.getElementById('topSignInUser').innerText = `User ID: ${idVal}`;
             showAlert("Signed in successfully!");
             
-            loadFinancialSummary();
-            loadTransactionsFromDB();
-            loadInvestmentsFromDB();
+            if (typeof loadFinancialSummary === 'function') loadFinancialSummary();
+            if (typeof loadTransactionsFromDB === 'function') loadTransactionsFromDB();
+            if (typeof loadInvestmentsFromDB === 'function') loadInvestmentsFromDB();
+            if (typeof loadPaymentHistory === 'function') loadPaymentHistory();
         }
 
         function handleLogout() {
@@ -693,57 +699,90 @@
             showAlert("Logged out successfully.");
         }
 
-        // Load Financial Summary
+        function sendTier1PublicMsg() {
+            const input = document.getElementById('tier1PublicMsgInput');
+            if(!input) return;
+            const txt = input.value.trim();
+            if(!txt) return;
+            const box = document.getElementById('tier1PublicChatBox');
+            if(!box) return;
+            box.innerHTML += `
+                <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30">
+                    <span class="text-emerald-400 font-bold block text-[10px]">👤 User</span>
+                    <p class="text-slate-200">${txt}</p>
+                </div>
+            `;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function showAlert(msg) {
+            const alertBox = document.getElementById('systemAlert');
+            const alertMsg = document.getElementById('systemAlertMsg');
+            if(alertBox && alertMsg) {
+                alertMsg.innerText = msg;
+                alertBox.classList.remove('hidden');
+                setTimeout(() => { alertBox.classList.add('hidden'); }, 3000);
+            } else {
+                alert(msg);
+            }
+        }
+
+        // 1. Load Financial Summary & Balances to UI
         async function loadFinancialSummary() {
             try {
-                if (!supabaseClient) return;
+                if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
                 const { data, error } = await supabaseClient
                     .from('app_financial_ledgers')
                     .select('*')
                     .eq('company_id', cachedCompanyId)
-                    .maybeSingle();
-
-                if (error) throw error;
+                    .single();
+                if (error && error.code !== 'PGRST116') throw error;
                 if (data) {
-                    document.getElementById('displayWalletTop').innerText = `৳ ${Number(data.wallet_balance || 0).toFixed(2)}`;
-                    document.getElementById('displayCashBalance').innerText = `৳ ${Number(data.cash_balance || 0).toFixed(2)}`;
-                    document.getElementById('displayNovIncome').innerText = `৳ ${Number(data.nov_income || 0).toFixed(2)}`;
-                    document.getElementById('displayNovExpense').innerText = `৳ ${Number(data.nov_expense || 0).toFixed(2)}`;
+                    const walletDisplay = document.getElementById('displayWalletTop');
+                    const cashDisplay = document.getElementById('displayCashBalance');
+                    const incDisplay = document.getElementById('displayNovIncome');
+                    const expDisplay = document.getElementById('displayNovExpense');
+                    if (walletDisplay) walletDisplay.innerText = Number(data.wallet_balance || 0).toFixed(2);
+                    if (cashDisplay) cashDisplay.innerText = Number(data.cash_balance || 0).toFixed(2);
+                    if (incDisplay) incDisplay.innerText = Number(data.nov_income || 0).toFixed(2);
+                    if (expDisplay) expDisplay.innerText = Number(data.nov_expense || 0).toFixed(2);
                 }
             } catch (err) {
-                console.error("Financial summary error:", err.message);
+                console.error("Error fetching financial summary:", err.message);
             }
         }
 
-        // Load Vault Transactions
+        // 2. Load Recent Vault Transactions
         async function loadTransactionsFromDB() {
             try {
-                if (!supabaseClient) return;
+                if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
                 const { data, error } = await supabaseClient
                     .from('app_transactions_vault')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(20);
-
+                    .limit(15);
                 if (error) throw error;
-                const container = document.getElementById('marketLogTableBody');
+                const container = document.getElementById('vaultLogContainer');
                 if (!container) return;
-
                 if (!data || data.length === 0) {
-                    container.innerHTML = '<tr class="bg-slate-950"><td colspan="4" class="p-3 text-center text-slate-500">No transactions recorded.</td></tr>';
+                    container.innerHTML = '<p class="text-slate-500">No transactions recorded yet.</p>';
                     return;
                 }
-
                 container.innerHTML = data.map(item => {
                     const isIncome = item.transaction_category === 'INCOME';
                     const amount = item.payload && item.payload.amount ? item.payload.amount : 0;
                     return `
-                        <tr class="bg-slate-900/40 hover:bg-slate-900 transition">
-                            <td class="p-3 font-sans ${isIncome ? 'text-emerald-400' : 'text-indigo-400'} font-bold">[${item.transaction_category}]</td>
-                            <td class="p-3 font-sans text-slate-200">${item.record_key || 'N/A'}</td>
-                            <td class="p-3 ${isIncome ? 'text-emerald-400' : 'text-rose-400'} font-bold font-mono">৳ ${amount}</td>
-                            <td class="p-3 text-right text-emerald-400 font-sans">Synced ✓</td>
-                        </tr>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                            <div>
+                                <span class="${isIncome ? 'text-emerald-400' : 'text-rose-400'} font-mono font-bold">[${item.transaction_category || 'GENERAL'}]</span>
+                                <span class="text-slate-200 ml-2">${item.record_key || 'N/A'}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-mono font-bold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">৳${amount}</span>
+                                <span class="text-slate-500 text-[10px]">Synced ✓</span>
+                            </div>
+                        </div>
                     `;
                 }).join('');
             } catch (err) {
@@ -751,15 +790,16 @@
             }
         }
 
-        // Handle Income Submit
+        // 3. Handle Income Entry
         async function handleIncomeSubmit(e) {
             if (e) e.preventDefault();
-            const desc = document.getElementById('incDescInput').value.trim();
-            const amt = parseFloat(document.getElementById('incAmountInput').value) || 0;
+            const descInput = document.getElementById('incDescInput');
+            const amtInput = document.getElementById('incAmountInput');
+            const desc = descInput ? descInput.value.trim() : '';
+            const amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
             if (amt <= 0) return;
-
             try {
-                if (supabaseClient) {
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                     await supabaseClient.from('app_transactions_vault').insert([{
                         company_id: cachedCompanyId,
                         user_id: currentUserId,
@@ -768,26 +808,27 @@
                         payload: { amount: amt }
                     }]);
                 }
-                document.getElementById('incDescInput').value = '';
-                document.getElementById('incAmountInput').value = '';
+                if (descInput) descInput.value = '';
+                if (amtInput) amtInput.value = '';
                 closeModal('incomeEntryModal');
                 loadTransactionsFromDB();
                 loadFinancialSummary();
-                showAlert(`Income of ৳${amt} saved successfully!`);
+                showAlert(`Income entry of ৳${amt} successfully saved!`);
             } catch (err) {
-                showAlert("Error: " + err.message);
+                showAlert("Error saving income: " + err.message);
             }
         }
 
-        // Handle Market Expense Submit
+        // 4. Handle Expense Entry
         async function handleMarketSubmit(e) {
             if (e) e.preventDefault();
-            const desc = document.getElementById('mktDescInput').value.trim();
-            const amt = parseFloat(document.getElementById('mktAmountInput').value) || 0;
+            const descInput = document.getElementById('mktDescInput');
+            const amtInput = document.getElementById('mktAmountInput');
+            const desc = descInput ? descInput.value.trim() : '';
+            const amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
             if (amt <= 0) return;
-
             try {
-                if (supabaseClient) {
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                     await supabaseClient.from('app_transactions_vault').insert([{
                         company_id: cachedCompanyId,
                         user_id: currentUserId,
@@ -796,127 +837,147 @@
                         payload: { amount: amt }
                     }]);
                 }
-                document.getElementById('mktDescInput').value = '';
-                document.getElementById('mktAmountInput').value = '';
+                if (descInput) descInput.value = '';
+                if (amtInput) amtInput.value = '';
                 closeModal('marketEntryModal');
                 loadTransactionsFromDB();
                 loadFinancialSummary();
-                showAlert(`Expense of ৳${amt} saved successfully!`);
+                showAlert(`Expense entry of ৳${amt} successfully saved!`);
             } catch (err) {
-                showAlert("Error: " + err.message);
+                showAlert("Error saving expense: " + err.message);
             }
         }
 
-        // Load Loans / Investments (Receivable / Payable)
+        // 5. Load Receivables & Payables (Loans)
         async function loadInvestmentsFromDB() {
             try {
-                if (!supabaseClient) return;
+                if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
                 const { data, error } = await supabaseClient
                     .from('investments')
                     .select('*')
                     .order('created_at', { ascending: false });
-
                 if (error) throw error;
-
-                const givenContainer = document.getElementById('loanGivenList');
-                const takenContainer = document.getElementById('loanTakenList');
-
+                const container = document.getElementById('loanListContainer');
+                if (!container) return;
                 if (!data || data.length === 0) {
-                    if (givenContainer) givenContainer.innerHTML = '<p class="text-slate-500 text-xs">No receivable records.</p>';
-                    if (takenContainer) takenContainer.innerHTML = '<p class="text-slate-500 text-xs">No payable records.</p>';
+                    container.innerHTML = '<p class="text-slate-500">No loan or investment records found.</p>';
                     return;
                 }
-
-                const receivables = data.filter(i => i.loan_type === 'receivable');
-                const payables = data.filter(i => i.loan_type === 'payable');
-
-                if (givenContainer) {
-                    givenContainer.innerHTML = receivables.length === 0 ? '<p class="text-slate-500 text-xs">No receivables found.</p>' :
-                    receivables.map(i => `
-                        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+                container.innerHTML = data.map(i => {
+                    const isReceivable = i.loan_type === 'receivable';
+                    return `
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
                             <div>
-                                <span class="font-bold text-slate-200">${i.to_bank || i.description}</span>
-                                <span class="text-[10px] text-slate-400 block">${i.settlement_status || 'due'}</span>
+                                <span class="px-2 py-0.5 rounded font-mono font-bold text-[10px] ${isReceivable ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'}">
+                                    ${isReceivable ? 'RECEIVABLE (পাবো)' : 'PAYABLE (দেবো)'}
+                                </span>
+                                <span class="font-bold text-slate-200 ml-2">${i.to_bank || i.description || 'N/A'}</span>
+                                <span class="font-mono font-bold ml-3 text-amber-400">৳${i.amount}</span>
                             </div>
-                            <span class="font-mono font-bold text-emerald-400">৳${i.amount}</span>
+                            <span class="px-2 py-0.5 bg-slate-900 text-slate-400 rounded text-[10px] uppercase">${i.settlement_status || 'due'}</span>
                         </div>
-                    `).join('');
-                }
-
-                if (takenContainer) {
-                    takenContainer.innerHTML = payables.length === 0 ? '<p class="text-slate-500 text-xs">No payables found.</p>' :
-                    payables.map(i => `
-                        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
-                            <div>
-                                <span class="font-bold text-slate-200">${i.to_bank || i.description}</span>
-                                <span class="text-[10px] text-slate-400 block">${i.settlement_status || 'due'}</span>
-                            </div>
-                            <span class="font-mono font-bold text-rose-400">৳${i.amount}</span>
-                        </div>
-                    `).join('');
-                }
+                    `;
+                }).join('');
             } catch (err) {
                 console.error("Investment load error:", err.message);
             }
         }
 
-        // Handle Loan Entry
+        // 6. Handle Loan Entry (Receivable / Payable)
         async function handleLoanSubmit(e) {
             if (e) e.preventDefault();
-            const person = document.getElementById('loanPersonInput').value.trim();
-            const amt = parseFloat(document.getElementById('loanAmountInput').value) || 0;
-            const loanType = document.getElementById('loanTypeSelect').value; // 'receivable' or 'payable'
-
+            const personInput = document.getElementById('loanPersonInput');
+            const amtInput = document.getElementById('loanAmountInput');
+            const typeSelect = document.getElementById('loanTypeSelect');
+            const person = personInput ? personInput.value.trim() : '';
+            const amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
+            const loanType = typeSelect ? typeSelect.value : 'receivable';
             if (!person || amt <= 0) return;
-
             try {
-                if (supabaseClient) {
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                     await supabaseClient.from('investments').insert([{
                         company_id: cachedCompanyId,
                         user_id: currentUserId,
+                        from_bank: 'MAIN_VAULT',
                         to_bank: person,
                         amount: amt,
-                        description: `Loan record for ${person}`,
+                        description: `Loan entry for ${person}`,
                         loan_type: loanType,
                         settlement_status: 'due'
                     }]);
                 }
-                document.getElementById('loanPersonInput').value = '';
-                document.getElementById('loanAmountInput').value = '';
+                if (personInput) personInput.value = '';
+                if (amtInput) amtInput.value = '';
                 closeModal('loanEntryModal');
                 loadInvestmentsFromDB();
-                showAlert(`Loan entry (${loanType.toUpperCase()}) saved successfully!`);
+                showAlert(`Loan record (${loanType.toUpperCase()}) saved successfully!`);
             } catch (err) {
-                showAlert("Error: " + err.message);
+                showAlert("Error saving loan record: " + err.message);
             }
         }
 
-        // Payment Gateway Redirection
+        // 7. Initiate Secure Payment Gateway Redirect
         async function initiatePaymentGateway(e) {
             if (e) e.preventDefault();
-            const amt = parseFloat(document.getElementById('payGatewayAmountInput').value) || 0;
-            const gatewayName = document.getElementById('gatewayNameSelect').value;
-            if (amt <= 0) return;
-
-            const invoiceId = 'INV-' + Date.now();
+            const amtInput = document.getElementById('payGatewayAmountInput');
+            const gatewaySelect = document.getElementById('gatewayNameSelect');
+            const amount = parseFloat(amtInput ? amtInput.value : 0) || 0;
+            const gatewayName = gatewaySelect ? gatewaySelect.value : 'bKash';
+            if (amount <= 0) {
+                showAlert("Please enter a valid amount.");
+                return;
+            }
             try {
-                if (supabaseClient) {
+                const invoiceId = 'INV-' + Date.now();
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                     await supabaseClient.from('payments').insert([{
                         company_id: cachedCompanyId,
                         user_id: 1001,
                         transaction_id: invoiceId,
                         gateway_name: gatewayName,
-                        amount: amt,
+                        amount: amount,
                         purpose: 'WALLET_RECHARGE',
                         status: 'PENDING'
                     }]);
                 }
-                showAlert(`Redirecting to secure ${gatewayName} gateway...`);
+                showAlert(`Redirecting to secure ${gatewayName} Payment Gateway...`);
                 setTimeout(() => {
                     closeModal('paymentGatewayModal');
                 }, 1500);
             } catch (err) {
-                showAlert("Gateway error: " + err.message);
+                showAlert("Gateway initiation failed: " + err.message);
+            }
+        }
+
+        // 8. Fetch Payment Gateway History
+        async function loadPaymentHistory() {
+            try {
+                if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+                const { data, error } = await supabaseClient
+                    .from('payments')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                const container = document.getElementById('paymentHistoryContainer');
+                if (!container) return;
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p class="text-slate-500">No gateway payments recorded.</p>';
+                    return;
+                }
+                container.innerHTML = data.map(p => `
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                        <div>
+                            <span class="font-bold text-emerald-400">${p.gateway_name || 'MFS'}</span>
+                            <span class="text-slate-400 ml-2 font-mono">[${p.transaction_id}]</span>
+                            <span class="font-mono font-bold ml-3 text-slate-200">৳${p.amount}</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${p.status === 'SUCCESS' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'}">
+                            ${p.status}
+                        </span>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Payment history error:", err.message);
             }
         }
 
@@ -932,18 +993,6 @@
         function openAgentAuthModal() { document.getElementById('agentAuthModal').classList.remove('hidden'); }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        function showAlert(msg) {
-            const alertBox = document.getElementById('systemAlert');
-            const alertMsg = document.getElementById('systemAlertMsg');
-            if(alertBox && alertMsg) {
-                alertMsg.innerText = msg;
-                alertBox.classList.remove('hidden');
-                setTimeout(() => { alertBox.classList.add('hidden'); }, 3000);
-            } else {
-                alert(msg);
-            }
-        }
 
         let cartItems = [];
         function addPosItem() {
