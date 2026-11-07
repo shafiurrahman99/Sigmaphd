@@ -37,9 +37,10 @@ function switchTab(tabName) {
     if (activeBtn) activeBtn.className = "px-5 py-2.5 bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
 }
 
-// Sign-In Handler (Ensures proper view toggle & data loading)
+// Sign-In Handler (Directly switches view without reloading page)
 function handleSignIn(e) {
     if (e) e.preventDefault();
+    
     const idVal = document.getElementById('inputUserId').value.trim();
     const passVal = document.getElementById('inputPassword').value.trim();
 
@@ -48,12 +49,19 @@ function handleSignIn(e) {
         return;
     }
 
-    // Set Global User ID if needed
+    // Set Global User ID
     currentUserId = idVal;
 
-    document.getElementById('page1View').classList.add('hidden');
-    document.getElementById('page2View').classList.remove('hidden');
-    document.getElementById('topSignInUser').innerText = `User ID: ${idVal}`;
+    // Hide Login Page and Show Dashboard
+    const page1 = document.getElementById('page1View');
+    const page2 = document.getElementById('page2View');
+    
+    if (page1) page1.classList.add('hidden');
+    if (page2) page2.classList.remove('hidden');
+    
+    const userLabel = document.getElementById('topSignInUser');
+    if (userLabel) userLabel.innerText = `User ID: ${idVal}`;
+    
     showAlert("Signed in successfully!");
 
     // Trigger data loaders safely
@@ -61,11 +69,16 @@ function handleSignIn(e) {
     if (typeof loadTransactionsFromDB === 'function') loadTransactionsFromDB();
     if (typeof loadInvestmentsFromDB === 'function') loadInvestmentsFromDB();
     if (typeof loadPaymentHistory === 'function') loadPaymentHistory();
+
+    return false;
 }
 
 function handleLogout() {
-    document.getElementById('page2View').classList.add('hidden');
-    document.getElementById('page1View').classList.remove('hidden');
+    const page1 = document.getElementById('page1View');
+    const page2 = document.getElementById('page2View');
+    
+    if (page2) page2.classList.add('hidden');
+    if (page1) page1.classList.remove('hidden');
     showAlert("Logged out successfully.");
 }
 
@@ -89,7 +102,7 @@ function sendTier1PublicMsg() {
 function showAlert(msg) {
     const alertBox = document.getElementById('systemAlert');
     const alertMsg = document.getElementById('systemAlertMsg');
-    if (alertBox && alertMsg) {
+    if(alertBox && alertMsg) {
         alertMsg.innerText = msg;
         alertBox.classList.remove('hidden');
         setTimeout(() => {
