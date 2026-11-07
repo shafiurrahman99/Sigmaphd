@@ -1,191 +1,490 @@
+```html
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>স্টুডেন্ট পোর্টাল - নমুনা ৫</title>
-    <!-- Tailwind CSS -->
+    <title>My Develop App - Sigma PhD™</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-gray-50 text-gray-800">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#12151c',
+                        cardBg: '#1e2430',
+                        innerDark: '#0e1117',
+                        inputBg: '#090b10',
+                        accentGreen: '#0fa968',
+                        accentGreenHover: '#0c8e57',
+                        modPill: '#10392b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
-    <!-- ১. স্টুডেন্ট লগইন ভিউ -->
-    <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-xl shadow-lg border w-full max-w-md">
-            <h2 class="text-2xl font-bold text-indigo-600 text-center mb-1">স্টুডেন্ট ড্যাশবোর্ড</h2>
-            <p class="text-xs text-gray-500 text-center mb-6">ইউজার আইডি ও পাসওয়ার্ড দিয়ে প্রবেশ করুন</p>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0d12;
+            color: #e2e8f0;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .buy-btn-gradient {
+            background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 50%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+
+        .buy-btn-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(244, 63, 94, 0.35);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141822;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b3245;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b445c;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 sm:p-6 bg-slate-950">
+
+    <!-- Mobile-First App Container -->
+    <div class="w-full max-w-md mx-auto space-y-4">
+
+        <!-- Toast Notification -->
+        <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
+            <span id="toast-text">Action successful!</span>
+            <button onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <!-- ================= TOP CARD: MAIN ACCESS & LOGIN ================= -->
+        <div class="bg-[#1e2430] rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800 relative overflow-hidden">
             
-            <form onsubmit="loginStudent(event)" class="space-y-4">
+            <!-- Header Section -->
+            <div class="flex items-start justify-between mb-5">
                 <div>
-                    <label class="block text-sm font-medium mb-1">স্টুডেন্ট আইডি</label>
-                    <input type="text" id="studentIdInput" placeholder="student01" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">My Develop App</h1>
+                    <p class="font-bengali text-emerald-400 font-semibold text-sm mt-0.5 tracking-wide">নিজের হাতের গড়া</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">পাসওয়ার্ড</label>
-                    <input type="password" id="passwordInput" placeholder="pass123" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <div class="text-right">
+                    <span class="gradient-text font-black text-lg italic tracking-wider block">Sigma PhD™</span>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition">লগইন</button>
-            </form>
-            <p id="errorMsg" class="text-red-500 text-xs text-center mt-3 hidden">ভুল আইডি বা পাসওয়ার্ড দেওয়া হয়েছে!</p>
-            
-            <div class="mt-6 p-3 bg-indigo-50 rounded-lg text-xs text-indigo-800">
-                📌 <b>টেস্ট আইডি:</b> student01 থেকে student10 <br>
-                🔑 <b>পাসওয়ার্ড:</b> pass123
             </div>
+
+            <!-- Main Sign In Form -->
+            <form id="mainLoginForm" onsubmit="handleMainSignIn(event)" class="space-y-4">
+                <!-- User ID Field -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">User ID</label>
+                    <div class="relative">
+                        <input type="text" id="mainUserId" value="01818589423" required
+                            class="w-full bg-[#0a0c10] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm placeholder-slate-600">
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="mainUserPassword" value="123456" required
+                            class="w-full bg-[#0a0c10] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm">
+                        <button type="button" onclick="togglePasswordVisibility('mainUserPassword', 'mainEyeIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                            <i id="mainEyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sign In Button (Navigates to Next Page) -->
+                <button type="submit" 
+                    class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 transition-all duration-200 active:scale-[0.98] shadow-lg shadow-emerald-900/20 text-base mt-2">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </form>
+
+            <!-- Separator Line -->
+            <div class="my-4 border-t border-slate-700/40"></div>
+
+            <!-- Buy New ID / License Button -->
+            <button onclick="openLicenseModal()" 
+                class="w-full buy-btn-gradient text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-[0.98] text-base">
+                <i class="fa-solid fa-credit-card text-base text-slate-900"></i>
+                <span>Buy New ID / License</span>
+            </button>
+        </div>
+
+
+        <!-- ================= BOTTOM CARD: AI ASSISTANT & PUBLIC FORUM ================= -->
+        <div class="bg-[#1e2430] rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800 space-y-4">
+            
+            <!-- Status Line Header -->
+            <div class="flex items-center justify-between text-xs sm:text-sm">
+                <div class="flex items-center space-x-2">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <!-- Clicking 24/7 active AI assistant opens login popup window -->
+                    <button onclick="openModLoginModal()" class="text-emerald-400 font-bold hover:underline underline-offset-2 transition-all">
+                        24/7 active AI assistant
+                    </button>
+                    <span class="text-slate-400 font-normal">& Open Public Forum</span>
+                </div>
+                <span id="modeBadge" class="bg-[#0e271f] text-emerald-400 border border-emerald-800/50 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide">
+                    Visitor Mode
+                </span>
+            </div>
+
+            <!-- Chat Display Box -->
+            <div id="chatBox" class="bg-[#0a0c10] border border-slate-800 rounded-2xl p-3 h-64 overflow-y-auto space-y-3 flex flex-col">
+                
+                <!-- Initial Bot Welcome Message Card -->
+                <div class="bg-[#141a24] border border-slate-800/80 rounded-xl p-3 shadow-sm max-w-[92%] self-start space-y-1">
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <div class="flex items-center space-x-1.5 text-amber-400 font-bold">
+                            <span>🤖</span>
+                            <span>Live AI Assistant</span>
+                        </div>
+                        <span class="text-[10px] text-slate-500">Now</span>
+                    </div>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Welcome Public Visitors! Click "<span class="text-emerald-400 cursor-pointer hover:underline font-semibold" onclick="openModLoginModal()">24/7 active AI assistant</span>" link to sign in as Moderator.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Chat Input Area -->
+            <form onsubmit="handleSendMessage(event)" class="flex items-center space-x-2 pt-1">
+                <input type="text" id="chatInput" placeholder="Type message as visitor or moderator..." 
+                    class="flex-1 bg-[#0a0c10] border border-slate-700/70 rounded-2xl py-3 px-4 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                <button type="submit" 
+                    class="bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3 px-4 rounded-2xl flex items-center space-x-1.5 transition-all text-xs sm:text-sm active:scale-95 shadow-md shrink-0">
+                    <span>Send</span>
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+
         </div>
     </div>
 
-    <!-- ২. পোর্টাল ড্যাশবোর্ড ভিউ -->
-    <div id="dashboardView" class="hidden min-h-screen">
-        <!-- হেডার -->
-        <header class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-md">
-            <div>
-                <h1 class="font-bold text-lg">স্টুডেন্ট অ্যাকাডেমিক পোর্টাল</h1>
-                <p id="studentNameDisplay" class="text-xs text-indigo-200"></p>
+
+    <!-- ================= MODERATOR LOGIN MODAL / WINDOW ================= -->
+    <div id="modLoginModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#1e2430] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4 animate-in fade-in zoom-in duration-200">
+            <button onclick="closeModLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">AI Assistant Sign In</h3>
+                <p class="text-xs text-slate-400">Enter Moderator credentials to activate response mode</p>
             </div>
-            <button onclick="logout()" class="bg-indigo-700 hover:bg-indigo-800 text-xs px-3 py-1.5 rounded transition">লগআউট</button>
-        </header>
 
-        <main class="max-w-5xl mx-auto p-6 space-y-8">
-            <!-- বিষয়ের তালিকা ও কী কী পড়া আছে -->
-            <section>
-                <h3 class="text-md font-bold mb-3 text-gray-700">📘 সাবজেক্ট ও পড়ার সিলেবাস</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-4 rounded-lg border shadow-sm">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-indigo-600">Web Development</span>
-                            <span class="text-xs bg-gray-100 px-2 py-0.5 rounded">CSE-101</span>
-                        </div>
-                        <ul class="text-xs text-gray-600 list-disc list-inside space-y-1">
-                            <li>HTML5 Semantic Tags & Layout</li>
-                            <li>Tailwind CSS Component Design</li>
-                            <li>JavaScript Event Handling</li>
-                            <li>Supabase Database REST Query</li>
-                        </ul>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border shadow-sm">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-indigo-600">Database Systems</span>
-                            <span class="text-xs bg-gray-100 px-2 py-0.5 rounded">CSE-102</span>
-                        </div>
-                        <ul class="text-xs text-gray-600 list-disc list-inside space-y-1">
-                            <li>PostgreSQL Basics</li>
-                            <li>Table Creation & Data Insertion</li>
-                            <li>Supabase Row Level Security (RLS)</li>
-                            <li>Realtime Auto-Update Queries</li>
-                        </ul>
+            <form onsubmit="handleModLogin(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">User ID</label>
+                    <input type="text" id="modUserId" placeholder="Enter User ID" required
+                        class="w-full bg-[#0a0c10] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="modPassword" placeholder="Enter Password" required
+                            class="w-full bg-[#0a0c10] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs focus:outline-none focus:border-emerald-500">
+                        <button type="button" onclick="togglePasswordVisibility('modPassword', 'modEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                            <i id="modEyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
                     </div>
                 </div>
-            </section>
 
-            <!-- হোমওয়ার্ক ও গিটহাব টাস্ক টেবিল -->
-            <section class="bg-white rounded-lg border shadow-sm p-5">
-                <h3 class="text-md font-bold mb-4 text-gray-700">📂 হোমওয়ার্ক ও গিটহাব লিংক</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-100 text-gray-600 text-xs uppercase">
-                            <tr>
-                                <th class="p-3">টাস্ক / হোমওয়ার্ক</th>
-                                <th class="p-3">বিষয়</th>
-                                <th class="p-3">গিটহাব লিংক</th>
-                                <th class="p-3">ডেডলাইন</th>
-                                <th class="p-3">স্ট্যাটাস (অটো আপডেট)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="taskRows" class="divide-y text-xs">
-                            <!-- JS ডাটা দিয়ে পূর্ণ হবে -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
+                <button type="submit" class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    Activate AI Assistant Mode
+                </button>
+            </form>
+        </div>
     </div>
 
+
+    <!-- ================= LICENSE / BUY MODAL ================= -->
+    <div id="licenseModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#1e2430] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4 animate-in fade-in zoom-in duration-200">
+            <button onclick="closeLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Get License Key</h3>
+                <p class="text-xs text-slate-400">Select a plan to obtain instant User ID access</p>
+            </div>
+
+            <div class="space-y-2.5 pt-2">
+                <!-- Option 1 -->
+                <div onclick="selectPlan('1 Month Access', '৳250')" class="p-3.5 rounded-2xl border border-slate-700 hover:border-emerald-500 bg-[#0a0c10] cursor-pointer flex justify-between items-center transition-all group">
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-200 group-hover:text-emerald-400">Starter Pack</h4>
+                        <p class="text-[11px] text-slate-400">1 Month Unlimited Moderator Access</p>
+                    </div>
+                    <span class="text-emerald-400 font-extrabold text-sm">৳250</span>
+                </div>
+                <!-- Option 2 -->
+                <div onclick="selectPlan('Lifetime VIP License', '৳999')" class="p-3.5 rounded-2xl border border-amber-500/50 bg-[#0a0c10] cursor-pointer flex justify-between items-center transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 bg-amber-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-bl-lg uppercase">Popular</div>
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-400">Sigma PhD Pro</h4>
+                        <p class="text-[11px] text-slate-400">Lifetime Unlimited License + AI Bot</p>
+                    </div>
+                    <span class="text-amber-400 font-extrabold text-sm">৳999</span>
+                </div>
+            </div>
+
+            <button onclick="closeLicenseModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl text-xs transition-all">
+                Close
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Application Logic Script -->
     <script>
-        // ডেমো ১০ জন স্টুডেন্ট
-        const studentsList = Array.from({ length: 10 }, (_, i) => {
-            const idNum = String(i + 1).padStart(2, '0');
-            return { id: `student${idNum}`, pass: 'pass123', name: `স্টুডেন্ট ${idNum}` };
-        });
+        // State variables
+        let isModeratorActive = false;
+        let activeModUser = null;
 
-        // ডেমো টাস্কের ডাটা
-        let tasksData = [
-            { id: 1, title: 'HTML & Responsive Layout', subject: 'Web Development', github: 'https://github.com', deadline: '2026-11-05', status: 'Pending' },
-            { id: 2, title: 'JavaScript DOM Manipulation', subject: 'Web Development', github: 'https://github.com', deadline: '2026-11-10', status: 'Submitted' },
-            { id: 3, title: 'Supabase Database Query Task', subject: 'Database System', github: 'https://github.com', deadline: '2026-11-15', status: 'Pending' }
-        ];
-
-        // লগইন ফাংশন
-        function loginStudent(e) {
-            e.preventDefault();
-            const idVal = document.getElementById('studentIdInput').value.trim();
-            const passVal = document.getElementById('passwordInput').value.trim();
-
-            const foundStudent = studentsList.find(s => s.id === idVal && s.pass === passVal);
-
-            if (foundStudent) {
-                document.getElementById('loginView').classList.add('hidden');
-                document.getElementById('dashboardView').classList.remove('hidden');
-                document.getElementById('studentNameDisplay').innerText = `স্বাগতম, ${foundStudent.name} (${foundStudent.id})`;
-                document.getElementById('errorMsg').classList.add('hidden');
-                loadTasks();
+        // Password visibility toggle helper
+        function togglePasswordVisibility(inputId, iconId) {
+            const pwdInput = document.getElementById(inputId);
+            const eyeIcon = document.getElementById(iconId);
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
             } else {
-                document.getElementById('errorMsg').classList.remove('hidden');
+                pwdInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
             }
         }
 
-        // লগআউট
-        function logout() {
-            document.getElementById('dashboardView').classList.add('hidden');
-            document.getElementById('loginView').classList.remove('hidden');
-        }
-
-        // টাস্ক টেবিল লোড
-        function loadTasks() {
-            const tableBody = document.getElementById('taskRows');
-            tableBody.innerHTML = tasksData.map(task => `
-                <tr class="hover:bg-gray-50">
-                    <td class="p-3 font-semibold text-gray-700">${task.title}</td>
-                    <td class="p-3 text-gray-500">${task.subject}</td>
-                    <td class="p-3">
-                        <a href="${task.github}" target="_blank" class="text-indigo-600 hover:underline">
-                            GitHub Repository ↗
-                        </a>
-                    </td>
-                    <td class="p-3 text-gray-500">${task.deadline}</td>
-                    <td class="p-3">
-                        <select onchange="changeTaskStatus(${task.id}, this.value)" class="border rounded px-2 py-1 text-xs font-medium cursor-pointer ${
-                            task.status === 'Completed' ? 'bg-green-50 text-green-700 border-green-200' :
-                            task.status === 'Submitted' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-                        }">
-                            <option value="Pending" ${task.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                            <option value="Submitted" ${task.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
-                            <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                        </select>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // ব্যাকএন্ড সুপ্রা বেস কুয়েরি অটোমেটিক স্ট্যাটাস আপডেট লজিক
-        function changeTaskStatus(taskId, newStatus) {
-            const targetTask = tasksData.find(t => t.id === taskId);
-            if (targetTask) {
-                targetTask.status = newStatus;
-                
-                /* Supabase SDK কানেক্ট করা থাকলে ডাটাবেজে অটো আপডেট হওয়ার আসল কুয়েরি:
-                const { data, error } = await supabase
-                    .from('tasks')
-                    .update({ status: newStatus })
-                    .eq('id', taskId);
-                */
-
-                alert(`স্ট্যাটাস পরিবর্তন সফল হয়েছে: ${newStatus}`);
-                loadTasks();
+        // Show toast notification
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toastText.innerText = message;
+            
+            if (isError) {
+                toast.classList.remove('bg-emerald-600');
+                toast.classList.add('bg-rose-600');
+            } else {
+                toast.classList.remove('bg-rose-600');
+                toast.classList.add('bg-emerald-600');
             }
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                hideToast();
+            }, 3500);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.add('hidden');
+        }
+
+        // Top Main Form Sign In Handler (Goes to Next Page)
+        function handleMainSignIn(e) {
+            e.preventDefault();
+            const userId = document.getElementById('mainUserId').value.trim();
+            const password = document.getElementById('mainUserPassword').value;
+
+            if (!userId || !password) {
+                showToast('Please enter both User ID and Password', true);
+                return;
+            }
+
+            showToast('Signing in... Redirecting to second page.');
+            // Here second page navigation trigger will occur once screenshot provided
+        }
+
+        // Moderator Window Login Functions
+        function openModLoginModal() {
+            if (isModeratorActive) {
+                showToast(`Already active as AI Assistant Moderator (${activeModUser})`);
+                return;
+            }
+            document.getElementById('modLoginModal').classList.remove('hidden');
+        }
+
+        function closeModLoginModal() {
+            document.getElementById('modLoginModal').classList.add('hidden');
+        }
+
+        function handleModLogin(e) {
+            e.preventDefault();
+            const userId = document.getElementById('modUserId').value.trim();
+            const password = document.getElementById('modPassword').value;
+
+            if (!userId || !password) {
+                showToast('Please enter User ID and Password', true);
+                return;
+            }
+
+            isModeratorActive = true;
+            activeModUser = userId;
+            closeModLoginModal();
+
+            // Update Badge Status
+            const modeBadge = document.getElementById('modeBadge');
+            modeBadge.innerText = 'AI Assistant Active';
+            modeBadge.className = 'bg-emerald-900/60 text-emerald-300 border border-emerald-500/50 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
+
+            showToast(`Logged in! You are now replying as AI Assistant (${userId}).`);
+
+            // Add system log into chat display
+            appendChatMessage('System', `User ${userId} logged in as AI Assistant Moderator.`, 'system');
+        }
+
+        // Send Chat Message
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            if (isModeratorActive) {
+                // Sent by active Moderator / AI Assistant
+                appendChatMessage(`AI Assistant (${activeModUser})`, message, 'assistant');
+            } else {
+                // Sent as Visitor
+                appendChatMessage('Visitor', message, 'user');
+                // Simulate auto-bot reply for visitor when moderator not logged in
+                setTimeout(() => {
+                    generateBotResponse(message);
+                }, 800);
+            }
+
+            input.value = '';
+        }
+
+        // Append Message Card to Chat
+        function appendChatMessage(sender, text, type) {
+            const chatBox = document.getElementById('chatBox');
+            const messageCard = document.createElement('div');
+            
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (type === 'user') {
+                messageCard.className = 'bg-[#182130] border border-slate-700/70 rounded-xl p-3 shadow-sm max-w-[90%] self-end space-y-1 ml-auto';
+                messageCard.innerHTML = `
+                    <div class="flex items-center justify-between text-xs mb-1 space-x-2">
+                        <span class="text-slate-400 text-[10px]">${timeStr}</span>
+                        <div class="flex items-center space-x-1.5 text-slate-300 font-bold">
+                            <span>${sender}</span>
+                            <span>👤</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-200 text-xs leading-relaxed text-right">${escapeHTML(text)}</p>
+                `;
+            } else if (type === 'assistant' || type === 'bot') {
+                messageCard.className = 'bg-[#141a24] border border-slate-800/80 rounded-xl p-3 shadow-sm max-w-[90%] self-start space-y-1';
+                messageCard.innerHTML = `
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <div class="flex items-center space-x-1.5 text-amber-400 font-bold">
+                            <span>🤖</span>
+                            <span>${sender}</span>
+                        </div>
+                        <span class="text-slate-500 text-[10px]">${timeStr}</span>
+                    </div>
+                    <p class="text-slate-300 text-xs leading-relaxed">${escapeHTML(text)}</p>
+                `;
+            } else if (type === 'system') {
+                messageCard.className = 'bg-emerald-950/40 border border-emerald-800/40 rounded-xl p-2.5 text-center text-[11px] text-emerald-300 my-1 font-medium';
+                messageCard.innerHTML = `<span>ℹ️ ${escapeHTML(text)}</span>`;
+            }
+
+            chatBox.appendChild(messageCard);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Default Auto AI Response
+        function generateBotResponse(userMsg) {
+            const lower = userMsg.toLowerCase();
+            let botMsg = "Thank you for your message! Click '24/7 active AI assistant' to log in as Moderator.";
+
+            if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+                botMsg = "Hello! Welcome to Sigma PhD™ App. How can we help you today?";
+            } else if (lower.includes('price') || lower.includes('buy') || lower.includes('license') || lower.includes('id')) {
+                botMsg = "You can purchase a new ID or License key by clicking the 'Buy New ID / License' button at the top!";
+            }
+
+            appendChatMessage('Live AI Assistant', botMsg, 'bot');
+        }
+
+        // Buy Modal Controls
+        function openLicenseModal() {
+            document.getElementById('licenseModal').classList.remove('hidden');
+        }
+
+        function closeLicenseModal() {
+            document.getElementById('licenseModal').classList.add('hidden');
+        }
+
+        function selectPlan(planName, price) {
+            closeLicenseModal();
+            showToast(`Selected: ${planName} (${price}). Redirecting to payment...`);
+        }
+
+        // Helper to sanitize HTML
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
         }
     </script>
 </body>
 </html>
+```
