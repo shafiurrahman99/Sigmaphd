@@ -1,0 +1,90 @@
+function addPosItem() {
+    const name = document.getElementById('posProductName').value.trim();
+    const qty = parseInt(document.getElementById('posProductQty').value) || 1;
+    const price = parseFloat(document.getElementById('posProductPrice').value) || 0;
+    if(!name) { showAlert("Please enter product name"); return; }
+    posCart.push({ name, qty, price });
+    renderCart();
+    document.getElementById('posProductName').value = '';
+    showAlert("Item added to cart");
+}
+
+function renderCart() {
+    const tbody = document.getElementById('posCartBody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    let total = 0;
+    posCart.forEach((item, idx) => {
+        let sub = item.qty * item.price;
+        total += sub;
+        tbody.innerHTML += `<tr>
+            <td class="p-2.5 text-slate-200 font-medium">${item.name}</td>
+            <td class="p-2.5 text-center">${item.qty}</td>
+            <td class="p-2.5 text-right">৳${item.price.toFixed(2)}</td>
+            <td class="p-2.5 text-right text-emerald-400 font-bold">৳${sub.toFixed(2)}</td>
+            <td class="p-2.5 text-center"><button type="button" onclick="posCart.splice(${idx},1);renderCart()" class="text-rose-400 hover:text-rose-300 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>`;
+    });
+    document.getElementById('posGrandTotal').innerText = total.toFixed(2);
+}
+
+function generateCashMemoModal() {
+    if(posCart.length === 0) { showAlert("Cart is empty!"); return; }
+    
+    const storeName = document.getElementById('memoStoreNameInput').value.trim() || 'My Store Name';
+    const storeAddr = document.getElementById('memoStoreAddressInput').value.trim() || 'Dhaka, Bangladesh';
+
+    document.getElementById('printMemoTitle').innerText = storeName;
+    document.getElementById('printMemoAddress').innerText = storeAddr;
+
+    const tbody = document.getElementById('memoModalBody');
+    tbody.innerHTML = '';
+    let total = 0;
+    posCart.forEach(i => {
+        let sub = i.qty * i.price;
+        total += sub;
+        tbody.innerHTML += `<tr><td class="border border-slate-300 p-2.5">${i.name}</td><td class="border border-slate-300 p-2.5 text-center">${i.qty}</td><td class="border border-slate-300 p-2.5 text-right">৳${i.price.toFixed(2)}</td><td class="border border-slate-300 p-2.5 text-right">৳${sub.toFixed(2)}</td></tr>`;
+    });
+    document.getElementById('memoModalGrandTotal').innerText = total.toFixed(2);
+    document.getElementById('memoModal').classList.remove('hidden');
+}
+
+function openFundDistModal(m, surplus) {
+    currentMonthSurplusSum = surplus;
+    document.getElementById('selectedMonthBadge').innerText = m;
+    document.getElementById('modalNetBalanceDisplay').innerText = `৳ ${surplus.toLocaleString('en-US')}.00`;
+    document.getElementById('cashAmountInput').value = accountBalances.cash;
+    document.getElementById('bank1AmountInput').value = accountBalances.bank1;
+    document.getElementById('bank2AmountInput').value = accountBalances.bank2;
+    autoCalculateBank3();
+    document.getElementById('fundDistModal').classList.remove('hidden');
+}
+
+function autoCalculateBank3() {
+    const c = parseFloat(document.getElementById('cashAmountInput').value) || 0;
+    const b1 = parseFloat(document.getElementById('bank1AmountInput').value) || 0;
+    const b2 = parseFloat(document.getElementById('bank2AmountInput').value) || 0;
+    const rem = currentMonthSurplusSum - (c + b1 + b2);
+    document.getElementById('bank3AmountInput').value = rem >= 0 ? rem : 0;
+}
+
+function saveFundDistribution() {
+    accountBalances.cash = parseFloat(document.getElementById('cashAmountInput').value) || 0;
+    accountBalances.bank1 = parseFloat(document.getElementById('bank1AmountInput').value) || 0;
+    accountBalances.bank2 = parseFloat(document.getElementById('bank2AmountInput').value) || 0;
+    accountBalances.bank3 = parseFloat(document.getElementById('bank3AmountInput').value) || 0;
+    renderState();
+    closeModal('fundDistModal');
+    showAlert("Fund distribution saved!");
+}
+
+function saveBankSetup() {
+    bankNames.bank1 = document.getElementById('bank1NameInput').value || bankNames.bank1;
+    bankNames.bank2 = document.getElementById('bank2NameInput').value || bankNames.bank2;
+    bankNames.bank3 = document.getElementById('bank3NameInput').value || bankNames.bank3;
+    document.getElementById('thBank1').innerText = bankNames.bank1 + ' (৳)';
+    document.getElementById('thBank2').innerText = bankNames.bank2 + ' (৳)';
+    document.getElementById('thBank3').innerText = bankNames.bank3 + ' (৳)';
+    closeModal('bankSetupModal');
+    showAlert("Bank account names locked!");
+}
