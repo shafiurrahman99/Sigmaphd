@@ -72,9 +72,13 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-950">
 
-    <!-- Global State Variables with Company ID = 105 -->
+    <!-- Global State Variables Synchronized with DB Schema -->
     <script>
         const GLOBAL_COMPANY_ID = 105;
+        let currentUserId = "8942"; // 4-digit User ID matching DB
+        let currentCompositeUserId = "105_8942"; // company_id_user_id format
+        let currentUserMobile = "01818589423"; // Separate mobile field
+        
         let isModeratorLoggedIn = false;
         let currentWalletBalance = 2100.00;
         let currentValidityDays = 25;
@@ -118,8 +122,8 @@
             <form onsubmit="handleMainSignIn(event)" class="space-y-4">
                 <input type="hidden" id="signInCompanyId" value="105">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">User ID</label>
-                    <input type="text" id="mainUserId" value="01818589423" required
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">4-Digit User ID or Mobile</label>
+                    <input type="text" id="mainUserId" value="8942" required
                         class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
                 </div>
 
@@ -170,7 +174,7 @@
                     <div class="flex items-center justify-between text-xs mb-1">
                         <div class="flex items-center space-x-1.5 text-amber-400 font-bold">
                             <span>🤖</span>
-                            <span>Live AI Assistant (Company ID: 105)</span>
+                            <span>Live AI Assistant (Composite ID: 105_8942)</span>
                         </div>
                         <span class="text-[10px] text-slate-500">Now</span>
                     </div>
@@ -210,7 +214,7 @@
                         <span id="activeDeviceCount">1</span> Device Active 
                         <span class="text-slate-400 font-normal">(Max 2)</span>
                     </h2>
-                    <span class="text-[10px] text-amber-400 font-mono">Company ID: 105</span>
+                    <span class="text-[10px] text-amber-400 font-mono">Composite ID: <strong id="displayCompositeId">105_8942</strong></span>
                 </div>
             </div>
 
@@ -233,10 +237,10 @@
                 </div>
                 <div>
                     <h3 class="text-xs font-bold text-white flex items-center space-x-1">
-                        <span>User: <strong id="currentLoggedInUser" class="text-emerald-400">01818589423</strong></span>
+                        <span>ID: <strong id="currentLoggedInUser" class="text-emerald-400">8942</strong></span>
                     </h3>
                     <div class="flex items-center space-x-1 mt-0.5">
-                        <p class="text-[10px] text-amber-400 font-semibold">Validity Remaining: <span id="accountValidityDays">25</span> days</p>
+                        <p class="text-[10px] text-amber-400 font-semibold">Validity: <span id="accountValidityDays">25</span> days</p>
                         <button type="button" onclick="openExtendValidityModal(event)" class="w-4 h-4 bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-slate-950 font-black rounded-full flex items-center justify-center text-[10px] transition-all" title="Extend Validity">
                             +
                         </button>
@@ -272,7 +276,7 @@
             <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
                 <div class="flex items-center space-x-2">
                     <span class="text-slate-400 text-xs">Coupon Code:</span>
-                    <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA-8589</span>
+                    <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA-8942</span>
                 </div>
                 <button onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all">
                     <i class="fa-regular fa-copy"></i>
@@ -508,7 +512,7 @@
 
     </div>
 
-    <!-- ================= ALL MODAL WINDOWS (WITH HIDDEN COMPANY ID = 105) ================= -->
+    <!-- ================= ALL MODAL WINDOWS (WITH HIDDEN COMPANY ID = 105 & COMPOSITE ID) ================= -->
 
     <!-- MODAL 0: LANDING PAGE BUY LICENSE MODAL -->
     <div id="buyLicenseLandingModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -526,12 +530,12 @@
             <form onsubmit="handleLandingBuySubmit(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="licenseCompanyId" value="105">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Mobile Number</label>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Customer Mobile Number</label>
                     <input type="text" id="landingBuyMobile" placeholder="01XXXXXXXXX" required
                         class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Customer Email Address</label>
                     <input type="email" id="landingBuyEmail" placeholder="yourname@gmail.com" required
                         class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
                 </div>
@@ -576,8 +580,8 @@
             <form onsubmit="handleModLogin(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="modCompanyId" value="105">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">User ID</label>
-                    <input type="text" id="modUserId" placeholder="Enter Moderator ID" required
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">4-Digit User ID</label>
+                    <input type="text" id="modUserId" placeholder="Enter 4-digit User ID" required
                         class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs focus:outline-none focus:border-emerald-500">
                 </div>
                 <div>
@@ -603,19 +607,24 @@
                     <i class="fa-solid fa-mobile-screen-button"></i>
                 </div>
                 <h3 class="text-lg font-bold text-white">Add New Device</h3>
-                <p class="text-xs text-slate-400">Charge: <strong class="text-emerald-400">৳ 100.00</strong> (Company ID: 105)</p>
+                <p class="text-xs text-slate-400">Charge: <strong class="text-emerald-400">৳ 100.00</strong> (Composite ID: <span id="deviceCompLabel">105_8942</span>)</p>
             </div>
             <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="deviceCompanyId" value="105">
                 <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Device Name</label>
+                    <input type="text" id="deviceNameInput" placeholder="e.g. Samsung Galaxy A52" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500 mb-2">
+                </div>
+                <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Select Payment Method</label>
                     <div class="space-y-2">
                         <label class="flex items-center space-x-2.5 bg-[#080a0f] p-3 rounded-xl border border-slate-700 cursor-pointer">
-                            <input type="radio" name="devicePayMethod" value="wallet" checked class="text-emerald-500 focus:ring-0">
+                            <input type="radio" name="devicePayMethod" value="Wallet" checked class="text-emerald-500 focus:ring-0">
                             <span class="text-xs text-slate-200 font-semibold">Deduct from Wallet (Balance: <span id="modalWalletBalance">৳ 2100.00</span>)</span>
                         </label>
                         <label class="flex items-center space-x-2.5 bg-[#080a0f] p-3 rounded-xl border border-slate-700 cursor-pointer">
-                            <input type="radio" name="devicePayMethod" value="gateway" class="text-emerald-500 focus:ring-0">
+                            <input type="radio" name="devicePayMethod" value="Gateway" class="text-emerald-500 focus:ring-0">
                             <span class="text-xs text-slate-200 font-semibold">bKash / Nagad / Rocket Mobile Banking</span>
                         </label>
                     </div>
@@ -673,7 +682,7 @@
                     <i class="fa-solid fa-clock-rotate-left"></i>
                 </div>
                 <h3 class="text-lg font-bold text-white">Extend Account Validity</h3>
-                <p class="text-xs text-slate-400">Company ID: 105</p>
+                <p class="text-xs text-slate-400">Composite ID: <span id="validityCompLabel">105_8942</span></p>
             </div>
             <form onsubmit="handleExtendValiditySubmit(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="validityCompanyId" value="105">
@@ -713,18 +722,18 @@
                     <i class="fa-solid fa-gear"></i>
                 </div>
                 <h3 class="text-lg font-bold text-white">Profile Settings</h3>
-                <p class="text-xs text-slate-400">Company ID: 105</p>
+                <p class="text-xs text-slate-400">Composite ID: <span id="settingsCompLabel">105_8942</span></p>
             </div>
             <form onsubmit="handleSettingsUpdate(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="settingsCompanyId" value="105">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
-                    <input type="email" id="settingsEmail" value="user@domain.com" required
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Mobile Number</label>
+                    <input type="text" id="settingsMobile" value="01818589423" required
                         class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Current Password</label>
-                    <input type="password" id="settingsCurrentPass" placeholder="••••••" required
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                    <input type="email" id="settingsEmail" value="user@domain.com" required
                         class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
@@ -809,8 +818,13 @@
                         class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
                 </div>
                 <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Customer Email</label>
+                    <input type="email" id="buyUserEmail" placeholder="customer@gmail.com" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500 mb-2">
+                </div>
+                <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Referral / Coupon Code</label>
-                    <input type="text" id="buyUserCoupon" value="SIGMA-8589" readonly
+                    <input type="text" id="buyUserCoupon" value="SIGMA-8942" readonly
                         class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 font-bold text-xs">
                 </div>
                 <div>
@@ -839,8 +853,8 @@
                 <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
                     <i class="fa-solid fa-circle-plus"></i>
                 </div>
-                <h3 class="text-lg font-bold text-white">Add New Income Entry</h3>
-                <p class="text-xs text-slate-400">Company ID: 105</p>
+                <h3 class="text-lg font-bold text-white">Add New Income Record</h3>
+                <p class="text-xs text-slate-400">Composite ID: <span id="incomeCompLabel">105_8942</span></p>
             </div>
             <form onsubmit="handleIncomeSubmit(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="incomeCompanyId" value="105">
@@ -877,15 +891,15 @@
                     <i class="fa-solid fa-handshake"></i>
                 </div>
                 <h3 class="text-lg font-bold text-white">Add Loan Record</h3>
-                <p class="text-xs text-slate-400">Company ID: 105</p>
+                <p class="text-xs text-slate-400">Composite ID: <span id="loanCompLabel">105_8942</span></p>
             </div>
             <form onsubmit="handleLoanSubmit(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="loanCompanyId" value="105">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Loan Category</label>
                     <select id="loanType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
-                        <option value="given">Receivable (পাবো / Loan Given)</option>
-                        <option value="taken">Payable (দেবো / Loan Taken)</option>
+                        <option value="Receivable">Receivable (পাবো / Loan Given)</option>
+                        <option value="Payable">Payable (দেবো / Loan Taken)</option>
                     </select>
                 </div>
                 <div>
@@ -954,8 +968,8 @@
                 <div class="w-12 h-12 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
                     <i class="fa-solid fa-cart-arrow-down"></i>
                 </div>
-                <h3 class="text-lg font-bold text-white">Add Expense Entry</h3>
-                <p class="text-xs text-slate-400">Company ID: 105</p>
+                <h3 class="text-lg font-bold text-white">Add Expense Record</h3>
+                <p class="text-xs text-slate-400">Composite ID: <span id="expenseCompLabel">105_8942</span></p>
             </div>
             <form onsubmit="handleMarketSubmit(event)" class="space-y-3 pt-2">
                 <input type="hidden" id="expenseCompanyId" value="105">
@@ -977,8 +991,8 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Status</label>
                     <select id="marketStatus" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
-                        <option value="paid">Paid</option>
-                        <option value="due">Due (Payable)</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Due">Due (Payable)</option>
                     </select>
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-xs transition-all mt-2">
@@ -1003,7 +1017,7 @@
                     </div>
                     <div>
                         <h3 id="chatTitleHeader" class="text-xs font-bold text-white">My Chat (Global User Forum)</h3>
-                        <p id="chatSubHeader" class="text-[10px] text-emerald-400 font-semibold">Company ID: 105</p>
+                        <p id="chatSubHeader" class="text-[10px] text-emerald-400 font-semibold">Composite ID: 105_8942</p>
                     </div>
                 </div>
                 <button onclick="closeMyChatModal()" class="text-slate-400 hover:text-white">
@@ -1014,19 +1028,19 @@
             <!-- Active User Row (Click to Private Chat) -->
             <div class="flex items-center space-x-2 overflow-x-auto py-2 border-b border-slate-800/60 shrink-0">
                 <span class="text-[10px] text-slate-400 shrink-0 font-medium">Users:</span>
-                <button onclick="startPrivateChat('01711223344')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-emerald-400 font-mono shrink-0">01711223344</button>
-                <button onclick="startPrivateChat('01988776655')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-amber-400 font-mono shrink-0">01988776655</button>
-                <button onclick="startPrivateChat('01855443322')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-blue-400 font-mono shrink-0">01855443322</button>
+                <button onclick="startPrivateChat('1234')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-emerald-400 font-mono shrink-0">User 1234</button>
+                <button onclick="startPrivateChat('5678')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-amber-400 font-mono shrink-0">User 5678</button>
+                <button onclick="startPrivateChat('9012')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-blue-400 font-mono shrink-0">User 9012</button>
             </div>
 
             <!-- Chat Messages Body -->
             <div id="myChatContainer" class="flex-1 bg-[#080a0f] border border-slate-800 rounded-xl p-3 my-2 overflow-y-auto space-y-2.5">
                 <div class="bg-slate-800/60 p-2 rounded-xl text-xs text-slate-300 max-w-[80%]">
-                    <span class="text-[9px] text-indigo-400 block font-bold">User: 01711223344</span>
+                    <span class="text-[9px] text-indigo-400 block font-bold">User: 1234</span>
                     Hello everyone! How is the new application system working out?
                 </div>
                 <div class="bg-emerald-950/40 border border-emerald-800/40 p-2 rounded-xl text-xs text-emerald-200 self-end ml-auto max-w-[80%]">
-                    <span class="text-[9px] text-emerald-400 block font-bold">You (01818589423)</span>
+                    <span class="text-[9px] text-emerald-400 block font-bold">You (8942)</span>
                     Yes, thank you! Everything is running smoothly.
                 </div>
             </div>
@@ -1054,18 +1068,18 @@
                     <i class="fa-solid fa-receipt"></i>
                 </div>
                 <h3 class="text-base font-bold text-white">Digital Cash Memo Generator</h3>
-                <p class="text-[10px] text-slate-400 font-mono">Company ID: <strong class="text-amber-400">105</strong></p>
+                <p class="text-[10px] text-slate-400 font-mono">Composite ID: <strong class="text-amber-400" id="memoCompLabel">105_8942</strong></p>
             </div>
 
             <!-- Memo Type Radio Switcher -->
             <div class="bg-[#080a0f] border border-slate-800 p-2 rounded-2xl grid grid-cols-2 gap-2 text-xs">
                 <label class="flex items-center space-x-2 p-2 rounded-xl bg-slate-800/80 cursor-pointer border border-slate-700">
-                    <input type="radio" name="memoModeRadio" value="platform" checked onchange="switchMemoMode('platform')" class="text-indigo-500">
-                    <span class="text-[11px] font-bold text-slate-200">Sigma PhD ➔ User</span>
+                    <input type="radio" name="memoModeRadio" value="Platform" checked onchange="switchMemoMode('platform')" class="text-indigo-500">
+                    <span class="text-[11px] font-bold text-slate-200">Platform Memo</span>
                 </label>
                 <label class="flex items-center space-x-2 p-2 rounded-xl bg-slate-800/80 cursor-pointer border border-slate-700">
-                    <input type="radio" name="memoModeRadio" value="business" onchange="switchMemoMode('business')" class="text-indigo-500">
-                    <span class="text-[11px] font-bold text-slate-200">User ➔ Customer</span>
+                    <input type="radio" name="memoModeRadio" value="Business" onchange="switchMemoMode('business')" class="text-indigo-500">
+                    <span class="text-[11px] font-bold text-slate-200">Business Memo</span>
                 </label>
             </div>
 
@@ -1090,17 +1104,17 @@
                 <div class="flex justify-between items-start border-b border-slate-200 pb-3">
                     <div>
                         <h4 id="memoHeaderTitle" class="font-extrabold text-sm text-slate-950">MY DEVELOP APP</h4>
-                        <p id="memoHeaderSub" class="text-[10px] text-slate-600">Sigma PhD™ Platform Services (Co. ID: 105)</p>
+                        <p id="memoHeaderSub" class="text-[10px] text-slate-600">Sigma PhD™ Platform Services (Composite ID: 105_8942)</p>
                         <p class="text-[10px] text-slate-500 font-mono">Date: <span id="memoDate">07/11/2026</span></p>
                     </div>
                     <div class="text-right">
                         <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-300">PAID SLIP</span>
-                        <p class="text-[10px] text-slate-500 mt-1 font-mono">Memo No: #MEMO-<span id="memoRandomNum">8589</span></p>
+                        <p class="text-[10px] text-slate-500 mt-1 font-mono">Memo No: #MEMO-<span id="memoRandomNum">8942</span></p>
                     </div>
                 </div>
 
                 <div>
-                    <p class="text-[11px] font-semibold text-slate-700">Customer / Recipient: <strong id="memoUserDisplay" class="text-slate-900 font-mono">01818589423</strong></p>
+                    <p class="text-[11px] font-semibold text-slate-700">Customer / User ID: <strong id="memoUserDisplay" class="text-slate-900 font-mono">8942</strong></p>
                 </div>
 
                 <table class="w-full text-left border-collapse border border-slate-200">
@@ -1180,6 +1194,15 @@
             document.getElementById('activeDeviceCount').innerText = activeDevices;
             document.getElementById('subUserCount').innerText = totalSubUsers;
 
+            document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
+            document.getElementById('deviceCompLabel').innerText = currentCompositeUserId;
+            document.getElementById('validityCompLabel').innerText = currentCompositeUserId;
+            document.getElementById('settingsCompLabel').innerText = currentCompositeUserId;
+            document.getElementById('incomeCompLabel').innerText = currentCompositeUserId;
+            document.getElementById('loanCompLabel').innerText = currentCompositeUserId;
+            document.getElementById('expenseCompLabel').innerText = currentCompositeUserId;
+            document.getElementById('memoCompLabel').innerText = currentCompositeUserId;
+
             document.getElementById('runningMonthIncome').innerText = formatMoney(runningIncome);
             document.getElementById('runningMonthExpense').innerText = formatMoney(runningExpense);
             document.getElementById('runningMonthSurplus').innerText = formatMoney(runningIncome - runningExpense);
@@ -1192,16 +1215,22 @@
             document.getElementById('loanTakenTotalText').innerText = 'Total: ' + formatMoney(loanTakenTotal);
         }
 
-        // Page Navigation
+        // Page Navigation & Sign In
         function handleMainSignIn(event) {
             event.preventDefault();
-            const userId = document.getElementById('mainUserId').value;
+            const inputVal = document.getElementById('mainUserId').value.trim();
             const companyId = document.getElementById('signInCompanyId').value;
-            if(!userId) return;
-            document.getElementById('currentLoggedInUser').innerText = userId + ' (Co: ' + companyId + ')';
+            if(!inputVal) return;
+
+            // Ensure 4 digits user ID format
+            currentUserId = inputVal.length <= 4 ? inputVal.padStart(4, '0') : inputVal.slice(-4);
+            currentCompositeUserId = `${companyId}_${currentUserId}`;
+
+            document.getElementById('currentLoggedInUser').innerText = currentUserId;
             document.getElementById('page1').classList.add('hidden');
             document.getElementById('page2').classList.remove('hidden');
-            showToast('Successfully signed in to Dashboard (Company ID: ' + companyId + ')!');
+            updateFinancialDisplays();
+            showToast(`Successfully signed in! Composite ID: ${currentCompositeUserId}`);
         }
 
         function handleLogOut() {
@@ -1226,7 +1255,7 @@
             if(!coupon) coupon = 'ADMIN-DEFAULT';
 
             closeBuyLicenseLandingModal();
-            showToast(`Payment successful! New ID created for Co ID ${companyId} & sent to ${mobile}.`);
+            showToast(`Licenses table record inserted! Co ID: ${companyId}, Mobile: ${mobile}`);
         }
 
         // Chatbot logic
@@ -1249,7 +1278,7 @@
             const chatBox = document.getElementById('chatBox');
             chatBox.innerHTML += `
                 <div class="bg-amber-950/30 border border-amber-800/50 rounded-xl p-2.5 text-xs text-amber-300">
-                    🛡️ System (Co ID: ${companyId}): User <strong>${modId}</strong> signed in as Moderator!
+                    🛡️ System (Composite ID: ${companyId}_${modId}): Moderator signed in!
                 </div>
             `;
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -1265,14 +1294,14 @@
             if(isModeratorLoggedIn) {
                 chatBox.innerHTML += `
                     <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-2.5 text-xs text-emerald-200 self-end max-w-[85%]">
-                        <div class="font-bold text-[10px] text-emerald-400 mb-0.5">🛡️ Moderator (Co: 105)</div>
+                        <div class="font-bold text-[10px] text-emerald-400 mb-0.5">🛡️ Moderator (${currentCompositeUserId})</div>
                         ${msg}
                     </div>
                 `;
             } else {
                 chatBox.innerHTML += `
                     <div class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 self-end max-w-[85%]">
-                        <div class="font-bold text-[10px] text-slate-400 mb-0.5">Visitor (Co: 105)</div>
+                        <div class="font-bold text-[10px] text-slate-400 mb-0.5">Visitor (${currentCompositeUserId})</div>
                         ${msg}
                     </div>
                 `;
@@ -1316,14 +1345,16 @@
         function handleSettingsUpdate(event) {
             event.preventDefault();
             const companyId = document.getElementById('settingsCompanyId').value;
+            const newMobile = document.getElementById('settingsMobile').value;
             const newPass = document.getElementById('settingsNewPass').value;
             const confirmPass = document.getElementById('settingsConfirmPass').value;
             if(newPass !== confirmPass) {
                 showToast('New passwords do not match!');
                 return;
             }
+            currentUserMobile = newMobile;
             closeSettingsModal();
-            showToast(`Profile updated successfully for Company ID: ${companyId}!`);
+            showToast(`Users table updated successfully for ${currentCompositeUserId}!`);
         }
 
         // Add Device Modal
@@ -1333,8 +1364,10 @@
         function handleAddDeviceSubmit(event) {
             event.preventDefault();
             const companyId = document.getElementById('deviceCompanyId').value;
+            const deviceName = document.getElementById('deviceNameInput').value;
             const payMethod = document.querySelector('input[name="devicePayMethod"]:checked').value;
-            if(payMethod === 'wallet') {
+            
+            if(payMethod === 'Wallet') {
                 if(currentWalletBalance < 100) {
                     showToast('Insufficient wallet balance!');
                     return;
@@ -1344,7 +1377,7 @@
             activeDevices += 1;
             updateFinancialDisplays();
             closeAddDeviceModal();
-            showToast(`New device added successfully (Co ID: ${companyId})!`);
+            showToast(`Devices table record inserted for ${currentCompositeUserId} (${deviceName})!`);
         }
 
         // Recharge Modal
@@ -1356,10 +1389,11 @@
             const companyId = document.getElementById('walletCompanyId').value;
             const amount = parseFloat(document.getElementById('rechargeAmount').value) || 0;
             const gateway = document.getElementById('paymentGatewaySelect').value;
+            
             currentWalletBalance += amount;
             updateFinancialDisplays();
             closeAddBalanceModal();
-            showToast(`Recharge of ৳${amount} via ${gateway} successful (Co ID: ${companyId})!`);
+            showToast(`Wallet Transactions record inserted: Recharged ৳${amount} via ${gateway} for ${currentCompositeUserId}!`);
         }
 
         // Extend Validity Modal
@@ -1392,7 +1426,7 @@
             currentValidityDays += 30;
             updateFinancialDisplays();
             closeExtendValidityModal();
-            showToast(`Account validity extended by 30 days (Co ID: ${companyId})!`);
+            showToast(`Users table validity extended by 30 days for ${currentCompositeUserId}!`);
         }
 
         // Buy Lot Modal
@@ -1413,7 +1447,7 @@
             const price = document.getElementById('lotTotalPrice').value;
             const gateway = document.getElementById('lotPaymentGateway').value;
             closeBuyLotModal();
-            showToast(`Lot of ${lot} User IDs (${price}) purchased via ${gateway} (Co ID: ${companyId})!`);
+            showToast(`Licenses table record inserted: Bulk Lot of ${lot} IDs (${price}) via ${gateway} for ${currentCompositeUserId}!`);
         }
 
         // Sell ID Modal
@@ -1424,6 +1458,7 @@
             event.preventDefault();
             const companyId = document.getElementById('sellCompanyId').value;
             const mobile = document.getElementById('buyUserMobile').value;
+            const email = document.getElementById('buyUserEmail').value;
             let coupon = document.getElementById('buyUserCoupon').value.trim();
             const gateway = document.getElementById('buyPayGateway').value;
             
@@ -1432,7 +1467,7 @@
             totalSubUsers += 1;
             updateFinancialDisplays();
             closeSellLicenseModal();
-            showToast(`User ID created! Co ID: ${companyId}, Coupon: ${coupon} (${gateway})`);
+            showToast(`Licenses & Users tables updated! New ID sold to ${mobile} under ${currentCompositeUserId}`);
         }
 
         // Income Modal
@@ -1447,7 +1482,7 @@
             totalIncome2026 += amount;
             updateFinancialDisplays();
             closeIncomeModal();
-            showToast(`New income entry saved (Company ID: ${companyId})!`);
+            showToast(`Income Records table entry saved for ${currentCompositeUserId}!`);
         }
 
         // Loan Modal
@@ -1457,12 +1492,12 @@
         function handleLoanSubmit(event) {
             event.preventDefault();
             const companyId = document.getElementById('loanCompanyId').value;
-            const type = document.getElementById('loanType').value;
+            const type = document.getElementById('loanType').value; // 'Receivable' or 'Payable'
             const name = document.getElementById('loanPersonName').value;
             const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
             const date = document.getElementById('loanDate').value;
 
-            if(type === 'given') {
+            if(type === 'Receivable') {
                 loanGivenTotal += amount;
                 const container = document.getElementById('loanGivenList');
                 container.innerHTML += `
@@ -1500,7 +1535,7 @@
 
             updateFinancialDisplays();
             closeLoanModal();
-            showToast(`Loan record saved successfully (Co ID: ${companyId})!`);
+            showToast(`Loan Records table entry saved for ${currentCompositeUserId}!`);
         }
 
         function openRepayModal(type, personName, amount) {
@@ -1539,7 +1574,7 @@
                 const parentDiv = targetBtn.parentElement;
                 parentDiv.innerHTML = `
                     <div class="text-right">
-                        <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold block">Settled (পরিশোধিত)</span>
+                        <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold block">Settled</span>
                         <span class="text-[9px] text-slate-500 font-mono block mt-0.5">${formattedDate}</span>
                     </div>
                 `;
@@ -1547,7 +1582,7 @@
 
             updateFinancialDisplays();
             closeRepayModal();
-            showToast(`Loan settled (Co ID: ${companyId})!`);
+            showToast(`Loan records status updated to Settled for ${currentCompositeUserId}!`);
         }
 
         // Market Modal
@@ -1560,7 +1595,7 @@
             const dateStr = document.getElementById('marketDate').value;
             const desc = document.getElementById('marketDesc').value;
             const amount = parseFloat(document.getElementById('marketAmount').value) || 0;
-            const status = document.getElementById('marketStatus').value;
+            const status = document.getElementById('marketStatus').value; // 'Paid' or 'Due'
 
             runningExpense += amount;
             totalExpense2026 += amount;
@@ -1568,7 +1603,7 @@
             const formattedDate = dateStr ? dateStr.split('-').reverse().join('/') : '07/11/2026';
 
             const container = document.getElementById('marketExpenseList');
-            const statusBadge = status === 'paid' 
+            const statusBadge = status === 'Paid' 
                 ? `<span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold">Paid</span>`
                 : `<span class="bg-amber-950/80 text-amber-400 border border-amber-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold">Due (Payable)</span>`;
 
@@ -1581,7 +1616,7 @@
                 </tr>
             ` + container.innerHTML;
 
-            if(status === 'due') {
+            if(status === 'Due') {
                 loanTakenTotal += amount;
                 const loanContainer = document.getElementById('loanTakenList');
                 loanContainer.innerHTML += `
@@ -1602,7 +1637,7 @@
 
             updateFinancialDisplays();
             closeMarketModal();
-            showToast(`New expense entry added (Co ID: ${companyId})!`);
+            showToast(`Expense Records table entry saved for ${currentCompositeUserId}!`);
         }
 
         // My Chat Modals
@@ -1618,7 +1653,7 @@
             const container = document.getElementById('myChatContainer');
             container.innerHTML = `
                 <div class="bg-amber-950/30 border border-amber-800/40 p-2 rounded-xl text-xs text-amber-300">
-                    🔒 Private chat session started with User <strong>${userId}</strong> (Company ID: 105).
+                    🔒 Private chat session started with User <strong>${userId}</strong> (Composite ID: 105_${userId}).
                 </div>
             `;
         }
@@ -1626,17 +1661,17 @@
         function exitPrivateChat() {
             activePrivateUser = null;
             document.getElementById('chatTitleHeader').innerText = 'My Chat (Global User Forum)';
-            document.getElementById('chatSubHeader').innerText = 'Company ID: 105';
+            document.getElementById('chatSubHeader').innerText = `Composite ID: ${currentCompositeUserId}`;
             document.getElementById('chatBackButton').classList.add('hidden');
             
             const container = document.getElementById('myChatContainer');
             container.innerHTML = `
                 <div class="bg-slate-800/60 p-2 rounded-xl text-xs text-slate-300 max-w-[80%]">
-                    <span class="text-[9px] text-indigo-400 block font-bold">User: 01711223344</span>
+                    <span class="text-[9px] text-indigo-400 block font-bold">User: 1234</span>
                     Hello everyone! How is the new application system working out?
                 </div>
                 <div class="bg-emerald-950/40 border border-emerald-800/40 p-2 rounded-xl text-xs text-emerald-200 self-end ml-auto max-w-[80%]">
-                    <span class="text-[9px] text-emerald-400 block font-bold">You (01818589423)</span>
+                    <span class="text-[9px] text-emerald-400 block font-bold">You (${currentUserId})</span>
                     Yes, thank you! Everything is running smoothly.
                 </div>
             `;
@@ -1651,7 +1686,7 @@
             const container = document.getElementById('myChatContainer');
             container.innerHTML += `
                 <div class="bg-emerald-950/40 border border-emerald-800/40 p-2 rounded-xl text-xs text-emerald-200 self-end ml-auto max-w-[80%]">
-                    <span class="text-[9px] text-emerald-400 block font-bold">${activePrivateUser ? 'Private to ' + activePrivateUser : 'You'} (Co: 105)</span>
+                    <span class="text-[9px] text-emerald-400 block font-bold">${activePrivateUser ? 'Private to ' + activePrivateUser : 'You'} (${currentCompositeUserId})</span>
                     ${msg}
                 </div>
             `;
@@ -1662,7 +1697,7 @@
         // Cash Memo Handlers & Dual Mode
         function openCashMemoModal() {
             document.getElementById('memoDate').innerText = new Date().toLocaleDateString('en-GB');
-            document.getElementById('memoRandomNum').innerText = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('memoRandomNum').innerText = currentUserId;
             switchMemoMode('platform');
             document.getElementById('cashMemoModal').classList.remove('hidden');
         }
@@ -1680,8 +1715,8 @@
             if(mode === 'platform') {
                 bizInputs.classList.add('hidden');
                 headerTitle.innerText = "MY DEVELOP APP";
-                headerSub.innerText = "Sigma PhD™ Platform Services (Co. ID: 105)";
-                userDisplay.innerText = document.getElementById('currentLoggedInUser').innerText;
+                headerSub.innerText = `Sigma PhD™ Platform Services (Composite ID: ${currentCompositeUserId})`;
+                userDisplay.innerText = currentUserId;
 
                 tableBody.innerHTML = `
                     <tr>
@@ -1699,7 +1734,7 @@
             } else {
                 bizInputs.classList.remove('hidden');
                 headerTitle.innerText = "USER BUSINESS MEMO";
-                headerSub.innerText = "Personal Customer Invoice (Co. ID: 105)";
+                headerSub.innerText = `Personal Customer Invoice (Composite ID: ${currentCompositeUserId})`;
                 updateBusinessMemo();
             }
         }
@@ -1732,7 +1767,7 @@
         }
 
         function downloadPDFMemo() {
-            showToast('Downloading cash memo in PDF format (Co ID: 105)...');
+            showToast(`Cash Memos table record generated for ${currentCompositeUserId}...`);
             setTimeout(() => {
                 printCashMemo();
             }, 800);
