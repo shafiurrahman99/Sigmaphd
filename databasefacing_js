@@ -1,10 +1,11 @@
-// --- 1. Supabase Client Initialization (Safe Single Declaration) ---
-const SUPABASE_URL = 'https://your-supabase-url.supabase.co'; // আপনার সঠিক Supabase URL এখানে দিন
-const SUPABASE_ANON_KEY = 'your-supabase-anon-key'; // আপনার সঠিক Anon Key এখানে দিন
+// databasefacing.js - Supabase Queries, Ledgers, Vault & Payment Gateways
 
+const SUPABASE_URL = 'https://your-supabase-url.supabase.co';
+const SUPABASE_ANON_KEY = 'your-supabase-anon-key';
 let supabaseClient = null;
+
 try {
-    if (window.supabase) {
+    if (window.supabase && SUPABASE_URL.includes('http')) {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 } catch (e) {
@@ -12,96 +13,9 @@ try {
 }
 
 let cachedCompanyId = 1;
-let currentUserId = 'USR-1001';
+let currentUserId = '01818589423';
 
-// --- 2. Page Initialization on Load ---
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("App Initialized successfully.");
-    loadFinancialSummary();
-    loadTransactionsFromDB();
-    loadInvestmentsFromDB();
-});
-
-// --- 3. Sign In Handler (Fixes Page Transition) ---
-async function handleSignIn(e) {
-    if (e) e.preventDefault();
-    const userIdInput = document.getElementById('inputUserId');
-    const passwordInput = document.getElementById('inputPassword');
-
-    const enteredId = userIdInput ? userIdInput.value.trim() : '';
-    const enteredPass = passwordInput ? passwordInput.value.trim() : '';
-
-    if (!enteredId || !enteredPass) {
-        showAlert("Please enter both User ID and Password.");
-        return;
-    }
-
-    try {
-        console.log("Attempting sign in for ID:", enteredId);
-        
-        if (supabaseClient) {
-            const { data, error } = await supabaseClient
-                .from('companies')
-                .select('*')
-                .eq('company_id', enteredId)
-                .maybeSingle();
-
-            if (error) console.warn("Company table check notice:", error.message);
-        }
-
-        // Hide Login Page (Page 1) and Show Dashboard (Page 2)
-        const page1 = document.getElementById('page1View');
-        const page2 = document.getElementById('page2View');
-        const topUser = document.getElementById('topSignInUser');
-
-        if (page1) page1.classList.add('hidden');
-        if (page2) page2.classList.remove('hidden');
-        if (topUser) topUser.innerText = `User ID: ${enteredId}`;
-
-        showAlert("Sign in successful!");
-        
-        // Load Live Database Data
-        loadFinancialSummary();
-        loadTransactionsFromDB();
-        loadInvestmentsFromDB();
-    } catch (err) {
-        console.error("Sign-in Error:", err.message);
-        showAlert("Sign in failed: " + err.message);
-    }
-}
-
-function handleLogout() {
-    const page1 = document.getElementById('page1View');
-    const page2 = document.getElementById('page2View');
-    if (page2) page2.classList.add('hidden');
-    if (page1) page1.classList.remove('hidden');
-    showAlert("Logged out successfully.");
-}
-
-// --- 4. Tab Switching Logic ---
-function switchTab(tabName) {
-    const tabs = ['dashboard', 'cashMemo', 'myChat', 'security'];
-    tabs.forEach(t => {
-        const el = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}View`);
-        const btn = document.getElementById(`tab${t === 'dashboard' ? 'Dash' : t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
-        if(el) el.classList.add('hidden');
-        if(btn) btn.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
-    });
-
-    let currentViewId = 'tabDashboardView';
-    let currentBtnId = 'tabDashBtn';
-
-    if (tabName === 'cashMemo') { currentViewId = 'tabCashMemoView'; currentBtnId = 'tabCashMemoBtn'; }
-    else if (tabName === 'myChat') { currentViewId = 'tabMyChatView'; currentBtnId = 'tabMyChatBtn'; }
-    else if (tabName === 'security') { currentViewId = 'tabSecurityView'; currentBtnId = 'tabSecBtn'; }
-
-    const activeView = document.getElementById(currentViewId);
-    const activeBtn = document.getElementById(currentBtnId);
-    if(activeView) activeView.classList.remove('hidden');
-    if(activeBtn) activeBtn.className = "px-5 py-2.5 bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
-}
-
-// --- 5. Financial Summary Loader ---
+// 1. Load Financial Summary & Balances
 async function loadFinancialSummary() {
     try {
         if (!supabaseClient) return;
@@ -124,11 +38,11 @@ async function loadFinancialSummary() {
             if (expDisplay) expDisplay.innerText = Number(data.nov_expense || 0).toFixed(2);
         }
     } catch (err) {
-        console.error("Financial summary error:", err.message);
+        console.error("Error fetching financial summary:", err.message);
     }
 }
 
-// --- 6. Transactions Loader from Vault ---
+// 2. Load Recent Vault Transactions
 async function loadTransactionsFromDB() {
     try {
         if (!supabaseClient) return;
@@ -136,14 +50,14 @@ async function loadTransactionsFromDB() {
             .from('app_transactions_vault')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(20);
+            .limit(15);
 
         if (error) throw error;
-        const container = document.getElementById('marketLogTableBody');
+        const container = document.getElementById('vaultLogContainer');
         if (!container) return;
 
         if (!data || data.length === 0) {
-            container.innerHTML = '<tr class="bg-slate-950"><td colspan="4" class="p-3 text-center text-slate-500">No transactions recorded.</td></tr>';
+            container.innerHTML = '<p class="text-slate-500">No transactions recorded yet.</p>';
             return;
         }
 
@@ -151,12 +65,16 @@ async function loadTransactionsFromDB() {
             const isIncome = item.transaction_category === 'INCOME';
             const amount = item.payload && item.payload.amount ? item.payload.amount : 0;
             return `
-                <tr class="bg-slate-900/40 hover:bg-slate-900 transition">
-                    <td class="p-3 font-sans ${isIncome ? 'text-emerald-400' : 'text-indigo-400'} font-bold">[${item.transaction_category}]</td>
-                    <td class="p-3 font-sans text-slate-200">${item.record_key || 'N/A'}</td>
-                    <td class="p-3 ${isIncome ? 'text-emerald-400' : 'text-rose-400'} font-bold font-mono">৳ ${amount}</td>
-                    <td class="p-3 text-right text-emerald-400 font-sans">Synced ✓</td>
-                </tr>
+                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="${isIncome ? 'text-emerald-400' : 'text-rose-400'} font-mono font-bold">[${item.transaction_category || 'GENERAL'}]</span>
+                        <span class="text-slate-200 ml-2">${item.record_key || 'N/A'}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-mono font-bold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">৳${amount}</span>
+                        <span class="text-slate-500 text-[10px]">Synced ✓</span>
+                    </div>
+                </div>
             `;
         }).join('');
     } catch (err) {
@@ -164,13 +82,14 @@ async function loadTransactionsFromDB() {
     }
 }
 
-// --- 7. Income & Expense Handlers ---
+// 3. Handle Income Entry
 async function handleIncomeSubmit(e) {
     if (e) e.preventDefault();
     const descInput = document.getElementById('incDescInput');
     const amtInput = document.getElementById('incAmountInput');
     const desc = descInput ? descInput.value.trim() : '';
     const amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
+
     if (amt <= 0) return;
 
     try {
@@ -188,18 +107,20 @@ async function handleIncomeSubmit(e) {
         closeModal('incomeEntryModal');
         loadTransactionsFromDB();
         loadFinancialSummary();
-        showAlert(`Income of ৳${amt} saved successfully!`);
+        showAlert(`Income entry of ৳${amt} successfully saved!`);
     } catch (err) {
-        showAlert("Error: " + err.message);
+        showAlert("Error saving income: " + err.message);
     }
 }
 
+// 4. Handle Expense Entry
 async function handleMarketSubmit(e) {
     if (e) e.preventDefault();
     const descInput = document.getElementById('mktDescInput');
     const amtInput = document.getElementById('mktAmountInput');
     const desc = descInput ? descInput.value.trim() : '';
     const amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
+
     if (amt <= 0) return;
 
     try {
@@ -217,13 +138,13 @@ async function handleMarketSubmit(e) {
         closeModal('marketEntryModal');
         loadTransactionsFromDB();
         loadFinancialSummary();
-        showAlert(`Expense of ৳${amt} saved successfully!`);
+        showAlert(`Expense entry of ৳${amt} successfully saved!`);
     } catch (err) {
-        showAlert("Error: " + err.message);
+        showAlert("Error saving expense: " + err.message);
     }
 }
 
-// --- 8. Loans & Investments Loader (Receivable / Payable) ---
+// 5. Load Receivables & Payables (Loans)
 async function loadInvestmentsFromDB() {
     try {
         if (!supabaseClient) return;
@@ -233,49 +154,35 @@ async function loadInvestmentsFromDB() {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-
-        const givenContainer = document.getElementById('loanGivenList');
-        const takenContainer = document.getElementById('loanTakenList');
+        const container = document.getElementById('loanListContainer');
+        if (!container) return;
 
         if (!data || data.length === 0) {
-            if (givenContainer) givenContainer.innerHTML = '<p class="text-slate-500 text-xs">No receivable records.</p>';
-            if (takenContainer) takenContainer.innerHTML = '<p class="text-slate-500 text-xs">No payable records.</p>';
+            container.innerHTML = '<p class="text-slate-500">No loan records found.</p>';
             return;
         }
 
-        const receivables = data.filter(i => i.loan_type === 'receivable');
-        const payables = data.filter(i => i.loan_type === 'payable');
-
-        if (givenContainer) {
-            givenContainer.innerHTML = receivables.length === 0 ? '<p class="text-slate-500 text-xs">No receivables.</p>' :
-            receivables.map(i => `
-                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+        container.innerHTML = data.map(i => {
+            const isReceivable = i.loan_type === 'receivable';
+            return `
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
                     <div>
-                        <span class="font-bold text-slate-200">${i.to_bank || i.description}</span>
-                        <span class="text-[10px] text-slate-400 block">${i.settlement_status || 'due'}</span>
+                        <span class="px-2 py-0.5 rounded font-mono font-bold text-[10px] ${isReceivable ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'}">
+                            ${isReceivable ? 'RECEIVABLE (পাবো)' : 'PAYABLE (দেবো)'}
+                        </span>
+                        <span class="font-bold text-slate-200 ml-2">${i.to_bank || i.description || 'N/A'}</span>
+                        <span class="font-mono font-bold ml-3 text-amber-400">৳${i.amount}</span>
                     </div>
-                    <span class="font-mono font-bold text-emerald-400">৳${i.amount}</span>
+                    <span class="px-2 py-0.5 bg-slate-900 text-slate-400 rounded text-[10px] uppercase">${i.settlement_status || 'due'}</span>
                 </div>
-            `).join('');
-        }
-
-        if (takenContainer) {
-            takenContainer.innerHTML = payables.length === 0 ? '<p class="text-slate-500 text-xs">No payables.</p>' :
-            payables.map(i => `
-                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                        <span class="font-bold text-slate-200">${i.to_bank || i.description}</span>
-                        <span class="text-[10px] text-slate-400 block">${i.settlement_status || 'due'}</span>
-                    </div>
-                    <span class="font-mono font-bold text-rose-400">৳${i.amount}</span>
-                </div>
-            `).join('');
-        }
+            `;
+        }).join('');
     } catch (err) {
         console.error("Investment load error:", err.message);
     }
 }
 
+// 6. Handle Loan Entry
 async function handleLoanSubmit(e) {
     if (e) e.preventDefault();
     const personInput = document.getElementById('loanPersonInput');
@@ -293,9 +200,10 @@ async function handleLoanSubmit(e) {
             await supabaseClient.from('investments').insert([{
                 company_id: cachedCompanyId,
                 user_id: currentUserId,
+                from_bank: 'MAIN_VAULT',
                 to_bank: person,
                 amount: amt,
-                description: `Loan record for ${person}`,
+                description: `Loan entry for ${person}`,
                 loan_type: loanType,
                 settlement_status: 'due'
             }]);
@@ -304,32 +212,78 @@ async function handleLoanSubmit(e) {
         if (amtInput) amtInput.value = '';
         closeModal('loanEntryModal');
         loadInvestmentsFromDB();
-        showAlert(`Loan entry (${loanType.toUpperCase()}) saved successfully!`);
+        showAlert(`Loan record (${loanType.toUpperCase()}) saved successfully!`);
     } catch (err) {
-        showAlert("Error: " + err.message);
+        showAlert("Error saving loan record: " + err.message);
     }
 }
 
-// --- 9. Utility & Modal Helpers ---
-function openIncomeEntryModal() { document.getElementById('incomeEntryModal').classList.remove('hidden'); }
-function openLoanEntryModal() { document.getElementById('loanEntryModal').classList.remove('hidden'); }
-function openMarketEntryModal() { document.getElementById('marketEntryModal').classList.remove('hidden'); }
-function openBankSetupModal() { document.getElementById('bankSetupModal').classList.remove('hidden'); }
-function openPaymentGatewayModal() { document.getElementById('paymentGatewayModal').classList.remove('hidden'); }
-function openAccountSettingsModal() { document.getElementById('accountSettingsModal').classList.remove('hidden'); }
-function openValidityPaymentOptionsModal() { document.getElementById('validityPaymentOptionsModal').classList.remove('hidden'); }
-function openP2PTransferModal() { document.getElementById('p2pTransferModal').classList.remove('hidden'); }
-function openAgentAuthModal() { document.getElementById('agentAuthModal').classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+// 7. Initiate Payment Gateway Redirect
+async function initiatePaymentGateway(e) {
+    if (e) e.preventDefault();
+    const amtInput = document.getElementById('payGatewayAmountInput');
+    const gatewaySelect = document.getElementById('gatewayNameSelect');
+    const amount = parseFloat(amtInput ? amtInput.value : 0) || 0;
+    const gatewayName = gatewaySelect ? gatewaySelect.value : 'bKash';
 
-function showAlert(msg) {
-    const alertBox = document.getElementById('systemAlert');
-    const alertMsg = document.getElementById('systemAlertMsg');
-    if(alertBox && alertMsg) {
-        alertMsg.innerText = msg;
-        alertBox.classList.remove('hidden');
-        setTimeout(() => { alertBox.classList.add('hidden'); }, 3000);
-    } else {
-        alert(msg);
+    if (amount <= 0) {
+        showAlert("Please enter a valid amount.");
+        return;
+    }
+
+    try {
+        const invoiceId = 'INV-' + Date.now();
+        if (supabaseClient) {
+            await supabaseClient.from('payments').insert([{
+                company_id: cachedCompanyId,
+                user_id: 1001,
+                transaction_id: invoiceId,
+                gateway_name: gatewayName,
+                amount: amount,
+                purpose: 'WALLET_RECHARGE',
+                status: 'PENDING'
+            }]);
+        }
+        showAlert(`Redirecting to secure ${gatewayName} Payment Gateway...`);
+        setTimeout(() => {
+            closeModal('paymentGatewayModal');
+        }, 1500);
+    } catch (err) {
+        showAlert("Gateway initiation failed: " + err.message);
+    }
+}
+
+// 8. Fetch Payment History
+async function loadPaymentHistory() {
+    try {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
+            .from('payments')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        const container = document.getElementById('paymentHistoryContainer');
+        if (!container) return;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p class="text-slate-500">No gateway payments recorded.</p>';
+            return;
+        }
+
+        container.innerHTML = data.map(p => `
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                <div>
+                    <span class="font-bold text-emerald-400">${p.gateway_name || 'MFS'}</span>
+                    <span class="text-slate-400 ml-2 font-mono">[${p.transaction_id}]</span>
+                    <span class="font-mono font-bold ml-3 text-slate-200">৳${p.amount}</span>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${p.status === 'SUCCESS' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'}">
+                    ${p.status}
+                </span>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error("Payment history error:", err.message);
     }
 }
