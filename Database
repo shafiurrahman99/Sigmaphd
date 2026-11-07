@@ -1,1 +1,1719 @@
 
+```html
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Develop App - Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Hind Siliguri for Bengali & Inter for Numbers/English) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#07090d',
+                        cardBg: '#131822',
+                        innerDark: '#080a0f',
+                        accentGreen: '#0fa968',
+                        accentOrange: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', 'Inter', sans-serif;
+            background-color: #07090d;
+            color: #e2e8f0;
+            user-select: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .buy-btn-gradient {
+            background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 50%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+
+        .buy-btn-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-950">
+
+    <!-- Global State Variables -->
+    <script>
+        let isModeratorLoggedIn = false;
+        let currentWalletBalance = 2100.00;
+        let currentValidityDays = 25;
+        let activeDevices = 1;
+        let totalSubUsers = 5;
+
+        let runningIncome = 25000.00;
+        let runningExpense = 5500.00;
+        let totalIncome2026 = 55508.00;
+        let totalExpense2026 = 23308.00;
+
+        let loanGivenTotal = 3000.00;
+        let loanTakenTotal = 4000.00;
+    </script>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
+        <span id="toast-text">Action successful!</span>
+        <button onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2">
+            <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+    </div>
+
+    <!-- ================= PAGE 1: LOGIN & CHATBOT LANDING PAGE ================= -->
+    <div id="page1" class="w-full max-w-md mx-auto space-y-4 my-auto py-4">
+
+        <!-- Top Card: Sign In & License -->
+        <div class="bg-[#131822] rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800/80 relative overflow-hidden">
+            <div class="flex items-start justify-between mb-5">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">My Develop App</h1>
+                    <p class="font-bengali text-emerald-400 font-semibold text-sm mt-0.5 tracking-wide">নিজের হাতের গড়া</p>
+                </div>
+                <div class="text-right">
+                    <span class="gradient-text font-black text-lg italic tracking-wider block">Sigma PhD™</span>
+                </div>
+            </div>
+
+            <!-- Sign In Form -->
+            <form onsubmit="handleMainSignIn(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">User ID</label>
+                    <input type="text" id="mainUserId" value="01818589423" required
+                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="mainUserPassword" value="123456" required
+                            class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-lg shadow-emerald-900/20 text-base mt-2">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </form>
+
+            <div class="my-4 border-t border-slate-800"></div>
+
+            <button type="button" onclick="openBuyLicenseLandingModal()" 
+                class="w-full buy-btn-gradient text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 text-base">
+                <i class="fa-solid fa-credit-card text-base text-slate-900"></i>
+                <span>Buy New ID / License</span>
+            </button>
+        </div>
+
+        <!-- Bottom Card: AI Assistant Forum -->
+        <div class="bg-[#131822] rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800/80 space-y-4">
+            <div class="flex items-center justify-between text-xs sm:text-sm">
+                <div class="flex items-center space-x-2">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <button onclick="openModLoginModal()" class="text-emerald-400 font-bold hover:underline transition-all">
+                        24/7 active AI assistant
+                    </button>
+                    <span class="text-slate-400 font-normal">& Open Public Forum</span>
+                </div>
+                <span id="modeBadge" class="bg-[#0e271f] text-emerald-400 border border-emerald-800/50 px-2.5 py-1 rounded-full text-[11px] font-semibold">
+                    Visitor Mode
+                </span>
+            </div>
+
+            <div id="chatBox" class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 h-52 overflow-y-auto space-y-3 flex flex-col">
+                <div class="bg-[#18202d] border border-slate-800 rounded-xl p-3 shadow-sm max-w-[92%] self-start space-y-1">
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <div class="flex items-center space-x-1.5 text-amber-400 font-bold">
+                            <span>🤖</span>
+                            <span>Live AI Assistant</span>
+                        </div>
+                        <span class="text-[10px] text-slate-500">Now</span>
+                    </div>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Welcome Public Visitors! Click "<span class="text-emerald-400 cursor-pointer font-semibold hover:underline" onclick="openModLoginModal()">24/7 active AI assistant</span>" link to sign in as Moderator.
+                    </p>
+                </div>
+            </div>
+
+            <form onsubmit="handleSendMessage(event)" class="flex items-center space-x-2 pt-1">
+                <input type="text" id="chatInput" placeholder="Type message as visitor or moderator..." 
+                    class="flex-1 bg-[#080a0f] border border-slate-700/70 rounded-2xl py-3 px-4 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                <button type="submit" 
+                    class="bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3 px-4 rounded-2xl flex items-center space-x-1.5 transition-all text-xs sm:text-sm active:scale-95 shrink-0">
+                    <span>Send</span>
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ================= PAGE 2: DASHBOARD ================= -->
+    <div id="page2" class="hidden w-full max-w-md mx-auto space-y-4 py-2">
+        
+        <!-- Top Status Card: Device & Balance -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between shadow-xl">
+            <div class="flex items-center space-x-3">
+                <div class="relative cursor-pointer" onclick="openAddDeviceModal()" title="নতুন ডিভাইস যোগ করুন">
+                    <div class="w-10 h-10 bg-emerald-950/80 border border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 text-lg">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-slate-950 font-black w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">+</span>
+                </div>
+                <div>
+                    <h2 class="text-xs font-bold text-white flex items-center space-x-1">
+                        <span id="activeDeviceCount">১</span>টি ডিভাইস সক্রিয় 
+                        <span class="text-slate-400 font-normal">(সর্বোচ্চ ২)</span>
+                    </h2>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-400 block font-medium">ব্যালেন্স (+ক্যাশব্যাক)</span>
+                    <span id="walletBalanceText" class="text-emerald-400 font-extrabold text-sm font-mono">৳ ২১০০.০০</span>
+                </div>
+                <button onclick="openAddBalanceModal()" class="w-8 h-8 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black rounded-xl flex items-center justify-center text-base shadow-md transition-all" title="এড ব্যালেন্স">
+                    +
+                </button>
+            </div>
+        </div>
+
+        <!-- Top Profile Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between shadow-xl">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 font-bold">
+                    <i class="fa-solid fa-user-check text-sm"></i>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-white flex items-center space-x-1">
+                        <span>User: <strong id="currentLoggedInUser" class="text-emerald-400">01818589423</strong></span>
+                    </h3>
+                    <div class="flex items-center space-x-1 mt-0.5">
+                        <p class="text-[10px] text-amber-400 font-semibold">মেয়াদ বাকি: <span id="accountValidityDays">২৫</span> দিন</p>
+                        <button type="button" onclick="openExtendValidityModal(event)" class="w-4 h-4 bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-slate-950 font-black rounded-full flex items-center justify-center text-[10px] transition-all" title="মেয়াদ বাড়ান">
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings & Logout Side by Side -->
+            <div class="flex items-center space-x-2">
+                <button type="button" onclick="openSettingsModal(event)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
+                    <i class="fa-solid fa-gear text-xs text-amber-400"></i>
+                    <span>সেটিংস</span>
+                </button>
+                <button type="button" onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                    <span>লগআউট</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Referral / Coupon Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-2.5">
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-300 font-bold flex items-center space-x-1.5">
+                    <i class="fa-solid fa-link text-emerald-400"></i>
+                    <span>রেফারাল চেইন ও ইউজার সেল</span>
+                </span>
+                <span class="bg-indigo-900/40 text-indigo-300 border border-indigo-700/50 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                    আন্ডারে ইউজার: <strong class="text-emerald-400 font-extrabold text-xs" id="subUserCount">৫</strong> জন
+                </span>
+            </div>
+            
+            <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
+                <div class="flex items-center space-x-2">
+                    <span class="text-slate-400 text-xs">কুপন কোড:</span>
+                    <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA-8589</span>
+                </div>
+                <button onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Copy</span>
+                </button>
+            </div>
+
+            <!-- Action Buttons for Lot Buy and ID Sell -->
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="openBuyLotModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                    <i class="fa-solid fa-boxes-packing text-xs"></i>
+                    <span>নতুন লট ক্রয়</span>
+                </button>
+                <button onclick="openSellLicenseModal()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                    <span>নতুন আইডি বিক্রয়</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2 shadow-xl">
+            <div class="grid grid-cols-3 gap-1 text-xs">
+                <button class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-center shadow-md">ড্যাশবোর্ড</button>
+                <button onclick="openMyChatModal()" class="bg-[#1a2130] hover:bg-slate-800 text-slate-300 font-medium py-2 rounded-xl text-center border border-slate-700/50">My Chat</button>
+                <button onclick="openCashMemoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-center shadow-md flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>ক্যাশ মেমো</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Monthly Financial Summary Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-line text-emerald-400 text-base"></i>
+                    <h3 class="text-xs sm:text-sm font-bold text-white">মাসিক হিসাব সারাংশ (আয়, ব্যয়, উদ্বৃত্ত)</h3>
+                </div>
+                <button onclick="openIncomeModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
+                    <span>+</span>
+                    <span>নতুন আয়ের এন্ট্রি</span>
+                </button>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="py-2.5 px-3">মাস</th>
+                            <th class="py-2.5 px-2">মোট আয় (৳)</th>
+                            <th class="py-2.5 px-2">মোট ব্যয় (৳)</th>
+                            <th class="py-2.5 px-2 text-right">মোট মাসিক উদ্বৃত্ত (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 font-medium">
+                        <!-- Total Sum Row 2026 -->
+                        <tr class="bg-emerald-950/20 text-emerald-400 font-bold">
+                            <td class="py-3 px-3 flex items-center space-x-1.5 cursor-pointer" onclick="toggleYear('year2026', 'icon2026')">
+                                <i id="icon2026" class="fa-solid fa-minus text-xs"></i>
+                                <span>মোট যোগফল (২০২৬)</span>
+                            </td>
+                            <td id="totalIncome2026" class="py-3 px-2">৳ ৫৫,৫০৮.০০</td>
+                            <td id="totalExpense2026" class="py-3 px-2 text-rose-400">৳ ২৩,৩০৮.০০</td>
+                            <td id="totalSurplus2026" class="py-3 px-2 text-right">৳ ৩২,২০০.০০</td>
+                        </tr>
+
+                        <!-- 2026 Months Container -->
+                        <tbody id="year2026" class="divide-y divide-slate-800/40">
+                            <tr>
+                                <td class="py-2.5 px-3 text-slate-300">নভেম্বর ২০২৬ (রানিং মাস)</td>
+                                <td id="runningMonthIncome" class="py-2.5 px-2 text-emerald-400">৳ ২৫,০০০.০০</td>
+                                <td id="runningMonthExpense" class="py-2.5 px-2 text-rose-400">৳ ৫,৫০০.০০</td>
+                                <td id="runningMonthSurplus" class="py-2.5 px-2 text-right text-emerald-400">৳ ১৯,৫০০.০০</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 text-slate-400">অক্টোবর ২০২৬</td>
+                                <td class="py-2.5 px-2 text-emerald-400">৳ ১৮,৫০৮.০০</td>
+                                <td class="py-2.5 px-2 text-rose-400">৳ ১০,৩০৮.০০</td>
+                                <td class="py-2.5 px-2 text-right text-emerald-400">৳ ৮,২০০.০০</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 text-slate-400">সেপ্টেম্বর ২০২৬</td>
+                                <td class="py-2.5 px-2 text-emerald-400">৳ ১২,০০০.০০</td>
+                                <td class="py-2.5 px-2 text-rose-400">৳ ৭,৫০০.০০</td>
+                                <td class="py-2.5 px-2 text-right text-emerald-400">৳ ৪,৫০০.০০</td>
+                            </tr>
+                        </tbody>
+
+                        <!-- Year 2025 Collapsible -->
+                        <tr class="bg-slate-900/40 text-slate-400 font-semibold cursor-pointer" onclick="toggleYear('year2025', 'icon2025')">
+                            <td class="py-2.5 px-3 flex items-center space-x-1.5" colspan="4">
+                                <i id="icon2025" class="fa-solid fa-plus text-xs text-amber-400"></i>
+                                <span>আগের বছরের হিসাব (২০২৫)</span>
+                            </td>
+                        </tr>
+                        <tbody id="year2025" class="hidden divide-y divide-slate-800/40 text-slate-400">
+                            <tr>
+                                <td class="py-2 px-3">ডিসেম্বর ২০২৫</td>
+                                <td class="py-2 px-2">৳ ১৫,০০০.০০</td>
+                                <td class="py-2 px-2 text-rose-400">৳ ৬,০০০.০০</td>
+                                <td class="py-2 px-2 text-right text-emerald-400">৳ ৯,০০০.০০</td>
+                            </tr>
+                        </tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loan Management Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-hand-holding-dollar text-amber-400 text-base"></i>
+                    <h3 class="text-xs sm:text-sm font-bold text-white">ধারের হিসাব (ধার দেওয়া ও নেওয়া)</h3>
+                </div>
+                <button onclick="openLoanModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
+                    <span>+</span>
+                    <span>নতুন ধারের এন্ট্রি</span>
+                </button>
+            </div>
+
+            <!-- Loan Given List -->
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+                    <span class="text-amber-400 font-bold">ধার দেওয়া হয়েছে (পাবো)</span>
+                    <span id="loanGivenTotalText" class="text-emerald-400 font-extrabold">মোট: ৳ ৩,০০০</span>
+                </div>
+                <div id="loanGivenList" class="space-y-2">
+                    <div class="flex items-center justify-between bg-[#111622] p-2.5 rounded-xl border border-slate-800 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-500 font-mono text-[11px]">05/11</span>
+                            <span class="font-bold text-slate-200">আবুল হোসেন</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-emerald-400 font-bold">৳ ৩,০০০</span>
+                            <button onclick="openRepayModal('given', 'আবুল হোসেন', 3000)" class="bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-md text-[10px] font-bold transition-all">
+                                পরিশোধ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loan Taken List -->
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+                    <span class="text-rose-400 font-bold">ধার নেওয়া হয়েছে (দেবো)</span>
+                    <span id="loanTakenTotalText" class="text-rose-400 font-extrabold">মোট: ৳ ৪,০০০</span>
+                </div>
+                <div id="loanTakenList" class="space-y-2">
+                    <div class="flex items-center justify-between bg-[#111622] p-2.5 rounded-xl border border-slate-800 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-500 font-mono text-[11px]">05/11</span>
+                            <span class="font-bold text-slate-200">সেন্ট্রাল গ্রোসারি শপ</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-rose-400 font-bold">৳ ২,০০০</span>
+                            <button onclick="openRepayModal('taken', 'সেন্ট্রাল গ্রোসারি শপ', 2000)" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 px-2 py-1 rounded-md text-[10px] font-bold transition-all">
+                                পরিশোধ করুন
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-[#111622] p-2.5 rounded-xl border border-slate-800 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-500 font-mono text-[11px]">04/11</span>
+                            <span class="font-bold text-slate-200">সাদেক ভাই</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-rose-400 font-bold">৳ ২,০০০</span>
+                            <button onclick="openRepayModal('taken', 'সাদেক ভাই', 2000)" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 px-2 py-1 rounded-md text-[10px] font-bold transition-all">
+                                পরিশোধ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Expenses Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-cart-shopping text-indigo-400 text-base"></i>
+                    <h3 class="text-xs sm:text-sm font-bold text-white">প্রতিদিনকার খরচের হিসাব</h3>
+                </div>
+                <button onclick="openMarketModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
+                    <span>+</span>
+                    <span>নতুন খরচের এন্ট্রি</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="py-2.5 px-2">তারিখ</th>
+                            <th class="py-2.5 px-2">খরচের বিবরণ / আইটেম</th>
+                            <th class="py-2.5 px-2">মোট খরচ (৳)</th>
+                            <th class="py-2.5 px-2 text-right">স্ট্যাটাস</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marketExpenseList" class="divide-y divide-slate-800/50 font-medium">
+                        <tr class="hover:bg-slate-900/50">
+                            <td class="py-2.5 px-2 text-slate-400 font-mono">05/11/2026</td>
+                            <td class="py-2.5 px-2 text-slate-200 font-medium">মানিক ভাইয়ের দোকান</td>
+                            <td class="py-2.5 px-2 text-rose-400 font-bold">৳ ২৫০০০.০০</td>
+                            <td class="py-2.5 px-2 text-right">
+                                <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold">পরিশোধিত</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/50">
+                            <td class="py-2.5 px-2 text-slate-400 font-mono">05/11/2026</td>
+                            <td class="py-2.5 px-2 text-slate-200 font-medium">সেন্ট্রাল গ্রোসারি শপ</td>
+                            <td class="py-2.5 px-2 text-rose-400 font-bold">৳ ২০০০.০০</td>
+                            <td class="py-2.5 px-2 text-right">
+                                <span class="bg-amber-950/80 text-amber-400 border border-amber-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold">বাকি (ধার)</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/50">
+                            <td class="py-2.5 px-2 text-slate-400 font-mono">04/11/2026</td>
+                            <td class="py-2.5 px-2 text-slate-200 font-medium">মাছ, মাংস ও শাকসবজি</td>
+                            <td class="py-2.5 px-2 text-rose-400 font-bold">৳ ১,৪৫০.০০</td>
+                            <td class="py-2.5 px-2 text-right">
+                                <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold">পরিশোধিত</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= ALL MODAL WINDOWS ================= -->
+
+    <!-- MODAL 0: LANDING PAGE BUY LICENSE MODAL -->
+    <div id="buyLicenseLandingModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeBuyLicenseLandingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">নতুন আইডি / লাইসেন্স ক্রয় করুন</h3>
+                <p class="text-xs text-slate-400">মোবাইল ব্যাংকিং দিয়ে আইডি অ্যাক্টিভেট করুন</p>
+            </div>
+            <form onsubmit="handleLandingBuySubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">মোবাইল নাম্বার</label>
+                    <input type="text" id="landingBuyMobile" placeholder="01XXXXXXXXX" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">ইমেইল এড্রেস</label>
+                    <input type="email" id="landingBuyEmail" placeholder="yourname@gmail.com" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">কুপন / রেফারাল কোড (ঐচ্ছিক)</label>
+                    <input type="text" id="landingBuyCoupon" placeholder="খালি রাখলে অ্যাডমিন কুপন বসবে"
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 uppercase text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">টাকার পরিমাণ (৳)</label>
+                    <input type="text" value="৳ ৫০০.০০ (৩০ দিন মেয়াদী)" readonly
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">মোবাইল ব্যাংকিং পেমেন্ট মেথড</label>
+                    <select id="landingPayGateway" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                        <option value="bKash">bKash (বিকাশ পেমেন্ট)</option>
+                        <option value="Nagad">Nagad (নগদ পেমেন্ট)</option>
+                        <option value="Rocket">Rocket (রকেট পেমেন্ট)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full buy-btn-gradient text-slate-950 font-black py-3 rounded-xl text-xs transition-all mt-2 shadow-lg">
+                    পেমেন্ট সম্পন্ন করে আইডি লাইসেন্স নিন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 1: MODERATOR LOGIN -->
+    <div id="modLoginModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeModLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Moderator Login</h3>
+                <p class="text-xs text-slate-400">Sign in to activate Moderator Mode in Chat</p>
+            </div>
+            <form onsubmit="handleModLogin(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">User ID</label>
+                    <input type="text" id="modUserId" placeholder="Enter Moderator ID" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <input type="password" id="modPassword" placeholder="••••••" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    Sign In as Moderator
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: ADD DEVICE (৳100) -->
+    <div id="addDeviceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">নতুন ডিভাইস যুক্ত করুন</h3>
+                <p class="text-xs text-slate-400">চার্জ: <strong class="text-emerald-400">৳ ১০০.০০</strong> (১টি অতিরিক্ত ডিভাইস)</p>
+            </div>
+            <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">পেমেন্ট মাধ্যম বেছে নিন</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2.5 bg-[#080a0f] p-3 rounded-xl border border-slate-700 cursor-pointer">
+                            <input type="radio" name="devicePayMethod" value="wallet" checked class="text-emerald-500 focus:ring-0">
+                            <span class="text-xs text-slate-200 font-semibold">ওয়ালেট ব্যালেন্স থেকে কাটুন (বর্তমান: <span id="modalWalletBalance">৳২১০০.০০</span>)</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 bg-[#080a0f] p-3 rounded-xl border border-slate-700 cursor-pointer">
+                            <input type="radio" name="devicePayMethod" value="gateway" class="text-emerald-500 focus:ring-0">
+                            <span class="text-xs text-slate-200 font-semibold">বিকাশ / নগদ / রকেট মোবাইল ব্যাংকিং</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    ৳ ১০০ পেমেন্ট করে ডিভাইস যুক্ত করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: RECHARGE / ADD BALANCE -->
+    <div id="addBalanceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeAddBalanceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">ওয়ালেট ব্যালেন্স রিচার্জ</h3>
+                <p class="text-xs text-slate-400">বিকাশ/নগদ/রকেটের মাধ্যমে রিচার্জ করুন</p>
+            </div>
+            <form onsubmit="handleAddBalanceSubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">রিচার্জের পরিমাণ (৳)</label>
+                    <input type="number" id="rechargeAmount" min="50" value="500" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-sm focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">মোবাইল ব্যাংকিং মেথড</label>
+                    <select id="paymentGatewaySelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                        <option value="bKash">bKash (বিকাশ)</option>
+                        <option value="Nagad">Nagad (নগদ)</option>
+                        <option value="Rocket">Rocket (রকেট)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    পেমেন্ট গেটওয়েতে এগিয়ে যান
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: EXTEND VALIDITY -->
+    <div id="extendValidityModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeExtendValidityModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">মেয়াদ বৃদ্ধি করুন</h3>
+                <p class="text-xs text-slate-400">কুপন কোড বা মোবাইল ব্যাংকিং দিয়ে মেয়াদ বাড়ান</p>
+            </div>
+            <form onsubmit="handleExtendValiditySubmit(event)" class="space-y-3 pt-2">
+                <div class="bg-[#080a0f] p-3 rounded-xl border border-slate-800 text-xs space-y-1">
+                    <div class="flex justify-between text-slate-400">
+                        <span>বর্তমান মেয়াদ:</span>
+                        <span class="text-amber-400 font-bold" id="currentValidityInModal">২৫ দিন</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">পদ্ধতি নির্বাচন করুন</label>
+                    <select id="extendMethod" onchange="toggleExtendInput(this.value)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                        <option value="gateway">মোবাইল ব্যাংকিং / ওয়ালেট (৳১০০ = +৩০ দিন)</option>
+                        <option value="coupon">কুপন / রিডিম কোড</option>
+                    </select>
+                </div>
+                <div id="extendCouponGroup" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">কুপন কোড দিন</label>
+                    <input type="text" id="extendCouponInput" placeholder="PROMO2026"
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 uppercase font-bold text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    মেয়াদ বৃদ্ধি কনফার্ম করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: SETTINGS MODAL -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">প্রোফাইল সেটিংস</h3>
+                <p class="text-xs text-slate-400">ইমেইল ও পাসওয়ার্ড আপডেট করুন</p>
+            </div>
+            <form onsubmit="handleSettingsUpdate(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">ইমেইল এড্রেস</label>
+                    <input type="email" id="settingsEmail" value="user@domain.com" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">বর্তমান পাসওয়ার্ড</label>
+                    <input type="password" id="settingsCurrentPass" placeholder="••••••" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">নতুন পাসওয়ার্ড</label>
+                    <input type="password" id="settingsNewPass" placeholder="নতুন পাসওয়ার্ড দিন" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">পুনরায় নতুন পাসওয়ার্ড</label>
+                    <input type="password" id="settingsConfirmPass" placeholder="আবার লিখুন" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    পাসওয়ার্ড ও ইমেইল আপডেট করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 6: BUY LOT (ID LOT PURCHASE) -->
+    <div id="buyLotModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-boxes-packing"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">নতুন ইউজার লট ক্রয়</h3>
+                <p class="text-xs text-slate-400">অ্যাডমিন থেকে একসাথে একাধিক আইডি ক্রয় করুন</p>
+            </div>
+            <form onsubmit="handleBuyLotSubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">লট নির্বাচন করুন</label>
+                    <select id="lotPackageSelect" onchange="calculateLotPrice(this.value)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                        <option value="20">২০ টি ইউজার আইডি লট (৳২,০০০)</option>
+                        <option value="50">৫০ টি ইউজার আইডি লট (৳৪,৫০০)</option>
+                        <option value="100">১০০ টি ইউজার আইডি লট (৳৮,০০০)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">মোট পেমেন্ট মূল্য (৳)</label>
+                    <input type="text" id="lotTotalPrice" value="৳ ২০০০.০০" readonly
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 font-bold text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">মোবাইল ব্যাংকিং / পেমেন্ট মেথড</label>
+                    <select id="lotPaymentGateway" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                        <option value="bKash">bKash (বিকাশ)</option>
+                        <option value="Nagad">Nagad (নগদ)</option>
+                        <option value="Rocket">Rocket (রকেট)</option>
+                        <option value="Wallet">ওয়ালেট ব্যালেন্স</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    লট ক্রয় কনফার্ম করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 7: SELL LICENSE / ID TO NEW USER -->
+    <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">নতুন ইউজারকে আইডি বিক্রয় করুন</h3>
+                <p class="text-xs text-slate-400">নতুন ইউজারের মোবাইল/ইমেইলে ক্রডেনশিয়াল পাঠাল যাবে</p>
+            </div>
+            <form onsubmit="handleSellLicenseSubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">কাস্টমারের মোবাইল নাম্বার</label>
+                    <input type="text" id="buyUserMobile" placeholder="017XXXXXXXX" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">রেফারাল / কুপন কোড</label>
+                    <input type="text" id="buyUserCoupon" value="SIGMA-8589" readonly
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 font-bold text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">মোবাইল ব্যাংকিং পেমেন্ট গ্রহণ</label>
+                    <select id="buyPayGateway" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                        <option value="bKash">bKash (বিকাশ)</option>
+                        <option value="Nagad">Nagad (নগদ)</option>
+                        <option value="Rocket">Rocket (রকেট)</option>
+                        <option value="Cash">নগদ ক্যাশ গ্রহণ</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    নতুন আইডি সেন্ট করুন ও লাইসেন্স পাঠান
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 8: INCOME ENTRY MODAL -->
+    <div id="incomeModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeIncomeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-circle-plus"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">নতুন আয়ের এন্ট্রি</h3>
+                <p class="text-xs text-slate-400">আপনার আজকের আয়ের হিসাব যুক্ত করুন</p>
+            </div>
+            <form onsubmit="handleIncomeSubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">তারিখ নির্বাচন করুন</label>
+                    <input type="date" id="incomeDate" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">আয়ের বিবরণ</label>
+                    <input type="text" id="incomeDesc" placeholder="যেমন: নতুন সফটওয়্যার সেল" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">আয়ের পরিমাণ (৳)</label>
+                    <input type="number" id="incomeAmount" placeholder="৳ 0.00" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    আয় সেভ করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 9: LOAN ENTRY MODAL -->
+    <div id="loanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeLoanModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-handshake"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">নতুন ধারের এন্ট্রি (দেওয়া/নেওয়া)</h3>
+            </div>
+            <form onsubmit="handleLoanSubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">ধারের ধরন</label>
+                    <select id="loanType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                        <option value="given">ধার দেওয়া হয়েছে (পাবো)</option>
+                        <option value="taken">ধার নেওয়া হয়েছে (দেবো)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">তারিখ</label>
+                    <input type="date" id="loanDate" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">ব্যক্তি / প্রতিষ্ঠানের নাম</label>
+                    <input type="text" id="loanPersonName" placeholder="আবুল হোসেন / স্টোর" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">টাকার পরিমাণ (৳)</label>
+                    <input type="number" id="loanAmount" placeholder="৳ 0.00" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 font-bold text-xs focus:outline-none focus:border-amber-500">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    ধারের হিসাব সেভ করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 10: LOAN REPAYMENT MODAL -->
+    <div id="repayModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeRepayModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">ধার পরিশোধ করুন</h3>
+                <p id="repayPersonLabel" class="text-xs text-amber-400 font-semibold"></p>
+            </div>
+            <form onsubmit="handleRepaySubmit(event)" class="space-y-3 pt-2">
+                <input type="hidden" id="repayType">
+                <input type="hidden" id="repayBaseAmount">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">পরিশোধের তারিখ</label>
+                    <input type="date" id="repayDate" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">অতিরিক্ত চার্জ / লাভ / সুদ (৳)</label>
+                    <input type="number" id="repayExtraCharge" value="0" min="0"
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    পরিশোধ সম্পন্ন করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 11: MARKET / DAILY EXPENSE MODAL -->
+    <div id="marketModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeMarketModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2">
+                    <i class="fa-solid fa-cart-arrow-down"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">নতুন খরচের এন্ট্রি</h3>
+            </div>
+            <form onsubmit="handleMarketSubmit(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">তারিখ নির্বাচন করুন</label>
+                    <input type="date" id="marketDate" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">খরচের বিবরণ / আইটেম</label>
+                    <input type="text" id="marketDesc" placeholder="যেমন: বাজারের কেনাকাটা" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">মোট খরচ (৳)</label>
+                    <input type="number" id="marketAmount" placeholder="৳ 0.00" required
+                        class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400 font-bold text-xs focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">স্ট্যাটাস</label>
+                    <select id="marketStatus" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                        <option value="paid">পরিশোধিত</option>
+                        <option value="due">বাকি (ধার)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-xs transition-all mt-2">
+                    খরচ সেভ করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 12: MY CHAT (GROUP & 1-TO-1 USER CHAT) -->
+    <div id="myChatModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-md h-[520px] rounded-3xl p-4 shadow-2xl relative flex flex-col justify-between">
+            
+            <!-- Chat Header -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <button id="chatBackButton" onclick="exitPrivateChat()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div class="w-8 h-8 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-full flex items-center justify-center text-xs font-bold">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <div>
+                        <h3 id="chatTitleHeader" class="text-xs font-bold text-white">My Chat (গ্লোবাল ইউজার সাপোর্ট)</h3>
+                        <p id="chatSubHeader" class="text-[10px] text-emerald-400 font-semibold">সকল ইউজার অনলাইনে আছে</p>
+                    </div>
+                </div>
+                <button onclick="closeMyChatModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Active User Row (Click to Private Chat) -->
+            <div class="flex items-center space-x-2 overflow-x-auto py-2 border-b border-slate-800/60 shrink-0">
+                <span class="text-[10px] text-slate-400 shrink-0 font-medium">ইউজারগণ:</span>
+                <button onclick="startPrivateChat('01711223344')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-emerald-400 font-mono shrink-0">01711223344</button>
+                <button onclick="startPrivateChat('01988776655')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-amber-400 font-mono shrink-0">01988776655</button>
+                <button onclick="startPrivateChat('01855443322')" class="bg-[#080a0f] hover:bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] text-blue-400 font-mono shrink-0">01855443322</button>
+            </div>
+
+            <!-- Chat Messages Body -->
+            <div id="myChatContainer" class="flex-1 bg-[#080a0f] border border-slate-800 rounded-xl p-3 my-2 overflow-y-auto space-y-2.5">
+                <div class="bg-slate-800/60 p-2 rounded-xl text-xs text-slate-300 max-w-[80%]">
+                    <span class="text-[9px] text-indigo-400 block font-bold">User: 01711223344</span>
+                    সবাই কেমন আছেন? নতুন আপডেটের কাজ ভালো চলছে।
+                </div>
+                <div class="bg-emerald-950/40 border border-emerald-800/40 p-2 rounded-xl text-xs text-emerald-200 self-end ml-auto max-w-[80%]">
+                    <span class="text-[9px] text-emerald-400 block font-bold">You (01818589423)</span>
+                    হ্যাঁ, ধন্যবাদ! সব সিস্টেম এখন সচল।
+                </div>
+            </div>
+
+            <!-- Chat Input Form -->
+            <form onsubmit="handleSendMyChat(event)" class="flex items-center space-x-2 pt-1">
+                <input type="text" id="myChatInput" placeholder="বার্তা লিখুন..." 
+                    class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition-all shrink-0">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 13: CASH MEMO (DUAL MODE: PLATFORM VS BUSINESS) -->
+    <div id="cashMemoModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-5 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeCashMemoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-10 h-10 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-lg mb-1">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <h3 class="text-base font-bold text-white">ডিজিটাল ক্যাশ মেমো প্রিন্টার</h3>
+            </div>
+
+            <!-- Memo Type Radio Switcher -->
+            <div class="bg-[#080a0f] border border-slate-800 p-2 rounded-2xl grid grid-cols-2 gap-2 text-xs">
+                <label class="flex items-center space-x-2 p-2 rounded-xl bg-slate-800/80 cursor-pointer border border-slate-700">
+                    <input type="radio" name="memoModeRadio" value="platform" checked onchange="switchMemoMode('platform')" class="text-indigo-500">
+                    <span class="text-[11px] font-bold text-slate-200">সিগমা পিএইচডি ➔ ইউজার</span>
+                </label>
+                <label class="flex items-center space-x-2 p-2 rounded-xl bg-slate-800/80 cursor-pointer border border-slate-700">
+                    <input type="radio" name="memoModeRadio" value="business" onchange="switchMemoMode('business')" class="text-indigo-500">
+                    <span class="text-[11px] font-bold text-slate-200">ইউজার ➔ কাস্টমার</span>
+                </label>
+            </div>
+
+            <!-- Business Inputs (Visible only when Business Radio Selected) -->
+            <div id="businessMemoInputs" class="hidden bg-[#080a0f] p-3 rounded-2xl border border-slate-800 space-y-2">
+                <div class="text-[11px] font-bold text-amber-400">কাস্টমার বিজনেসের ক্যাশ মেমো বিবরণ:</div>
+                <input type="text" id="custNameInput" placeholder="কাস্টমারের নাম" oninput="updateBusinessMemo()"
+                    class="w-full bg-[#131822] border border-slate-700 rounded-lg py-1.5 px-2.5 text-xs text-white">
+                <div class="grid grid-cols-3 gap-1.5">
+                    <input type="text" id="custItemDesc" placeholder="আইটেম বিবরণ" oninput="updateBusinessMemo()"
+                        class="w-full bg-[#131822] border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-white col-span-1">
+                    <input type="number" id="custQty" placeholder="পরিমাণ" value="1" oninput="updateBusinessMemo()"
+                        class="w-full bg-[#131822] border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-white">
+                    <input type="number" id="custRate" placeholder="রেট (৳)" value="500" oninput="updateBusinessMemo()"
+                        class="w-full bg-[#131822] border border-slate-700 rounded-lg py-1.5 px-2 text-xs text-white">
+                </div>
+            </div>
+
+            <!-- Dynamic Printable Cash Memo Card -->
+            <div id="printableCashMemoCard" class="bg-white text-slate-900 rounded-2xl p-5 shadow-lg space-y-4 font-sans text-xs">
+                <div class="flex justify-between items-start border-b border-slate-200 pb-3">
+                    <div>
+                        <h4 id="memoHeaderTitle" class="font-extrabold text-sm text-slate-950">MY DEVELOP APP</h4>
+                        <p id="memoHeaderSub" class="text-[10px] text-slate-600">Sigma PhD™ Platform Services</p>
+                        <p class="text-[10px] text-slate-500 font-mono">তারিখ: <span id="memoDate">07/11/2026</span></p>
+                    </div>
+                    <div class="text-right">
+                        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-300">PAID SLIP</span>
+                        <p class="text-[10px] text-slate-500 mt-1 font-mono">মেমো নং: #MEMO-<span id="memoRandomNum">8589</span></p>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-700">প্রাপক / কাস্টমার: <strong id="memoUserDisplay" class="text-slate-900 font-mono">01818589423</strong></p>
+                </div>
+
+                <table class="w-full text-left border-collapse border border-slate-200">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 text-[10px]">
+                            <th class="p-2 border-r border-slate-200">আইটেম বিবরণ</th>
+                            <th class="p-2 border-r border-slate-200 text-center">পরিমাণ</th>
+                            <th class="p-2 text-right">মূল্য (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memoTableBody" class="divide-y divide-slate-200 text-[11px]">
+                        <tr>
+                            <td class="p-2 border-r border-slate-200">ডিভাইস লাইসেন্স ও সার্ভিস অ্যাক্টিভেশন</td>
+                            <td class="p-2 border-r border-slate-200 text-center">১টি</td>
+                            <td class="p-2 text-right">৳ ৫০০.০০</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border-r border-slate-200">ওয়ালেট টপ-আপ & রিচার্জ ক্যাশব্যাক</td>
+                            <td class="p-2 border-r border-slate-200 text-center">১টি</td>
+                            <td class="p-2 text-right">৳ ২১০০.০০</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="flex justify-between items-center border-t border-slate-200 pt-2 text-xs font-bold">
+                    <span>সর্বমোট টাকা:</span>
+                    <span id="memoTotalAmount" class="text-emerald-700 text-sm font-extrabold">৳ ২৬০০.০০</span>
+                </div>
+
+                <div class="text-center pt-2 border-t border-slate-100 text-[9px] text-slate-400 italic">
+                    ধন্যবাদ আমাদের সাথে থাকার জন্য! এটি একটি ডিজিটাল ক্যাশ স্লিপ।
+                </div>
+            </div>
+
+            <!-- Print & PDF Buttons -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="printCashMemo()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition-all">
+                    <i class="fa-solid fa-print"></i>
+                    <span>প্রিন্ট মেমো</span>
+                </button>
+                <button onclick="downloadPDFMemo()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition-all">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>PDF সেভ করুন</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Section for Logic -->
+    <script>
+        let activePrivateUser = null;
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = text;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.add('hidden');
+        }
+
+        function formatMoney(amount) {
+            return '৳ ' + Number(amount).toLocaleString('bn-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function updateFinancialDisplays() {
+            document.getElementById('walletBalanceText').innerText = formatMoney(currentWalletBalance);
+            document.getElementById('modalWalletBalance').innerText = formatMoney(currentWalletBalance);
+
+            document.getElementById('accountValidityDays').innerText = currentValidityDays;
+            document.getElementById('currentValidityInModal').innerText = currentValidityDays + ' দিন';
+
+            document.getElementById('activeDeviceCount').innerText = activeDevices;
+            document.getElementById('subUserCount').innerText = totalSubUsers;
+
+            document.getElementById('runningMonthIncome').innerText = formatMoney(runningIncome);
+            document.getElementById('runningMonthExpense').innerText = formatMoney(runningExpense);
+            document.getElementById('runningMonthSurplus').innerText = formatMoney(runningIncome - runningExpense);
+
+            document.getElementById('totalIncome2026').innerText = formatMoney(totalIncome2026);
+            document.getElementById('totalExpense2026').innerText = formatMoney(totalExpense2026);
+            document.getElementById('totalSurplus2026').innerText = formatMoney(totalIncome2026 - totalExpense2026);
+
+            document.getElementById('loanGivenTotalText').innerText = 'মোট: ' + formatMoney(loanGivenTotal);
+            document.getElementById('loanTakenTotalText').innerText = 'মোট: ' + formatMoney(loanTakenTotal);
+        }
+
+        // Page Navigation
+        function handleMainSignIn(event) {
+            event.preventDefault();
+            const userId = document.getElementById('mainUserId').value;
+            if(!userId) return;
+            document.getElementById('currentLoggedInUser').innerText = userId;
+            document.getElementById('page1').classList.add('hidden');
+            document.getElementById('page2').classList.remove('hidden');
+            showToast('সফলভাবে ড্যাশবোর্ডে সাইন ইন হয়েছে!');
+        }
+
+        function handleLogOut() {
+            document.getElementById('page2').classList.add('hidden');
+            document.getElementById('page1').classList.remove('hidden');
+            showToast('লগআউট সম্পন্ন হয়েছে');
+        }
+
+        // Landing Page License Modal
+        function openBuyLicenseLandingModal() {
+            document.getElementById('buyLicenseLandingModal').classList.remove('hidden');
+        }
+        function closeBuyLicenseLandingModal() {
+            document.getElementById('buyLicenseLandingModal').classList.add('hidden');
+        }
+        function handleLandingBuySubmit(event) {
+            event.preventDefault();
+            const mobile = document.getElementById('landingBuyMobile').value;
+            let coupon = document.getElementById('landingBuyCoupon').value.trim();
+            const gateway = document.getElementById('landingPayGateway').value;
+            if(!coupon) coupon = 'ADMIN-DEFAULT';
+
+            closeBuyLicenseLandingModal();
+            showToast(`পেমেন্ট সফল! আইডি ও পাসওয়ার্ড ${mobile} এ মোবাইল ব্যাংকিং (${gateway}) মাধ্যমে পাঠানো হয়েছে।`);
+        }
+
+        // Chatbot logic
+        function openModLoginModal() {
+            document.getElementById('modLoginModal').classList.remove('hidden');
+        }
+        function closeModLoginModal() {
+            document.getElementById('modLoginModal').classList.add('hidden');
+        }
+        function handleModLogin(event) {
+            event.preventDefault();
+            const modId = document.getElementById('modUserId').value;
+            isModeratorLoggedIn = true;
+            document.getElementById('modeBadge').innerText = 'Moderator Mode';
+            document.getElementById('modeBadge').className = 'bg-amber-950/80 text-amber-400 border border-amber-800/60 px-2.5 py-1 rounded-full text-[11px] font-semibold';
+            closeModLoginModal();
+            showToast(`Moderator Mode Activated: ${modId}`);
+
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `
+                <div class="bg-amber-950/30 border border-amber-800/50 rounded-xl p-2.5 text-xs text-amber-300">
+                    🛡️ System: User <strong>${modId}</strong> signed in as Moderator!
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleSendMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            const chatBox = document.getElementById('chatBox');
+            if(isModeratorLoggedIn) {
+                chatBox.innerHTML += `
+                    <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-2.5 text-xs text-emerald-200 self-end max-w-[85%]">
+                        <div class="font-bold text-[10px] text-emerald-400 mb-0.5">🛡️ Moderator</div>
+                        ${msg}
+                    </div>
+                `;
+            } else {
+                chatBox.innerHTML += `
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 self-end max-w-[85%]">
+                        <div class="font-bold text-[10px] text-slate-400 mb-0.5">Visitor</div>
+                        ${msg}
+                    </div>
+                `;
+            }
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Copy Coupon
+        function copyCouponCode() {
+            const coupon = document.getElementById('userCouponCode').innerText;
+            const temp = document.createElement('textarea');
+            temp.value = coupon;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast('কুপন কোড কপি করা হয়েছে!');
+        }
+
+        // Collapsible Year
+        function toggleYear(yearId, iconId) {
+            const yearElem = document.getElementById(yearId);
+            const iconElem = document.getElementById(iconId);
+            if(yearElem.classList.contains('hidden')) {
+                yearElem.classList.remove('hidden');
+                iconElem.className = 'fa-solid fa-minus text-xs';
+            } else {
+                yearElem.classList.add('hidden');
+                iconElem.className = 'fa-solid fa-plus text-xs';
+            }
+        }
+
+        // Settings Modal
+        function openSettingsModal(event) { 
+            if(event) event.stopPropagation();
+            document.getElementById('settingsModal').classList.remove('hidden'); 
+        }
+        function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+        function handleSettingsUpdate(event) {
+            event.preventDefault();
+            const newPass = document.getElementById('settingsNewPass').value;
+            const confirmPass = document.getElementById('settingsConfirmPass').value;
+            if(newPass !== confirmPass) {
+                showToast('নতুন পাসওয়ার্ড দুটি মিলছে না!');
+                return;
+            }
+            closeSettingsModal();
+            showToast('প্রোফাইল ইমেইল ও পাসওয়ার্ড আপডেট সফল হয়েছে!');
+        }
+
+        // Add Device Modal
+        function openAddDeviceModal() { document.getElementById('addDeviceModal').classList.remove('hidden'); }
+        function closeAddDeviceModal() { document.getElementById('addDeviceModal').classList.add('hidden'); }
+
+        function handleAddDeviceSubmit(event) {
+            event.preventDefault();
+            const payMethod = document.querySelector('input[name="devicePayMethod"]:checked').value;
+            if(payMethod === 'wallet') {
+                if(currentWalletBalance < 100) {
+                    showToast('অপর্যাপ্ত ওয়ালেট ব্যালেন্স!');
+                    return;
+                }
+                currentWalletBalance -= 100;
+            }
+            activeDevices += 1;
+            updateFinancialDisplays();
+            closeAddDeviceModal();
+            showToast('নতুন ডিভাইস সফলভাবে যুক্ত করা হয়েছে!');
+        }
+
+        // Recharge Modal
+        function openAddBalanceModal() { document.getElementById('addBalanceModal').classList.remove('hidden'); }
+        function closeAddBalanceModal() { document.getElementById('addBalanceModal').classList.add('hidden'); }
+
+        function handleAddBalanceSubmit(event) {
+            event.preventDefault();
+            const amount = parseFloat(document.getElementById('rechargeAmount').value) || 0;
+            const gateway = document.getElementById('paymentGatewaySelect').value;
+            currentWalletBalance += amount;
+            updateFinancialDisplays();
+            closeAddBalanceModal();
+            showToast(`${gateway}-এর মাধ্যমে ৳${amount} রিচার্জ সফল হয়েছে!`);
+        }
+
+        // Extend Validity Modal
+        function openExtendValidityModal(event) { 
+            if(event) event.stopPropagation();
+            document.getElementById('extendValidityModal').classList.remove('hidden'); 
+        }
+        function closeExtendValidityModal() { document.getElementById('extendValidityModal').classList.add('hidden'); }
+
+        function toggleExtendInput(val) {
+            const group = document.getElementById('extendCouponGroup');
+            if(val === 'coupon') {
+                group.classList.remove('hidden');
+            } else {
+                group.classList.add('hidden');
+            }
+        }
+
+        function handleExtendValiditySubmit(event) {
+            event.preventDefault();
+            const method = document.getElementById('extendMethod').value;
+            if(method === 'gateway') {
+                if(currentWalletBalance < 100) {
+                    showToast('অপর্যাপ্ত ওয়ালেট ব্যালেন্স! রিচার্জ করুন।');
+                    return;
+                }
+                currentWalletBalance -= 100;
+            }
+            currentValidityDays += 30;
+            updateFinancialDisplays();
+            closeExtendValidityModal();
+            showToast('মেয়াদ সফলভাবে আরও ৩০ দিন বাড়ানো হয়েছে!');
+        }
+
+        // Buy Lot Modal
+        function openBuyLotModal() { document.getElementById('buyLotModal').classList.remove('hidden'); }
+        function closeBuyLotModal() { document.getElementById('buyLotModal').classList.add('hidden'); }
+
+        function calculateLotPrice(val) {
+            let price = '৳ ২০০০.০০';
+            if(val === '50') price = '৳ ৪৫০০.০০';
+            if(val === '100') price = '৳ ৮০০০.০০';
+            document.getElementById('lotTotalPrice').value = price;
+        }
+
+        function handleBuyLotSubmit(event) {
+            event.preventDefault();
+            const lot = document.getElementById('lotPackageSelect').value;
+            const price = document.getElementById('lotTotalPrice').value;
+            const gateway = document.getElementById('lotPaymentGateway').value;
+            closeBuyLotModal();
+            showToast(`সফলভাবে ${lot} টি আইডির লট (${price}) ${gateway}-এর মাধ্যমে ক্রয় সম্পন্ন হয়েছে!`);
+        }
+
+        // Sell ID Modal
+        function openSellLicenseModal() { document.getElementById('sellLicenseModal').classList.remove('hidden'); }
+        function closeSellLicenseModal() { document.getElementById('sellLicenseModal').classList.add('hidden'); }
+
+        function handleSellLicenseSubmit(event) {
+            event.preventDefault();
+            const mobile = document.getElementById('buyUserMobile').value;
+            let coupon = document.getElementById('buyUserCoupon').value.trim();
+            const gateway = document.getElementById('buyPayGateway').value;
+            
+            if(!coupon) coupon = "ADMIN-DEFAULT";
+
+            totalSubUsers += 1;
+            updateFinancialDisplays();
+            closeSellLicenseModal();
+            showToast(`আইডি তৈরি হয়েছে! কুপন: ${coupon} (${gateway})`);
+        }
+
+        // Income Modal
+        function openIncomeModal() { document.getElementById('incomeModal').classList.remove('hidden'); }
+        function closeIncomeModal() { document.getElementById('incomeModal').classList.add('hidden'); }
+
+        function handleIncomeSubmit(event) {
+            event.preventDefault();
+            const amount = parseFloat(document.getElementById('incomeAmount').value) || 0;
+            runningIncome += amount;
+            totalIncome2026 += amount;
+            updateFinancialDisplays();
+            closeIncomeModal();
+            showToast('নতুন আয় সফলভাবে যুক্ত হয়েছে!');
+        }
+
+        // Loan Modal
+        function openLoanModal() { document.getElementById('loanModal').classList.remove('hidden'); }
+        function closeLoanModal() { document.getElementById('loanModal').classList.add('hidden'); }
+
+        function handleLoanSubmit(event) {
+            event.preventDefault();
+            const type = document.getElementById('loanType').value;
+            const name = document.getElementById('loanPersonName').value;
+            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const date = document.getElementById('loanDate').value;
+
+            if(type === 'given') {
+                loanGivenTotal += amount;
+                const container = document.getElementById('loanGivenList');
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-[#111622] p-2.5 rounded-xl border border-slate-800 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-500 font-mono text-[11px]">${date}</span>
+                            <span class="font-bold text-slate-200">${name}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-emerald-400 font-bold">৳ ${amount}</span>
+                            <button onclick="openRepayModal('given', '${name}', ${amount})" class="bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-md text-[10px] font-bold transition-all">
+                                পরিশোধ করুন
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                loanTakenTotal += amount;
+                const container = document.getElementById('loanTakenList');
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-[#111622] p-2.5 rounded-xl border border-slate-800 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-500 font-mono text-[11px]">${date}</span>
+                            <span class="font-bold text-slate-200">${name}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-rose-400 font-bold">৳ ${amount}</span>
+                            <button onclick="openRepayModal('taken', '${name}', ${amount})" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 px-2 py-1 rounded-md text-[10px] font-bold transition-all">
+                                পরিশোধ করুন
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            updateFinancialDisplays();
+            closeLoanModal();
+            showToast('ধারের হিসাব সংরক্ষিত হয়েছে!');
+        }
+
+        function openRepayModal(type, personName, amount) {
+            window.currentRepayBtn = event.currentTarget;
+            document.getElementById('repayType').value = type;
+            document.getElementById('repayBaseAmount').value = amount;
+            document.getElementById('repayPersonLabel').innerText = `ব্যক্তি/দোকান: ${personName} (৳${amount})`;
+            document.getElementById('repayDate').valueAsDate = new Date();
+            document.getElementById('repayModal').classList.remove('hidden');
+        }
+
+        function closeRepayModal() { document.getElementById('repayModal').classList.add('hidden'); }
+
+        function handleRepaySubmit(event) {
+            event.preventDefault();
+            const type = document.getElementById('repayType').value;
+            const extraCharge = parseFloat(document.getElementById('repayExtraCharge').value) || 0;
+            const dateStr = document.getElementById('repayDate').value;
+            const formattedDate = dateStr ? dateStr.split('-').reverse().join('/') : '07/11/2026';
+
+            if(type === 'given') {
+                if(extraCharge > 0) {
+                    runningIncome += extraCharge;
+                    totalIncome2026 += extraCharge;
+                }
+            } else {
+                if(extraCharge > 0) {
+                    runningExpense += extraCharge;
+                    totalExpense2026 += extraCharge;
+                }
+            }
+
+            const targetBtn = window.currentRepayBtn;
+            if(targetBtn) {
+                const parentDiv = targetBtn.parentElement;
+                parentDiv.innerHTML = `
+                    <div class="text-right">
+                        <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold block">পরিশোধিত</span>
+                        <span class="text-[9px] text-slate-500 font-mono block mt-0.5">${formattedDate}</span>
+                    </div>
+                `;
+            }
+
+            updateFinancialDisplays();
+            closeRepayModal();
+            showToast('ধারের টাকা সফলভাবে পরিশোধ করা হয়েছে!');
+        }
+
+        // Market Modal
+        function openMarketModal() { document.getElementById('marketModal').classList.remove('hidden'); }
+        function closeMarketModal() { document.getElementById('marketModal').classList.add('hidden'); }
+
+        function handleMarketSubmit(event) {
+            event.preventDefault();
+            const dateStr = document.getElementById('marketDate').value;
+            const desc = document.getElementById('marketDesc').value;
+            const amount = parseFloat(document.getElementById('marketAmount').value) || 0;
+            const status = document.getElementById('marketStatus').value;
+
+            runningExpense += amount;
+            totalExpense2026 += amount;
+
+            const formattedDate = dateStr ? dateStr.split('-').reverse().join('/') : '07/11/2026';
+
+            const container = document.getElementById('marketExpenseList');
+            const statusBadge = status === 'paid' 
+                ? `<span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold">পরিশোধিত</span>`
+                : `<span class="bg-amber-950/80 text-amber-400 border border-amber-800/60 px-2 py-0.5 rounded-md text-[10px] font-bold">বাকি (ধার)</span>`;
+
+            container.innerHTML = `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="py-2.5 px-2 text-slate-400 font-mono">${formattedDate}</td>
+                    <td class="py-2.5 px-2 text-slate-200 font-medium">${desc}</td>
+                    <td class="py-2.5 px-2 text-rose-400 font-bold">৳ ${amount.toFixed(2)}</td>
+                    <td class="py-2.5 px-2 text-right">${statusBadge}</td>
+                </tr>
+            ` + container.innerHTML;
+
+            if(status === 'due') {
+                loanTakenTotal += amount;
+                const loanContainer = document.getElementById('loanTakenList');
+                loanContainer.innerHTML += `
+                    <div class="flex items-center justify-between bg-[#111622] p-2.5 rounded-xl border border-slate-800 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-500 font-mono text-[11px]">${formattedDate.slice(0, 5)}</span>
+                            <span class="font-bold text-slate-200">${desc}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-rose-400 font-bold">৳ ${amount}</span>
+                            <button onclick="openRepayModal('taken', '${desc}', ${amount})" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 px-2 py-1 rounded-md text-[10px] font-bold transition-all">
+                                পরিশোধ করুন
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            updateFinancialDisplays();
+            closeMarketModal();
+            showToast('নতুন খরচের এন্ট্রি সফলভাবে যুক্ত হয়েছে!');
+        }
+
+        // My Chat Modals
+        function openMyChatModal() { document.getElementById('myChatModal').classList.remove('hidden'); }
+        function closeMyChatModal() { document.getElementById('myChatModal').classList.add('hidden'); }
+
+        function startPrivateChat(userId) {
+            activePrivateUser = userId;
+            document.getElementById('chatTitleHeader').innerText = `প্রাইভেট চ্যাট: User ${userId}`;
+            document.getElementById('chatSubHeader').innerText = '১-টু-১ চ্যাট সক্রিয় আছে';
+            document.getElementById('chatBackButton').classList.remove('hidden');
+            
+            const container = document.getElementById('myChatContainer');
+            container.innerHTML = `
+                <div class="bg-amber-950/30 border border-amber-800/40 p-2 rounded-xl text-xs text-amber-300">
+                    🔒 ইউজার <strong>${userId}</strong> এর সাথে আপনার প্রাইভেট চ্যাট শুরু হয়েছে।
+                </div>
+            `;
+        }
+
+        function exitPrivateChat() {
+            activePrivateUser = null;
+            document.getElementById('chatTitleHeader').innerText = 'My Chat (গ্লোবাল ইউজার সাপোর্ট)';
+            document.getElementById('chatSubHeader').innerText = 'সকল ইউজার অনলাইনে আছে';
+            document.getElementById('chatBackButton').classList.add('hidden');
+            
+            const container = document.getElementById('myChatContainer');
+            container.innerHTML = `
+                <div class="bg-slate-800/60 p-2 rounded-xl text-xs text-slate-300 max-w-[80%]">
+                    <span class="text-[9px] text-indigo-400 block font-bold">User: 01711223344</span>
+                    সবাই কেমন আছেন? নতুন আপডেটের কাজ ভালো চলছে।
+                </div>
+                <div class="bg-emerald-950/40 border border-emerald-800/40 p-2 rounded-xl text-xs text-emerald-200 self-end ml-auto max-w-[80%]">
+                    <span class="text-[9px] text-emerald-400 block font-bold">You (01818589423)</span>
+                    হ্যাঁ, ধন্যবাদ! সব সিস্টেম এখন সচল।
+                </div>
+            `;
+        }
+
+        function handleSendMyChat(event) {
+            event.preventDefault();
+            const input = document.getElementById('myChatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            const container = document.getElementById('myChatContainer');
+            container.innerHTML += `
+                <div class="bg-emerald-950/40 border border-emerald-800/40 p-2 rounded-xl text-xs text-emerald-200 self-end ml-auto max-w-[80%]">
+                    <span class="text-[9px] text-emerald-400 block font-bold">${activePrivateUser ? 'Private to ' + activePrivateUser : 'You'}</span>
+                    ${msg}
+                </div>
+            `;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Cash Memo Handlers & Dual Mode
+        function openCashMemoModal() {
+            document.getElementById('memoDate').innerText = new Date().toLocaleDateString('en-GB');
+            document.getElementById('memoRandomNum').innerText = Math.floor(1000 + Math.random() * 9000);
+            switchMemoMode('platform');
+            document.getElementById('cashMemoModal').classList.remove('hidden');
+        }
+
+        function closeCashMemoModal() { document.getElementById('cashMemoModal').classList.add('hidden'); }
+
+        function switchMemoMode(mode) {
+            const bizInputs = document.getElementById('businessMemoInputs');
+            const headerTitle = document.getElementById('memoHeaderTitle');
+            const headerSub = document.getElementById('memoHeaderSub');
+            const tableBody = document.getElementById('memoTableBody');
+            const totalDisplay = document.getElementById('memoTotalAmount');
+            const userDisplay = document.getElementById('memoUserDisplay');
+
+            if(mode === 'platform') {
+                bizInputs.classList.add('hidden');
+                headerTitle.innerText = "MY DEVELOP APP";
+                headerSub.innerText = "Sigma PhD™ Platform Services";
+                userDisplay.innerText = document.getElementById('currentLoggedInUser').innerText;
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td class="p-2 border-r border-slate-200">ডিভাইস লাইসেন্স ও সার্ভিস অ্যাক্টিভেশন</td>
+                        <td class="p-2 border-r border-slate-200 text-center">১টি</td>
+                        <td class="p-2 text-right">৳ ৫০০.০০</td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 border-r border-slate-200">ওয়ালেট টপ-আপ & রিচার্জ ক্যাশব্যাক</td>
+                        <td class="p-2 border-r border-slate-200 text-center">১টি</td>
+                        <td class="p-2 text-right">৳ ২১০০.০০</td>
+                    </tr>
+                `;
+                totalDisplay.innerText = "৳ ২৬০০.০০";
+            } else {
+                bizInputs.classList.remove('hidden');
+                headerTitle.innerText = "USER BUSINESS MEMO";
+                headerSub.innerText = "ইউজারের ব্যক্তিগত ক্যাশ মেমো";
+                updateBusinessMemo();
+            }
+        }
+
+        function updateBusinessMemo() {
+            const name = document.getElementById('custNameInput').value.trim() || 'সম্মানিত কাস্টমার';
+            const item = document.getElementById('custItemDesc').value.trim() || 'পণ্যের বিবরণ';
+            const qty = parseFloat(document.getElementById('custQty').value) || 1;
+            const rate = parseFloat(document.getElementById('custRate').value) || 0;
+            const total = qty * rate;
+
+            document.getElementById('memoUserDisplay').innerText = name;
+            document.getElementById('memoTableBody').innerHTML = `
+                <tr>
+                    <td class="p-2 border-r border-slate-200">${item}</td>
+                    <td class="p-2 border-r border-slate-200 text-center">${qty}টি</td>
+                    <td class="p-2 text-right">৳ ${total.toFixed(2)}</td>
+                </tr>
+            `;
+            document.getElementById('memoTotalAmount').innerText = `৳ ${total.toFixed(2)}`;
+        }
+
+        function printCashMemo() {
+            const printContents = document.getElementById('printableCashMemoCard').outerHTML;
+            const originalContents = document.body.innerHTML;
+            document.body.innerHTML = `<div style="padding:20px; background:#fff;">${printContents}</div>`;
+            window.print();
+            document.body.innerHTML = originalContents;
+            window.location.reload();
+        }
+
+        function downloadPDFMemo() {
+            showToast('ক্যাশ মেমো PDF ফরম্যাটে ডাউনলোড করা হচ্ছে...');
+            setTimeout(() => {
+                printCashMemo();
+            }, 800);
+        }
+
+        // Initialize Defaults
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            if(document.getElementById('marketDate')) document.getElementById('marketDate').value = today;
+            if(document.getElementById('incomeDate')) document.getElementById('incomeDate').value = today;
+            updateFinancialDisplays();
+        });
+    </script>
+</body>
+</html>
+```
