@@ -1,61 +1,170 @@
+// interfacebuttonlogic.js - UI Handling, Tab Switching & Event Listeners
+
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof renderState === 'function') renderState();
-    if (typeof renderLoans === 'function') renderLoans();
+    console.log("Interface logic loaded.");
 });
 
+// Tab Switching Handler
 function switchTab(tabName) {
-    const tabs = ['Dashboard', 'CashMemo', 'MyChat', 'Sec'];
+    const tabs = ['Dashboard', 'CashMemo', 'MyChat', 'Sec', 'Payment'];
     tabs.forEach(t => {
         const el = document.getElementById(`tab${t}View`);
         const btn = document.getElementById(`tab${t}Btn`);
-        if(el) el.classList.add('hidden');
-        if(btn) btn.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
+        if (el) el.classList.add('hidden');
+        if (btn) btn.className = "px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
     });
 
     let currentViewId = 'tabDashboardView';
-    let currentBtnId = 'tabDashBtn';
+    let currentBtnId = 'tabDashboardBtn';
 
-    if (tabName === 'cashMemo') { currentViewId = 'tabCashMemoView'; currentBtnId = 'tabCashMemoBtn'; }
-    else if (tabName === 'myChat') { currentViewId = 'tabMyChatView'; currentBtnId = 'tabMyChatBtn'; }
-    else if (tabName === 'security') { currentViewId = 'tabSecurityView'; currentBtnId = 'tabSecBtn'; }
+    if (tabName === 'cashMemo' || tabName === 'CashMemo') {
+        currentViewId = 'tabCashMemoView';
+        currentBtnId = 'tabCashMemoBtn';
+    } else if (tabName === 'myChat' || tabName === 'MyChat') {
+        currentViewId = 'tabMyChatView';
+        currentBtnId = 'tabMyChatBtn';
+    } else if (tabName === 'security' || tabName === 'Sec') {
+        currentViewId = 'tabSecurityView';
+        currentBtnId = 'tabSecBtn';
+    } else if (tabName === 'payment' || tabName === 'Payment') {
+        currentViewId = 'tabPaymentView';
+        currentBtnId = 'tabPaymentBtn';
+    }
 
     const activeView = document.getElementById(currentViewId);
     const activeBtn = document.getElementById(currentBtnId);
-    if(activeView) activeView.classList.remove('hidden');
-    if(activeBtn) activeBtn.className = "px-5 py-2.5 bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
+    if (activeView) activeView.classList.remove('hidden');
+    if (activeBtn) activeBtn.className = "px-5 py-2.5 bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer";
 }
 
-function closeModal(id) { 
-    const m = document.getElementById(id);
-    if(m) m.classList.add('hidden'); 
+// Sign-In Handler (Ensures proper view toggle & data loading)
+function handleSignIn(e) {
+    if (e) e.preventDefault();
+    const idVal = document.getElementById('inputUserId').value.trim();
+    const passVal = document.getElementById('inputPassword').value.trim();
+
+    if (!idVal || !passVal) {
+        showAlert("Please enter User ID and Password.");
+        return;
+    }
+
+    // Set Global User ID if needed
+    currentUserId = idVal;
+
+    document.getElementById('page1View').classList.add('hidden');
+    document.getElementById('page2View').classList.remove('hidden');
+    document.getElementById('topSignInUser').innerText = `User ID: ${idVal}`;
+    showAlert("Signed in successfully!");
+
+    // Trigger data loaders safely
+    if (typeof loadFinancialSummary === 'function') loadFinancialSummary();
+    if (typeof loadTransactionsFromDB === 'function') loadTransactionsFromDB();
+    if (typeof loadInvestmentsFromDB === 'function') loadInvestmentsFromDB();
+    if (typeof loadPaymentHistory === 'function') loadPaymentHistory();
 }
 
-function openModal(id) {
-    const m = document.getElementById(id);
-    if(m) m.classList.remove('hidden');
+function handleLogout() {
+    document.getElementById('page2View').classList.add('hidden');
+    document.getElementById('page1View').classList.remove('hidden');
+    showAlert("Logged out successfully.");
 }
 
-function openValidityPaymentOptionsModal() { openModal('validityPaymentOptionsModal'); }
-function openP2PTransferModal() { openModal('p2pTransferModal'); }
-function openPaymentGatewayModal() { 
-    closeModal('validityPaymentOptionsModal');
-    openModal('paymentGatewayModal'); 
+function sendTier1PublicMsg() {
+    const input = document.getElementById('tier1PublicMsgInput');
+    if (!input) return;
+    const txt = input.value.trim();
+    if (!txt) return;
+    const box = document.getElementById('tier1PublicChatBox');
+    if (!box) return;
+    box.innerHTML += `
+        <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30">
+            <span class="text-emerald-400 font-bold block text-[10px]">👤 User</span>
+            <p class="text-slate-200">${txt}</p>
+        </div>
+    `;
+    input.value = '';
+    box.scrollTop = box.scrollHeight;
 }
-function openAccountSettingsModal() { openModal('accountSettingsModal'); }
-function openBankSetupModal() { openModal('bankSetupModal'); }
-function openAgentAuthModal() { openModal('agentAuthModal'); }
-function openIncomeEntryModal() { openModal('incomeEntryModal'); }
-function openLoanEntryModal() { openModal('loanEntryModal'); }
-function openMarketEntryModal() { openModal('marketEntryModal'); }
 
 function showAlert(msg) {
     const alertBox = document.getElementById('systemAlert');
     const alertMsg = document.getElementById('systemAlertMsg');
-    if(alertBox && alertMsg) {
+    if (alertBox && alertMsg) {
         alertMsg.innerText = msg;
         alertBox.classList.remove('hidden');
-        setTimeout(() => { alertBox.classList.add('hidden'); }, 3000);
+        setTimeout(() => {
+            alertBox.classList.add('hidden');
+        }, 3000);
     } else {
         alert(msg);
     }
+}
+
+// Modal Toggle Helpers
+function openIncomeEntryModal() { const el = document.getElementById('incomeEntryModal'); if(el) el.classList.remove('hidden'); }
+function openLoanEntryModal() { const el = document.getElementById('loanEntryModal'); if(el) el.classList.remove('hidden'); }
+function openMarketEntryModal() { const el = document.getElementById('marketEntryModal'); if(el) el.classList.remove('hidden'); }
+function openPaymentGatewayModal() { const el = document.getElementById('paymentGatewayModal'); if(el) el.classList.remove('hidden'); }
+function closeModal(id) { const el = document.getElementById(id); if(el) el.classList.add('hidden'); }
+
+// POS Cart & Memo Logic
+let cartItems = [];
+function addPosItem() {
+    const nameInput = document.getElementById('posProductName');
+    const qtyInput = document.getElementById('posProductQty');
+    const priceInput = document.getElementById('posProductPrice');
+    
+    const name = nameInput ? nameInput.value.trim() : '';
+    const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+    const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
+    
+    if (!name || price <= 0) {
+        showAlert("Please enter valid item name and price.");
+        return;
+    }
+
+    cartItems.push({ name, qty, price, total: qty * price });
+    renderCart();
+    if(nameInput) nameInput.value = '';
+}
+
+function renderCart() {
+    const body = document.getElementById('posCartBody');
+    if (!body) return;
+    let grandTotal = 0;
+    body.innerHTML = cartItems.map((item, idx) => {
+        grandTotal += item.total;
+        return `
+            <tr>
+                <td class="p-2.5">${item.name}</td>
+                <td class="p-2.5 text-center">${item.qty}</td>
+                <td class="p-2.5 text-right">৳${item.price}</td>
+                <td class="p-2.5 text-right font-bold">৳${item.total}</td>
+                <td class="p-2.5 text-center"><button onclick="cartItems.splice(${idx},1);renderCart()" class="text-rose-400 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+        `;
+    }).join('');
+    const totalEl = document.getElementById('posGrandTotal');
+    if(totalEl) totalEl.innerText = grandTotal.toFixed(2);
+}
+
+function generateCashMemoModal() {
+    if (cartItems.length === 0) { showAlert("Cart is empty!"); return; }
+    const body = document.getElementById('memoModalBody');
+    if(body) {
+        body.innerHTML = cartItems.map(item => `
+            <tr>
+                <td class="border border-slate-300 p-2">${item.name}</td>
+                <td class="border border-slate-300 p-2 text-center">${item.qty}</td>
+                <td class="border border-slate-300 p-2 text-right">৳${item.price}</td>
+                <td class="border border-slate-300 p-2 text-right">৳${item.total}</td>
+            </tr>
+        `).join('');
+    }
+    const memoTotal = document.getElementById('memoModalGrandTotal');
+    const posTotal = document.getElementById('posGrandTotal');
+    if(memoTotal && posTotal) memoTotal.innerText = posTotal.innerText;
+    
+    const memoModal = document.getElementById('memoModal');
+    if(memoModal) memoModal.classList.remove('hidden');
 }
