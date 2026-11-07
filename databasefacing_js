@@ -1,0 +1,147 @@
+function saveIncomeEntry() {
+    const amt = parseFloat(document.getElementById('incAmountInput').value) || 0;
+    if(amt > 0) {
+        novIncome += amt;
+        accountBalances.cash += amt;
+        document.getElementById('rowNovInc').innerText = `৳ ${novIncome.toLocaleString('en-US')}.00`;
+        const novNet = novIncome - novExpense;
+        document.getElementById('rowNovNet').innerText = `৳ ${novNet.toLocaleString('en-US')}.00`;
+        renderState();
+        closeModal('incomeEntryModal');
+        document.getElementById('incAmountInput').value = '';
+        document.getElementById('incDescInput').value = '';
+        showAlert(`৳ ${amt} added to Income!`);
+    } else {
+        showAlert("Please enter a valid amount!");
+    }
+}
+
+function saveMarketEntry() {
+    const amt = parseFloat(document.getElementById('mktAmountInput').value) || 0;
+    const desc = document.getElementById('mktDescInput').value.trim() || 'Daily Groceries';
+    if (amt > 0) {
+        novExpense += amt;
+        if(accountBalances.cash >= amt) accountBalances.cash -= amt;
+        document.getElementById('rowNovExp').innerText = `৳ ${novExpense.toLocaleString('en-US')}.00`;
+        const novNet = novIncome - novExpense;
+        document.getElementById('rowNovNet').innerText = `৳ ${novNet.toLocaleString('en-US')}.00`;
+        
+        const table = document.getElementById('marketLogTableBody');
+        const row = document.createElement('tr');
+        row.className = "bg-slate-900/40";
+        row.innerHTML = `
+            <td class="p-3 font-sans text-indigo-400">Today</td>
+            <td class="p-3 font-sans text-slate-200">${desc}</td>
+            <td class="p-3 text-rose-400 font-bold">৳ ${amt.toLocaleString('en-US')}.00</td>
+            <td class="p-3 text-right text-emerald-400 font-sans">Paid</td>
+        `;
+        table.prepend(row);
+
+        renderState();
+        closeModal('marketEntryModal');
+        document.getElementById('mktAmountInput').value = '';
+        document.getElementById('mktDescInput').value = '';
+        showAlert(`৳ ${amt} added to expenses!`);
+    }
+}
+
+function saveLoanEntry() {
+    const person = document.getElementById('loanPersonInput').value.trim();
+    const amt = parseFloat(document.getElementById('loanAmountInput').value) || 0;
+    const type = document.getElementById('loanTypeSelect').value;
+
+    if (!person || amt <= 0) {
+        showAlert("Please enter valid person name and loan amount!");
+        return;
+    }
+
+    if (type === 'pabo') {
+        if (accountBalances.cash < amt) {
+            showAlert("Warning: Insufficient Cash Balance!");
+            return;
+        }
+        accountBalances.cash -= amt;
+    }
+
+    loanItems.unshift({
+        id: Date.now(),
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }),
+        person: person,
+        amount: amt,
+        type: type,
+        status: 'due'
+    });
+
+    renderState();
+    renderLoans();
+    closeModal('loanEntryModal');
+    document.getElementById('loanPersonInput').value = '';
+    document.getElementById('loanAmountInput').value = '';
+    showAlert("New Loan entry saved!");
+}
+
+function settleLoan(id) {
+    const item = loanItems.find(i => i.id === id);
+    if (item) {
+        item.status = 'paid';
+        if(item.type === 'pabo') accountBalances.cash += item.amount;
+        renderState();
+        renderLoans();
+        showAlert(`Loan for ${item.person} settled!`);
+    }
+}
+
+function renderLoans() {
+    const givenList = document.getElementById('loanGivenList');
+    const takenList = document.getElementById('loanTakenList');
+    if(!givenList || !takenList) return;
+    givenList.innerHTML = ''; takenList.innerHTML = '';
+    
+    let paboSum = 0, deboSum = 0;
+    loanItems.forEach(i => {
+        const isPaid = i.status === 'paid';
+        if(!isPaid) {
+            if(i.type === 'pabo') paboSum += i.amount;
+            else deboSum += i.amount;
+        }
+        const html = `
+            <div class="bg-slate-900 p-3 rounded-xl border ${isPaid?'border-emerald-500/30 opacity-60':'border-slate-800'} flex justify-between items-center">
+                <div>
+                    <span class="text-[10px] text-indigo-400 font-mono font-bold">[${i.date}]</span>
+                    <span class="font-bold text-slate-200 ml-1.5 text-xs">${i.person}</span>
+                    <span class="font-mono font-bold ml-2 text-xs ${i.type==='pabo'?'text-amber-400':'text-rose-400'}">৳${i.amount.toLocaleString('en-US')}.00</span>
+                </div>
+                ${isPaid ? `<span class="text-emerald-400 text-[10px] font-bold">Settled ✓</span>` : 
+                `<button type="button" onclick="settleLoan(${i.id})" class="px-2.5 py-1 bg-emerald-600 text-slate-950 font-bold text-[10px] rounded-lg hover:bg-emerald-500 transition shadow cursor-pointer">Settle</button>`}
+            </div>
+        `;
+        if(i.type === 'pabo') givenList.innerHTML += html;
+        else takenList.innerHTML += html;
+    });
+    document.getElementById('givenTotalBadge').innerText = `৳ ${paboSum.toLocaleString('en-US')}.00`;
+    document.getElementById('takenTotalBadge').innerText = `৳ ${deboSum.toLocaleString('en-US')}.00`;
+}
+
+function exportAppData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ walletBalance, accountBalances, loanItems }));
+    const dl = document.createElement('a');
+    dl.setAttribute("href", dataStr);
+    dl.setAttribute("download", "my_develop_app_backup.json");
+    document.body.appendChild(dl); dl.click(); dl.remove();
+    showAlert("Data backup file downloaded!");
+}
+
+function importAppData(e) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const data = JSON.parse(evt.target.result);
+            if(data.accountBalances) accountBalances = data.accountBalances;
+            if(data.loanItems) loanItems = data.loanItems;
+            renderState();
+            renderLoans();
+            showAlert("Data restored successfully!");
+        } catch(err) { showAlert("Invalid backup file!"); }
+    };
+    if(e.target.files[0]) reader.readAsText(e.target.files[0]);
+}
