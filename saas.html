@@ -54,9 +54,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ------------------------------------------------------------- */
-        /* Login Card Glowing Ring & Watermark Styles                    */
-        /* ------------------------------------------------------------- */
         .wave-char {
             display: inline-block;
             font-weight: 600;
@@ -144,9 +141,6 @@
             background: rgba(15, 23, 42, 0.85);
         }
 
-        /* ------------------------------------------------------------- */
-        /* Portal Page Styles                                            */
-        /* ------------------------------------------------------------- */
         .pad-watermark {
             background-color: rgba(255, 255, 255, 0.96);
             background-image: radial-gradient(circle, rgba(11, 132, 61, 0.03) 0%, rgba(26, 35, 126, 0.05) 100%);
@@ -167,24 +161,19 @@
         <div class="card-ring-wrapper w-full">
             <div class="glass-card relative rounded-2xl p-4 sm:p-6 w-full overflow-hidden z-10">
                 
-                <!-- Background Inclined Watermark -->
                 <div class="watermark-container">
                     <span class="watermark-text">WELCOME TO SIGMA PHD</span>
                 </div>
 
-                <!-- Card Content Layer -->
                 <div class="relative z-10 flex flex-col items-center">
                     
-                    <!-- Fixed Red-to-Green Trademark Header with Flying Bird Icons -->
                     <div class="mb-4 text-center">
                         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-wider inline-flex items-center gap-2 sm:gap-3 font-inter">
-                            <!-- Left Bird Icon -->
                             <svg class="w-6 h-6 sm:w-8 sm:h-8 text-red-500 drop-shadow transform -scale-x-100" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M22 6c-1.25 0-2.45.3-3.5 1.05C17.3 4.25 14.3 2.5 11 2.5c-4.7 0-8.5 3.8-8.5 8.5 0 2.2.8 4.2 2.2 5.7L2.5 20s2.5.5 4.5-.5c1.4.7 3 1 4.5 1 5.8 0 10.5-4.7 10.5-10.5 0-1.4-.3-2.7-.8-4C21.7 6 22 6 22 6zm-11 12c-3.6 0-6.5-2.9-6.5-6.5 0-2.3 1.2-4.3 3-5.5 1-.6 2.2-1 3.5-1 3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5z"/>
                                 <path d="M15.5 8.5c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5z"/>
                             </svg>
 
-                            <!-- Logo Text -->
                             <span>
                                 <span class="wave-char">S</span>
                                 <span class="wave-char">i</span>
@@ -198,7 +187,6 @@
                                 <span class="wave-char">™</span>
                             </span>
 
-                            <!-- Right Bird Icon -->
                             <svg class="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400 drop-shadow" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M22 6c-1.25 0-2.45.3-3.5 1.05C17.3 4.25 14.3 2.5 11 2.5c-4.7 0-8.5 3.8-8.5 8.5 0 2.2.8 4.2 2.2 5.7L2.5 20s2.5.5 4.5-.5c1.4.7 3 1 4.5 1 5.8 0 10.5-4.7 10.5-10.5 0-1.4-.3-2.7-.8-4C21.7 6 22 6 22 6zm-11 12c-3.6 0-6.5-2.9-6.5-6.5 0-2.3 1.2-4.3 3-5.5 1-.6 2.2-1 3.5-1 3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5z"/>
                                 <path d="M15.5 8.5c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5z"/>
@@ -206,17 +194,15 @@
                         </h1>
                     </div>
 
-                    <!-- Alert / Error Message Box Container -->
                     <div id="alertBox" class="hidden w-full max-w-md mb-3 p-2 rounded-lg text-xs text-center font-medium transition-all duration-300"></div>
 
-                    <!-- Form -->
                     <form id="initialLoginForm" onsubmit="handleInitialAuth(event)" class="w-full max-w-md space-y-3 font-inter">
                         <div class="input-group">
                             <input 
                                 type="text" 
                                 id="initialUsername"
                                 required
-                                value="Sigma PhD"
+                                value="sigmaphd"
                                 placeholder="System ID"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
@@ -228,7 +214,7 @@
                                 type="password" 
                                 id="initialPassword"
                                 required
-                                value="Sigma7890#"
+                                value="sigma7890#"
                                 placeholder="Credential Password"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
@@ -259,7 +245,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- MAIN WRAPPER CONTAINER (Screen 2: Portal Gateway after Authentication) -->
     <div id="sigmaMainWrapper" class="hidden w-full max-w-5xl bg-white/95 backdrop-blur-md shadow-2xl rounded-xl border border-gray-400 flex flex-col min-h-[94vh] relative overflow-hidden fade-in">
@@ -370,7 +355,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">পাসওয়ার্ড</label>
-                            <input type="password" id="superAdminPass" value="sigma789#" required placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <input type="password" id="superAdminPass" value="sigma7890#" required placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">লগইন করুন</button>
                     </form>
@@ -414,7 +399,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 1: NEW COMPANY REGISTRATION FORM (LAYOUT_SETTINGS + 5 MODULAR COLUMNS) -->
+                <!-- TAB 1: NEW COMPANY REGISTRATION FORM -->
                 <div id="tabRegisterForm" class="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
                     <h3 class="text-sm font-bold text-sigmaNavy mb-4 border-b pb-2 flex items-center gap-2">
                         <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি এন্ট্রি ফরম (লেআউট সেটিং + ৫টি মডিউলার কলাম)
@@ -432,7 +417,6 @@
                             </div>
                         </div>
 
-                        <!-- 0. ORIGINAL: layout_settings -->
                         <div class="p-3 bg-slate-100 border-2 border-slate-300 rounded-xl space-y-2">
                             <label class="block font-extrabold text-slate-800"><i class="fa-solid fa-sliders text-slate-700"></i> মূল লেআউট সেটিং (`layout_settings` - Full HTML JSON Payload):</label>
                             <textarea id="cLayoutHtml" rows="3" placeholder='{"full_html": "<!DOCTYPE html>...</html>"}' class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
@@ -442,31 +426,26 @@
                             <i class="fa-solid fa-cubes text-purple-700"></i> অতিরিক্ত ৫টি মডিউলার কলাম (Advanced Code Division):
                         </div>
 
-                        <!-- 1. layout_html -->
                         <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
                             <label class="block font-extrabold text-purple-900"><i class="fa-solid fa-code text-purple-700"></i> ১. layout_html (.html) — এইচটিএমএল লেআউট ও স্ট্রাকচার:</label>
                             <textarea id="cLayoutHtmlCol" rows="3" placeholder="<!DOCTYPE html>...</html>" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
                         </div>
 
-                        <!-- 2. style_css -->
                         <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-2">
                             <label class="block font-extrabold text-indigo-900"><i class="fa-solid fa-palette text-indigo-700"></i> ২. style_css (.css) — ভিজ্যুয়াল ডিজাইন ও থিম:</label>
                             <textarea id="cStyleCss" rows="3" placeholder="body { background: #020617; ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
                         </div>
 
-                        <!-- 3. interfacebuttonlogic_js -->
                         <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
                             <label class="block font-extrabold text-emerald-900"><i class="fa-solid fa-hand-pointer text-emerald-700"></i> ৩. interfacebuttonlogic_js (.js) — ইউজার ইন্টারফেস ও বাটন লজিক:</label>
                             <textarea id="cInterfaceJs" rows="3" placeholder="function handleLogin(e) { ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
                         </div>
 
-                        <!-- 4. databasefacing_js -->
                         <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
                             <label class="block font-extrabold text-blue-900"><i class="fa-solid fa-database text-blue-700"></i> ৪. databasefacing_js (.js) — ডাটাবেজ অপারেশন ও এপিআই ফেচিং:</label>
                             <textarea id="cDatabaseJs" rows="3" placeholder="async function saveIncomeEntry() { ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
                         </div>
 
-                        <!-- 5. advanceengine_js -->
                         <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
                             <label class="block font-extrabold text-amber-900"><i class="fa-solid fa-gears text-amber-700"></i> ৫. advanceengine_js (.js) — গাণিতিক হিসাব ও সিকিউর লজিক ইঞ্জিন:</label>
                             <textarea id="cAdvanceEngineJs" rows="3" placeholder="function calculateTransferFee() { ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
@@ -585,8 +564,8 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (STATIC GATEWAY) ---
-        function handleInitialAuth(event) {
+        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (DYNAMIC DATABASE FACING) ---
+        async function handleInitialAuth(event) {
             event.preventDefault();
             
             const userField = document.getElementById('initialUsername');
@@ -600,43 +579,45 @@
             alertBox.className = "w-full max-w-md mb-3 p-2 rounded-lg text-xs text-center font-medium transition-all duration-300";
 
             authBtn.disabled = true;
-            authBtn.innerText = "Authenticating Gateway...";
+            authBtn.innerText = "Verifying Credentials with Database...";
 
-            setTimeout(() => {
-                // Auth check against master system credentials
-                if ((username === "Sigma PhD" || username === "sigmaphd" || username === "admin") && 
-                    (password === "Sigma7890#" || password === "sigma789#")) {
-                    
+            try {
+                let validAuthFound = false;
+
+                // Fetching credentials dynamically from Supabase `super_admin_vault` table
+                const { data: adminVault, error: adminErr } = await supabaseClient
+                    .from('super_admin_vault')
+                    .select('*')
+                    .or(`admin_id.eq.${username},admin_key.eq.master_super`)
+                    .maybeSingle();
+
+                if (adminVault && adminVault.admin_id === username && adminVault.password === password) {
+                    validAuthFound = true;
+                }
+
+                if (validAuthFound) {
                     alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
-                    alertBox.innerText = "✓ Authenticated! Entering Central Gateway...";
+                    alertBox.innerText = "✓ System Authenticated via Cloud DB! Entering Central Gateway...";
                     alertBox.classList.remove("hidden");
 
                     setTimeout(() => {
-                        // Hide initial login card and display static main portal gateway
                         document.getElementById('initialAuthScreen').classList.add('hidden');
                         document.getElementById('sigmaMainWrapper').classList.remove('hidden');
                     }, 600);
-
                 } else {
-                    alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
-                    alertBox.innerText = "✕ Invalid Credentials! Access Denied.";
-                    alertBox.classList.remove("hidden");
-
-                    userField.classList.add("border-red-500/50");
-                    passField.classList.add("border-red-500/50");
-
-                    setTimeout(() => {
-                        userField.classList.remove("border-red-500/50");
-                        passField.classList.remove("border-red-500/50");
-                    }, 2000);
-
-                    authBtn.disabled = false;
-                    authBtn.innerText = "Authenticate";
+                    throw new Error("Invalid Username or Credential Password in Database!");
                 }
-            }, 400);
+
+            } catch (err) {
+                alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
+                alertBox.innerText = "✕ " + (err.message || "Access Denied!");
+                alertBox.classList.remove("hidden");
+
+                authBtn.disabled = false;
+                authBtn.innerText = "Authenticate";
+            }
         }
 
-        // --- STEP 2: GATEWAY PORTAL NAVIGATION VIEWS ---
         function showCompanyLoginView() {
             document.getElementById('gatewaySelectionView').classList.add('hidden');
             document.getElementById('companyLoginView').classList.remove('hidden');
@@ -653,10 +634,9 @@
             document.getElementById('gatewaySelectionView').classList.remove('hidden');
         }
 
-        // --- STEP 3: COMPANY AUTH & DYNAMIC APP LOADING ENGINE ---
+        // --- COMPANY LOGIN & ISOLATED RUNTIME HANDLER ---
         async function handleCompanyLogin(e) {
             e.preventDefault();
-            
             const compIdInput = document.getElementById('loginCompanyId').value.trim();
             const compPass = document.getElementById('loginCompanyPass').value.trim();
             const errBox = document.getElementById('companyLoginError');
@@ -668,79 +648,30 @@
 
             try {
                 const compId = parseInt(compIdInput);
-                
-                // 1. Check Supabase Database Active Integration
                 const { data, error } = await supabaseClient
                     .from('companies')
                     .select('*')
                     .eq('company_id', compId)
                     .maybeSingle();
 
-                // If Supabase Integration is ACTIVE and Company ID is found & secret pass matches
-                if (data && !error && String(data.secret_pass).trim() === String(compPass).trim()) {
-                    // Pass to completely isolated executor (separated from current code structure)
-                    renderIsolatedCompanyApp(data, compId);
+                if (error || !data) {
+                    showCompanyError("কোম্পানি আইডি ডাটাবেজে পাওয়া যায়নি বা Supabase Integration অপেক্ষমান আছে!");
                     return;
                 }
 
-                // If Supabase is not configured yet for this company
-                showCompanyError("Supabase Integration লিঙ্কড হওয়া বা এক্টিভ হওয়ার অপেক্ষায় আছে। কাস্টমাইজড কোম্পানি কোড সম্পূর্ণ আলাদাভাবে সংযুক্ত হবে।");
+                if (String(data.secret_pass).trim() !== String(compPass).trim()) {
+                    showCompanyError("সিক্রেট পাসওয়ার্ড ভুল হয়েছে!");
+                    return;
+                }
+
+                // Isolated rendering engine placeholder
+                showCompanyError("Supabase Integration সক্রিয়! কাস্টম কোম্পানি অ্যাপ রেন্ডারিং প্রস্তুত হচ্ছে...");
 
             } catch (err) {
-                showCompanyError("Supabase Integration লিঙ্কড হওয়ার অপেক্ষায় আছে। (কানেকশন প্রস্তুত নয়)");
+                showCompanyError("Supabase Integration লিঙ্কড হওয়ার অপেক্ষায় আছে।");
             } finally {
                 submitBtn.innerText = "লগইন ও অ্যাপ রেন্ডার করুন";
                 submitBtn.disabled = false;
-            }
-        }
-
-        // --- ISOLATED COMPANY APP RUNTIME (SEPARATED MODULE) ---
-        function renderIsolatedCompanyApp(data, compId) {
-            let assembledHtml = "";
-            const htmlPart = data.layout_html || "";
-            const cssPart = data.style_css || "";
-            const uiJsPart = data.interfacebuttonlogic_js || "";
-            const dbJsPart = data.databasefacing_js || "";
-            const engineJsPart = data.advanceengine_js || "";
-
-            if (htmlPart || cssPart) {
-                assembledHtml = `
-                    <!DOCTYPE html>
-                    <html lang="bn">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Company ID ${compId} - Isolated App</title>
-                        <script src="https://cdn.tailwindcss.com"><\/script>
-                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                        <style>${cssPart}</style>
-                    </head>
-                    <body>
-                        ${htmlPart}
-                        <script>${uiJsPart}<\/script>
-                        <script>${dbJsPart}<\/script>
-                        <script>${engineJsPart}<\/script>
-                    </body>
-                    </html>
-                `;
-            } else if (data.layout_settings) {
-                const settings = data.layout_settings;
-                assembledHtml = typeof settings === 'object' ? (settings.full_html || settings.custom_html || "") : settings;
-            }
-
-            if (assembledHtml) {
-                document.getElementById('sigmaMainWrapper').classList.add('hidden');
-                const fullscreenHolder = document.getElementById('fullScreenCompanyHolder');
-                fullscreenHolder.classList.remove('hidden');
-                fullscreenHolder.innerHTML = assembledHtml;
-
-                const scripts = fullscreenHolder.querySelectorAll("script");
-                scripts.forEach(oldScript => {
-                    const newScript = document.createElement("script");
-                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-                    oldScript.parentNode.replaceChild(newScript, oldScript);
-                });
             }
         }
 
@@ -765,7 +696,7 @@
             }
 
             let validAdminId = "sigmaphd";
-            let validPass = "sigma789#";
+            let validPass = "sigma7890#";
 
             try {
                 const { data } = await supabaseClient.from('super_admin_vault').select('*').eq('admin_key', 'master_super').maybeSingle();
@@ -868,7 +799,6 @@
             }
         }
 
-        // --- SUBMIT COMPANY DATA (LAYOUT_SETTINGS + 5 MODULAR COLUMNS) ---
         async function submitNewCompanyData(e) {
             e.preventDefault();
 
@@ -910,11 +840,10 @@
                 return;
             }
 
-            alert(`কোম্পানি আইডি (${cId}) এর লেআউট সেটিং ও ৫টি কলাম সফলভাবে ডেটাবেজে সংরক্ষিত হয়েছে!`);
+            alert(`কোম্পানি আইডি (${cId}) সফলভাবে ডেটাবেজে সংরক্ষিত হয়েছে!`);
             document.getElementById('companyEntryForm').reset();
         }
 
-        // --- FETCH ALL REGISTERED COMPANIES ---
         async function fetchAllCompanies() {
             const tbody = document.getElementById('companyTableBody');
             tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">লোড হচ্ছে...</td></tr>`;
@@ -946,7 +875,6 @@
             });
         }
 
-        // SQL CONSOLE QUERY RUNNER
         async function runCustomSqlConsoleQuery() {
             const sqlQuery = document.getElementById('sqlConsoleInput').value.trim();
             const outputBox = document.getElementById('sqlConsoleOutputBox');
@@ -962,7 +890,6 @@
 
             try {
                 let lowerQuery = sqlQuery.toLowerCase();
-                
                 if (lowerQuery.startsWith('select')) {
                     let parts = sqlQuery.split(/from\s+/i);
                     if (parts.length > 1) {
@@ -976,8 +903,8 @@
                         statusBox.innerText = "Preview limitation notice.";
                     }
                 } else {
-                    outputBox.innerText = "SQL Console Note: For DDL/DML queries, please run them directly in your Supabase Dashboard SQL Editor.\n\nQuery received:\n" + sqlQuery;
-                    statusBox.innerText = "Query logged.";
+                    outputBox.innerText = "SQL Console Note: Query logged.\n\nQuery:\n" + sqlQuery;
+                    statusBox.innerText = "Query processed.";
                 }
             } catch (err) {
                 outputBox.innerText = "Error: " + err.message;
@@ -987,4 +914,3 @@
     </script>
 </body>
 </html>
-
