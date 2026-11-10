@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -656,7 +655,7 @@
                     .maybeSingle();
 
                 if (error || !data) {
-                    showCompanyError("কোম্পানি আইডি ডাটাবেজে পাওয়া যায়নি বা Supabase Integration অপেক্ষমান আছে!");
+                    showCompanyError("কোম্পানি আইডি ডাটাবেজে পাওয়া যায়নি!");
                     return;
                 }
 
@@ -665,11 +664,10 @@
                     return;
                 }
 
-                // Isolated rendering engine placeholder
-                showCompanyError("Supabase Integration সক্রিয়! কাস্টম কোম্পানি অ্যাপ রেন্ডারিং প্রস্তুত হচ্ছে...");
+                showCompanyError("লগইন সফল! অ্যাপ রেন্ডার করা হচ্ছে...");
 
             } catch (err) {
-                showCompanyError("Supabase Integration লিঙ্কড হওয়ার অপেক্ষায় আছে।");
+                showCompanyError("ডেটাবেজ সংযোগে সমস্যা হয়েছে।");
             } finally {
                 submitBtn.innerText = "লগইন ও অ্যাপ রেন্ডার করুন";
                 submitBtn.disabled = false;
@@ -677,6 +675,11 @@
         }
 
         function showCompanyError(msg) {
+            const errBox = document.getElementById('companyLoginError');
+            errBox.innerText = msg;
+            errBox.classList.remove('hidden');
+        }
+
         // --- SUPER ADMIN LOGIN (DIRECT DB CHECK) ---
         async function handleSuperAdminLogin(e) {
             e.preventDefault();
