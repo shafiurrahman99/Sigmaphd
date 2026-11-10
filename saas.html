@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -202,7 +202,6 @@
                                 type="text" 
                                 id="initialUsername"
                                 required
-                                value="sigmaphd"
                                 placeholder="System ID"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
@@ -214,7 +213,6 @@
                                 type="password" 
                                 id="initialPassword"
                                 required
-                                value="sigma7890#"
                                 placeholder="Credential Password"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
@@ -351,11 +349,11 @@
                     <form onsubmit="handleSuperAdminLogin(event)" class="space-y-4 text-left">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">সুপার এডমিন আইডি</label>
-                            <input type="text" id="superAdminId" value="sigmaphd" required class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <input type="text" id="superAdminId" required placeholder="সুপার এডমিন আইডি..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">পাসওয়ার্ড</label>
-                            <input type="password" id="superAdminPass" value="sigma7890#" required placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <input type="password" id="superAdminPass" required placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">লগইন করুন</button>
                     </form>
@@ -564,7 +562,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (DYNAMIC DATABASE FACING) ---
+        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (STRICT DB DYNAMIC ONLY) ---
         async function handleInitialAuth(event) {
             event.preventDefault();
             
@@ -579,34 +577,37 @@
             alertBox.className = "w-full max-w-md mb-3 p-2 rounded-lg text-xs text-center font-medium transition-all duration-300";
 
             authBtn.disabled = true;
-            authBtn.innerText = "Verifying Credentials with Database...";
+            authBtn.innerText = "Verifying with Database...";
 
             try {
-                let validAuthFound = false;
-
-                // Fetching credentials dynamically from Supabase `super_admin_vault` table
-                const { data: adminVault, error: adminErr } = await supabaseClient
+                // Fetch credentials directly from Supabase `super_admin_vault`
+                const { data: adminVault, error } = await supabaseClient
                     .from('super_admin_vault')
                     .select('*')
-                    .or(`admin_id.eq.${username},admin_key.eq.master_super`)
+                    .eq('admin_id', username)
                     .maybeSingle();
 
-                if (adminVault && adminVault.admin_id === username && adminVault.password === password) {
-                    validAuthFound = true;
+                if (error) {
+                    throw new Error("Database Connection Error: " + error.message);
                 }
 
-                if (validAuthFound) {
-                    alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
-                    alertBox.innerText = "✓ System Authenticated via Cloud DB! Entering Central Gateway...";
-                    alertBox.classList.remove("hidden");
-
-                    setTimeout(() => {
-                        document.getElementById('initialAuthScreen').classList.add('hidden');
-                        document.getElementById('sigmaMainWrapper').classList.remove('hidden');
-                    }, 600);
-                } else {
-                    throw new Error("Invalid Username or Credential Password in Database!");
+                if (!adminVault) {
+                    throw new Error("Invalid Username or Credential Password!");
                 }
+
+                if (adminVault.password !== password) {
+                    throw new Error("Invalid Username or Credential Password!");
+                }
+
+                // If authentication passes from DB
+                alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
+                alertBox.innerText = "✓ System Authenticated via Cloud DB! Entering Central Gateway...";
+                alertBox.classList.remove("hidden");
+
+                setTimeout(() => {
+                    document.getElementById('initialAuthScreen').classList.add('hidden');
+                    document.getElementById('sigmaMainWrapper').classList.remove('hidden');
+                }, 500);
 
             } catch (err) {
                 alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
@@ -676,12 +677,7 @@
         }
 
         function showCompanyError(msg) {
-            const errBox = document.getElementById('companyLoginError');
-            errBox.innerText = msg;
-            errBox.classList.remove('hidden');
-        }
-
-        // --- SUPER ADMIN LOGIN ---
+        // --- SUPER ADMIN LOGIN (DIRECT DB CHECK) ---
         async function handleSuperAdminLogin(e) {
             e.preventDefault();
             const id = document.getElementById('superAdminId').value.trim();
@@ -691,34 +687,39 @@
             
             if(errBox) errBox.classList.add('hidden');
             if(submitBtn) {
-                submitBtn.innerText = "লগইন হচ্ছে...";
+                submitBtn.innerText = "ডাটাবেজ যাচাই করা হচ্ছে...";
                 submitBtn.disabled = true;
             }
 
-            let validAdminId = "sigmaphd";
-            let validPass = "sigma7890#";
-
             try {
-                const { data } = await supabaseClient.from('super_admin_vault').select('*').eq('admin_key', 'master_super').maybeSingle();
-                if (data) {
-                    validAdminId = data.admin_id;
-                    validPass = data.password;
-                }
-            } catch(ex) {}
+                const { data, error } = await supabaseClient
+                    .from('super_admin_vault')
+                    .select('*')
+                    .eq('admin_id', id)
+                    .maybeSingle();
 
-            if (id === validAdminId && pass === validPass) {
+                if (error || !data) {
+                    throw new Error("ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড!");
+                }
+
+                if (data.password !== pass) {
+                    throw new Error("ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড!");
+                }
+
                 document.getElementById('superAdminLoginView').classList.add('hidden');
                 document.getElementById('superAdminDashboard').classList.remove('hidden');
                 switchAdminNav('registerForm');
-            } else {
+
+            } catch(ex) {
                 if(errBox) {
-                    errBox.innerText = "ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড!";
+                    errBox.innerText = ex.message || "ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড!";
                     errBox.classList.remove('hidden');
                 }
-            }
-            if(submitBtn) {
-                submitBtn.innerText = "লগইন করুন";
-                submitBtn.disabled = false;
+            } finally {
+                if(submitBtn) {
+                    submitBtn.innerText = "লগইন করুন";
+                    submitBtn.disabled = false;
+                }
             }
         }
 
@@ -914,3 +915,4 @@
     </script>
 </body>
 </html>
+```
