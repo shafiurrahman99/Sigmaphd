@@ -231,12 +231,12 @@
 
                     <div class="mt-4 text-center">
                         <a 
-                            href="http://www.sigmaphd.com" 
+                            href="https://sigmaphd.vercel.app" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             class="text-xs text-slate-400 hover:text-emerald-400 transition-colors tracking-widest lowercase"
                         >
-                            www.sigmaphd.com
+                            sigmaphd.vercel.app
                         </a>
                     </div>
 
@@ -265,7 +265,7 @@
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block font-mono text-xs">
                         <div class="font-bold text-sigmaNavy">REG. NO: REG-894520-BD</div>
-                        <div class="text-[11px] text-sigmaGreen italic">www.sigmaphd.com</div>
+                        <div class="text-[11px] text-sigmaGreen italic">sigmaphd.vercel.app</div>
                     </div>
                     <!-- Global System Logout Button -->
                     <button onclick="handleGlobalSystemLogout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
@@ -563,21 +563,18 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC (SECURE PROXY URL & DYNAMIC ROUTING APPLIED) -->
+    <!-- JAVASCRIPT LOGIC (DYNAMIC ROUTING & VERCEL REWRITE PROXY) -->
     <script>
-        // আসল Supabase ইউআরএল হাইড করে প্রক্সি পাথ সেট করা হলো
-        const SUPABASE_URL = window.location.origin + '/api/v1';
+        // Supabase URL dynamically masked using local origin path
+        const SUPABASE_URL = window.location.origin + '/api/v1/secure';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- DYNAMIC PATH EXTENSION ROUTER (Reports, Forms & Summary URL Masking) ---
+        // Routing Helper for dynamic custom URLs
         function navigateToExtension(pathName, titleText) {
-            // ব্রাউজার অ্যাড্রেস বারে কাস্টম এক্সটেনশন পাথ দেখাবে (যেমন: www.sigmaphd.com/reports/summary)
             window.history.pushState({path: pathName}, '', pathName);
-            
-            // ডেমো বা ডাইনামিক রেন্ডারিং লজিক
-            console.log("Navigated to extension path: " + pathName);
+            console.log("Navigated extension route: " + pathName);
         }
 
         // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE ---
@@ -606,7 +603,7 @@
                     setTimeout(() => {
                         document.getElementById('initialAuthScreen').classList.add('hidden');
                         document.getElementById('sigmaMainWrapper').classList.remove('hidden');
-                        navigateToExtension('/portal/gateway', 'Gateway');
+                        navigateToExtension('/portal/gateway', 'Gateway Portal');
                     }, 400);
                     return;
                 }
@@ -628,7 +625,7 @@
                 setTimeout(() => {
                     document.getElementById('initialAuthScreen').classList.add('hidden');
                     document.getElementById('sigmaMainWrapper').classList.remove('hidden');
-                    navigateToExtension('/portal/gateway', 'Gateway');
+                    navigateToExtension('/portal/gateway', 'Gateway Portal');
                 }, 400);
 
             } catch (err) {
@@ -651,7 +648,7 @@
                 document.getElementById('gatewaySelectionView').classList.remove('hidden');
 
                 document.getElementById('initialAuthScreen').classList.remove('hidden');
-                navigateToExtension('/', 'Login');
+                navigateToExtension('/', 'Home');
                 
                 const alertBox = document.getElementById('alertBox');
                 if(alertBox) alertBox.classList.add('hidden');
@@ -673,14 +670,14 @@
         function showSuperAdminLoginView() {
             document.getElementById('gatewaySelectionView').classList.add('hidden');
             document.getElementById('superAdminLoginView').classList.remove('hidden');
-            navigateToExtension('/admin/login', 'Admin Login');
+            navigateToExtension('/admin/login', 'Super Admin Login');
         }
 
         function backToGateway() {
             document.getElementById('companyLoginView').classList.add('hidden');
             document.getElementById('superAdminLoginView').classList.add('hidden');
             document.getElementById('gatewaySelectionView').classList.remove('hidden');
-            navigateToExtension('/portal/gateway', 'Gateway');
+            navigateToExtension('/portal/gateway', 'Gateway Portal');
         }
 
         // --- COMPANY LOGIN & ISOLATED RUNTIME HANDLER ---
@@ -714,7 +711,7 @@
                 }
 
                 showCompanyError("লগইন সফল! অ্যাপ রেন্ডার করা হচ্ছে...");
-                navigateToExtension(`/company/dashboard/${compId}`, 'Company Dashboard');
+                navigateToExtension(`/company/dashboard/${compId}`, 'Company Workspace');
 
             } catch (err) {
                 showCompanyError("ডেটাবেজ সংযোগে সমস্যা হয়েছে।");
@@ -749,7 +746,7 @@
                     document.getElementById('superAdminLoginView').classList.add('hidden');
                     document.getElementById('superAdminDashboard').classList.remove('hidden');
                     switchAdminNav('registerForm');
-                    navigateToExtension('/admin/dashboard', 'Admin Dashboard');
+                    navigateToExtension('/admin/dashboard', 'Master Control');
                     return;
                 }
 
@@ -766,7 +763,7 @@
                 document.getElementById('superAdminLoginView').classList.add('hidden');
                 document.getElementById('superAdminDashboard').classList.remove('hidden');
                 switchAdminNav('registerForm');
-                navigateToExtension('/admin/dashboard', 'Admin Dashboard');
+                navigateToExtension('/admin/dashboard', 'Master Control');
 
             } catch(ex) {
                 if(errBox) {
@@ -784,7 +781,7 @@
         function handleAdminLogout() {
             document.getElementById('superAdminDashboard').classList.add('hidden');
             document.getElementById('superAdminLoginView').classList.remove('hidden');
-            navigateToExtension('/admin/login', 'Admin Login');
+            navigateToExtension('/admin/login', 'Super Admin Login');
         }
 
         function openAdminPasswordModal() {
@@ -849,7 +846,7 @@
             if (target === 'registerForm') {
                 document.getElementById('tabRegisterForm').classList.remove('hidden');
                 document.getElementById('radioReg').checked = true;
-                navigateToExtension('/admin/dashboard/register', 'Register Company');
+                navigateToExtension('/admin/dashboard/register', 'Register Form');
             } else if (target === 'companyList') {
                 document.getElementById('tabCompanyList').classList.remove('hidden');
                 document.getElementById('radioList').checked = true;
