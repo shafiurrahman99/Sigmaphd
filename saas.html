@@ -579,7 +579,7 @@
             authBtn.innerText = "Verifying with Database...";
 
             try {
-                // Fetch credentials directly from Supabase `super_admin_vault`
+                // Fetch credentials directly from Supabase `super_admin_vault` table
                 const { data: adminVault, error } = await supabaseClient
                     .from('super_admin_vault')
                     .select('*')
