@@ -262,9 +262,15 @@
                         <h2 id="headerSubtitle" class="text-xs sm:text-sm font-bold text-sigmaGreen italic font-serif leading-none tracking-wide">Advanced Productivity Research, Solutions & Visuality</h2>
                     </div>
                 </div>
-                <div class="text-right hidden sm:block font-mono text-xs">
-                    <div class="font-bold text-sigmaNavy">REG. NO: REG-894520-BD</div>
-                    <div class="text-[11px] text-sigmaGreen italic">www.sigmaphd.com</div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block font-mono text-xs">
+                        <div class="font-bold text-sigmaNavy">REG. NO: REG-894520-BD</div>
+                        <div class="text-[11px] text-sigmaGreen italic">www.sigmaphd.com</div>
+                    </div>
+                    <!-- Global System Logout Button -->
+                    <button onclick="handleGlobalSystemLogout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
+                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট (Log Out)
+                    </button>
                 </div>
             </div>
 
@@ -563,7 +569,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (FALLBACK + DB CHECK) ---
+        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE ---
         async function handleInitialAuth(event) {
             event.preventDefault();
             
@@ -621,6 +627,31 @@
 
                 authBtn.disabled = false;
                 authBtn.innerText = "Authenticate";
+            }
+        }
+
+        // --- GLOBAL SYSTEM LOGOUT (RETURN TO INITIAL AUTH SCREEN) ---
+        function handleGlobalSystemLogout() {
+            if (confirm('আপনি কি নিশ্চিতভাবে এই সেশন থেকে লগআউট করতে চান?')) {
+                // মেইন পোর্টাল ও ড্যাশবোর্ড হাইড করা
+                document.getElementById('sigmaMainWrapper').classList.add('hidden');
+                document.getElementById('superAdminDashboard').classList.add('hidden');
+                document.getElementById('companyLoginView').classList.add('hidden');
+                document.getElementById('superAdminLoginView').classList.add('hidden');
+                document.getElementById('gatewaySelectionView').classList.remove('hidden');
+
+                // ১ম লগইন স্ক্রিন আবার ফিরিয়ে আনা
+                document.getElementById('initialAuthScreen').classList.remove('hidden');
+                
+                // ইনফরমেশন ও বাটন রিসেট করা
+                const alertBox = document.getElementById('alertBox');
+                if(alertBox) alertBox.classList.add('hidden');
+                
+                const authBtn = document.getElementById('authBtn');
+                if(authBtn) {
+                    authBtn.disabled = false;
+                    authBtn.innerText = "Authenticate";
+                }
             }
         }
 
