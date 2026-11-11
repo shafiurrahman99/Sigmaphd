@@ -1,12 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/api/v1/:path*",
+      "source": "/api/v1/secure/:path*",
       "destination": "https://zooqqmgncgebglskfnpt.supabase.co/rest/v1/:path*"
     },
     {
       "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "destination": "/phd.html"
     }
   ]
 }
