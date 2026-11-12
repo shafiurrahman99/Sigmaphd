@@ -1,53 +1,53 @@
-// --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (Using Vercel Secure API) ---
-        async function handleInitialAuth(event) {
-            event.preventDefault();
-            
-            const userField = document.getElementById('initialUsername');
-            const passField = document.getElementById('initialPassword');
-            const alertBox = document.getElementById('alertBox');
-            const authBtn = document.getElementById('authBtn');
+import { createClient } from '@supabase/supabase-js';
 
-            const username = userField.value.trim();
-            const password = passField.value.trim();
+export default async function handler(req, res) {
+  // শুধুমাত্র POST রিকোয়েস্ট অ্যালাউ করা
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-            alertBox.className = "w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300";
+  // Vercel Environment Variables থেকে সিক্রেট মানগুলো নেওয়া
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-            authBtn.disabled = true;
-            authBtn.innerText = "Authenticating via Secure API...";
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return res.status(500).json({ error: 'Server environment variables not configured!' });
+  }
 
-            try {
-                // সরাসরি Supabase-এ কল না করে আমাদের Vercel Serverless API-তে রিকোয়েস্ট পাঠানো হচ্ছে
-                const response = await fetch('/api/secure-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'verify_admin',
-                        payload: { admin_id: username, password: password }
-                    })
-                });
+  const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-                const result = await response.json();
+  try {
+    const { action, payload } = req.body;
 
-                if (!response.ok || !result.success || !result.data) {
-                    throw new Error(result.error || "ভুল System ID বা Credential Password!");
-                }
+    // ১. সুপার এডমিন ভেরিফিকেশন RPC কল
+    if (action === 'verify_admin') {
+      const { admin_id, password } = payload;
+      const { data, error } = await supabaseClient.rpc('verify_super_admin', {
+        p_admin_id: admin_id,
+        p_password: password
+      });
 
-                alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
-                alertBox.innerText = "✓ Authenticated! Entering Central Gateway...";
-                alertBox.classList.remove("hidden");
+      if (error) throw error;
+      return res.status(200).json({ success: true, data });
+    }
 
-                setTimeout(() => {
-                    document.getElementById('initialAuthScreen').classList.add('hidden');
-                    document.getElementById('sigmaMainWrapper').classList.remove('hidden');
-                    navigateToExtension('/portal/gateway', 'Gateway Portal');
-                }, 400);
+    // ২. কোম্পানি লগইন বা ডেটা ফেচিং এর জন্য
+    if (action === 'get_company') {
+      const { company_id } = payload;
+      const { data, error } = await supabaseClient
+        .from('companies')
+        .select('*')
+        .eq('company_id', company_id)
+        .maybeSingle();
 
-            } catch (err) {
-                alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
-                alertBox.innerText = "✕ " + (err.message || "Access Denied!");
-                alertBox.classList.remove("hidden");
+      if (error) throw error;
+      return res.status(200).json({ success: true, data });
+    }
 
-                authBtn.disabled = false;
-                authBtn.innerText = "Authenticate";
-            }
-        }
+    // অন্য কোনো অ্যাকশন হলে
+    return res.status(400).json({ error: 'Invalid action specified' });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+}
