@@ -155,7 +155,7 @@
 </head>
 <body class="flex justify-center items-center p-2 sm:p-4 select-none min-h-screen">
 
-    <!-- 0. INITIAL AUTHENTICATION CARD (Screen 1) -->
+    <!-- 0. INITIAL AUTHENTICATION CARD (Screen 1 - Fully Database Connected) -->
     <div id="initialAuthScreen" class="w-full max-w-lg my-auto flex items-center justify-center">
         <div class="card-ring-wrapper w-full">
             <div class="glass-card relative rounded-2xl p-4 sm:p-6 w-full overflow-hidden z-10">
@@ -201,8 +201,7 @@
                                 type="text" 
                                 id="initialUsername"
                                 required
-                                value="sigmaphd"
-                                placeholder="System ID"
+                                placeholder="সুপার এডমিন আইডি (যেমন: sigmaphd)"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
                             />
@@ -213,8 +212,7 @@
                                 type="password" 
                                 id="initialPassword"
                                 required
-                                value="123456"
-                                placeholder="Credential Password"
+                                placeholder="সিক্রেট পাসওয়ার্ড দিন..."
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
                             />
@@ -225,7 +223,7 @@
                             id="authBtn"
                             class="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:from-red-500 hover:to-emerald-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-emerald-950/40 active:scale-[0.99] transition-all duration-200 text-sm tracking-wide mt-1"
                         >
-                            Authenticate
+                            ডেটাবেজ অথেন্টিকেট করুন
                         </button>
                     </form>
 
@@ -301,7 +299,7 @@
                             <i class="fa-solid fa-building-user"></i> কোম্পানি ইউজার লগইন (Company Login)
                         </button>
                         <button onclick="showSuperAdminLoginView()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-user-shield"></i> সুপার এডমিন লগইন (Super Admin)
+                            <i class="fa-solid fa-user-shield"></i> সুপার এডমিন কন্ট্রোল (Super Admin)
                         </button>
                     </div>
                 </div>
@@ -348,19 +346,19 @@
                     <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
                         <i class="fa-solid fa-user-shield text-3xl mb-1 text-amber-300"></i>
                         <h3 class="text-lg font-bold">সুপার এডমিন লগইন (Super Admin)</h3>
-                        <p class="text-[11px] text-gray-200">নতুন কোম্পানি এন্ট্রি ও মডিউল ম্যানেজমেন্টের জন্য লগইন করুন</p>
+                        <p class="text-[11px] text-gray-200">ডেটাবেজ ভল্ট থেকে এডমিন আইডি ও পাসওয়ার্ড যাচাই করুন</p>
                     </div>
 
                     <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
 
                     <form onsubmit="handleSuperAdminLogin(event)" class="space-y-4 text-left">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">সুপার এডমিন আইডি</label>
-                            <input type="text" id="superAdminId" required value="sigmaphd" placeholder="সুপার এডমিন আইডি..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">সুপার এডমিন আইডি (`admin_id`)</label>
+                            <input type="text" id="superAdminId" required placeholder="যেমন: sigmaphd" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">পাসওয়ার্ড</label>
-                            <input type="password" id="superAdminPass" required value="123456" placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">পাসওয়ার্ড (`password`)</label>
+                            <input type="password" id="superAdminPass" required placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">লগইন করুন</button>
                     </form>
@@ -565,19 +563,17 @@
 
     <!-- JAVASCRIPT LOGIC (DYNAMIC ROUTING & VERCEL REWRITE PROXY) -->
     <script>
-        // Supabase URL dynamically masked using local origin path
         const SUPABASE_URL = window.location.origin + '/api/v1/secure';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Routing Helper for dynamic custom URLs
         function navigateToExtension(pathName, titleText) {
             window.history.pushState({path: pathName}, '', pathName);
             console.log("Navigated extension route: " + pathName);
         }
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE ---
+        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (Connected directly to super_admin_vault) ---
         async function handleInitialAuth(event) {
             event.preventDefault();
             
@@ -592,22 +588,9 @@
             alertBox.className = "w-full max-w-md mb-3 p-2 rounded-lg text-xs text-center font-medium transition-all duration-300";
 
             authBtn.disabled = true;
-            authBtn.innerText = "Verifying Credentials...";
+            authBtn.innerText = "ডেটাবেজ ভল্ট যাচাই করা হচ্ছে...";
 
             try {
-                if (username === 'sigmaphd' && password === '123456') {
-                    alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
-                    alertBox.innerText = "✓ System Authenticated! Entering Central Gateway...";
-                    alertBox.classList.remove("hidden");
-
-                    setTimeout(() => {
-                        document.getElementById('initialAuthScreen').classList.add('hidden');
-                        document.getElementById('sigmaMainWrapper').classList.remove('hidden');
-                        navigateToExtension('/portal/gateway', 'Gateway Portal');
-                    }, 400);
-                    return;
-                }
-
                 const { data: adminVault, error } = await supabaseClient
                     .from('super_admin_vault')
                     .select('*')
@@ -615,11 +598,11 @@
                     .maybeSingle();
 
                 if (error || !adminVault || String(adminVault.password).trim() !== password) {
-                    throw new Error("Invalid Username or Credential Password!");
+                    throw new Error("ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড! ডেটাবেজে সঠিক তথ্য দিন।");
                 }
 
                 alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
-                alertBox.innerText = "✓ System Authenticated via Cloud DB! Entering Central Gateway...";
+                alertBox.innerText = "✓ সুপার এডমিন অথেন্টিকেশন সফল! সেন্ট্রাল গেটওয়েতে প্রবেশ করা হচ্ছে...";
                 alertBox.classList.remove("hidden");
 
                 setTimeout(() => {
@@ -630,11 +613,11 @@
 
             } catch (err) {
                 alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
-                alertBox.innerText = "✕ " + (err.message || "Access Denied!");
+                alertBox.innerText = "✕ " + (err.message || "অ্যাক্সেস ডিনাইড!");
                 alertBox.classList.remove("hidden");
 
                 authBtn.disabled = false;
-                authBtn.innerText = "Authenticate";
+                authBtn.innerText = "ডেটাবেজ অথেন্টিকেট করুন";
             }
         }
 
@@ -648,6 +631,8 @@
                 document.getElementById('gatewaySelectionView').classList.remove('hidden');
 
                 document.getElementById('initialAuthScreen').classList.remove('hidden');
+                document.getElementById('initialUsername').value = '';
+                document.getElementById('initialPassword').value = '';
                 navigateToExtension('/', 'Home');
                 
                 const alertBox = document.getElementById('alertBox');
@@ -656,7 +641,7 @@
                 const authBtn = document.getElementById('authBtn');
                 if(authBtn) {
                     authBtn.disabled = false;
-                    authBtn.innerText = "Authenticate";
+                    authBtn.innerText = "ডেটাবেজ অথেন্টিকেট করুন";
                 }
             }
         }
@@ -742,21 +727,13 @@
             }
 
             try {
-                if (id === 'sigmaphd' && pass === '123456') {
-                    document.getElementById('superAdminLoginView').classList.add('hidden');
-                    document.getElementById('superAdminDashboard').classList.remove('hidden');
-                    switchAdminNav('registerForm');
-                    navigateToExtension('/admin/dashboard', 'Master Control');
-                    return;
-                }
-
                 const { data, error } = await supabaseClient
                     .from('super_admin_vault')
                     .select('*')
                     .eq('admin_id', id)
                     .maybeSingle();
 
-                if (error || !data || data.password !== pass) {
+                if (error || !data || String(data.password).trim() !== pass) {
                     throw new Error("ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড!");
                 }
 
