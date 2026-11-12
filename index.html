@@ -594,6 +594,13 @@
                     })
                 });
 
+                // সেফটি চেক: রেসপন্সটি সঠিক JSON ফরম্যাটে আছে কি না যাচাই করা
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const rawText = await response.text();
+                    throw new Error("Invalid Server Response (Not JSON)");
+                }
+
                 const result = await response.json();
 
                 if (!response.ok || !result.success || !result.data) {
@@ -687,6 +694,11 @@
                     })
                 });
 
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Server error occurred.");
+                }
+
                 const result = await response.json();
 
                 if (!response.ok || !result.success || !result.data) {
@@ -739,6 +751,11 @@
                         payload: { admin_id: id, password: pass }
                     })
                 });
+
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Invalid Server Response");
+                }
 
                 const result = await response.json();
 
