@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
+  // শুধুমাত্র POST রিকোয়েস্ট অ্যালাউ করা
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).json({ success: false, error: `Method ${req.method} Not Allowed` });
@@ -20,6 +21,7 @@ export default async function handler(req, res) {
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
     const { action, payload } = req.body || {};
 
+    // ১. সুপার এডমিন ভেরিফিকেশন (লগইন)
     if (action === 'verify_admin') {
       const { admin_id, password } = payload || {};
       const { data, error } = await supabaseClient.rpc('verify_super_admin', {
@@ -28,11 +30,13 @@ export default async function handler(req, res) {
       });
 
       if (error) {
-        return res.status(400).json({ success: false, error: error.message });
+        // পাসওয়ার্ড ভুল বা ডেটাবেজ এরর হলে সঠিক JSON ফরম্যাটে এরর রিটার্ন করা
+        return res.status(200).json({ success: false, error: error.message });
       }
       return res.status(200).json({ success: true, data });
     }
 
+    // ২. কোম্পানি ডেটা ফেচিং
     if (action === 'get_company') {
       const { company_id } = payload || {};
       const { data, error } = await supabaseClient
@@ -42,14 +46,15 @@ export default async function handler(req, res) {
         .maybeSingle();
 
       if (error) {
-        return res.status(400).json({ success: false, error: error.message });
+        return res.status(200).json({ success: false, error: error.message });
       }
       return res.status(200).json({ success: true, data });
     }
 
-    return res.status(400).json({ success: false, error: 'Invalid action specified' });
+    return res.status(200).json({ success: false, error: 'Invalid action specified' });
 
   } catch (err) {
-    return res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
+    // যেকোনো আনহ্যান্ডলড এক্সেপশন বা সার্ভার ক্র্যাশ রোধে JSON আকারে এরর পাঠানো
+    return res.status(200).json({ success: false, error: err.message || 'Internal Server Error' });
   }
 }
