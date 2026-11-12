@@ -1,18 +1,12 @@
 {
-  "name": "sigmaphd-backend",
+  "name": "sigmaphd",
   "version": "1.0.0",
-  "description": "Backend for Sigma PhD",
-  "main": "server.js",
+  "description": "Sigma PhD Central Universal Gateway Portal",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.11.3"
+    "@supabase/supabase-js": "^2.39.0"
   }
 }
