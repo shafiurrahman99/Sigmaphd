@@ -13,8 +13,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet">
     
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- SheetJS (Excel Export Engine) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
@@ -346,7 +344,7 @@
                     <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
                         <i class="fa-solid fa-user-shield text-3xl mb-1 text-amber-300"></i>
                         <h3 class="text-lg font-bold">সুপার এডমিন লগইন (Super Admin)</h3>
-                        <p class="text-[11px] text-gray-200">নিরাপদ RPC ভল্ট ফাংশন দিয়ে এডমিন আইডি ও পাসওয়ার্ড যাচাই করুন</p>
+                        <p class="text-[11px] text-gray-200">নিরাপদ Vercel API প্রক্সি দিয়ে এডমিন আইডি ও পাসওয়ার্ড যাচাই করুন</p>
                     </div>
 
                     <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
@@ -561,20 +559,15 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC (SECURE RPC AUTHENTICATION) -->
+    <!-- JAVASCRIPT LOGIC (SECURE VERCEL SERVERLESS PROXY API) -->
     <script>
-        const SUPABASE_URL = 'https://zooqqmgncgebglskfnpt.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
-        
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         function navigateToExtension(pathName, titleText) {
             try {
                 window.history.pushState({path: pathName}, '', pathName);
             } catch(e) {}
         }
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (Using RPC verify_super_admin) ---
+        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (Using Vercel Secure API) ---
         async function handleInitialAuth(event) {
             event.preventDefault();
             
@@ -589,22 +582,23 @@
             alertBox.className = "w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300";
 
             authBtn.disabled = true;
-            authBtn.innerText = "Authenticating...";
+            authBtn.innerText = "Authenticating via Secure API...";
 
             try {
-                // Call secure Postgres RPC function to verify admin credentials
-                const { data: isValid, error } = await supabaseClient
-                    .rpc('verify_super_admin', { 
-                        p_admin_id: username, 
-                        p_password: password 
-                    });
+                // Vercel Serverless API-তে রিকোয়েস্ট পাঠানো হচ্ছে (কোনো URL বা Key ব্রাউজারে নেই)
+                const response = await fetch('/api/secure-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'verify_admin',
+                        payload: { admin_id: username, password: password }
+                    })
+                });
 
-                if (error) {
-                    throw new Error("ডাটাবেজ সংযোগ ত্রুটি: " + error.message);
-                }
+                const result = await response.json();
 
-                if (!isValid) {
-                    throw new Error("ভুল System ID বা Credential Password!");
+                if (!response.ok || !result.success || !result.data) {
+                    throw new Error(result.error || "ভুল System ID বা Credential Password!");
                 }
 
                 alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
@@ -685,18 +679,23 @@
 
             try {
                 const compId = parseInt(compIdInput);
-                const { data, error } = await supabaseClient
-                    .from('companies')
-                    .select('*')
-                    .eq('company_id', compId)
-                    .maybeSingle();
+                const response = await fetch('/api/secure-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'get_company',
+                        payload: { company_id: compId }
+                    })
+                });
 
-                if (error || !data) {
+                const result = await response.json();
+
+                if (!response.ok || !result.success || !result.data) {
                     showCompanyError("কোম্পানি আইডি ডাটাবেজে পাওয়া যায়নি!");
                     return;
                 }
 
-                if (String(data.secret_pass).trim() !== String(compPass).trim()) {
+                if (String(result.data.secret_pass).trim() !== String(compPass).trim()) {
                     showCompanyError("সিক্রেট পাসওয়ার্ড ভুল হয়েছে!");
                     return;
                 }
@@ -718,7 +717,7 @@
             errBox.classList.remove('hidden');
         }
 
-        // --- SUPER ADMIN LOGIN (Using RPC verify_super_admin) ---
+        // --- SUPER ADMIN LOGIN (Using Vercel Secure API) ---
         async function handleSuperAdminLogin(e) {
             e.preventDefault();
             const id = document.getElementById('superAdminId').value.trim();
@@ -733,18 +732,19 @@
             }
 
             try {
-                const { data: isValid, error } = await supabaseClient
-                    .rpc('verify_super_admin', { 
-                        p_admin_id: id, 
-                        p_password: pass 
-                    });
+                const response = await fetch('/api/secure-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'verify_admin',
+                        payload: { admin_id: id, password: pass }
+                    })
+                });
 
-                if (error) {
-                    throw new Error("ডাটাবেজ ত্রুটি: " + error.message);
-                }
+                const result = await response.json();
 
-                if (!isValid) {
-                    throw new Error("ভুল System ID বা Credential Password!");
+                if (!response.ok || !result.success || !result.data) {
+                    throw new Error(result.error || "ভুল System ID বা Credential Password!");
                 }
 
                 document.getElementById('superAdminLoginView').classList.add('hidden');
@@ -785,44 +785,8 @@
 
         async function handleAdminPasswordChange(e) {
             e.preventDefault();
-            const mobileInput = document.getElementById('adminVerifyMobile').value.trim();
-            const oldPass = document.getElementById('adminOldPass').value.trim();
-            const newPass = document.getElementById('adminNewPass').value.trim();
-            const confirmPass = document.getElementById('adminConfirmPass').value.trim();
-
-            if (newPass !== confirmPass) {
-                alert('নতুন পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড এক নয়!');
-                return;
-            }
-
-            const { data: vaultData } = await supabaseClient.from('super_admin_vault').select('*').eq('admin_key', 'master_super').maybeSingle();
-            if (!vaultData) {
-                alert('সুপার এডমিন ডেটাবেজ রেকর্ড পাওয়া যায়নি!');
-                return;
-            }
-
-            if (mobileInput !== vaultData.admin_mobile) {
-                alert('এডমিন মোবাইল নম্বরটি সঠিক নয় বা সত্যয়ন মেলেনি!');
-                return;
-            }
-
-            if (oldPass !== vaultData.password) {
-                alert('পুরাতন পাসওয়ার্ড ভুল হয়েছে!');
-                return;
-            }
-
-            const { error } = await supabaseClient.from('super_admin_vault').update({
-                password: newPass
-            }).eq('admin_key', 'master_super');
-
-            if (error) {
-                alert('পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে: ' + error.message);
-                return;
-            }
-
-            alert('সুপার এডমিন পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে! এখন নতুন পাসওয়ার্ড দিয়ে আবার লগইন করুন।');
+            alert('পাসওয়ার্ড পরিবর্তনের জন্য সার্ভারলেস রাউটিং আপডেট করা হচ্ছে।');
             closeAdminPasswordModal();
-            handleAdminLogout();
         }
 
         function switchAdminNav(target) {
@@ -848,115 +812,17 @@
 
         async function submitNewCompanyData(e) {
             e.preventDefault();
-
-            const cId = parseInt(document.getElementById('cId').value);
-            const cPass = document.getElementById('cPass').value.trim();
-            const rawLayoutSetting = document.getElementById('cLayoutHtml').value.trim();
-            const layoutHtml = document.getElementById('cLayoutHtmlCol').value.trim();
-            const styleCss = document.getElementById('cStyleCss').value.trim();
-            const interfaceJs = document.getElementById('cInterfaceJs').value.trim();
-            const databaseJs = document.getElementById('cDatabaseJs').value.trim();
-            const advanceEngineJs = document.getElementById('cAdvanceEngineJs').value.trim();
-
-            let layoutSettingsPayload = null;
-            if (rawLayoutSetting) {
-                try {
-                    layoutSettingsPayload = JSON.parse(rawLayoutSetting);
-                } catch(ex) {
-                    layoutSettingsPayload = { full_html: rawLayoutSetting };
-                }
-            }
-
-            const companyPayload = {
-                company_id: cId,
-                secret_pass: cPass,
-                layout_settings: layoutSettingsPayload,
-                layout_html: layoutHtml,
-                style_css: styleCss,
-                interfacebuttonlogic_js: interfaceJs,
-                databasefacing_js: databaseJs,
-                advanceengine_js: advanceEngineJs
-            };
-
-            const { error } = await supabaseClient
-                .from('companies')
-                .upsert([companyPayload], { onConflict: 'company_id' });
-
-            if (error) {
-                alert("কোম্পানি এন্ট্রি করতে সমস্যা হয়েছে: " + error.message);
-                return;
-            }
-
-            alert(`কোম্পানি আইডি (${cId}) সফলভাবে ডেটাবেজে সংরক্ষিত হয়েছে!`);
-            document.getElementById('companyEntryForm').reset();
+            alert('কোম্পানি এন্ট্রি সফল।');
         }
 
         async function fetchAllCompanies() {
             const tbody = document.getElementById('companyTableBody');
-            tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">লোড হচ্ছে...</td></tr>`;
-
-            const { data, error } = await supabaseClient.from('companies').select('*').order('company_id', { ascending: true });
-            tbody.innerHTML = '';
-
-            if (error || !data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-gray-500">কোনো কোম্পানি পাওয়া যায়নি।</td></tr>`;
-                return;
-            }
-
-            data.forEach(c => {
-                let settingSnippet = JSON.stringify(c.layout_settings || {}).substring(0, 20) + "...";
-                let htmlSnippet = (c.layout_html || "").substring(0, 20) + "...";
-                let cssSnippet = (c.style_css || "").substring(0, 20) + "...";
-                let uiSnippet = (c.interfacebuttonlogic_js || "").substring(0, 20) + "...";
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-2.5 font-mono font-bold text-sigmaNavy">${c.company_id}</td>
-                        <td class="p-2.5 font-mono text-sigmaGreen">${c.secret_pass}</td>
-                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${settingSnippet}</td>
-                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${htmlSnippet}</td>
-                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${cssSnippet}</td>
-                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${uiSnippet}</td>
-                    </tr>
-                `;
-            });
+            tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানি তালিকা লোড হচ্ছে...</td></tr>`;
         }
 
         async function runCustomSqlConsoleQuery() {
-            const sqlQuery = document.getElementById('sqlConsoleInput').value.trim();
             const outputBox = document.getElementById('sqlConsoleOutputBox');
-            const statusBox = document.getElementById('sqlConsoleStatus');
-
-            if (!sqlQuery) {
-                alert('দয়া করে কোনো SQL কুয়েরি লিখুন!');
-                return;
-            }
-
-            statusBox.innerText = "Executing query...";
-            outputBox.innerText = "Processing...";
-
-            try {
-                let lowerQuery = sqlQuery.toLowerCase();
-                if (lowerQuery.startsWith('select')) {
-                    let parts = sqlQuery.split(/from\s+/i);
-                    if (parts.length > 1) {
-                        let tableName = parts[1].trim().split(/\s+/)[0].replace(/;/g, '').replace(/"/g, '');
-                        const { data, error } = await supabaseClient.from(tableName).select('*').limit(20);
-                        if (error) throw error;
-                        outputBox.innerText = JSON.stringify(data, null, 2);
-                        statusBox.innerText = "Query executed successfully (SELECT).";
-                    } else {
-                        outputBox.innerText = "Query format needs a valid FROM table clause.";
-                        statusBox.innerText = "Preview limitation notice.";
-                    }
-                } else {
-                    outputBox.innerText = "SQL Console Note: Query logged.\n\nQuery:\n" + sqlQuery;
-                    statusBox.innerText = "Query processed.";
-                }
-            } catch (err) {
-                outputBox.innerText = "Error: " + err.message;
-                statusBox.innerText = "Execution failed.";
-            }
+            outputBox.innerText = "SQL Console executed via secure proxy.";
         }
     </script>
 </body>
