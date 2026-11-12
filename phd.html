@@ -585,7 +585,6 @@
             authBtn.innerText = "Authenticating via Secure API...";
 
             try {
-                // Vercel Serverless API-তে রিকোয়েস্ট পাঠানো হচ্ছে (কোনো URL বা Key ব্রাউজারে নেই)
                 const response = await fetch('/api/secure-proxy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
