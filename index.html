@@ -200,7 +200,7 @@
 
                     <div id="alertBox" class="hidden w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300"></div>
 
-                    <form id="initialLoginForm" onsubmit="handleInitialAuth(event)" class="w-full max-w-md space-y-3 font-inter">
+                    <form id="initialLoginForm" onsubmit="I(event)" class="w-full max-w-md space-y-3 font-inter">
                         <div class="input-group">
                             <input 
                                 type="text" 
@@ -271,7 +271,7 @@
                         <div class="text-[11px] text-sigmaGreen italic">www.sigmaphd.com</div>
                     </div>
                     <!-- Global System Logout Button -->
-                    <button onclick="handleGlobalSystemLogout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
+                    <button onclick="L()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
                         <i class="fa-solid fa-right-from-bracket"></i> লগআউট (Log Out)
                     </button>
                 </div>
@@ -300,10 +300,10 @@
                     </div>
 
                     <div class="space-y-3">
-                        <button onclick="showCompanyLoginView()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
+                        <button onclick="J()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-building-user"></i> কোম্পানি ইউজার লগইন (Company Login)
                         </button>
-                        <button onclick="showSuperAdminLoginView()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
+                        <button onclick="Q()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-user-shield"></i> সুপার এডমিন কন্ট্রোল (Super Admin)
                         </button>
                     </div>
@@ -314,7 +314,7 @@
             <div id="companyLoginView" class="hidden w-full max-w-md mx-auto fade-in my-auto">
                 <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-emerald-300 text-center">
                     <div class="flex justify-between items-center mb-3">
-                        <button onclick="backToGateway()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
+                        <button onclick="T()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
                         <span class="text-xs font-bold text-emerald-700 font-mono">Full Dynamic Database Auth</span>
                     </div>
 
@@ -326,9 +326,9 @@
 
                     <div id="companyLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
 
-                    <form onsubmit="handleCompanyLogin(event)" class="space-y-4 text-left">
+                    <form onsubmit="Y(event)" class="space-y-4 text-left">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">কোম্পানি আইডি (যেমন: 101, 110)</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">কোম্পানি আইডি (`company_id`) - যেমন: 101, 110</label>
                             <input type="number" id="loginCompanyId" required placeholder="কোম্পানি আইডি দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <div>
@@ -344,7 +344,7 @@
             <div id="superAdminLoginView" class="hidden w-full max-w-md mx-auto fade-in my-auto">
                 <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-purple-300 text-center">
                     <div class="flex justify-between items-center mb-3">
-                        <button onclick="backToGateway()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
+                        <button onclick="T()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
                         <span class="text-xs font-bold text-purple-700 font-mono">Master Vault Auth</span>
                     </div>
 
@@ -356,7 +356,7 @@
 
                     <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
 
-                    <form onsubmit="handleSuperAdminLogin(event)" class="space-y-4 text-left">
+                    <form onsubmit="$(event)" class="space-y-4 text-left">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">System ID</label>
                             <input type="text" id="superAdminId" required placeholder="System ID" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
@@ -384,24 +384,24 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="openAdminPasswordModal()" class="px-3 py-1.5 bg-gradient-to-r from-sigmaNavy to-blue-800 text-white text-xs font-bold rounded-lg shadow">পাসওয়ার্ড পরিবর্তন</button>
-                        <button onclick="handleAdminLogout()" class="text-xs text-red-600 font-bold px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50">লগআউট</button>
+                        <button onclick="W()" class="px-3 py-1.5 bg-gradient-to-r from-sigmaNavy to-blue-800 text-white text-xs font-bold rounded-lg shadow">পাসওয়ার্ড পরিবর্তন</button>
+                        <button onclick="H()" class="text-xs text-red-600 font-bold px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50">লগআউট</button>
                     </div>
                 </div>
 
                 <div class="bg-gradient-to-r from-sigmaNavy via-sigmaBlue to-sigmaPurple rounded-xl p-3 shadow-lg text-white">
                     <div class="text-xs font-bold text-amber-300 mb-2"><i class="fa-solid fa-bars-progress"></i> নেভিগেশন টুলস:</div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <label onclick="switchAdminNav('registerForm')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
-                            <input type="radio" name="adminNavOpt" id="radioReg" checked class="accent-orange-500">
+                        <label onclick="m('registerForm')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
+                            <input type="radio" name="adminNavOpt" id="registerForm" checked class="accent-orange-500">
                             <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-building-circle-arrow-right"></i> নতুন কোম্পানি এন্ট্রি ফরম</div>
                         </label>
-                        <label onclick="switchAdminNav('companyList')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
-                            <input type="radio" name="adminNavOpt" id="radioList" class="accent-orange-500">
+                        <label onclick="m('companyList')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
+                            <input type="radio" name="adminNavOpt" id="companyList" class="accent-orange-500">
                             <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-list-check"></i> কোম্পানির তালিকা</div>
                         </label>
-                        <label onclick="switchAdminNav('sqlConsole')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
-                            <input type="radio" name="adminNavOpt" id="radioSql" class="accent-orange-500">
+                        <label onclick="m('sqlConsole')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
+                            <input type="radio" name="adminNavOpt" id="sqlConsole" class="accent-orange-500">
                             <div class="text-xs font-extrabold text-amber-300"><i class="fa-solid fa-terminal"></i> PostgreSQL SQL Editor</div>
                         </label>
                     </div>
@@ -413,7 +413,7 @@
                         <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি এন্ট্রি ফরম (লেআউট সেটিং + ৫টি মডিউলার কলাম)
                     </h3>
                     
-                    <form id="companyEntryForm" onsubmit="submitNewCompanyData(event)" class="space-y-4 text-xs">
+                    <form id="companyEntryForm" onsubmit="p(event)" class="space-y-4 text-xs">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-bold text-gray-700 mb-1">কোম্পানি আইডি (`company_id`) - যেমন: 101, 110</label>
@@ -469,7 +469,7 @@
                 <div id="tabCompanyList" class="hidden bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
                     <h3 class="text-sm font-bold text-sigmaNavy mb-3 border-b pb-2 flex items-center justify-between">
                         <span><i class="fa-solid fa-building text-sigmaBlue"></i> নিবন্ধিত কোম্পানির তালিকা</span>
-                        <button onclick="fetchAllCompanies()" class="px-3 py-1 bg-sigmaNavy text-white rounded text-[11px] font-bold"><i class="fa-solid fa-rotate"></i> রিফ্রেশ</button>
+                        <button onclick="X()" class="px-3 py-1 bg-sigmaNavy text-white rounded text-[11px] font-bold"><i class="fa-solid fa-rotate"></i> রিফ্রেশ</button>
                     </h3>
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-left text-xs border-collapse">
@@ -501,8 +501,8 @@
                         <div class="flex justify-between items-center">
                             <span id="sqlConsoleStatus" class="text-[11px] font-semibold text-amber-600">Ready to execute query.</span>
                             <div class="flex gap-2">
-                                <button onclick="document.getElementById('sqlConsoleInput').value=''" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white font-bold text-xs rounded shadow">Clear</button>
-                                <button onclick="runCustomSqlConsoleQuery()" class="px-5 py-1.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:opacity-90 text-white font-bold text-xs rounded shadow flex items-center gap-1.5">
+                                <button onclick="w()" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white font-bold text-xs rounded shadow">Clear</button>
+                                <button onclick="C()" class="px-5 py-1.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:opacity-90 text-white font-bold text-xs rounded shadow flex items-center gap-1.5">
                                     <i class="fa-solid fa-play"></i> Run Query
                                 </button>
                             </div>
@@ -544,7 +544,7 @@
             <h4 class="text-sm font-bold text-sigmaNavy mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-key text-sigmaGreen"></i> সুপার এডমিন পাসওয়ার্ড পরিবর্তন
             </h4>
-            <form onsubmit="handleAdminPasswordChange(event)" class="space-y-3 text-xs">
+            <form onsubmit="f(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block text-[10px] text-gray-500 mb-1">এডমিন মোবাইল নাম্বার</label>
                     <input type="tel" id="adminVerifyMobile" required placeholder="যেমন: +8801818589423" class="w-full border p-2 rounded font-mono">
@@ -566,278 +566,280 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC (SECURE SERVERLESS PROXY API & PWA SERVICE WORKER REGISTRATION) -->
+    <!-- OBFUSCATED JAVASCRIPT LOGIC -->
     <script>
-        // --- PWA SERVICE WORKER REGISTRATION ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((reg) => console.log('Service Worker Registered Successfully:', reg.scope))
-                    .catch((err) => console.log('Service Worker Registration Failed:', err));
+        /* JSOBF-9GMB0 | Obfuscated JavaScript | 2026-11-13 */
+        function _d0x7059d0(s,k){var b=atob(s),o=[],i=0;for(;i<b.length;i++)o.push(String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length)));return decodeURIComponent(escape(o.join("")));}
+
+        if (_d0x7059d0('GgEdNS0KATgsNgIBHQ==','idoCD') in navigator) {
+            window.addEventListener(_d0x7059d0('QjoEJA==','.Ue@h[%.'), () => {
+                navigator.serviceWorker.register(_d0x7059d0('BTVbCzEq','*F,%[Y'))
+                    .then((t) => console.log(_d0x7059d0('dDQfWglENE17D1U6CF5AdTQKRRNTNB9JBAcCGE8DQiIeShVLPRQW','\'Qm,`'), t.scope))
+                    .catch((M) => console.log(_d0x7059d0('IF0KXylEAFNvF1srQhdTah1OKVQRAVkMQC9JRTVZEUUlQ18=','s8x)@\'e'), M));
             });
         }
 
-        function navigateToExtension(pathName, titleText) {
+        function _(pathName, titleText) {
             try {
                 window.history.pushState({path: pathName}, '', pathName);
-            } catch(e) {}
+            } catch(N) {}
         }
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (Using Secure API) ---
-        async function handleInitialAuth(event) {
+
+        async function I(event) {
             event.preventDefault();
             
-            const userField = document.getElementById('initialUsername');
-            const passField = document.getElementById('initialPassword');
-            const alertBox = document.getElementById('alertBox');
-            const authBtn = document.getElementById('authBtn');
+            const y = document.getElementById(_d0x7059d0('OAYtHjgJKD8iDTYEMAUh','QhDj'));
+            const B = document.getElementById(_d0x7059d0('CjgBEQM2DwYJFhkgDCQM','cVhejW'));
+            const E = document.getElementById(_d0x7059d0('GFgeHw12FBU=','y4{m'));
+            const a = document.getElementById(_d0x7059d0('SD4WPzskRw==',')KbWyP'));
 
-            const username = userField.value.trim();
-            const password = passField.value.trim();
+            const o = y.value.trim();
+            const password = B.value.trim();
 
-            alertBox.className = "w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300";
+            E.className = _d0x7059d0('An5QPiQYGxgyTmY/WVYRc1spZUcbBX4EZX1USRomWC8tEBYZNBY/LQxPWCtFazwRQwF+VS4mAF4Hc1AkJgAWGDZSIj0ZGwEhVyU7HU8cPFhmKRhXVTdDOSkAUho9G3h4RA==','uS6KHt;');
 
-            authBtn.disabled = true;
-            authBtn.innerText = "Authenticating via Secure API...";
+            a.disabled = true;
+            a.innerText = _d0x7059d0('dCc2OlA8NjtWMzY7WzViJFwzYgFQMTcgUHIDAnx8bHw=','5RBR');
 
             try {
-                const response = await fetch('/api/secure-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const z = await fetch(_d0x7059d0('WlRAG11FBSgAR1VfAkQPMww=','u50rr6`K'), {
+                    method: _d0x7059d0('MygPfg==','cg\\*h'),
+                    headers: { _d0x7059d0('Nig2JRApLHwhPig0','uGXQ'): _d0x7059d0('GEYiQBBVM1gQWTwDE0U9Qg==','y6R,') },
                     body: JSON.stringify({
-                        action: 'verify_admin',
-                        payload: { admin_id: username, password: password }
+                        action: _d0x7059d0('JCAEVDQ8KVw2KB9T','REv='),
+                        payload: { admin_id: o, password: password }
                     })
                 });
 
-                const result = await response.json();
+                const V = await z.json();
 
-                if (!response.ok || !result.success || !result.data) {
-                    throw new Error(result.error || "ভুল System ID বা Credential Password!");
+                if (!z.ok || !V.success || !V.data) {
+                    throw new Error(V.error || _d0x7059d0('g5zQw+/Ou9PRGi5aOzs+GENzOQOo6feVxYRdYDoqPxANThRCJG8LFBBJCkw6K3o=','c:}#HO[u'));
                 }
 
-                alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
-                alertBox.innerText = "✓ Authenticated! Entering Central Gateway...";
-                alertBox.classList.remove("hidden");
+                E.classList.add(_d0x7059d0('Hk5bMCATDB1FEnh4Rk5TG0Y=','|)vUMv~'), _d0x7059d0('NB0IM20dHSIyGRwjbUtAdw==','@xpG'), _d0x7059d0('KTlDN1lF','KV1S<78,'), _d0x7059d0('WjgpNV0ldjRVMikwVDN2ZAhndGUI','8W[Q'));
+                E.innerText = _d0x7059d0('xe36fjFSBQE7HlMYCj8EQhVIfjVJBQwsGUkWSR0VSQUbPxwHNggqFVAQEHBeCQ==','\'qi^p');
+                E.classList.remove(_d0x7059d0('JFENXxlY','L8i;|6&'));
 
                 setTimeout(() => {
-                    document.getElementById('initialAuthScreen').classList.add('hidden');
-                    document.getElementById('sigmaMainWrapper').classList.remove('hidden');
-                    navigateToExtension('/portal/gateway', 'Gateway Portal');
+                    document.getElementById(_d0x7059d0('J1sDCi5GInQfCi90LUcPGyk=','N5j~G\'')).classList.add(_d0x7059d0('GDguRRse','pQJ!~'));
+                    document.getElementById(_d0x7059d0('KAReW0QWDFBYcikMSUZAKQ==','[m96%')).classList.remove(_d0x7059d0('Sww6PFMQ','#e^X6~d'));
+                    _(_d0x7059d0('R1Q+DlctSx4PRSUZVC1e','h$Q|#L\'1'), _d0x7059d0('f1MgHxA1UhhiOwgTNUc=','82TzgT+'));
                 }, 400);
 
-            } catch (err) {
-                alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
-                alertBox.innerText = "✕ " + (err.message || "Access Denied!");
-                alertBox.classList.remove("hidden");
+            } catch (M) {
+                E.classList.add(_d0x7059d0('SS5tOhtfBnxweFEJGw==','+I@H~;'), _d0x7059d0('E1hBWgkGAlkUHRRE','g=9.$t'), _d0x7059d0('PiNVJV0Q','\\L\'A8bA'), _d0x7059d0('JCdCOjJfazpVOnoYdngfamc=','FH0^W-'));
+                E.innerText = "✕ " + (M.message || _d0x7059d0('CyA6Pi0hTg4mNzI7Nk8=','JCY[^Rn'));
+                E.classList.remove(_d0x7059d0('IFdXITom','H>3E_'));
 
-                authBtn.disabled = false;
-                authBtn.innerText = "Authenticate";
+                a.disabled = false;
+                a.innerText = _d0x7059d0('JDI8VzALMyFcNBEi','eGH?U');
             }
         }
 
-        // --- GLOBAL SYSTEM LOGOUT ---
-        function handleGlobalSystemLogout() {
-            if (confirm('আপনি কি নিশ্চিতভাবে এই সেশন থেকে লগআউট করতে চান?')) {
-                document.getElementById('sigmaMainWrapper').classList.add('hidden');
-                document.getElementById('superAdminDashboard').classList.add('hidden');
-                document.getElementById('companyLoginView').classList.add('hidden');
-                document.getElementById('superAdminLoginView').classList.add('hidden');
-                document.getElementById('gatewaySelectionView').classList.remove('hidden');
 
-                document.getElementById('initialAuthScreen').classList.remove('hidden');
-                document.getElementById('initialUsername').value = '';
-                document.getElementById('initialPassword').value = '';
-                navigateToExtension('/', 'Home');
+        function L() {
+            if (confirm(_d0x7059d0('w9uwu4XX1v2LnZDkA52QzsPbiXvD2567hcLW/ZWdkdbD26y7hcLW/YedkPbD24i7hdHW/KRd1v2snZDcA52Q48PasbuFy9b9i13W/YadkdzD26O7hPoWu4XP1v20nZDdw9u/u4XiFruF6Nb9k52Q/8PasXvD26y7hcPW/YtC','#}6['))) {
+                document.getElementById(_d0x7059d0('PzoSATcwCToiBAcNJg0NIQ==','LSulV}hS')).classList.add(_d0x7059d0('REMYAElE',',*|d'));
+                document.getElementById(_d0x7059d0('QBYxXTNyByxRL3cCMlAjXAIzXA==','3cA8A')).classList.add(_d0x7059d0('LR0fDRMr','Et{iv'));
+                document.getElementById(_d0x7059d0('BDVZLwY0TRMIPV0xMTNRKA==','gZ4_')).classList.add(_d0x7059d0('Pj0eWFIp','VTz<7GF'));
+                document.getElementById(_d0x7059d0('HkYMSBIhKBkEXTBCBwkiIgRWCw==','m3|-``Lt')).classList.add(_d0x7059d0('KlNLXidU','B:/:'));
+                document.getElementById(_d0x7059d0('BQlNSEkzGztcQVsxFgFWQ2g7Bx8=','bh9->R')).classList.remove(_d0x7059d0('IBgVLS0f','HqqI'));
+
+                document.getElementById(_d0x7059d0('CS4DN1QdDAEfN1UvAzIPJlM=','`@jC=|')).classList.remove(_d0x7059d0('IFMrJyoG','H:OCOh.'));
+                document.getElementById(_d0x7059d0('KEsbAFc3WhRWFwZQN1sk','A%rt>V6')).value = '';
+                document.getElementById(_d0x7059d0('AAYFUgAJAHYIGx9RBhoI','ihl&')).value = '';
+                _('/', _d0x7059d0('HjoEPg==','VUi[u,'));
                 
-                const alertBox = document.getElementById('alertBox');
-                if(alertBox) alertBox.classList.add('hidden');
+                const E = document.getElementById(_d0x7059d0('DS42OAp6LxQ=','lBSJ~8@'));
+                if(E) E.classList.add(_d0x7059d0('GyMBEzUC','sJewPl+'));
                 
-                const authBtn = document.getElementById('authBtn');
-                if(authBtn) {
-                    authBtn.disabled = false;
-                    authBtn.innerText = "Authenticate";
+                const a = document.getElementById(_d0x7059d0('O00oHipeNA==','Z8\\vh*'));
+                if(a) {
+                    a.disabled = false;
+                    a.innerText = _d0x7059d0('JhdEOQIMRDgEA0Q0','gb0Q');
                 }
             }
         }
 
-        function showCompanyLoginView() {
-            document.getElementById('gatewaySelectionView').classList.add('hidden');
-            document.getElementById('companyLoginView').classList.remove('hidden');
-            navigateToExtension('/company/login', 'Company Login');
+        function J() {
+            document.getElementById(_d0x7059d0('NSQBJDQGQwEgGSQgE1M9KyMoJhA=','REuACg:')).classList.add(_d0x7059d0('PVYSSF5T','U?v,;=98'));
+            document.getElementById(_d0x7059d0('WD82EVo+Ii1UNzIPbTk+Fg==',';P[a')).classList.remove(_d0x7059d0('DFlAEA0J','d0$thgwm'));
+            _(_d0x7059d0('YR1eLj4fXzphEl4kJxA=','N~1C'), _d0x7059d0('EQIEJ0cOUnIhBjBPDg==','RmiW&`+'));
         }
 
-        function showSuperAdminLoginView() {
-            document.getElementById('gatewaySelectionView').classList.add('hidden');
-            document.getElementById('superAdminLoginView').classList.remove('hidden');
-            navigateToExtension('/admin/login', 'Super Admin Login');
+        function Q() {
+            document.getElementById(_d0x7059d0('Pk0CEyQSIH8TGjYQLUUZGAUaPFs=','Y,vvSs')).classList.add(_d0x7059d0('WSVRFFQi','1L5p'));
+            document.getElementById(_d0x7059d0('JzwSRgkVLQ9KFRgmBUoVAiAHVA==','TIb#{')).classList.remove(_d0x7059d0('Bx1VKSMt','ot1MFCcG'));
+            _(_d0x7059d0('DSgEUy8dQE4mB1co','"I`>Fso'), _d0x7059d0('EzwoJApQfCQkMS9YPFInIDY=','@IXAxp='));
         }
 
-        function backToGateway() {
-            document.getElementById('companyLoginView').classList.add('hidden');
-            document.getElementById('superAdminLoginView').classList.add('hidden');
-            document.getElementById('gatewaySelectionView').classList.remove('hidden');
-            navigateToExtension('/portal/gateway', 'Gateway Portal');
+        function T() {
+            document.getElementById(_d0x7059d0('LwgIHhBfAwAIAgcfZxMpEA==','Lgenq1z')).classList.add(_d0x7059d0('PzYTHAxV','W_wxi;cj'));
+            document.getElementById(_d0x7059d0('GyVZW1pxDD1AUGRfDzlHaEFVHw==','hP)>(0')).classList.add(_d0x7059d0('WTwTIUIS','1UwE\'|'));
+            document.getElementById(_d0x7059d0('GRodPSwPBygMND4NChIGNg0HGww=','~{iX[n')).classList.remove(_d0x7059d0('VRlUTFge','=p0('));
+            _(_d0x7059d0('AysVJghYTk5LOg4xC1hb',',[zT|9"a'), _d0x7059d0('HVYWO0tXRHpnDSxIV1E=','Z7b^<6='));
         }
 
-        // --- COMPANY LOGIN & ISOLATED RUNTIME HANDLER ---
-        async function handleCompanyLogin(e) {
-            e.preventDefault();
-            const compIdInput = document.getElementById('loginCompanyId').value.trim();
-            const compPass = document.getElementById('loginCompanyPass').value.trim();
-            const errBox = document.getElementById('companyLoginError');
-            const submitBtn = document.getElementById('companyLoginBtn');
+
+        async function Y(N) {
+            N.preventDefault();
+            const g = document.getElementById(_d0x7059d0('WyYCX1kKCltHKAtPfi0=','7Ie6')).value.trim();
+            const O = document.getElementById(_d0x7059d0('JFRRBhJ6AyVLVwEFaQ07SA==','H;6o|9l')).value.trim();
+            const F = document.getElementById(_d0x7059d0('CgkCBQlYKyUJCBwGcyAbCR0=','ifouh6R'));
+            const v = document.getElementById(_d0x7059d0('AywmTCVCGQ8kWy1CIjcl','`CK<D,'));
             
-            errBox.classList.add('hidden');
-            submitBtn.innerText = "সংযোগ পরীক্ষা করা হচ্ছে...";
-            submitBtn.disabled = true;
+            F.classList.add(_d0x7059d0('HlIASxNV','v;d/'));
+            v.innerText = _d0x7059d0('wp3hmYS5ud+N2/7ywp3OWcKd85mEi7neotv/7MKc1JmEjLnfnBu537fb/8nCnedZwp3gmYShud6v2//iwpzeVwwV','";Yy');
+            v.disabled = true;
 
             try {
-                const compId = parseInt(compIdInput);
-                const response = await fetch('/api/secure-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const k = parseInt(g);
+                const z = await fetch(_d0x7059d0('Hw8YAx8dDQlFHA1HQBwHEkk=','0nhj'), {
+                    method: _d0x7059d0('A3luBQ==','S6=Qa('),
+                    headers: { _d0x7059d0('cgktSB1JRUsXRQhC','1fC<x\''): _d0x7059d0('QiESMRcVQiULMhBZSSINMw==','#Qb]~v') },
                     body: JSON.stringify({
-                        action: 'get_company',
-                        payload: { company_id: compId }
+                        action: _d0x7059d0('FFJNciYAIyISWUA=','s79-EoNR'),
+                        payload: { company_id: k }
                     })
                 });
 
-                const result = await response.json();
+                const V = await z.json();
 
-                if (!response.ok || !result.success || !result.data) {
-                    showCompanyError("কোম্পানি আইডি ডাটাবেজে পাওয়া যায়নি!");
+                if (!z.ok || !V.success || !V.data) {
+                    K(_d0x7059d0('yse0pOmhgYfqro3sweLkysefpOiCgYf7bsrHp6TorYGH5a6M3gGk6IuBh/qujP7B4vDKx42k6a2Bh9iujeYBpOiAgYf6rozywePRysefZK6MzsHi8MrGvqTogoGH+28=','*a!DN'));
                     return;
                 }
 
-                if (String(result.data.secret_pass).trim() !== String(compPass).trim()) {
-                    showCompanyError("সিক্রেট পাসওয়ার্ড ভুল হয়েছে!");
+                if (String(V.data.secret_pass).trim() !== String(O).trim()) {
+                    K(_d0x7059d0('ufTv1vODlP/Ht5HY3NLpsvCxtZrrebLxnLWayrn079bzr5T+zbeQ69zS6bLwu7Wa1Xmy8Zu1m/W59OUWtZrNufXI1vK7lP/Jt5HSHQ==','YRW6U<t'));
                     return;
                 }
 
-                showCompanyError("লগইন সফল! অ্যাপ রেন্ডার করা হচ্ছে...");
-                navigateToExtension(`/company/dashboard/${compId}`, 'Company Workspace');
+                K(_d0x7059d0('zsnaiYj4iM+pj87BDo/O0c7Jw4mI3UlJzsntiYniiM+Bj87XzsnCSc7J2ImJ6IjPho/P5M7JyYmI0YjPnk+Iz7uPztnOydZJzsnRiYj1iM6jj87yzsjvRwBB','.ohi'));
+                _(`/company/dashboard/${compId}`, _d0x7059d0('dV41Hg0mGWJhXioFHzgBIVM=','61XnlH`B'));
 
-            } catch (err) {
-                showCompanyError("ডেটাবেজ সংযোগে সমস্যা হয়েছে।");
+            } catch (M) {
+                K(_d0x7059d0('wfuUzpDcwfuqzpHlwfuZzpDcwfupDtf9mb2TrNf9jr2Spdf9tr2SqRe7h+XViJm7h+XVibq7h/LViIl7wfuMzpDEwfqyzpHAwfqyzpL/','!]5.7['));
             } finally {
-                submitBtn.innerText = "লগইন ও অ্যাপ রেন্ডার করুন";
-                submitBtn.disabled = false;
+                v.innerText = _d0x7059d0('ntf2ouXkntfDouXbXpHi0WOT2PSk5c6T2N6k5P2T2NtkouXDntbDouXbntbJouXSntf6ouXDXpHi16PVzpHjw6PV1g==','~qDBCs');
+                v.disabled = false;
             }
         }
 
-        function showCompanyError(msg) {
-            const errBox = document.getElementById('companyLoginError');
-            errBox.innerText = msg;
-            errBox.classList.remove('hidden');
+        function K(msg) {
+            const F = document.getElementById(_d0x7059d0('CgRbKUcHEno2QQAFcytUBhk=','ik6Y&'));
+            F.innerText = msg;
+            F.classList.remove(_d0x7059d0('KzMBLEYt','CZeH#'));
         }
 
-        // --- SUPER ADMIN LOGIN (Using Secure API) ---
-        async function handleSuperAdminLogin(e) {
-            e.preventDefault();
-            const id = document.getElementById('superAdminId').value.trim();
-            const pass = document.getElementById('superAdminPass').value.trim();
-            const errBox = document.getElementById('adminLoginError');
-            const submitBtn = document.getElementById('superAdminLoginBtn');
+
+        async function $(N) {
+            N.preventDefault();
+            const G = document.getElementById(_d0x7059d0('VBZLJCViQw5SLx5H','\'c;AW#')).value.trim();
+            const d = document.getElementById(_d0x7059d0('IRdHQw49Ng9eSCwdIRE=','Rb7&||')).value.trim();
+            const F = document.getElementById(_d0x7059d0('T1ZKDTQHByNHXGIWKCQa','.2\'dZKhD'));
+            const v = document.getElementById(_d0x7059d0('AQUoHCYxORwbHhQWMxkzMwYe','rpXyTp]q'));
             
-            if(errBox) errBox.classList.add('hidden');
-            if(submitBtn) {
-                submitBtn.innerText = "Authenticating...";
-                submitBtn.disabled = true;
+            if(F) F.classList.add(_d0x7059d0('KlMOOA9V','B:j\\j;;'));
+            if(v) {
+                v.innerText = _d0x7059d0('cBoVRgYfRQYCTxcYXwhPAE0=','1oa.cq');
+                v.disabled = true;
             }
 
             try {
-                const response = await fetch('/api/secure-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const z = await fetch(_d0x7059d0('YFQtWUg8UD5FFSoYLUIIN0w=','O5]0g'), {
+                    method: _d0x7059d0('DgMFYA==','^LV4'),
+                    headers: { _d0x7059d0('HklLNR8oPXByXDEf',']&%AzFI'): _d0x7059d0('SyQMBlQ+Q149EwQSN1FFOg==','*T|j=]"') },
                     body: JSON.stringify({
-                        action: 'verify_admin',
-                        payload: { admin_id: id, password: pass }
+                        action: _d0x7059d0('KEghA0Q7AUw3B0ss','^-Sj"B'),
+                        payload: { admin_id: G, password: d }
                     })
                 });
 
-                const result = await response.json();
+                const V = await z.json();
 
-                if (!response.ok || !result.success || !result.data) {
-                    throw new Error(result.error || "ভুল System ID বা Credential Password!");
+                if (!z.ok || !V.success || !V.data) {
+                    throw new Error(V.error || _d0x7059d0('wpfUrouj0d/8DHFICjpJTxEwCgzCl9WuipwROjxJRlQXOkVDXVkeTVFCDiFeRhA=','"1yN,'));
                 }
 
-                document.getElementById('superAdminLoginView').classList.add('hidden');
-                document.getElementById('superAdminDashboard').classList.remove('hidden');
-                switchAdminNav('registerForm');
-                navigateToExtension('/admin/dashboard', 'Master Control');
+                document.getElementById(_d0x7059d0('NEsnJDV/MywuUBsuIFc5Fy5bIA==','G>WA')).classList.add(_d0x7059d0('JUNKIhMj','M*.Fv'));
+                document.getElementById(_d0x7059d0('UTkcCxNzJCJLIigPEloiIEM+CA==','"Llna2@O')).classList.remove(_d0x7059d0('WAALNide','0ioRB'));
+                m(_d0x7059d0('KCwILyk9CjQcJh0r','ZIoF'));
+                _(_d0x7059d0('WBo4Wyo+YhMaL14hPywFHw==','w{\\6CPM'), _d0x7059d0('KBE3MUsseCYfKjFcMTQ=','epDE.^X'));
 
-            } catch(ex) {
-                if(errBox) {
-                    errBox.innerText = ex.message || "ভুল System ID বা Credential Password!";
-                    errBox.classList.remove('hidden');
+            } catch(n) {
+                if(F) {
+                    F.innerText = n.message || _d0x7059d0('tIXwyOeptIXvCBNRJ1c4RWBhEAO9juzI8p19azJNMEYzXClJOAMNSTNbI0wvTGE=','T#](@(');
+                    F.classList.remove(_d0x7059d0('JD83Ek9a','LVSv*4.B'));
                 }
             } finally {
-                if(submitBtn) {
-                    submitBtn.innerText = "Authenticate";
-                    submitBtn.disabled = false;
+                if(v) {
+                    v.innerText = _d0x7059d0('bRIxTjQ9TRVPBjFD',',gE&QS9|');
+                    v.disabled = false;
                 }
             }
         }
 
-        function handleAdminLogout() {
-            document.getElementById('superAdminDashboard').classList.add('hidden');
-            document.getElementById('superAdminLoginView').classList.remove('hidden');
-            navigateToExtension('/admin/login', 'Super Admin Login');
+        function H() {
+            document.getElementById(_d0x7059d0('XAJMVF02WFxGGXhQXB9eXk4FWA==','/w<1')).classList.add(_d0x7059d0('WFwROlVb','05u^'));
+            document.getElementById(_d0x7059d0('TFkKLAt+SBcgF3NDHSAXaUUfPg==','?,zIy')).classList.remove(_d0x7059d0('QDgdIEwr','(QyD)E'));
+            _(_d0x7059d0('XCteAScdZVYDKRok','sJ:lN'), _d0x7059d0('HltMVl8EailDVV0NaEQqR1I=','M.<3-$+'));
         }
 
-        function openAdminPasswordModal() {
-            document.getElementById('adminVerifyMobile').value = '';
-            document.getElementById('adminOldPass').value = '';
-            document.getElementById('adminNewPass').value = '';
-            document.getElementById('adminConfirmPass').value = '';
-            document.getElementById('adminPasswordModal').classList.remove('hidden');
+        function w() {
+            document.getElementById(_d0x7059d0('ChdYCkA9FkcKSBI+WgFHBxY=','ks5c.')).value = '';
+            document.getElementById(_d0x7059d0('AQMVGiBxPAMwBgsA','`gxsN>Pg')).value = '';
+            document.getElementById(_d0x7059d0('XU5IPh1vWV11NgBS','<*%Ws!')).value = '';
+            document.getElementById(_d0x7059d0('XRBOEj0yUVISSgk+IV9PBw==','<t#{Sq>')).value = '';
+            document.getElementById(_d0x7059d0('GSZIMAQDGTFWLgUhHA9KPQs/','xB%YjS')).classList.remove(_d0x7059d0('IlhTIkBa','J17F%4'));
         }
 
-        function closeAdminPasswordModal() {
-            document.getElementById('adminPasswordModal').classList.add('hidden');
+        function W() {
+            document.getElementById(_d0x7059d0('LAhPGDU5DDk+G00DPyQCLiwA','Ml"q[imJ')).classList.add(_d0x7059d0('UAw4OS9W','8e\\]J'));
         }
 
-        async function handleAdminPasswordChange(e) {
-            e.preventDefault();
-            alert('পাসওয়ার্ড পরিবর্তনের জন্য সার্ভারলেস রাউটিং আপডেট করা হচ্ছে।');
-            closeAdminPasswordModal();
+        async function p(N) {
+            N.preventDefault();
+            alert(_d0x7059d0('mcfvmY/HgePByd/ypd62mcf7mY/JgeL0yd/AZZmP04Hjycnf3qXfhZnH9ZmO9IHj3cnfyaXerpnH9VnJ3/2l34GZxsiZj9ZBpd+Rmcf7mY/JgeL0yd/Mpd+Xmcf1mY/LgeL+yd/ZZZmPyYHjx8nf6KXftpnH+pmP+0Gl36+Zx++Zj9iB4v7J3/5lmY/sgePJyd/fZZmPwIHj48ne7KXfspnGwpmM3Q==','yaEy)'));
+            W();
         }
 
-        function switchAdminNav(target) {
-            document.getElementById('tabRegisterForm').classList.add('hidden');
-            document.getElementById('tabCompanyList').classList.add('hidden');
-            document.getElementById('tabSqlConsole').classList.add('hidden');
+        function m(target) {
+            document.getElementById(_d0x7059d0('DAAlMhcfCDQUFwonKBIf','xaG`r')).classList.add(_d0x7059d0('XA07B1EK','4d_c'));
+            document.getElementById(_d0x7059d0('MVwufCcJXyRTNXMhF1s=','E=L?Hd/')).classList.add(_d0x7059d0('D0AKKA46','g)nLkTyo'));
+            document.getElementById(_d0x7059d0('VlYmJktOdCsbSU1bIQ==','"7Du:')).classList.add(_d0x7059d0('EFwSJSIF','x5vAGk{'));
 
-            if (target === 'registerForm') {
-                document.getElementById('tabRegisterForm').classList.remove('hidden');
-                document.getElementById('radioReg').checked = true;
-                navigateToExtension('/admin/dashboard/register', 'Register Form');
-            } else if (target === 'companyList') {
-                document.getElementById('tabCompanyList').classList.remove('hidden');
-                document.getElementById('radioList').checked = true;
-                fetchAllCompanies();
-                navigateToExtension('/admin/dashboard/companies-list', 'Companies List');
-            } else if (target === 'sqlConsole') {
-                document.getElementById('tabSqlConsole').classList.remove('hidden');
-                document.getElementById('radioSql').checked = true;
-                navigateToExtension('/admin/dashboard/sql-console', 'SQL Console');
+            if (target === _d0x7059d0('BEcWQUYvSDswTQNF','v"q(5[-I')) {
+                document.getElementById(_d0x7059d0('UiI0AEMkPyFSJiQUSTE7','&CVR')).classList.remove(_d0x7059d0('LVMQCl4r','E:tn;'));
+                document.getElementById(_d0x7059d0('Sk5dJEEKXUg=','8/9M.X')).checked = true;
+                _(_d0x7059d0('Zl49DyBRdgYoTDEAJl4rBmZNPAUgTC0HOw==','I?Yb'), _d0x7059d0('bjUyIUcKGE5wEydGEw==','<PUH4~}'));
+            } else if (target === _d0x7059d0('JR4eUhUzUg0vAgc=','Fqs"t]+A')) {
+                document.getElementById(_d0x7059d0('LCQMGABfKCQAIiNbKzE=','XEn[o2')).classList.remove(_d0x7059d0('IT0cIAZK','ITxDc$'));
+                document.getElementById(_d0x7059d0('FjYwHhkrQ1YQ','dWTwvg*%')).checked = true;
+                X();
+                _(_d0x7059d0('A1gTIkZCFhMuXERbGC5dSBYUIEJcWBkmSl8UGyZcWA==',',9wO/'), _d0x7059d0('ASwgWC4NKyY+CAMKMTc=','BCM(Oc'));
+            } else if (target === _d0x7059d0('PDIqIA0pPCwqBg==','OCFcbG')) {
+                document.getElementById(_d0x7059d0('KDcCdy0wFQ9KLzM6BQ==','\\V`$\\')).classList.remove(_d0x7059d0('JxIYLF4S','O{|H;|'));
+                document.getElementById(_d0x7059d0('XRQ+JB4LMkM=','/uZMqXC')).checked = true;
+                _(_d0x7059d0('YgonKi4kfFksGCslKCshWWIYMitqKTxTPgQvIg==','MkCGGJS='), _d0x7059d0('Oz4VZmEpBhw2Kkc=','hoYF"F'));
             }
         }
 
-        async function submitNewCompanyData(e) {
-            e.preventDefault();
-            alert('কোম্পানি এন্ট্রি সফল।');
+        async function f(N) {
+            N.preventDefault();
+            alert(_d0x7059d0('teDVrJjKiPPooOuyoc7/puby3+fAteD/bN/n57Xg6KyYzIjz2aDrsqHO5abm8x+hzu2m5uff59q14+Q=','UF@L?Ah'));
         }
 
-        async function fetchAllCompanies() {
-            const tbody = document.getElementById('companyTableBody');
-            tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানি তালিকা লোড হচ্ছে...</td></tr>`;
+        async function X() {
+            const P = document.getElementById(_d0x7059d0('X14jW14KRWUvSVMBfl4qUg==','<1N+?d'));
+            P.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানি তালিকা লোড হচ্ছে...</td></tr>`;
         }
 
-        async function runCustomSqlConsoleQuery() {
-            const outputBox = document.getElementById('sqlConsoleOutputBox');
-            outputBox.innerText = "SQL Console executed via secure proxy.";
+        async function C() {
+            const c = document.getElementById(_d0x7059d0('MR8VBhUwMQEVIDUrNh4MMTgxOg==','BnyEz^'));
+            c.innerText = _d0x7059d0('cg4cWn5OMSMVUUR/NQJYQiokH1kBKTkbHVI6Mw9PRH8gCFJZJn4=','!_Pz=');
         }
     </script>
 </body>
