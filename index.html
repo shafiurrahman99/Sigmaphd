@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sigma PhD - Personal Dashboard</title>
+    <title>Sigma PhD - Personal Dashboard with Balance Transfer</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -80,7 +80,7 @@
     <!-- Live Notification Ticker Bar -->
     <div class="fixed top-3 right-3 z-50 bg-slate-900/90 border border-emerald-500/50 text-emerald-300 px-3 py-1.5 rounded-full text-xs font-mono shadow-lg flex items-center space-x-1.5 backdrop-blur-md">
         <span class="animate-ping w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span id="tickerText">+ [System]: রেডি</span>
+        <span id="tickerText">+ [System]: ট্রান্সফার মডিউল সচল</span>
     </div>
 
     <!-- ================= MAIN CONTAINER ================= -->
@@ -90,7 +90,6 @@
         <div class="glass-card rounded-3xl p-5 text-center relative overflow-hidden space-y-2">
             <h1 class="text-2xl font-extrabold text-white tracking-tight">Sigma PhD</h1>
             
-            <!-- Token Number & Copy Feature -->
             <div class="flex items-center justify-center space-x-2 pt-1">
                 <span class="text-xs text-slate-400">আপনার টোকেন:</span>
                 <span id="headerTokenText" class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono font-bold text-xs px-2.5 py-1 rounded">SIGMA-8942</span>
@@ -102,7 +101,6 @@
 
         <!-- ================= VIEW 1: FRONT PAGE (ACTIVATE LICENSE & SIGN IN) ================= -->
         <div id="viewFrontPage" class="glass-card rounded-3xl p-6 space-y-5 fade-in text-center">
-            <!-- Top: Activate License Button -->
             <div class="space-y-3">
                 <button onclick="openActivateModal()" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 hover:opacity-95 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-xl flex items-center justify-center space-x-3 text-base transition-all active:scale-95">
                     <i class="fa-solid fa-user-plus text-lg"></i>
@@ -112,7 +110,6 @@
 
             <div class="border-t border-slate-800 pt-3"></div>
 
-            <!-- Bottom: Sign In Section -->
             <div class="space-y-3 text-left">
                 <h3 class="text-xs font-bold text-slate-300 text-center mb-1">পুরাতন বা অনুমোদিত গ্রাহকগণ</h3>
                 <form onsubmit="handleDirectSignIn(event)" class="space-y-3">
@@ -182,7 +179,7 @@
                 </button>
             </div>
 
-            <!-- Personal Dashboard Action Buttons (Lot Purchase & Sell License) -->
+            <!-- Personal Dashboard Action Buttons -->
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button onclick="openBuyLotModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow transition-all">
                     <i class="fa-solid fa-boxes-packing"></i>
@@ -196,11 +193,19 @@
 
             <!-- Common Features Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <!-- Balance & Plus Button & Latest Commission Feed -->
+                <!-- Balance, Top-up (+) Button & Standard Balance Transfer Button -->
                 <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex flex-col justify-between relative">
                     <div class="flex items-center justify-between text-xs text-slate-400">
                         <span>ব্যালেন্স (Balance in BDT)</span>
-                        <button onclick="openTopUpModal()" class="w-7 h-7 bg-emerald-600 text-slate-950 font-black rounded-full flex items-center justify-center text-sm shadow transition-all hover:bg-emerald-500" title="Add Balance">+</button>
+                        <div class="flex items-center space-x-1.5">
+                            <!-- Plus Button for Top-Up -->
+                            <button onclick="openTopUpModal()" class="w-6 h-6 bg-emerald-600 text-slate-950 font-black rounded-full flex items-center justify-center text-xs shadow transition-all hover:bg-emerald-500" title="Add Balance">+</button>
+                            <!-- Balance Transfer Standard Button -->
+                            <button onclick="openTransferModal()" class="px-2 py-0.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded text-[10px] shadow transition flex items-center space-x-1" title="User to User Transfer">
+                                <i class="fa-solid fa-right-left text-[9px]"></i>
+                                <span>ট্রান্সফার</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="flex items-baseline space-x-2 mt-2">
                         <div id="mainWalletBalance" class="text-xl font-extrabold text-amber-400 font-mono">৳ 1,960.00</div>
@@ -208,7 +213,7 @@
                             +৳8.00 (লেটেস্ট)
                         </span>
                     </div>
-                    <span class="text-[9px] text-slate-500 mt-1">সর্বশেষ টোকেন কমিশন ও মূল ব্যালেন্স</span>
+                    <span class="text-[9px] text-slate-500 mt-1">মূল ব্যালেন্স ও ইউজার ট্রান্সফার সুবিধা</span>
                 </div>
 
                 <!-- User Specific Validity Countdown -->
@@ -234,7 +239,7 @@
 
     <!-- ================= MODALS ================= -->
 
-    <!-- 1. ACTIVATE LICENSE MODAL (Auto-Token Detection) -->
+    <!-- 1. ACTIVATE LICENSE MODAL -->
     <div id="activateModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
             <button onclick="closeActivateModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -288,7 +293,37 @@
         </div>
     </div>
 
-    <!-- 2. BUY LOT MODAL (Lot Purchase inside Personal Dashboard) -->
+    <!-- 2. STANDARD BALANCE TRANSFER MODAL (User to User) -->
+    <div id="transferModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-right-left text-blue-400"></i>
+                <span>ইউজার টু ইউজার ব্যালেন্স ট্রান্সফার</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">আপনার অ্যাকাউন্ট থেকে অন্য কোনো রেজিস্টার্ড ইউজারের কাছে তাৎক্ষণিকভাবে ব্যালেন্স পাঠান।</p>
+
+            <form onsubmit="handleBalanceTransfer(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">প্রাপকের ইউজার আইডি / নেম:</label>
+                    <input type="text" id="transferRecipient" required placeholder="যেমন: user_102" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">টাকার পরিমাণ (BDT):</label>
+                    <input type="number" id="transferAmount" min="10" value="100" required class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono font-bold">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">সিকিউরিটি পিন / পাসওয়ার্ড:</label>
+                    <input type="password" id="transferPin" required placeholder="আপনার পাসওয়ার্ড দিন..." class="w-full custom-input rounded-xl py-2.5 px-3 font-mono">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg mt-2">
+                    ব্যালেন্স ট্রান্সফার নিশ্চিত করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. BUY LOT MODAL -->
     <div id="buyLotModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
             <button onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -312,7 +347,7 @@
         </div>
     </div>
 
-    <!-- 3. SELL LICENSE MODAL (Sell to New User inside Personal Dashboard) -->
+    <!-- 4. SELL LICENSE MODAL -->
     <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
             <button onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -335,7 +370,7 @@
         </div>
     </div>
 
-    <!-- 4. BALANCE TOP-UP MODAL -->
+    <!-- 5. BALANCE TOP-UP MODAL -->
     <div id="topUpModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
             <button onclick="closeTopUpModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -362,6 +397,7 @@
     <script>
         let registeredUsername = "Zaki_8942";
         let registeredPassword = "123";
+        let userBalance = 1960.00;
         let isApprovedByAdmin = false;
         let isPreApprovedSale = false;
 
@@ -398,8 +434,12 @@
             showToast('টোকেন নম্বর সফলভাবে কপি হয়েছে!');
         }
 
+        // Modals Toggle
         function openActivateModal() { document.getElementById('activateModal').classList.remove('hidden'); }
         function closeActivateModal() { document.getElementById('activateModal').classList.add('hidden'); }
+
+        function openTransferModal() { document.getElementById('transferModal').classList.remove('hidden'); }
+        function closeTransferModal() { document.getElementById('transferModal').classList.add('hidden'); }
 
         function openBuyLotModal() { document.getElementById('buyLotModal').classList.remove('hidden'); }
         function closeBuyLotModal() { document.getElementById('buyLotModal').classList.add('hidden'); }
@@ -409,6 +449,31 @@
 
         function openTopUpModal() { document.getElementById('topUpModal').classList.remove('hidden'); }
         function closeTopUpModal() { document.getElementById('topUpModal').classList.add('hidden'); }
+
+        // Balance Transfer Logic
+        function handleBalanceTransfer(event) {
+            event.preventDefault();
+            const recipient = document.getElementById('transferRecipient').value.trim();
+            const amount = parseFloat(document.getElementById('transferAmount').value) || 0;
+            const pin = document.getElementById('transferPin').value.trim();
+
+            if(amount <= 0) {
+                showToast('সঠিক পরিমাণ উল্লেখ করুন!');
+                return;
+            }
+            if(amount > userBalance) {
+                showToast('আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!');
+                return;
+            }
+
+            // Deduct balance
+            userBalance -= amount;
+            document.getElementById('mainWalletBalance').innerText = `৳ ${userBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            
+            closeTransferModal();
+            showToast(`৳${amount} সফলভাবে "${recipient}" এর কাছে ট্রান্সফার হয়েছে!`);
+            updateTicker(`+ [Transfer]: ৳${amount} sent to ${recipient}`);
+        }
 
         function checkPreApprovedId(userIdVal) {
             const cleanId = userIdVal.trim().toLowerCase();
