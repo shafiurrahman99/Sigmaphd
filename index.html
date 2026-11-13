@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sigma PhD - Central Universal Gateway Portal</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -563,16 +564,14 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT LOGIC (EMBEDDED & STANDALONE) -->
     <script>
         const SUPABASE_URL = 'https://zooqqmgncgebglskfnpt.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE ---
         async function handleInitialAuth(event) {
             event.preventDefault();
-            
             const userField = document.getElementById('initialUsername');
             const passField = document.getElementById('initialPassword');
             const alertBox = document.getElementById('alertBox');
@@ -582,12 +581,10 @@
             const password = passField.value.trim();
 
             alertBox.className = "w-full max-w-md mb-3 p-2 rounded-lg text-xs text-center font-medium transition-all duration-300";
-
             authBtn.disabled = true;
             authBtn.innerText = "Verifying Credentials...";
 
             try {
-                // ১. ডাইরেক্ট হার্ডকোডেড ফলব্যাক চেক (sigmaphd / 123456)
                 if (username === 'sigmaphd' && password === '123456') {
                     alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
                     alertBox.innerText = "✓ System Authenticated! Entering Central Gateway...";
@@ -600,7 +597,6 @@
                     return;
                 }
 
-                // ২. Supabase টেবিল থেকে ডাটা চেক
                 const { data: adminVault, error } = await supabaseClient
                     .from('super_admin_vault')
                     .select('*')
@@ -630,20 +626,15 @@
             }
         }
 
-        // --- GLOBAL SYSTEM LOGOUT (RETURN TO INITIAL AUTH SCREEN) ---
         function handleGlobalSystemLogout() {
             if (confirm('আপনি কি নিশ্চিতভাবে এই সেশন থেকে লগআউট করতে চান?')) {
-                // মেইন পোর্টাল ও ড্যাশবোর্ড হাইড করা
                 document.getElementById('sigmaMainWrapper').classList.add('hidden');
                 document.getElementById('superAdminDashboard').classList.add('hidden');
                 document.getElementById('companyLoginView').classList.add('hidden');
                 document.getElementById('superAdminLoginView').classList.add('hidden');
                 document.getElementById('gatewaySelectionView').classList.remove('hidden');
-
-                // ১ম লগইন স্ক্রিন আবার ফিরিয়ে আনা
                 document.getElementById('initialAuthScreen').classList.remove('hidden');
                 
-                // ইনফরমেশন ও বাটন রিসেট করা
                 const alertBox = document.getElementById('alertBox');
                 if(alertBox) alertBox.classList.add('hidden');
                 
@@ -671,7 +662,6 @@
             document.getElementById('gatewaySelectionView').classList.remove('hidden');
         }
 
-        // --- COMPANY LOGIN & ISOLATED RUNTIME HANDLER ---
         async function handleCompanyLogin(e) {
             e.preventDefault();
             const compIdInput = document.getElementById('loginCompanyId').value.trim();
@@ -717,7 +707,6 @@
             errBox.classList.remove('hidden');
         }
 
-        // --- SUPER ADMIN LOGIN (DIRECT DB CHECK) ---
         async function handleSuperAdminLogin(e) {
             e.preventDefault();
             const id = document.getElementById('superAdminId').value.trim();
@@ -820,7 +809,7 @@
                 return;
             }
 
-            alert('সুপার এডমিন পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে! এখন নতুন পাসওয়ার্ড দিয়ে আবার লগইন করুন।');
+            alert('সুপার এডমিন পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!');
             closeAdminPasswordModal();
             handleAdminLogout();
         }
@@ -845,7 +834,6 @@
 
         async function submitNewCompanyData(e) {
             e.preventDefault();
-
             const cId = parseInt(document.getElementById('cId').value);
             const cPass = document.getElementById('cPass').value.trim();
             const rawLayoutSetting = document.getElementById('cLayoutHtml').value.trim();
