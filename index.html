@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sigma PhD - 4-Tier Enterprise SaaS Portal</title>
+    <title>Sigma PhD - New User Activation Portal</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,13 +49,13 @@
             100% { background-position: 0% 50%; }
         }
         .glass-card {
-            background: rgba(19, 24, 34, 0.9);
+            background: rgba(19, 24, 34, 0.92);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
         .custom-input {
-            background: rgba(8, 10, 15, 0.8);
+            background: rgba(8, 10, 15, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.12);
             color: #f8fafc;
         }
@@ -68,233 +68,178 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="flex flex-col items-center justify-start p-2 sm:p-4 min-h-screen">
+<body class="flex flex-col items-center justify-start p-3 sm:p-6 min-h-screen">
 
-    <!-- Toast Notification & Right-Side Notification Ticker (+ format) -->
+    <!-- Toast Notification -->
     <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
         <span id="toast-text">Action successful!</span>
         <button onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2"><i class="fa-solid fa-xmark text-base"></i></button>
     </div>
 
-    <!-- Top Right Latest Notification Bar (+ format) -->
-    <div id="liveNotificationTicker" class="fixed top-3 right-3 z-50 bg-slate-900/90 border border-emerald-500/50 text-emerald-300 px-3 py-1.5 rounded-full text-xs font-mono shadow-lg flex items-center space-x-1.5 backdrop-blur-md">
+    <!-- Live Notification Ticker Bar -->
+    <div class="fixed top-3 right-3 z-50 bg-slate-900/90 border border-emerald-500/50 text-emerald-300 px-3 py-1.5 rounded-full text-xs font-mono shadow-lg flex items-center space-x-1.5 backdrop-blur-md">
         <span class="animate-ping w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span id="tickerText">+ [System Ready]: ৪-স্তর মাল্টি-টেনেন্ট সিস্টেম সক্রিয়</span>
+        <span id="tickerText">+ [System]: নিউ ইউজার অ্যাক্টিভেশন মোড সচল</span>
     </div>
 
     <!-- ================= MAIN CONTAINER ================= -->
     <div class="w-full max-w-xl mx-auto space-y-4 my-auto py-4">
 
         <!-- HEADER BRANDING -->
-        <div class="glass-card rounded-3xl p-4 sm:p-6 text-center relative overflow-hidden">
-            <h1 class="text-2xl font-extrabold text-white tracking-tight">Sigma PhD™ — 4-Tier SaaS Portal</h1>
-            <p class="font-bengali text-emerald-400 font-semibold text-xs mt-1">সুপার এডমিন, স্টাফ, কোম্পানি ও এন্ড-ইউজার ইউনিভার্সাল গেটওয়ে</p>
+        <div class="glass-card rounded-3xl p-5 text-center relative overflow-hidden space-y-1">
+            <h1 class="text-2xl font-extrabold text-white tracking-tight">Sigma PhD™ — New User Portal</h1>
+            <p class="font-bengali text-emerald-400 font-semibold text-xs">সবাই নতুন: অ্যাক্টিভ লাইসেন্স ও পেন্ডিং অ্যাপ্রুভাল সিস্টেম</p>
         </div>
 
-        <!-- ================= VIEW 1: SELECTION & LOGIN ================= -->
-        <div id="viewLoginSelection" class="glass-card rounded-3xl p-5 sm:p-6 space-y-5 fade-in">
-            <div class="text-center space-y-1">
-                <h2 class="text-lg font-bold text-amber-400">আপনার স্তর (Layer) সিলেক্ট করে লগইন করুন</h2>
-                <p class="text-xs text-slate-400">টোকেন সিস্টেম ও হায়ারার্কি ভিত্তিক নিরাপদ অ্যাক্সেস</p>
+        <!-- ================= VIEW 1: FRONT PAGE (ACTIVATE LICENSE & LOGIN) ================= -->
+        <div id="viewFrontPage" class="glass-card rounded-3xl p-6 space-y-5 fade-in text-center">
+            <div class="space-y-2 py-3">
+                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-bold">
+                    স্বাগতম! নতুন ইউজারদের জন্য
+                </span>
+                <h2 class="text-xl font-black text-white">আপনার অ্যাকাউন্ট পরিচালনা করুন</h2>
+                <p class="text-xs text-slate-400 max-w-md mx-auto">
+                    নতুন লাইসেন্স সক্রিয় করতে নিচের বড় বাটনে ক্লিক করুন অথবা অ্যাপ্রুভ হয়ে গেলে সরাসরি পাসওয়ার্ড দিয়ে লগইন করুন।
+                </p>
             </div>
 
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">লেয়ার / স্তর নির্বাচন করুন:</label>
-                    <select id="loginLayerSelect" onchange="onLayerChange()" class="w-full custom-input rounded-2xl py-3 px-4 text-xs font-bold">
-                        <option value="1">১ম স্তর: সুপার এডমিন (Master Owner)</option>
-                        <option value="2">২য় স্তর: অফিস স্টাফ (Contractual Operator)</option>
-                        <option value="3">৩য় স্তর: কোম্পানি ক্লায়েন্ট (Enterprise Client Name & Pass)</option>
-                        <option value="4">৪র্থ স্তর: এন্ড-ইউজার (Customer / License Holder)</option>
-                    </select>
-                </div>
+            <!-- Big Front Activate License Button -->
+            <button onclick="openActivateModal()" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 hover:opacity-95 text-slate-950 font-black py-4 px-6 rounded-2xl shadow-xl flex items-center justify-center space-x-3 text-base transition-all active:scale-95">
+                <i class="fa-solid fa-user-plus text-lg"></i>
+                <span>Activate License / New User</span>
+            </button>
 
-                <form onsubmit="handleLayerLogin(event)" class="space-y-3">
+            <div class="border-t border-slate-800 pt-4">
+                <h3 class="text-xs font-bold text-slate-300 mb-3">ইতিমধ্যেই অ্যাপ্রুভড হলে লগইন করুন:</h3>
+                <form onsubmit="handleDirectLogin(event)" class="space-y-3 text-left">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1" id="labelUserId">ইউজার আইডি / System ID:</label>
-                        <input type="text" id="loginUsername" required placeholder="আইডি বা ইউজারনেম দিন..." 
-                            class="w-full custom-input rounded-2xl py-3 px-4 text-emerald-400 font-medium text-xs">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">ইউজার আইডি / সিস্টেম আইডি:</label>
+                        <input type="text" id="loginUname" required placeholder="আপনার আইডি লিখুন..." class="w-full custom-input rounded-2xl py-3 px-4 text-xs font-mono text-emerald-400">
                     </div>
-
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">পাসওয়ার্ড / টোকেন:</label>
-                        <input type="password" id="loginPassword" required placeholder="পাসওয়ার্ড দিন..." 
-                            class="w-full custom-input rounded-2xl py-3 px-4 text-emerald-400 font-medium text-xs">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">রি-টাইপ পাসওয়ার্ড (Retype Password):</label>
+                        <input type="password" id="loginPass" required placeholder="আপনার পাসওয়ার্ড দিন..." class="w-full custom-input rounded-2xl py-3 px-4 text-xs font-mono text-emerald-400">
                     </div>
-
-                    <button type="submit" 
-                        class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3 px-4 rounded-2xl flex items-center justify-center space-x-2 transition-all shadow-lg text-sm">
-                        <span>সংশ্লিষ্ট প্যানেলে প্রবেশ করুন</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                    <button type="submit" class="w-full bg-sigmaNavy hover:bg-slate-800 border border-slate-700 text-white font-bold py-3 rounded-2xl text-xs shadow transition-all">
+                        সিস্টেমে প্রবেশ করুন (Sign In)
                     </button>
                 </form>
-
-                <!-- Action Links for Tier 4 (New User License Activation & Forgot Password) -->
-                <div id="tier4ActionLinks" class="hidden pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <button type="button" onclick="openActivateLicenseModal()" class="text-emerald-400 font-bold hover:underline">
-                        <i class="fa-solid fa-user-plus"></i> Activate License / New User
-                    </button>
-                    <button type="button" onclick="openForgotPasswordModal()" class="text-amber-400 font-bold hover:underline">
-                        <i class="fa-solid fa-key"></i> Forgot Password?
-                    </button>
-                </div>
             </div>
         </div>
 
-        <!-- ================= VIEW 2: COMMON LAYER DASHBOARD ================= -->
-        <div id="viewLayerDashboard" class="hidden glass-card rounded-3xl p-5 sm:p-6 space-y-4 fade-in">
-            <!-- Top Dashboard Bar -->
+        <!-- ================= VIEW 2: PENDING STATUS SCREEN ================= -->
+        <div id="viewPendingStatus" class="hidden glass-card rounded-3xl p-6 space-y-4 fade-in text-center">
+            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-2xl animate-pulse">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <h2 class="text-lg font-bold text-amber-400">আপনার লাইসেন্স রিকোয়েস্ট পেন্ডিং রয়েছে!</h2>
+            <p class="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
+                এডমিন প্যানেল থেকে আপনার ম্যানুয়াল পেমেন্ট এবং তথ্য যাচাই করা হচ্ছে। অ্যাপ্রুভ হওয়ার পর আপনি আপনার পাসওয়ার্ড দিয়ে সিস্টেমে প্রবেশ করতে পারবেন।
+            </p>
+            <div class="bg-[#080a0f] p-3 rounded-2xl border border-slate-800 text-xs font-mono text-slate-400">
+                স্ট্যাটাস: <strong class="text-amber-400">Pending Admin Approval...</strong>
+            </div>
+            <button onclick="backToFront()" class="text-xs text-emerald-400 font-bold hover:underline">
+                <i class="fa-solid fa-arrow-left"></i> হোম পেজে ফিরে যান
+            </button>
+        </div>
+
+        <!-- ================= VIEW 3: USER DASHBOARD ================= -->
+        <div id="viewUserDashboard" class="hidden glass-card rounded-3xl p-6 space-y-4 fade-in">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div>
-                    <span id="badgeLayerName" class="bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase">Layer 1: Super Admin</span>
-                    <h2 id="titleUserHeading" class="text-base font-extrabold text-white mt-1">স্বাগতম, সুপার এডমিন</h2>
+                    <span id="dashLayerBadge" class="bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase">4th Layer: End-User</span>
+                    <h2 id="dashWelcome" class="text-base font-extrabold text-white mt-1">স্বাগতম, ইউজার</h2>
                 </div>
                 <button onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/40 px-3 py-1.5 rounded-xl text-xs font-bold transition-all">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i> লগআউট
                 </button>
             </div>
 
-            <!-- Common Features: Balance (+ button) & Validity Countdown & Under Users -->
+            <!-- Common Features Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <!-- Balance Box -->
-                <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex flex-col justify-between relative">
+                <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
                     <div class="flex items-center justify-between text-xs text-slate-400">
                         <span>ব্যালেন্স (Balance in BDT)</span>
-                        <button onclick="openAddBalanceModal()" class="w-7 h-7 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black rounded-full flex items-center justify-center text-sm shadow transition-all" title="Add Balance">
-                            +
-                        </button>
+                        <button onclick="showToast('ম্যানুয়াল পেমেন্ট অপশন সচল আছে')" class="w-7 h-7 bg-emerald-600 text-slate-950 font-black rounded-full flex items-center justify-center text-sm">+</button>
                     </div>
-                    <div id="commonBalanceText" class="text-xl font-extrabold text-amber-400 font-mono mt-2">৳ 25,400.00</div>
-                    <span class="text-[9px] text-slate-500 mt-1">প্লাস (+) বাটনে ক্লিক করে রিচার্জ করুন</span>
+                    <div class="text-xl font-extrabold text-amber-400 font-mono mt-2">৳ 1,960.00</div>
+                    <span class="text-[9px] text-slate-500 mt-1">মূল ব্যালেন্স ও ক্যাশব্যাক আপডেট</span>
                 </div>
 
-                <!-- Validity Countdown Box -->
                 <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
-                    <div class="text-xs text-slate-400">ভ্যালিডিটি কাউন্টডাউন (Validity)</div>
-                    <div id="commonCountdownText" class="text-sm font-extrabold text-cyan-400 font-mono mt-2">364d 23h 59m 59s</div>
+                    <div class="text-xs text-slate-400">ভ্যালিডিটি কাউন্টডাউন</div>
+                    <div class="text-sm font-extrabold text-cyan-400 font-mono mt-2">29d 23h 59m 59s</div>
                     <span class="text-[9px] text-cyan-300 mt-1">রিয়েল-টাইম সেকেন্ড কাউন্টার</span>
                 </div>
             </div>
 
-            <!-- Under Users & Token Statistics -->
             <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
                 <div>
-                    <h3 class="text-xs font-bold text-white flex items-center space-x-1.5">
-                        <i class="fa-solid fa-users text-emerald-400"></i>
-                        <span>অধিনস্থ ইউজার / টোকেন চেইন</span>
-                    </h3>
-                    <p class="text-[10px] text-slate-400 mt-0.5">টোকেন দিয়ে সংযুক্ত মোট সক্রিয় গ্রাহক</p>
+                    <h3 class="text-xs font-bold text-white"><i class="fa-solid fa-users text-emerald-400"></i> অধীনস্থ ইউজার / টোকেন</h3>
+                    <p class="text-[10px] text-slate-400">আপনার টোকেনের অধীনে সংযুক্ত সক্রিয় গ্রাহক</p>
                 </div>
                 <div class="text-right">
-                    <span id="commonUnderUsersText" class="text-base font-extrabold text-emerald-400 font-mono">1,420 জন</span>
+                    <span class="text-base font-extrabold text-emerald-400 font-mono">৫ জন</span>
                 </div>
-            </div>
-
-            <!-- Commission Engine & Token Sale Panel Summary -->
-            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 space-y-2">
-                <div class="flex items-center justify-between text-xs font-bold text-slate-300">
-                    <span class="text-amber-400"><i class="fa-solid fa-coins"></i> ১০% কমিশন ডিস্ট্রিবিউশন ইঞ্জিন</span>
-                    <span class="text-emerald-400">ইমিডিয়েট বস: ৳৮ | চেইন: ৳২</span>
-                </div>
-                <p class="text-[11px] text-slate-400 leading-relaxed">
-                    নতুন ইউজার অ্যাক্টিভেশনে কোম্পানি ও সুপার এডমিনের মূল ব্যালেন্সের সাথে স্বয়ংক্রিয়ভাবে কমিশন যুক্ত হয়ে ডানপাশের নোটিফিকেশন বারে প্লাস (+) আকারে আপডেট হচ্ছে।
-                </p>
             </div>
         </div>
 
     </div>
 
-    <!-- ================= MODALS ================= -->
-
-    <!-- 1. Activate License / New User Modal (Tier 4) -->
-    <div id="activateLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeActivateLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- ================= POPUP MODAL: ACTIVATE LICENSE ================= -->
+    <div id="activateModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeActivateModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-base font-bold text-white flex items-center space-x-2">
                 <i class="fa-solid fa-id-card text-emerald-400"></i>
-                <span>Activate License & New User Form</span>
+                <span>Activate License / New User Form</span>
             </h3>
-            <p class="text-[11px] text-slate-400">কোম্পানিকে ম্যানুয়াল পেমেন্ট করার পর প্রাপ্ত আইডি ও পাসওয়ার্ড এবং রেফারার টোকেন দিয়ে ফর্মটি পূরণ করুন।</p>
+            <p class="text-[11px] text-slate-400">কোম্পানিকে ম্যানুয়াল পেমেন্ট করার পর আপনার তথ্য ও প্রাপ্ত আইডি দিয়ে রিকোয়েস্ট সাবমিট করুন।</p>
             
-            <form onsubmit="handleLicenseActivationSubmit(event)" class="space-y-3 text-xs">
+            <form onsubmit="handleActivationSubmit(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">পূর্ণ নাম (Full Name):</label>
-                    <input type="text" id="actName" required placeholder="আপনার নাম লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3">
+                    <label class="block font-semibold text-slate-300 mb-1">পূর্ণ নাম:</label>
+                    <input type="text" id="mName" required placeholder="আপনার নাম লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">পূর্ণ ঠিকানা (Address):</label>
-                    <input type="text" id="actAddress" required placeholder="আপনার ঠিকানা লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3">
+                    <label class="block font-semibold text-slate-300 mb-1">পূর্ণ ঠিকানা:</label>
+                    <input type="text" id="mAddress" required placeholder="আপনার ঠিকানা লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1">ইমেল এড্রেস:</label>
-                        <input type="email" id="actEmail" required placeholder="email@domain.com" class="w-full custom-input rounded-xl py-2.5 px-3">
+                        <input type="email" id="mEmail" required placeholder="email@domain.com" class="w-full custom-input rounded-xl py-2.5 px-3">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1">মোবাইল নাম্বার:</label>
-                        <input type="tel" id="actMobile" required placeholder="01XXXXXXXXX" class="w-full custom-input rounded-xl py-2.5 px-3">
+                        <input type="tel" id="mMobile" required placeholder="01XXXXXXXXX" class="w-full custom-input rounded-xl py-2.5 px-3">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-semibold text-slate-300 mb-1">ইউজার আইডি (ম্যানুয়াল প্রাপ্ত):</label>
-                        <input type="text" id="actUserId" required placeholder="যেমন: 8942" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
+                        <label class="block font-semibold text-slate-300 mb-1">ইউজার নাম্বার / আইডি:</label>
+                        <input type="text" id="mUserId" required oninput="autoDetectLayer(this.value)" placeholder="যেমন: 8942" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-300 mb-1">পাসওয়ার্ড:</label>
-                        <input type="password" id="actPassword" required placeholder="পাসওয়ার্ড" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
+                        <input type="password" id="mPass" required placeholder="পাসওয়ার্ড" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
                     </div>
                 </div>
+
+                <!-- Auto-Detected Layer Display -->
+                <div class="bg-[#080a0f] p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                    <span class="text-slate-400">অটো-ডিটেক্টেড স্তর:</span>
+                    <span id="detectedLayerBadge" class="text-amber-400 font-bold font-mono">৪র্থ স্তর (End-User)</span>
+                </div>
+
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">ইমিডিয়েট রেফারির টোকেন / কোড:</label>
-                    <input type="text" id="actReferrerToken" required placeholder="যেমন: SIGMA-8942" class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono font-bold">
+                    <label class="block font-semibold text-slate-300 mb-1">রেফারির টোকেন / কোড:</label>
+                    <input type="text" id="mToken" required placeholder="যেমন: SIGMA-8942" class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono font-bold">
                 </div>
 
                 <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl shadow-lg mt-2">
-                    অ্যাপ্রুভালের জন্য সাবমিট করুন
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 2. Balance Top-Up Modal (Manual Payment Notice) -->
-    <div id="addBalanceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeAddBalanceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-base font-bold text-white">ব্যালেন্স রিচার্জ (Top-Up)</h3>
-            
-            <div class="bg-amber-950/40 border border-amber-600/50 rounded-2xl p-3 text-xs text-amber-200 space-y-2">
-                <p class="font-bold">⚠️ পেমেন্ট গেটওয়ে নোটিশ:</p>
-                <p>থার্ড-পার্টি পেমেন্ট গেটওয়েতে স্বয়ংক্রিয় পেমেন্ট নেওয়ার সুযোগ সাময়িকভাবে বন্ধ আছে।</p>
-                <p class="font-extrabold text-amber-400">আপাতত সুযোগ নাই, ম্যানুয়াল পেমেন্ট করেন।</p>
-            </div>
-
-            <form onsubmit="handleManualTopUp(event)" class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-300 mb-1">টাকার পরিমাণ (BDT):</label>
-                    <input type="number" id="topupAmountInput" value="500" min="50" required class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono font-bold">
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl shadow">
-                    ম্যানুয়াল পেমেন্ট রিকোয়েস্ট পাঠান
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 3. Forgot Password Modal -->
-    <div id="forgotPasswordModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeForgotPasswordModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-base font-bold text-white">পাসওয়ার্ড পুনরুদ্ধার (Forgot Password)</h3>
-            <p class="text-xs text-slate-400">আপনার সিস্টেম আইডি ও ইউজারনেম দিয়ে রিকোয়েস্ট পাঠান। এডমিন যাচাই করে পাসওয়ার্ড পাঠিয়ে দেবেন।</p>
-            
-            <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-300 mb-1">ইউজারনেম / System ID:</label>
-                    <input type="text" id="forgotUname" required placeholder="আপনার আইডি লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3 font-mono">
-                </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl shadow">
-                    রিকোয়েস্ট সাবমিট করুন
+                    পেন্ডিং অ্যাপ্রুভালের জন্য সাবমিট করুন
                 </button>
             </form>
         </div>
@@ -302,16 +247,6 @@
 
     <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script>
-        // Layer Data Store for 4-Tiers
-        const layerProfiles = {
-            1: { name: "১ম স্তর: সুপার এডমিন (Master Owner)", balance: 45000.00, validity: "UNLIMITED ROOT", users: "৫ জন স্টাফ ও ১০০ কোম্পানি" },
-            2: { name: "২য় স্তর: অফিস স্টাফ (Operator)", balance: 12500.00, validity: "180d 23h 59m", users: "২৫ কোম্পানি" },
-            3: { name: "৩য় স্তর: কোম্পানি ক্লায়েন্ট (Enterprise Client)", balance: 8400.00, validity: "364d 23h 59m", users: "৪৫০ জন গ্রাহক" },
-            4: { name: "৪র্থ স্তর: এন্ড-ইউজার (Customer / License Holder)", balance: 1960.00, validity: "29d 23h 59m", users: "৫ জন রেফারেল" }
-        };
-
-        let activeLayerId = 1;
-
         function showToast(text) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-text').innerText = text;
@@ -320,89 +255,57 @@
         }
         function hideToast() { document.getElementById('toast').classList.add('hidden'); }
 
-        function updateTickerNotification(msg) {
-            document.getElementById('tickerText').innerText = `+ ${msg}`;
+        function openActivateModal() { document.getElementById('activateModal').classList.remove('hidden'); }
+        function closeActivateModal() { document.getElementById('activateModal').classList.add('hidden'); }
+
+        function backToFront() {
+            document.getElementById('viewPendingStatus').classList.add('hidden');
+            document.getElementById('viewFrontPage').classList.remove('hidden');
         }
 
-        function onLayerChange() {
-            const layerVal = document.getElementById('loginLayerSelect').value;
-            const actionLinks = document.getElementById('tier4ActionLinks');
-            const labelUser = document.getElementById('labelUserId');
-            
-            if(layerVal === "4") {
-                actionLinks.classList.remove('hidden');
-                labelUser.innerText = "ইউজার আইডি (User ID):";
-            } else if(layerVal === "3") {
-                actionLinks.classList.add('hidden');
-                labelUser.innerText = "কোম্পানির নাম / ইউজারনেম:";
+        // Auto detect layer based on User ID length or prefix
+        function autoDetectLayer(val) {
+            const badge = document.getElementById('detectedLayerBadge');
+            if(val.startsWith('1')) {
+                badge.innerText = "১ম স্তর (Super Admin)";
+            } else if(val.startsWith('2')) {
+                badge.innerText = "২য় স্তর (Office Staff)";
+            } else if(val.startsWith('3')) {
+                badge.innerText = "৩য় স্তর (Company Client)";
             } else {
-                actionLinks.classList.add('hidden');
-                labelUser.innerText = "System ID / Operator ID:";
+                badge.innerText = "৪র্থ স্তর (End-User)";
             }
         }
 
-        // Layer Login Handler
-        function handleLayerLogin(event) {
+        function handleActivationSubmit(event) {
             event.preventDefault();
-            activeLayerId = document.getElementById('loginLayerSelect').value;
-            const uname = document.getElementById('loginUsername').value.trim();
+            closeActivateModal();
+            // Switch to Pending View
+            document.getElementById('viewFrontPage').classList.add('hidden');
+            document.getElementById('viewPendingStatus').classList.remove('hidden');
+            showToast('লাইসেন্স রিকোয়েস্ট সফলভাবে সাবমিট হয়েছে! স্ট্যাটাস এখন পেন্ডিং।');
+        }
 
-            const profile = layerProfiles[activeLayerId];
+        function handleDirectLogin(event) {
+            event.preventDefault();
+            const uname = document.getElementById('loginUname').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
 
-            // Update Dashboard UI
-            document.getElementById('badgeLayerName').innerText = profile.name;
-            document.getElementById('titleUserHeading').innerText = `স্বাগতম, ${uname || 'User'}`;
-            document.getElementById('commonBalanceText').innerText = `৳ ${profile.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-            document.getElementById('commonCountdownText').innerText = profile.validity;
-            document.getElementById('commonUnderUsersText').innerText = profile.users;
+            if(!uname || !pass) return;
 
-            // Switch Views
-            document.getElementById('viewLoginSelection').classList.add('hidden');
-            document.getElementById('viewLayerDashboard').classList.remove('hidden');
-
-            showToast(`সফলভাবে ${profile.name} প্যানেলে প্রবেশ করেছেন!`);
-            updateTickerNotification(`[Login]: ${profile.name} প্যানেল সচল হয়েছে`);
+            // Switch to Dashboard View
+            document.getElementById('viewFrontPage').classList.add('hidden');
+            document.getElementById('viewUserDashboard').classList.remove('hidden');
+            document.getElementById('dashWelcome').innerText = `স্বাগতম, ${uname}`;
+            showToast('সফলভাবে সিস্টেমে প্রবেশ করেছেন!');
         }
 
         function handleLogOut() {
-            document.getElementById('viewLayerDashboard').classList.add('hidden');
-            document.getElementById('viewLoginSelection').classList.remove('hidden');
-            showToast('সফলভাবে লগআউট করা হয়েছে');
-            updateTickerNotification('[Logout]: সিস্টেম গেটওয়েতে ফিরে এসেছে');
-        }
-
-        // Modals Control
-        function openActivateLicenseModal() { document.getElementById('activateLicenseModal').classList.remove('hidden'); }
-        function closeActivateLicenseModal() { document.getElementById('activateLicenseModal').classList.add('hidden'); }
-
-        function handleLicenseActivationSubmit(event) {
-            event.preventDefault();
-            closeActivateLicenseModal();
-            showToast('লাইসেন্স অ্যাক্টিভেশন ফর্ম সফলভাবে জমা হয়েছে! এডমিন অনুমোদনের পর ৪র্থ স্তরে যুক্ত হবেন।');
-            updateTickerNotification('[License Request]: নতুন ইউজারের লাইসেন্স অ্যাপ্রুভালের অপেক্ষায়');
-        }
-
-        function openAddBalanceModal() { document.getElementById('addBalanceModal').classList.remove('hidden'); }
-        function closeAddBalanceModal() { document.getElementById('addBalanceModal').classList.add('hidden'); }
-
-        function handleManualTopUp(event) {
-            event.preventDefault();
-            const amt = parseFloat(document.getElementById('topupAmountInput').value) || 0;
-            layerProfiles[activeLayerId].balance += amt;
-            document.getElementById('commonBalanceText').innerText = `৳ ${layerProfiles[activeLayerId].balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-            closeAddBalanceModal();
-            showToast(`৳${amt} টাকার ম্যানুয়াল পেমেন্ট রিকোয়েস্ট পাঠানো হয়েছে!`);
-            updateTickerNotification(`+ [Manual Top-up]: ৳${amt} রিচার্জ রিকোয়েস্ট পেন্ডিং`);
-        }
-
-        function openForgotPasswordModal() { document.getElementById('forgotPasswordModal').classList.remove('hidden'); }
-        function closeForgotPasswordModal() { document.getElementById('forgotPasswordModal').classList.add('hidden'); }
-
-        function handleForgotPasswordSubmit(event) {
-            event.preventDefault();
-            closeForgotPasswordModal();
-            showToast('পাসওয়ার্ড পুনরুদ্ধারের রিকোয়েস্ট সুপার এডমিনের কাছে পাঠানো হয়েছে!');
-            updateTickerNotification('[Password Reset]: রিকোয়েস্ট সফলভাবে সাবমিট হয়েছে');
+            document.getElementById('viewUserDashboard').classList.add('hidden');
+            document.getElementById('viewFrontPage').classList.remove('hidden');
+            document.getElementById('loginUname').value = '';
+            document.getElementById('loginPass').value = '';
+            showToast('লগআউট সম্পন্ন হয়েছে');
         }
     </script>
 </body>
