@@ -198,10 +198,10 @@
                         </h1>
                     </div>
 
-                    <div id="alertBox" class="hidden w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300"></div>
+                    <div id="p" class="hidden w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300"></div>
 
-                    <!-- Fix: Corrected onsubmit to point to obfuscated function `I(event)` -->
-                    <form id="initialLoginForm" onsubmit="I(event)" class="w-full max-w-md space-y-3 font-inter">
+                    <!-- Updated with obfuscated function C(event) -->
+                    <form id="initialLoginForm" onsubmit="C(event)" class="w-full max-w-md space-y-3 font-inter">
                         <div class="input-group">
                             <input 
                                 type="text" 
@@ -272,7 +272,7 @@
                         <div class="text-[11px] text-sigmaGreen italic">www.sigmaphd.com</div>
                     </div>
                     <!-- Global System Logout Button -->
-                    <button onclick="L()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
+                    <button onclick="k()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
                         <i class="fa-solid fa-right-from-bracket"></i> লগআউট (Log Out)
                     </button>
                 </div>
@@ -301,10 +301,10 @@
                     </div>
 
                     <div class="space-y-3">
-                        <button onclick="J()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
+                        <button onclick="d()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-building-user"></i> কোম্পানি ইউজার লগইন (Company Login)
                         </button>
-                        <button onclick="Q()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
+                        <button onclick="n()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-user-shield"></i> সুপার এডমিন কন্ট্রোল (Super Admin)
                         </button>
                     </div>
@@ -315,7 +315,7 @@
             <div id="companyLoginView" class="hidden w-full max-w-md mx-auto fade-in my-auto">
                 <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-emerald-300 text-center">
                     <div class="flex justify-between items-center mb-3">
-                        <button onclick="T()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
+                        <button onclick="S()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
                         <span class="text-xs font-bold text-emerald-700 font-mono">Full Dynamic Database Auth</span>
                     </div>
 
@@ -325,9 +325,10 @@
                         <p class="text-[11px] text-gray-200">আইডি ও পাসওয়ার্ড দিয়ে ডেটাবেজ থেকে মডিউলার বা লেআউট কোড লোড করুন</p>
                     </div>
 
-                    <div id="companyLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
+                    <div id="AzJFOgEzUQYPOkEkJS9aJRI=" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
 
-                    <form onsubmit="Y(event)" class="space-y-4 text-left">
+                    <!-- Updated with obfuscated function B(event) -->
+                    <form onsubmit="B(event)" class="space-y-4 text-left">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">কোম্পানি আইডি (`company_id`) - যেমন: 101, 110</label>
                             <input type="number" id="loginCompanyId" required placeholder="কোম্পানি আইডি দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
@@ -345,7 +346,7 @@
             <div id="superAdminLoginView" class="hidden w-full max-w-md mx-auto fade-in my-auto">
                 <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-purple-300 text-center">
                     <div class="flex justify-between items-center mb-3">
-                        <button onclick="T()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
+                        <button onclick="S()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
                         <span class="text-xs font-bold text-purple-700 font-mono">Master Vault Auth</span>
                     </div>
 
@@ -357,7 +358,8 @@
 
                     <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
 
-                    <form onsubmit="$(event)" class="space-y-4 text-left">
+                    <!-- Updated with obfuscated function b(event) -->
+                    <form onsubmit="b(event)" class="space-y-4 text-left">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">System ID</label>
                             <input type="text" id="superAdminId" required placeholder="System ID" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
@@ -385,23 +387,23 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="W()" class="px-3 py-1.5 bg-gradient-to-r from-sigmaNavy to-blue-800 text-white text-xs font-bold rounded-lg shadow">পাসওয়ার্ড পরিবর্তন</button>
-                        <button onclick="H()" class="text-xs text-red-600 font-bold px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50">লগআউট</button>
+                        <button onclick="P()" class="px-3 py-1.5 bg-gradient-to-r from-sigmaNavy to-blue-800 text-white text-xs font-bold rounded-lg shadow">পাসওয়ার্ড পরিবর্তন</button>
+                        <button onclick="m()" class="text-xs text-red-600 font-bold px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50">লগআউট</button>
                     </div>
                 </div>
 
                 <div class="bg-gradient-to-r from-sigmaNavy via-sigmaBlue to-sigmaPurple rounded-xl p-3 shadow-lg text-white">
                     <div class="text-xs font-bold text-amber-300 mb-2"><i class="fa-solid fa-bars-progress"></i> নেভিগেশন টুলস:</div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <label onclick="m('registerForm')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
+                        <label onclick="F('registerForm')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="registerForm" checked class="accent-orange-500">
                             <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-building-circle-arrow-right"></i> নতুন কোম্পানি এন্ট্রি ফরম</div>
                         </label>
-                        <label onclick="m('companyList')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
+                        <label onclick="F('companyList')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="companyList" class="accent-orange-500">
                             <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-list-check"></i> কোম্পানির তালিকা</div>
                         </label>
-                        <label onclick="m('sqlConsole')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
+                        <label onclick="F('sqlConsole')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="sqlConsole" class="accent-orange-500">
                             <div class="text-xs font-extrabold text-amber-300"><i class="fa-solid fa-terminal"></i> PostgreSQL SQL Editor</div>
                         </label>
@@ -414,7 +416,7 @@
                         <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি এন্ট্রি ফরম (লেআউট সেটিং + ৫টি মডিউলার কলাম)
                     </h3>
                     
-                    <form id="companyEntryForm" onsubmit="p(event)" class="space-y-4 text-xs">
+                    <form id="companyEntryForm" onsubmit="c(event)" class="space-y-4 text-xs">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-bold text-gray-700 mb-1">কোম্পানি আইডি (`company_id`) - যেমন: 101, 110</label>
@@ -470,7 +472,7 @@
                 <div id="tabCompanyList" class="hidden bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
                     <h3 class="text-sm font-bold text-sigmaNavy mb-3 border-b pb-2 flex items-center justify-between">
                         <span><i class="fa-solid fa-building text-sigmaBlue"></i> নিবন্ধিত কোম্পানির তালিকা</span>
-                        <button onclick="X()" class="px-3 py-1 bg-sigmaNavy text-white rounded text-[11px] font-bold"><i class="fa-solid fa-rotate"></i> রিফ্রেশ</button>
+                        <button onclick="j()" class="px-3 py-1 bg-sigmaNavy text-white rounded text-[11px] font-bold"><i class="fa-solid fa-rotate"></i> রিফ্রেশ</button>
                     </h3>
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-left text-xs border-collapse">
@@ -502,8 +504,8 @@
                         <div class="flex justify-between items-center">
                             <span id="sqlConsoleStatus" class="text-[11px] font-semibold text-amber-600">Ready to execute query.</span>
                             <div class="flex gap-2">
-                                <button onclick="w()" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white font-bold text-xs rounded shadow">Clear</button>
-                                <button onclick="C()" class="px-5 py-1.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:opacity-90 text-white font-bold text-xs rounded shadow flex items-center gap-1.5">
+                                <button onclick="m()" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white font-bold text-xs rounded shadow">Clear</button>
+                                <button onclick="f()" class="px-5 py-1.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:opacity-90 text-white font-bold text-xs rounded shadow flex items-center gap-1.5">
                                     <i class="fa-solid fa-play"></i> Run Query
                                 </button>
                             </div>
@@ -545,7 +547,7 @@
             <h4 class="text-sm font-bold text-sigmaNavy mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-key text-sigmaGreen"></i> সুপার এডমিন পাসওয়ার্ড পরিবর্তন
             </h4>
-            <form onsubmit="f(event)" class="space-y-3 text-xs">
+            <form onsubmit="g(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block text-[10px] text-gray-500 mb-1">এডমিন মোবাইল নাম্বার</label>
                     <input type="tel" id="adminVerifyMobile" required placeholder="যেমন: +8801818589423" class="w-full border p-2 rounded font-mono">
@@ -567,280 +569,283 @@
         </div>
     </div>
 
-    <!-- OBFUSCATED JAVASCRIPT LOGIC -->
+    <!-- NEW OBFUSCATED JAVASCRIPT LOGIC -->
     <script>
-        /* JSOBF-9GMB0 | Obfuscated JavaScript | 2026-11-13 */
-        function _d0x7059d0(s,k){var b=atob(s),o=[],i=0;for(;i<b.length;i++)o.push(String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length)));return decodeURIComponent(escape(o.join("")));}
+        /* JSOBF-1QM4W | Obfuscated JavaScript | 2026-11-13 */
+        function _d0xdd7709(s,k){var b=atob(s),o=[],i=0;for(;i<b.length;i++)o.push(String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length)));return decodeURIComponent(escape(o.join("")));}
 
-        if (_d0x7059d0('GgEdNS0KATgsNgIBHQ==','idoCD') in navigator) {
-            window.addEventListener(_d0x7059d0('QjoEJA==','.Ue@h[%.'), () => {
-                navigator.serviceWorker.register(_d0x7059d0('BTVbCzEq','*F,%[Y'))
-                    .then((t) => console.log(_d0x7059d0('dDQfWglENE17D1U6CF5AdTQKRRNTNB9JBAcCGE8DQiIeShVLPRQW','\'Qm,`'), t.scope))
-                    .catch((M) => console.log(_d0x7059d0('IF0KXylEAFNvF1srQhdTah1OKVQRAVkMQC9JRTVZEUUlQ18=','s8x)@\'e'), M));
+        if (_d0xdd7709('JkQODVw2RCsURz5EDg==','U!|{5') in navigator) {
+            window.addEventListener(_d0xdd7709('XgAVDg==','2otj'), () => {
+                navigator.serviceWorker.register(_d0xdd7709('agoQfis2','EygPA'))
+                    .then((t) => console.log(_d0xdd7709('KTkURAgZOUZlDgg3A0BBKDkBWxIOORRXBVoPE1ECHy8VVBQWMB8I','z\\f2a'), t.scope))
+                    .catch((Z) => console.log(_d0xdd7709('Eg5KEkMoJEtvC1ggJBkYNk8sKBhMFks/KARWRGwqKAddABA=','Ak8d*K'), Z));
             });
         }
 
-        function _(pathName, titleText) {
+        function N(pathName, titleText) {
             try {
                 window.history.pushState({path: pathName}, '', pathName);
-            } catch(N) {}
+            } catch(E) {}
         }
 
 
-        async function I(event) {
+        async function C(event) {
             event.preventDefault();
             
-            const y = document.getElementById(_d0x7059d0('OAYtHjgJKD8iDTYEMAUh','QhDj'));
-            const B = document.getElementById(_d0x7059d0('CjgBEQM2DwYJFhkgDCQM','cVhejW'));
-            const E = document.getElementById(_d0x7059d0('GFgeHw12FBU=','y4{m'));
-            const a = document.getElementById(_d0x7059d0('SD4WPzskRw==',')KbWyP'));
+            const K = document.getElementById(_d0xdd7709('BUIwMQVNNRAfSSsrDUE8','l,YE'));
+            const w = document.getElementById(_d0xdd7709('XwdbBlVZW2YIQQFLV0VS','6i2r<87'));
+            const p = document.getElementById(_d0xdd7709('FQQ0GQAqPhM=','thQk'));
+            const J = document.getElementById(_d0xdd7709('QlAtGBcoDA==','#%YpU\\bl'));
 
-            const o = y.value.trim();
-            const password = B.value.trim();
+            const o = K.value.trim();
+            const password = w.value.trim();
 
-            E.className = _d0x7059d0('An5QPiQYGxgyTmY/WVYRc1spZUcbBX4EZX1USRomWC8tEBYZNBY/LQxPWCtFazwRQwF+VS4mAF4Hc1AkJgAWGDZSIj0ZGwEhVyU7HU8cPFhmKRhXVTdDOSkAUho9G3h4RA==','uS6KHt;');
+            p.className = _d0xdd7709('Ug4dPV4NEUhCA2VFTFxBAxYqH1IRVQ5JZgdBQ0pWFSxXBRxJRFs8VxlFCFsIaEYESVEOGC1cFVRXAx0nXBUcSEYfIUcMEVFRGiZBCEVMTBVlUw1dBUcOOlMVWEpNVnsCUQ==','%#{H2a1');
 
-            a.disabled = true;
-            a.innerText = _d0x7059d0('dCc2OlA8NjtWMzY7WzViJFwzYgFQMTcgUHIDAnx8bHw=','5RBR');
+            J.disabled = true;
+            J.innerText = _d0xdd7709('bEErR0haK0ZOVStGQ1N/WURVf3xIVypdSBQef2QacQE=','-4_/');
 
             try {
-                const z = await fetch(_d0x7059d0('WlRAG11FBSgAR1VfAkQPMww=','u50rr6`K'), {
-                    method: _d0x7059d0('MygPfg==','cg\\*h'),
-                    headers: { _d0x7059d0('Nig2JRApLHwhPig0','uGXQ'): _d0x7059d0('GEYiQBBVM1gQWTwDE0U9Qg==','y6R,') },
+                const T = await fetch(_d0xdd7709('aj5fGnUgIDxaAT9+NS1ACyM=','E_/sZS'), {
+                    method: _d0xdd7709('PQUpdQ==','mJz!_'),
+                    headers: { _d0xdd7709('MzQQVURPGg8kIg5E','p[~!!!n"'): _d0xdd7709('LE1OKwYzLElXKAF/J05RKQ==','M=>GoP') },
                     body: JSON.stringify({
-                        action: _d0x7059d0('JCAEVDQ8KVw2KB9T','REv='),
+                        action: _d0xdd7709('BkhfPBFBL0xJOB5W','p--Uw8'),
                         payload: { admin_id: o, password: password }
                     })
                 });
 
-                const V = await z.json();
+                const z = await T.json();
 
-                if (!z.ok || !V.success || !V.data) {
-                    throw new Error(V.error || _d0x7059d0('g5zQw+/Ou9PRGi5aOzs+GENzOQOo6feVxYRdYDoqPxANThRCJG8LFBBJCkw6K3o=','c:}#HO[u'));
+                if (!T.ok || !z.success || !z.data) {
+                    throw new Error(z.error || _d0xdd7709('uvXgrvvPuvX/bg83KScoI3wHHnOt6PCu/O1tDS4rPjYjOjUvNnMdLy89LTw/Kn0=','ZSMN\\N'));
                 }
 
-                E.classList.add(_d0x7059d0('Hk5bMCATDB1FEnh4Rk5TG0Y=','|)vUMv~'), _d0x7059d0('NB0IM20dHSIyGRwjbUtAdw==','@xpG'), _d0x7059d0('KTlDN1lF','KV1S<78,'), _d0x7059d0('WjgpNV0ldjRVMikwVDN2ZAhndGUI','8W[Q'));
-                E.innerText = _d0x7059d0('xe36fjFSBQE7HlMYCj8EQhVIfjVJBQwsGUkWSR0VSQUbPxwHNggqFVAQEHBeCQ==','\'qi^p');
-                E.classList.remove(_d0x7059d0('JFENXxlY','L8i;|6&'));
+                p.classList.add(_d0xdd7709('RwJmI0gAOSdJAWZzFVVkdBU=','%eKF'), _d0xdd7709('LQQSQwY8DA9FSjUFRwQbaQ==','Yaj7+'), _d0xdd7709('XT8YKlgL','?PjN=y;'), _d0xdd7709('KCEBHi88Xh8nKwEbJipeT3p+XE56','JNsz'));
+                p.innerText = _d0xdd7709('suCyFBtWLh81ElVdOUIuEjRdAXE0Vz8FORJGFBlGNAMiHU0UHUIuEicdWBp0DQ==','P|!4Z#Zw');
+                p.classList.remove(_d0xdd7709('ThFNFghI','&x)rm'));
 
                 setTimeout(() => {
-                    document.getElementById(_d0x7059d0('J1sDCi5GInQfCi90LUcPGyk=','N5j~G\'')).classList.add(_d0x7059d0('GDguRRse','pQJ!~'));
-                    document.getElementById(_d0x7059d0('KAReW0QWDFBYcikMSUZAKQ==','[m96%')).classList.remove(_d0x7059d0('Sww6PFMQ','#e^X6~d'));
-                    _(_d0x7059d0('R1Q+DlctSx4PRSUZVC1e','h$Q|#L\'1'), _d0x7059d0('f1MgHxA1UhhiOwgTNUc=','82TzgT+'));
+                    document.getElementById(_d0xdd7709('J1MlTTUvUQ1MKCZuL0s5K1M=','N=L9\\')).classList.add(_d0xdd7709('E0FGRg4C','{(""kl,L'));
+                    document.getElementById(_d0xdd7709('EQwVIRMkNwsLJT4TGSYHFw==','berLriV')).classList.remove(_d0xdd7709('AgUsJiFC','jlHBD,'));
+                    N(_d0xdd7709('dz0OJCwsDXk/LBUzLywY','XMaV'), _d0xdd7709('FQE0M14zGWAGRiAUITo=','R`@V)'));
                 }, 400);
 
-            } catch (M) {
-                E.classList.add(_d0x7059d0('SS5tOhtfBnxweFEJGw==','+I@H~;'), _d0x7059d0('E1hBWgkGAlkUHRRE','g=9.$t'), _d0x7059d0('PiNVJV0Q','\\L\'A8bA'), _d0x7059d0('JCdCOjJfazpVOnoYdngfamc=','FH0^W-'));
-                E.innerText = "✕ " + (M.message || _d0x7059d0('CyA6Pi0hTg4mNzI7Nk8=','JCY[^Rn'));
-                E.classList.remove(_d0x7059d0('IFdXITom','H>3E_'));
+            } catch (Z) {
+                p.classList.add(_d0xdd7709('TQECD0oCAkgfVgBPHw==','/f/}'), _d0xdd7709('EBUqJU4ZJQBdYWFT','dpRQck@'), _d0xdd7709('NitQICZX','TD"DC%'), _d0xdd7709('Jig2Mzc2ajYyNmlydGd9cHc=','DGDWR'));
+                p.innerText = "✕ " + (Z.message || _d0xdd7709('Jy5LRDcVbWxEKg8oTAA=','fM(!D'));
+                p.classList.remove(_d0xdd7709('MQsIETwM','Yblu'));
 
-                a.disabled = false;
-                a.innerText = _d0x7059d0('JDI8VzALMyFcNBEi','eGH?U');
+                J.disabled = false;
+                J.innerText = _d0xdd7709('YlgKVUZDClRATApY','#-~=');
             }
         }
 
 
-        function L() {
-            if (confirm(_d0x7059d0('w9uwu4XX1v2LnZDkA52QzsPbiXvD2567hcLW/ZWdkdbD26y7hcLW/YedkPbD24i7hdHW/KRd1v2snZDcA52Q48PasbuFy9b9i13W/YadkdzD26O7hPoWu4XP1v20nZDdw9u/u4XiFruF6Nb9k52Q/8PasXvD26y7hcPW/YtC','#}6['))) {
-                document.getElementById(_d0x7059d0('PzoSATcwCToiBAcNJg0NIQ==','LSulV}hS')).classList.add(_d0x7059d0('REMYAElE',',*|d'));
-                document.getElementById(_d0x7059d0('QBYxXTNyByxRL3cCMlAjXAIzXA==','3cA8A')).classList.add(_d0x7059d0('LR0fDRMr','Et{iv'));
-                document.getElementById(_d0x7059d0('BDVZLwY0TRMIPV0xMTNRKA==','gZ4_')).classList.add(_d0x7059d0('Pj0eWFIp','VTz<7GF'));
-                document.getElementById(_d0x7059d0('HkYMSBIhKBkEXTBCBwkiIgRWCw==','m3|-``Lt')).classList.add(_d0x7059d0('KlNLXidU','B:/:'));
-                document.getElementById(_d0x7059d0('BQlNSEkzGztcQVsxFgFWQ2g7Bx8=','bh9->R')).classList.remove(_d0x7059d0('IBgVLS0f','HqqI'));
+        function k() {
+            if (confirm(_d0xdd7709('2tT0z5mQktSH35zNUs+Zr5LUkB/a1NrPmYWS1Jnfnf+SiaXa1M3PmZ6S1ILfnMySiZPa1fUP35z9kom4GpLUl9+d9ZKJidrU2g/fnNeSiLja1OfPmL1SkomN2tTlz5m8ktSm35ztUs+Zr5LUn9+c1pKIuBqS1LXfnMySiZcF',':rr/?'))) {
+                document.getElementById(_d0xdd7709('EiEVFg12TAIPHwAaHEtIGQ==','aHr{l;-k')).classList.add(_d0xdd7709('CUAxJwYE','a)UCcj?}'));
+                document.getElementById(_d0xdd7709('Fw8EXkUlHhlSWSAbB1NVCxsGXw==','dzt;7')).classList.add(_d0xdd7709('MAQZWApN','Xm}<o#5'));
+                document.getElementById(_d0xdd7709('HVBAQgdDUj0RWERcMEROBg==','~?-2f-+q')).classList.add(_d0xdd7709('HwwSKQsZ','wevMnwM)'));
+                document.getElementById(_d0xdd7709('Nw00NkMFHCk6XwgXIzpfEhEhJA==','DxDS1')).classList.add(_d0xdd7709('OjEMHx8I','RXh{zff!'));
+                document.getElementById(_d0xdd7709('HScuRi0bPwlGNh8lLko1FBAzRi0=','zFZ#Z')).classList.remove(_d0xdd7709('LEIhQU87','D+E%*Uk'));
 
-                document.getElementById(_d0x7059d0('CS4DN1QdDAEfN1UvAzIPJlM=','`@jC=|')).classList.remove(_d0x7059d0('IFMrJyoG','H:OCOh.'));
-                document.getElementById(_d0x7059d0('KEsbAFc3WhRWFwZQN1sk','A%rt>V6')).value = '';
-                document.getElementById(_d0x7059d0('AAYFUgAJAHYIGx9RBhoI','ihl&')).value = '';
-                _('/', _d0x7059d0('HjoEPg==','VUi[u,'));
+                document.getElementById(_d0xdd7709('KisKRxxGLwQWRx10IDcGVhs=','CEc3u\'')).classList.remove(_d0xdd7709('Xx4nCFIZ','7wCl'));
+                document.getElementById(_d0xdd7709('ChJUGAAOIwkQGU8CCAIq','c|=lioO\\')).value = '';
+                document.getElementById(_d0xdd7709('JhUBERwuFzgEBjwMBxcR','O{heu')).value = '';
+                N('/', _d0xdd7709('fycvTw==','7HB*GZQ'));
                 
-                const E = document.getElementById(_d0x7059d0('DS42OAp6LxQ=','lBSJ~8@'));
-                if(E) E.classList.add(_d0x7059d0('GyMBEzUC','sJewPl+'));
+                const p = document.getElementById(_d0xdd7709('AF4eID8jXQM=','a2{RK'));
+                if(p) p.classList.add(_d0xdd7709('LBEYRTkK','Dx|!\\d'));
                 
-                const a = document.getElementById(_d0x7059d0('O00oHipeNA==','Z8\\vh*'));
-                if(a) {
-                    a.disabled = false;
-                    a.innerText = _d0x7059d0('JhdEOQIMRDgEA0Q0','gb0Q');
+                const J = document.getElementById(_d0xdd7709('H1FCMTwOGg==','~$6Y~zt%'));
+                if(J) {
+                    J.disabled = false;
+                    J.innerText = _d0xdd7709('dBFbAEFNJFwHThxB','5d/h$#P');
                 }
             }
         }
 
-        function J() {
-            document.getElementById(_d0x7059d0('NSQBJDQGQwEgGSQgE1M9KyMoJhA=','REuACg:')).classList.add(_d0x7059d0('PVYSSF5T','U?v,;=98'));
-            document.getElementById(_d0x7059d0('WD82EVo+Ii1UNzIPbTk+Fg==',';P[a')).classList.remove(_d0x7059d0('DFlAEA0J','d0$thgwm'));
-            _(_d0x7059d0('YR1eLj4fXzphEl4kJxA=','N~1C'), _d0x7059d0('EQIEJ0cOUnIhBjBPDg==','RmiW&`+'));
+        function d() {
+            document.getElementById(_d0xdd7709('ERlKTUkOJmUTFFtLSgYwWCARW18=','vx>(>o_6')).classList.add(_d0xdd7709('I1g6TCsa','K1^(NtZ'));
+            document.getElementById(_d0xdd7709('VDgjVwBfThshQAhfYT4rUA==','7WN\'a1')).classList.remove(_d0xdd7709('SywNWEYr','#Ei<'));
+            N(_d0xdd7709('TAxCAwMCAVRBHwwIRAA=','co-ns'), _d0xdd7709('BVQ/MydVK2MKVDUqKA==','F;RC'));
         }
 
-        function Q() {
-            document.getElementById(_d0x7059d0('Pk0CEyQSIH8TGjYQLUUZGAUaPFs=','Y,vvSs')).classList.add(_d0x7059d0('WSVRFFQi','1L5p'));
-            document.getElementById(_d0x7059d0('JzwSRgkVLQ9KFRgmBUoVAiAHVA==','TIb#{')).classList.remove(_d0x7059d0('Bx1VKSMt','ot1MFCcG'));
-            _(_d0x7059d0('DSgEUy8dQE4mB1co','"I`>Fso'), _d0x7059d0('EzwoJApQfCQkMS9YPFInIDY=','@IXAxp='));
+        function n() {
+            document.getElementById(_d0xdd7709('KR9cQ0oJKx0bRENeHDshEH5PWB8=','N~(&=hR')).classList.add(_d0xdd7709('CTZIGCY+','a_,|CP'));
+            document.getElementById(_d0xdd7709('NAVIDDJ4QCoZViUvXk0pJlEMNw==','Gp8i@9$')).classList.remove(_d0xdd7709('KF9NFC8u','@6)pJ'));
+            N(_d0xdd7709('FQ84WwcNXzZVCTVY',':n\\6ncpZ'), _d0xdd7709('IiQzEANxAhEcOC1VPT4kHB8=','qQCu'));
         }
 
-        function T() {
-            document.getElementById(_d0x7059d0('LwgIHhBfAwAIAgcfZxMpEA==','Lgenq1z')).classList.add(_d0x7059d0('PzYTHAxV','W_wxi;cj'));
-            document.getElementById(_d0x7059d0('GyVZW1pxDD1AUGRfDzlHaEFVHw==','hP)>(0')).classList.add(_d0x7059d0('WTwTIUIS','1UwE\'|'));
-            document.getElementById(_d0x7059d0('GRodPSwPBygMND4NChIGNg0HGww=','~{iX[n')).classList.remove(_d0x7059d0('VRlUTFge','=p0('));
-            _(_d0x7059d0('AysVJghYTk5LOg4xC1hb',',[zT|9"a'), _d0x7059d0('HVYWO0tXRHpnDSxIV1E=','Z7b^<6='));
+        function S() {
+            document.getElementById(_d0xdd7709('K0wmFSlNMiknRCILHkouEg==','H#Ke')).classList.add(_d0xdd7709('Qxw0MCZc','+uPTC2o'));
+            document.getElementById(_d0xdd7709('OAUOJk1sIiYZEA9QSi8lJhcmSA==','Kp~C?-F')).classList.add(_d0xdd7709('QQkCJ0ZH',')`fC#'));
+            document.getElementById(_d0xdd7709('GjhNSkRcMTsYNVxMR1QnBiswXFg=','}Y9/3=Hh')).classList.remove(_d0xdd7709('DBpKWk5K','ds.>+$s2'));
+            N(_d0xdd7709('SDo1BRgrBAkAKy4SGysR','gJZwlJh&'), _d0xdd7709('fRAbQEMMHBohAFdADAk=',':qo%4me'));
         }
 
 
-        async function Y(N) {
-            N.preventDefault();
-            const g = document.getElementById(_d0x7059d0('WyYCX1kKCltHKAtPfi0=','7Ie6')).value.trim();
-            const O = document.getElementById(_d0x7059d0('JFRRBhJ6AyVLVwEFaQ07SA==','H;6o|9l')).value.trim();
-            const F = document.getElementById(_d0x7059d0('CgkCBQlYKyUJCBwGcyAbCR0=','ifouh6R'));
-            const v = document.getElementById(_d0x7059d0('AywmTCVCGQ8kWy1CIjcl','`CK<D,'));
+        async function B(E) {
+            E.preventDefault();
+            const i = document.getElementById(_d0xdd7709('FSdKDEE/FiVdBEEFMCw=','yH-e/|')).value.trim();
+            const O = document.getElementById(_d0xdd7709('EVoeLFwLElgJJFwxLVQKNg==','}5yE2H')).value.trim();
+            const X = document.getElementById(_d0xdd7709('Sk0hKUQLOB9GRSU3YBczPFs=',')"LY%eAS'));
+            const R = document.getElementById(_d0xdd7709('Oz5PKwpMCDU3Nks1KVYf','XQ"[k"qy'));
             
-            F.classList.add(_d0x7059d0('HlIASxNV','v;d/'));
-            v.innerText = _d0x7059d0('wp3hmYS5ud+N2/7ywp3OWcKd85mEi7neotv/7MKc1JmEjLnfnBu537fb/8nCnedZwp3gmYShud6v2//iwpzeVwwV','";Yy');
-            v.disabled = true;
+            X.classList.add(_d0xdd7709('PVdfVDBQ','U>;0'));
+            R.innerText = _d0xdd7709('zevupYvPtuOCrfHOzevBZc3r/KWL/bbira3w0M3q26WL+rbjk22247it8PXN6+hlzevvpYvXtuKgrfDezerRawNj','-MVE');
+            R.disabled = true;
 
             try {
-                const k = parseInt(g);
-                const z = await fetch(_d0x7059d0('Hw8YAx8dDQlFHA1HQBwHEkk=','0nhj'), {
-                    method: _d0x7059d0('A3luBQ==','S6=Qa('),
-                    headers: { _d0x7059d0('cgktSB1JRUsXRQhC','1fC<x\''): _d0x7059d0('QiESMRcVQiULMhBZSSINMw==','#Qb]~v') },
+                const V = parseInt(i);
+                const T = await fetch(_d0xdd7709('BBg5ORYATho8IlxeWwsmKEA=','+yIP9s'), {
+                    method: _d0xdd7709('cix4ag==','"c+>4'),
+                    headers: { _d0xdd7709('ZBYDGTBHU1Q5FCVM','\'ymmU)'): _d0xdd7709('LiolRj5XLi48RTkbJSk6RA==','OZU*W4') },
                     body: JSON.stringify({
-                        action: _d0x7059d0('FFJNciYAIyISWUA=','s79-EoNR'),
-                        payload: { company_id: k }
+                        action: _d0xdd7709('E0shDRVJJxEVQCw=','t.URv&Ja'),
+                        payload: { company_id: V }
                     })
                 });
 
-                const V = await z.json();
+                const z = await T.json();
 
-                if (!z.ok || !V.success || !V.data) {
-                    K(_d0x7059d0('yse0pOmhgYfqro3sweLkysefpOiCgYf7bsrHp6TorYGH5a6M3gGk6IuBh/qujP7B4vDKx42k6a2Bh9iujeYBpOiAgYf6rozywePRysefZK6MzsHi8MrGvqTogoGH+28=','*a!DN'));
+                if (!T.ok || !z.success || !z.data) {
+                    h(_d0xdd7709('penKp+3Or/npquLCv+Hgpenhp+ztr/n4aqXp2afswq/55qrj8H+n7OSv+fmq49C/4fSl6fOn7cKv+duq4sh/p+zvr/n5quPcv+DVpenhZ6rj4L/h9KXowKfs7a/5+Gs=','EO_GJ'));
                     return;
                 }
 
-                if (String(V.data.secret_pass).trim() !== String(O).trim()) {
-                    K(_d0x7059d0('ufTv1vODlP/Ht5HY3NLpsvCxtZrrebLxnLWayrn079bzr5T+zbeQ69zS6bLwu7Wa1Xmy8Zu1m/W59OUWtZrNufXI1vK7lP/Jt5HSHQ==','YRW6U<t'));
+                if (String(z.data.secret_pass).trim() !== String(O).trim()) {
+                    h(_d0xdd7709('1oqGgcLfnZC53sbpgNuGzJnmhMbiFsyYy4TGw9aKhoHC852Rs97H2oDbhsyZ7ITG3BbMmMyEx/zWioxBhMbE1ouhgcPnnZC33sbjQQ==','6,>ad`}'));
                     return;
                 }
 
-                K(_d0x7059d0('zsnaiYj4iM+pj87BDo/O0c7Jw4mI3UlJzsntiYniiM+Bj87XzsnCSc7J2ImJ6IjPho/P5M7JyYmI0YjPnk+Iz7uPztnOydZJzsnRiYj1iM6jj87yzsjvRwBB','.ohi'));
-                _(`/company/dashboard/${compId}`, _d0x7059d0('dV41Hg0mGWJhXioFHzgBIVM=','61XnlH`B'));
+                h(_d0xdd7709('nd/ApZLOo9v+kuOceaPbwZLjn7nlz1hSpZLco9r0kuObueXDmdTvFLnlzZnVwtT/653e/6WS+KPbx5LjhHmj2+yS44S55cNZkuONueXnmdXI1P/Ynd71axp3','}yrE4YC'));
+                N(`/company/dashboard/${compId}`, _d0xdd7709('BDcdSS8GNGcPH0slGz0mOxU=','GXp9NhM'));
 
-            } catch (M) {
-                K(_d0x7059d0('wfuUzpDcwfuqzpHlwfuZzpDcwfupDtf9mb2TrNf9jr2Spdf9tr2SqRe7h+XViJm7h+XVibq7h/LViIl7wfuMzpDEwfqyzpHAwfqyzpL/','!]5.7['));
+            } catch (Z) {
+                h(_d0xdd7709('ooyQsZbFypfO0eSU0fedoo22sZfeCtH3iaKMs7GX7cqW2tHkvdH2tmLKl+nR5ITR94mijbyxl+3Kl+8RooyIsZbdypbW0eSx0fa2oo+V','B*1Q1'));
             } finally {
-                v.innerText = _d0x7059d0('ntf2ouXkntfDouXbXpHi0WOT2PSk5c6T2N6k5P2T2NtkouXDntbDouXbntbJouXSntf6ouXDXpHi16PVzpHjw6PV1g==','~qDBCs');
-                v.disabled = false;
+                R.innerText = _d0xdd7709('1PX8zITI3sKzs+iEAr+Y9xSz6KnC+LOEkvyuipy/mM4Us+icwvi5hJL7rouvv5jF1PXwzITvHoSSxq6Kkr+Z5dT15g==','4SN,"_>d');
+                R.disabled = false;
             }
         }
 
-        function K(msg) {
-            const F = document.getElementById(_d0x7059d0('CgRbKUcHEno2QQAFcytUBhk=','ik6Y&'));
-            F.innerText = msg;
-            F.classList.remove(_d0x7059d0('KzMBLEYt','CZeH#'));
+        function h(msg) {
+            const X = document.getElementById(_d0xdd7709('AzJFOgEzUQYPOkEkJS9aJRI=','`](J'));
+            X.innerText = msg;
+            X.classList.remove(_d0xdd7709('DBctAhgr','d~If}Ez'));
         }
 
 
-        async function $(N) {
-            N.preventDefault();
-            const G = document.getElementById(_d0x7059d0('VBZLJCViQw5SLx5H','\'c;AW#')).value.trim();
-            const d = document.getElementById(_d0x7059d0('IRdHQw49Ng9eSCwdIRE=','Rb7&||')).value.trim();
-            const F = document.getElementById(_d0x7059d0('T1ZKDTQHByNHXGIWKCQa','.2\'dZKhD'));
-            const v = document.getElementById(_d0x7059d0('AQUoHCYxORwbHhQWMxkzMwYe','rpXyTp]q'));
+        async function b(E) {
+            E.preventDefault();
+            const y = document.getElementById(_d0xdd7709('QiNIAVkEVTtRCmIh','1V8d+E')).value.trim();
+            const $ = document.getElementById(_d0xdd7709('DhY7Hw8iLxcUDRsbDhA=','}cKz')).value.trim();
+            const X = document.getElementById(_d0xdd7709('W0gfISdnXV1FHA07WV1I',':,rHI+2'));
+            const R = document.getElementById(_d0xdd7709('AB0BQAEpFUgaBj1KFAEfZwcG','shq%'));
             
-            if(F) F.classList.add(_d0x7059d0('KlMOOA9V','B:j\\j;;'));
-            if(v) {
-                v.innerText = _d0x7059d0('cBoVRgYfRQYCTxcYXwhPAE0=','1oa.cq');
-                v.disabled = true;
+            if(X) X.classList.add(_d0xdd7709('CUZAXCEg','a/$8DN'));
+            if(R) {
+                R.innerText = _d0xdd7709('el8GIF5EBiFYSwYhVU1cZhU=',';*rH');
+                R.disabled = true;
             }
 
             try {
-                const z = await fetch(_d0x7059d0('YFQtWUg8UD5FFSoYLUIIN0w=','O5]0g'), {
-                    method: _d0x7059d0('DgMFYA==','^LV4'),
-                    headers: { _d0x7059d0('HklLNR8oPXByXDEf',']&%AzFI'): _d0x7059d0('SyQMBlQ+Q149EwQSN1FFOg==','*T|j=]"') },
+                const T = await fetch(_d0xdd7709('XgJaPl4QTzQEEU96ARFFLwg=','qc*W'), {
+                    method: _d0xdd7709('dTsSfg==','%tA*'),
+                    headers: { _d0xdd7709('Jj0bBQIwEX8hCBc7','eRuqg^'): _d0xdd7709('FTdKByMXJk4CJRpoUBglGg==','tG:kJ') },
                     body: JSON.stringify({
-                        action: _d0x7059d0('KEghA0Q7AUw3B0ss','^-Sj"B'),
-                        payload: { admin_id: G, password: d }
+                        action: _d0xdd7709('TkoGMgAvdllLGTII','8/t[fV)'),
+                        payload: { admin_id: y, password: $ }
                     })
                 });
 
-                const V = await z.json();
+                const z = await T.json();
 
-                if (!z.ok || !V.success || !V.data) {
-                    throw new Error(V.error || _d0x7059d0('wpfUrouj0d/8DHFICjpJTxEwCgzCl9WuipwROjxJRlQXOkVDXVkeTVFCDiFeRhA=','"1yN,'));
+                if (!T.ok || !z.success || !z.data) {
+                    throw new Error(z.error || _d0xdd7709('oePBuM71sMzzZT8hGgA1B2EMKHiJ0vyK5/tMGxsRNA8vMQU5BVQACzI2GzcbEHE=','AElXitPj'));
                 }
 
-                document.getElementById(_d0x7059d0('NEsnJDV/MywuUBsuIFc5Fy5bIA==','G>WA')).classList.add(_d0x7059d0('JUNKIhMj','M*.Fv'));
-                document.getElementById(_d0x7059d0('UTkcCxNzJCJLIigPEloiIEM+CA==','"Llna2@O')).classList.remove(_d0x7059d0('WAALNide','0ioRB'));
-                m(_d0x7059d0('KCwILyk9CjQcJh0r','ZIoF'));
-                _(_d0x7059d0('WBo4Wyo+YhMaL14hPywFHw==','w{\\6CPM'), _d0x7059d0('KBE3MUsseCYfKjFcMTQ=','epDE.^X'));
+                document.getElementById(_d0xdd7709('El01H108K0EIRgkVSBQheghNMg==','a(Ez/}O,')).classList.add(_d0xdd7709('HxguXx4b','wqJ;{u'));
+                document.getElementById(_d0xdd7709('X1g7QFBtSSZMTGhMOE1AQ0w5QQ==',',-K%"')).classList.remove(_d0xdd7709('HlFdNTMY','v89QV'));
+                F(_d0xdd7709('ADQpPis0FQAXISU1','rQNWX@p'));
+                N(_d0xdd7709('RV1SKU0ZRVhXN0wVBV1EIA==','j<6D$w'), _d0xdd7709('K01FKFwoRm9ZMk0oCUA=','f,6\\9Z'));
 
-            } catch(n) {
-                if(F) {
-                    F.innerText = n.message || _d0x7059d0('tIXwyOeptIXvCBNRJ1c4RWBhEAO9juzI8p19azJNMEYzXClJOAMNSTNbI0wvTGE=','T#](@(');
-                    F.classList.remove(_d0x7059d0('JD83Ek9a','LVSv*4.B'));
+            } catch(r) {
+                if(X) {
+                    X.innerText = r.message || _d0xdd7709('0J3y0sDXotyCGwxLFCInFxByGxKH8O6aloV/cRUzJh9eTzZTC3YSG0NIKF0VMmM=','0;_2gVBz');
+                    X.classList.remove(_d0xdd7709('RzIoL0dH','/[LK")'));
                 }
             } finally {
-                if(v) {
-                    v.innerText = _d0x7059d0('bRIxTjQ9TRVPBjFD',',gE&QS9|');
-                    v.disabled = false;
+                if(R) {
+                    R.innerText = _d0xdd7709('Ok9XWx5UV1oYW1dW','{:#3');
+                    R.disabled = false;
                 }
             }
         }
 
-        function H() {
-            document.getElementById(_d0x7059d0('XAJMVF02WFxGGXhQXB9eXk4FWA==','/w<1')).classList.add(_d0x7059d0('WFwROlVb','05u^'));
-            document.getElementById(_d0x7059d0('TFkKLAt+SBcgF3NDHSAXaUUfPg==','?,zIy')).classList.remove(_d0x7059d0('QDgdIEwr','(QyD)E'));
-            _(_d0x7059d0('XCteAScdZVYDKRok','sJ:lN'), _d0x7059d0('HltMVl8EailDVV0NaEQqR1I=','M.<3-$+'));
+        function P() {
+            document.getElementById(_d0xdd7709('MBNIHDEnXBQqCHwYMA5aFiIUXA==','Cf8y')).classList.add(_d0xdd7709('HxheUUQO','wq:5!`'));
+            document.getElementById(_d0xdd7709('ADMfWS5tXR4vAXAzS1AdEAZZKw==','sFo<\\,9')).classList.remove(_d0xdd7709('PU0gTjBK','U$D*'));
+            N(_d0xdd7709('WTJZUlFRWT9SWFFR','vS=?8?'), _d0xdd7709('Gi1DV0l3GS01WlwbGzcuMV0=','IX32;WX'));
         }
 
-        function w() {
-            document.getElementById(_d0x7059d0('ChdYCkA9FkcKSBI+WgFHBxY=','ks5c.')).value = '';
-            document.getElementById(_d0x7059d0('AQMVGiBxPAMwBgsA','`gxsN>Pg')).value = '';
-            document.getElementById(_d0x7059d0('XU5IPh1vWV11NgBS','<*%Ws!')).value = '';
-            document.getElementById(_d0x7059d0('XRBOEj0yUVISSgk+IV9PBw==','<t#{Sq>')).value = '';
-            document.getElementById(_d0x7059d0('GSZIMAQDGTFWLgUhHA9KPQs/','xB%YjS')).classList.remove(_d0x7059d0('IlhTIkBa','J17F%4'));
+
+        function m() {
+            document.getElementById(_d0xdd7709('XAZbRVM0U15UBE9hUgBfQFg=','=b6,')).value = '';
+            document.getElementById(_d0xdd7709('SltQF0JoWhx7Xk4N','+?=~,\'6x')).value = '';
+            document.getElementById(_d0xdd7709('F1IbVD04UwFtMgVF','v6v=S')).value = '';
+            document.getElementById(_d0xdd7709('T0AfIkBnHSVITQAmfkUBOA==','.$rK')).value = '';
+            document.getElementById(_d0xdd7709('Kz4AJyQKDD05LQI8LhcCKis2','JZmN')).classList.remove(_d0xdd7709('ASwTRQwr','iEw!'));
         }
 
-        function W() {
-            document.getElementById(_d0x7059d0('LAhPGDU5DDk+G00DPyQCLiwA','Ml"q[imJ')).classList.add(_d0x7059d0('UAw4OS9W','8e\\]J'));
+        function s() {
+            document.getElementById(_d0xdd7709('MT1PSDkAOFFSID8rRmw4NDhO','PY"!W')).classList.add(_d0xdd7709('LEgcWyFP','D!x?'));
         }
 
-        async function p(N) {
-            N.preventDefault();
-            alert(_d0x7059d0('mcfvmY/HgePByd/ypd62mcf7mY/JgeL0yd/AZZmP04Hjycnf3qXfhZnH9ZmO9IHj3cnfyaXerpnH9VnJ3/2l34GZxsiZj9ZBpd+Rmcf7mY/JgeL0yd/Mpd+Xmcf1mY/LgeL+yd/ZZZmPyYHjx8nf6KXftpnH+pmP+0Gl36+Zx++Zj9iB4v7J3/5lmY/sgePJyd/fZZmPwIHj48ne7KXfspnGwpmM3Q==','yaEy)'));
-            W();
+        async function c(E) {
+            E.preventDefault();
+            alert(_d0xdd7709('ndeAnsCVndeSnsC4nda1nsCVndeansGmndeLXoaN15GMzoaNwpGM0oaNzZGN84aN2ZGM1oaM+pGMzkbL2+3K2M7L2vzK2MkLndeSnsCVndeansGmndeHnsCVndeansCZndatnsCTXZGMzoaNw5GM94aN4pGMwYaN/1HK2ODL29vK2MfL2vbK2PkLnde/nsCbndeUXoaNxJGM5IaM8JGM5YaM+pGP2g==','}q*~f+'));
+            s();
         }
 
-        function m(target) {
-            document.getElementById(_d0x7059d0('DAAlMhcfCDQUFwonKBIf','xaG`r')).classList.add(_d0x7059d0('XA07B1EK','4d_c'));
-            document.getElementById(_d0x7059d0('MVwufCcJXyRTNXMhF1s=','E=L?Hd/')).classList.add(_d0x7059d0('D0AKKA46','g)nLkTyo'));
-            document.getElementById(_d0x7059d0('VlYmJktOdCsbSU1bIQ==','"7Du:')).classList.add(_d0x7059d0('EFwSJSIF','x5vAGk{'));
 
-            if (target === _d0x7059d0('BEcWQUYvSDswTQNF','v"q(5[-I')) {
-                document.getElementById(_d0x7059d0('UiI0AEMkPyFSJiQUSTE7','&CVR')).classList.remove(_d0x7059d0('LVMQCl4r','E:tn;'));
-                document.getElementById(_d0x7059d0('Sk5dJEEKXUg=','8/9M.X')).checked = true;
-                _(_d0x7059d0('Zl49DyBRdgYoTDEAJl4rBmZNPAUgTC0HOw==','I?Yb'), _d0x7059d0('bjUyIUcKGE5wEydGEw==','<PUH4~}'));
-            } else if (target === _d0x7059d0('JR4eUhUzUg0vAgc=','Fqs"t]+A')) {
-                document.getElementById(_d0x7059d0('LCQMGABfKCQAIiNbKzE=','XEn[o2')).classList.remove(_d0x7059d0('IT0cIAZK','ITxDc$'));
-                document.getElementById(_d0x7059d0('FjYwHhkrQ1YQ','dWTwvg*%')).checked = true;
-                X();
-                _(_d0x7059d0('A1gTIkZCFhMuXERbGC5dSBYUIEJcWBkmSl8UGyZcWA==',',9wO/'), _d0x7059d0('ASwgWC4NKyY+CAMKMTc=','BCM(Oc'));
-            } else if (target === _d0x7059d0('PDIqIA0pPCwqBg==','OCFcbG')) {
-                document.getElementById(_d0x7059d0('KDcCdy0wFQ9KLzM6BQ==','\\V`$\\')).classList.remove(_d0x7059d0('JxIYLF4S','O{|H;|'));
-                document.getElementById(_d0x7059d0('XRQ+JB4LMkM=','/uZMqXC')).checked = true;
-                _(_d0x7059d0('YgonKi4kfFksGCslKCshWWIYMitqKTxTPgQvIg==','MkCGGJS='), _d0x7059d0('Oz4VZmEpBhw2Kkc=','hoYF"F'));
+        function F(target) {
+            document.getElementById(_d0xdd7709('K1MCCDpVCSkrVxIcMEAN','_2`Z')).classList.add(_d0xdd7709('UThTFBNX','9Q7pv'));
+            document.getElementById(_d0xdd7709('EB8ZZF8JDhpJSSgXCFM=','d~{\'0')).classList.add(_d0xdd7709('QV8QH0xY',')6t{'));
+            document.getElementById(_d0xdd7709('OBYtPhEgNCADEyMbKg==','LwOm`')).classList.add(_d0xdd7709('BhMrOjQy','nzO^Q\\1$'));
+
+            if (target === _d0xdd7709('MF09JQgbJ0ocIwkC','B8ZL{o')) {
+                document.getElementById(_d0xdd7709('ESInKzcEDDAxHCAlCjEo','eCEyRc')).classList.remove(_d0xdd7709('Tj8rJStQ','&VOAN>'));
+                document.getElementById(_d0xdd7709('D11SQQR0UxA=','}<6(k&6w')).checked = true;
+                N(_d0xdd7709('ZS0mM0okYyY/UCIuLT9RLmMwO0QjPzY7UQ==','JLB^#'), _d0xdd7709('fCYyNRE+SzF1Gg04Qw==','.CU\\bJ'));
+            } else if (target === _d0xdd7709('XQVdBC9QE3wdPUo=','>j0tN')) {
+                document.getElementById(_d0xdd7709('BQEoYjoMCj0fGQZIJhU=','q`J!Uaz\\')).classList.remove(_d0xdd7709('GDQiWiIr','p]F>GE'));
+                document.getElementById(_d0xdd7709('R1cCAzp5XxUe','56fjU')).checked = true;
+                j();
+                N(_d0xdd7709('bgsJDC0vRQkANykIAgA2JUUODikxCwMIITJHAQg3NQ==','AjmaD'), _d0xdd7709('KCUEF1wTAi8aR3EUGD4=','kJig=}'));
+            } else if (target === _d0xdd7709('IDoLFjwlFDo/Lg==','SKgU')) {
+                document.getElementById(_d0xdd7709('NhkqMS8uOycMLS0ULQ==','BxHb^')).classList.remove(_d0xdd7709('BxdNCAYt','o~)lcC('));
+                document.getElementById(_d0xdd7709('LCcTKToNNxs=','^Fw@U')).checked = true;
+                N(_d0xdd7709('Xik1QjwBVBUpIkc3ABoDLH5cJANWEic/XDoDHg==','qHQ/Uo{'), _d0xdd7709('YBYrCWhcKRRGR1Y=','3Gg)+'));
             }
         }
 
-        async function f(N) {
-            N.preventDefault();
-            alert(_d0x7059d0('teDVrJjKiPPooOuyoc7/puby3+fAteD/bN/n57Xg6KyYzIjz2aDrsqHO5abm8x+hzu2m5uff59q14+Q=','UF@L?Ah'));
+
+        async function g(E) {
+            E.preventDefault();
+            alert(_d0xdd7709('tPjUnNHfvufSlvPTodrctPj/nND8vufDVrT4zpzQ/L7m8ZbywaHb+7T48ZzQ636h2s60+Oqc0Oa+5Ng=','T^A|v'));
         }
 
-        async function X() {
-            const P = document.getElementById(_d0x7059d0('X14jW14KRWUvSVMBfl4qUg==','<1N+?d'));
-            P.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানি তালিকা লোড হচ্ছে...</td></tr>`;
+        async function j() {
+            const v = document.getElementById(_d0xdd7709('Cl8zQQwdKAUIUjJULxw1KA==','i0^1msQQ'));
+            v.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানি তালিকা লোড হচ্ছে...</td></tr>`;
         }
 
-        async function C() {
-            const c = document.getElementById(_d0x7059d0('MR8VBhUwMQEVIDUrNh4MMTgxOg==','BnyEz^'));
-            c.innerText = _d0x7059d0('cg4cWn5OMSMVUUR/NQJYQiokH1kBKTkbHVI6Mw9PRH8gCFJZJn4=','!_Pz=');
+        async function f() {
+            const U = document.getElementById(_d0xdd7709('M0IsDlJbM1wsKHJANEM1OX9aOA==','@3@M=5'));
+            U.innerText = _d0xdd7709('CQUdURk7PwI1ODRRPyw0Ei8gNBV6IjgQeic0Ei8mNFEqJj4JI3o=','ZTQq');
         }
     </script>
 </body>
