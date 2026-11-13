@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Sigma PhD - Staff Portal (staff.html)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style id="dynamicStyleContainer"></style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl bg-slate-900 border border-blue-500/50 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-base font-extrabold text-blue-400"><i class="fa-solid fa-user-tie mr-2"></i>Tier 2: Office Staff Portal</h1>
+                <p class="text-[11px] text-slate-400">Company Onboarding & Dynamic Form Setup</p>
+            </div>
+            <button onclick="logoutStaff()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow">Log Out</button>
+        </div>
+
+        <div class="bg-blue-950/40 border border-blue-800/40 p-4 rounded-2xl flex justify-between items-center text-xs">
+            <span>Contract & Provision Status: <strong class="text-amber-300">[PROV] / [CONT] Active</strong></span>
+            <span class="px-2.5 py-1 bg-blue-600 text-white rounded text-[10px] font-bold">Staff Role</span>
+        </div>
+    </div>
+
+    <script>
+        function logoutStaff() {
+            window.location.href = 'staff.html';
+        }
+    </script>
+</body>
+</html>
