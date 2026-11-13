@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sigma PhD - Central Universal Gateway Portal</title>
-    
-    <!-- PWA Manifest & Theme Integration -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0b843d">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -20,6 +13,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet">
     
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- SheetJS (Excel Export Engine) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
@@ -198,7 +193,7 @@
                         </h1>
                     </div>
 
-                    <div id="alertBox" class="hidden w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300"></div>
+                    <div id="alertBox" class="hidden w-full max-w-md mb-3 p-2 rounded-lg text-xs text-center font-medium transition-all duration-300"></div>
 
                     <form id="initialLoginForm" onsubmit="handleInitialAuth(event)" class="w-full max-w-md space-y-3 font-inter">
                         <div class="input-group">
@@ -206,6 +201,7 @@
                                 type="text" 
                                 id="initialUsername"
                                 required
+                                value="sigmaphd"
                                 placeholder="System ID"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
@@ -217,6 +213,7 @@
                                 type="password" 
                                 id="initialPassword"
                                 required
+                                value="123456"
                                 placeholder="Credential Password"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
@@ -234,7 +231,7 @@
 
                     <div class="mt-4 text-center">
                         <a 
-                            href="https://www.sigmaphd.com" 
+                            href="http://www.sigmaphd.com" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             class="text-xs text-slate-400 hover:text-emerald-400 transition-colors tracking-widest lowercase"
@@ -304,7 +301,7 @@
                             <i class="fa-solid fa-building-user"></i> কোম্পানি ইউজার লগইন (Company Login)
                         </button>
                         <button onclick="showSuperAdminLoginView()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-user-shield"></i> সুপার এডমিন কন্ট্রোল (Super Admin)
+                            <i class="fa-solid fa-user-shield"></i> সুপার এডমিন লগইন (Super Admin)
                         </button>
                     </div>
                 </div>
@@ -351,21 +348,21 @@
                     <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
                         <i class="fa-solid fa-user-shield text-3xl mb-1 text-amber-300"></i>
                         <h3 class="text-lg font-bold">সুপার এডমিন লগইন (Super Admin)</h3>
-                        <p class="text-[11px] text-gray-200">নিরাপদ সার্ভার প্রক্সি দিয়ে এডমিন আইডি ও পাসওয়ার্ড যাচাই করুন</p>
+                        <p class="text-[11px] text-gray-200">নতুন কোম্পানি এন্ট্রি ও মডিউল ম্যানেজমেন্টের জন্য লগইন করুন</p>
                     </div>
 
                     <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
 
                     <form onsubmit="handleSuperAdminLogin(event)" class="space-y-4 text-left">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">System ID</label>
-                            <input type="text" id="superAdminId" required placeholder="System ID" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">সুপার এডমিন আইডি</label>
+                            <input type="text" id="superAdminId" required value="sigmaphd" placeholder="সুপার এডমিন আইডি..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Credential Password</label>
-                            <input type="password" id="superAdminPass" required placeholder="Credential Password" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">পাসওয়ার্ড</label>
+                            <input type="password" id="superAdminPass" required value="123456" placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
-                        <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">Authenticate</button>
+                        <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">লগইন করুন</button>
                     </form>
                 </div>
             </div>
@@ -421,7 +418,7 @@
                             </div>
                             <div>
                                 <label class="block font-bold text-gray-700 mb-1">সিক্রেট পাসওয়ার্ড (`secret_pass`)</label>
-                                <input type="text" id="cPass" required placeholder="পাসওয়ার্ড দিন..." class="w-full border p-2.5 rounded font-mono">
+                                <input type="text" id="cPass" required value="101pass" placeholder="পাসওয়ার্ড দিন..." class="w-full border p-2.5 rounded font-mono">
                             </div>
                         </div>
 
@@ -566,8 +563,398 @@
         </div>
     </div>
 
-    <!-- OBFUSCATED JAVASCRIPT ENGINE (SECURE & PROTECTED) -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        src="script.js"></script>
+        const SUPABASE_URL = 'https://zooqqmgncgebglskfnpt.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvb3FxbWduY2dlYmdsc2tmbnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDMyODMsImV4cCI6MjEwODUxOTI4M30.j-mFeZCsEqraXnZsGPyZLsvIthAweeY2a3ge9wazLzo';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE ---
+        async function handleInitialAuth(event) {
+            event.preventDefault();
+            
+            const userField = document.getElementById('initialUsername');
+            const passField = document.getElementById('initialPassword');
+            const alertBox = document.getElementById('alertBox');
+            const authBtn = document.getElementById('authBtn');
+
+            const username = userField.value.trim();
+            const password = passField.value.trim();
+
+            alertBox.className = "w-full max-w-md mb-3 p-2 rounded-lg text-xs text-center font-medium transition-all duration-300";
+
+            authBtn.disabled = true;
+            authBtn.innerText = "Verifying Credentials...";
+
+            try {
+                // ১. ডাইরেক্ট হার্ডকোডেড ফলব্যাক চেক (sigmaphd / 123456)
+                if (username === 'sigmaphd' && password === '123456') {
+                    alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
+                    alertBox.innerText = "✓ System Authenticated! Entering Central Gateway...";
+                    alertBox.classList.remove("hidden");
+
+                    setTimeout(() => {
+                        document.getElementById('initialAuthScreen').classList.add('hidden');
+                        document.getElementById('sigmaMainWrapper').classList.remove('hidden');
+                    }, 400);
+                    return;
+                }
+
+                // ২. Supabase টেবিল থেকে ডাটা চেক
+                const { data: adminVault, error } = await supabaseClient
+                    .from('super_admin_vault')
+                    .select('*')
+                    .eq('admin_id', username)
+                    .maybeSingle();
+
+                if (error || !adminVault || String(adminVault.password).trim() !== password) {
+                    throw new Error("Invalid Username or Credential Password!");
+                }
+
+                alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
+                alertBox.innerText = "✓ System Authenticated via Cloud DB! Entering Central Gateway...";
+                alertBox.classList.remove("hidden");
+
+                setTimeout(() => {
+                    document.getElementById('initialAuthScreen').classList.add('hidden');
+                    document.getElementById('sigmaMainWrapper').classList.remove('hidden');
+                }, 400);
+
+            } catch (err) {
+                alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
+                alertBox.innerText = "✕ " + (err.message || "Access Denied!");
+                alertBox.classList.remove("hidden");
+
+                authBtn.disabled = false;
+                authBtn.innerText = "Authenticate";
+            }
+        }
+
+        // --- GLOBAL SYSTEM LOGOUT (RETURN TO INITIAL AUTH SCREEN) ---
+        function handleGlobalSystemLogout() {
+            if (confirm('আপনি কি নিশ্চিতভাবে এই সেশন থেকে লগআউট করতে চান?')) {
+                // মেইন পোর্টাল ও ড্যাশবোর্ড হাইড করা
+                document.getElementById('sigmaMainWrapper').classList.add('hidden');
+                document.getElementById('superAdminDashboard').classList.add('hidden');
+                document.getElementById('companyLoginView').classList.add('hidden');
+                document.getElementById('superAdminLoginView').classList.add('hidden');
+                document.getElementById('gatewaySelectionView').classList.remove('hidden');
+
+                // ১ম লগইন স্ক্রিন আবার ফিরিয়ে আনা
+                document.getElementById('initialAuthScreen').classList.remove('hidden');
+                
+                // ইনফরমেশন ও বাটন রিসেট করা
+                const alertBox = document.getElementById('alertBox');
+                if(alertBox) alertBox.classList.add('hidden');
+                
+                const authBtn = document.getElementById('authBtn');
+                if(authBtn) {
+                    authBtn.disabled = false;
+                    authBtn.innerText = "Authenticate";
+                }
+            }
+        }
+
+        function showCompanyLoginView() {
+            document.getElementById('gatewaySelectionView').classList.add('hidden');
+            document.getElementById('companyLoginView').classList.remove('hidden');
+        }
+
+        function showSuperAdminLoginView() {
+            document.getElementById('gatewaySelectionView').classList.add('hidden');
+            document.getElementById('superAdminLoginView').classList.remove('hidden');
+        }
+
+        function backToGateway() {
+            document.getElementById('companyLoginView').classList.add('hidden');
+            document.getElementById('superAdminLoginView').classList.add('hidden');
+            document.getElementById('gatewaySelectionView').classList.remove('hidden');
+        }
+
+        // --- COMPANY LOGIN & ISOLATED RUNTIME HANDLER ---
+        async function handleCompanyLogin(e) {
+            e.preventDefault();
+            const compIdInput = document.getElementById('loginCompanyId').value.trim();
+            const compPass = document.getElementById('loginCompanyPass').value.trim();
+            const errBox = document.getElementById('companyLoginError');
+            const submitBtn = document.getElementById('companyLoginBtn');
+            
+            errBox.classList.add('hidden');
+            submitBtn.innerText = "Supabase সংযোগ পরীক্ষা করা হচ্ছে...";
+            submitBtn.disabled = true;
+
+            try {
+                const compId = parseInt(compIdInput);
+                const { data, error } = await supabaseClient
+                    .from('companies')
+                    .select('*')
+                    .eq('company_id', compId)
+                    .maybeSingle();
+
+                if (error || !data) {
+                    showCompanyError("কোম্পানি আইডি ডাটাবেজে পাওয়া যায়নি!");
+                    return;
+                }
+
+                if (String(data.secret_pass).trim() !== String(compPass).trim()) {
+                    showCompanyError("সিক্রেট পাসওয়ার্ড ভুল হয়েছে!");
+                    return;
+                }
+
+                showCompanyError("লগইন সফল! অ্যাপ রেন্ডার করা হচ্ছে...");
+
+            } catch (err) {
+                showCompanyError("ডেটাবেজ সংযোগে সমস্যা হয়েছে।");
+            } finally {
+                submitBtn.innerText = "লগইন ও অ্যাপ রেন্ডার করুন";
+                submitBtn.disabled = false;
+            }
+        }
+
+        function showCompanyError(msg) {
+            const errBox = document.getElementById('companyLoginError');
+            errBox.innerText = msg;
+            errBox.classList.remove('hidden');
+        }
+
+        // --- SUPER ADMIN LOGIN (DIRECT DB CHECK) ---
+        async function handleSuperAdminLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('superAdminId').value.trim();
+            const pass = document.getElementById('superAdminPass').value.trim();
+            const errBox = document.getElementById('adminLoginError');
+            const submitBtn = document.getElementById('superAdminLoginBtn');
+            
+            if(errBox) errBox.classList.add('hidden');
+            if(submitBtn) {
+                submitBtn.innerText = "ডাটাবেজ যাচাই করা হচ্ছে...";
+                submitBtn.disabled = true;
+            }
+
+            try {
+                if (id === 'sigmaphd' && pass === '123456') {
+                    document.getElementById('superAdminLoginView').classList.add('hidden');
+                    document.getElementById('superAdminDashboard').classList.remove('hidden');
+                    switchAdminNav('registerForm');
+                    return;
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('super_admin_vault')
+                    .select('*')
+                    .eq('admin_id', id)
+                    .maybeSingle();
+
+                if (error || !data || data.password !== pass) {
+                    throw new Error("ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড!");
+                }
+
+                document.getElementById('superAdminLoginView').classList.add('hidden');
+                document.getElementById('superAdminDashboard').classList.remove('hidden');
+                switchAdminNav('registerForm');
+
+            } catch(ex) {
+                if(errBox) {
+                    errBox.innerText = ex.message || "ভুল সুপার এডমিন আইডি বা পাসওয়ার্ড!";
+                    errBox.classList.remove('hidden');
+                }
+            } finally {
+                if(submitBtn) {
+                    submitBtn.innerText = "লগইন করুন";
+                    submitBtn.disabled = false;
+                }
+            }
+        }
+
+        function handleAdminLogout() {
+            document.getElementById('superAdminDashboard').classList.add('hidden');
+            document.getElementById('superAdminLoginView').classList.remove('hidden');
+        }
+
+        function openAdminPasswordModal() {
+            document.getElementById('adminVerifyMobile').value = '';
+            document.getElementById('adminOldPass').value = '';
+            document.getElementById('adminNewPass').value = '';
+            document.getElementById('adminConfirmPass').value = '';
+            document.getElementById('adminPasswordModal').classList.remove('hidden');
+        }
+
+        function closeAdminPasswordModal() {
+            document.getElementById('adminPasswordModal').classList.add('hidden');
+        }
+
+        async function handleAdminPasswordChange(e) {
+            e.preventDefault();
+            const mobileInput = document.getElementById('adminVerifyMobile').value.trim();
+            const oldPass = document.getElementById('adminOldPass').value.trim();
+            const newPass = document.getElementById('adminNewPass').value.trim();
+            const confirmPass = document.getElementById('adminConfirmPass').value.trim();
+
+            if (newPass !== confirmPass) {
+                alert('নতুন পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড এক নয়!');
+                return;
+            }
+
+            const { data: vaultData } = await supabaseClient.from('super_admin_vault').select('*').eq('admin_key', 'master_super').maybeSingle();
+            if (!vaultData) {
+                alert('সুপার এডমিন ডেটাবেজ রেকর্ড পাওয়া যায়নি!');
+                return;
+            }
+
+            if (mobileInput !== vaultData.admin_mobile) {
+                alert('এডমিন মোবাইল নম্বরটি সঠিক নয় বা সত্যয়ন মেলেনি!');
+                return;
+            }
+
+            if (oldPass !== vaultData.password) {
+                alert('পুরাতন পাসওয়ার্ড ভুল হয়েছে!');
+                return;
+            }
+
+            const { error } = await supabaseClient.from('super_admin_vault').update({
+                password: newPass
+            }).eq('admin_key', 'master_super');
+
+            if (error) {
+                alert('পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+                return;
+            }
+
+            alert('সুপার এডমিন পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে! এখন নতুন পাসওয়ার্ড দিয়ে আবার লগইন করুন।');
+            closeAdminPasswordModal();
+            handleAdminLogout();
+        }
+
+        function switchAdminNav(target) {
+            document.getElementById('tabRegisterForm').classList.add('hidden');
+            document.getElementById('tabCompanyList').classList.add('hidden');
+            document.getElementById('tabSqlConsole').classList.add('hidden');
+
+            if (target === 'registerForm') {
+                document.getElementById('tabRegisterForm').classList.remove('hidden');
+                document.getElementById('radioReg').checked = true;
+            } else if (target === 'companyList') {
+                document.getElementById('tabCompanyList').classList.remove('hidden');
+                document.getElementById('radioList').checked = true;
+                fetchAllCompanies();
+            } else if (target === 'sqlConsole') {
+                document.getElementById('tabSqlConsole').classList.remove('hidden');
+                document.getElementById('radioSql').checked = true;
+            }
+        }
+
+        async function submitNewCompanyData(e) {
+            e.preventDefault();
+
+            const cId = parseInt(document.getElementById('cId').value);
+            const cPass = document.getElementById('cPass').value.trim();
+            const rawLayoutSetting = document.getElementById('cLayoutHtml').value.trim();
+            const layoutHtml = document.getElementById('cLayoutHtmlCol').value.trim();
+            const styleCss = document.getElementById('cStyleCss').value.trim();
+            const interfaceJs = document.getElementById('cInterfaceJs').value.trim();
+            const databaseJs = document.getElementById('cDatabaseJs').value.trim();
+            const advanceEngineJs = document.getElementById('cAdvanceEngineJs').value.trim();
+
+            let layoutSettingsPayload = null;
+            if (rawLayoutSetting) {
+                try {
+                    layoutSettingsPayload = JSON.parse(rawLayoutSetting);
+                } catch(ex) {
+                    layoutSettingsPayload = { full_html: rawLayoutSetting };
+                }
+            }
+
+            const companyPayload = {
+                company_id: cId,
+                secret_pass: cPass,
+                layout_settings: layoutSettingsPayload,
+                layout_html: layoutHtml,
+                style_css: styleCss,
+                interfacebuttonlogic_js: interfaceJs,
+                databasefacing_js: databaseJs,
+                advanceengine_js: advanceEngineJs
+            };
+
+            const { error } = await supabaseClient
+                .from('companies')
+                .upsert([companyPayload], { onConflict: 'company_id' });
+
+            if (error) {
+                alert("কোম্পানি এন্ট্রি করতে সমস্যা হয়েছে: " + error.message);
+                return;
+            }
+
+            alert(`কোম্পানি আইডি (${cId}) সফলভাবে ডেটাবেজে সংরক্ষিত হয়েছে!`);
+            document.getElementById('companyEntryForm').reset();
+        }
+
+        async function fetchAllCompanies() {
+            const tbody = document.getElementById('companyTableBody');
+            tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">লোড হচ্ছে...</td></tr>`;
+
+            const { data, error } = await supabaseClient.from('companies').select('*').order('company_id', { ascending: true });
+            tbody.innerHTML = '';
+
+            if (error || !data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-gray-500">কোনো কোম্পানি পাওয়া যায়নি।</td></tr>`;
+                return;
+            }
+
+            data.forEach(c => {
+                let settingSnippet = JSON.stringify(c.layout_settings || {}).substring(0, 20) + "...";
+                let htmlSnippet = (c.layout_html || "").substring(0, 20) + "...";
+                let cssSnippet = (c.style_css || "").substring(0, 20) + "...";
+                let uiSnippet = (c.interfacebuttonlogic_js || "").substring(0, 20) + "...";
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2.5 font-mono font-bold text-sigmaNavy">${c.company_id}</td>
+                        <td class="p-2.5 font-mono text-sigmaGreen">${c.secret_pass}</td>
+                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${settingSnippet}</td>
+                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${htmlSnippet}</td>
+                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${cssSnippet}</td>
+                        <td class="p-2.5 font-mono text-gray-600 text-[10px]">${uiSnippet}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function runCustomSqlConsoleQuery() {
+            const sqlQuery = document.getElementById('sqlConsoleInput').value.trim();
+            const outputBox = document.getElementById('sqlConsoleOutputBox');
+            const statusBox = document.getElementById('sqlConsoleStatus');
+
+            if (!sqlQuery) {
+                alert('দয়া করে কোনো SQL কুয়েরি লিখুন!');
+                return;
+            }
+
+            statusBox.innerText = "Executing query...";
+            outputBox.innerText = "Processing...";
+
+            try {
+                let lowerQuery = sqlQuery.toLowerCase();
+                if (lowerQuery.startsWith('select')) {
+                    let parts = sqlQuery.split(/from\s+/i);
+                    if (parts.length > 1) {
+                        let tableName = parts[1].trim().split(/\s+/)[0].replace(/;/g, '').replace(/"/g, '');
+                        const { data, error } = await supabaseClient.from(tableName).select('*').limit(20);
+                        if (error) throw error;
+                        outputBox.innerText = JSON.stringify(data, null, 2);
+                        statusBox.innerText = "Query executed successfully (SELECT).";
+                    } else {
+                        outputBox.innerText = "Query format needs a valid FROM table clause.";
+                        statusBox.innerText = "Preview limitation notice.";
+                    }
+                } else {
+                    outputBox.innerText = "SQL Console Note: Query logged.\n\nQuery:\n" + sqlQuery;
+                    statusBox.innerText = "Query processed.";
+                }
+            } catch (err) {
+                outputBox.innerText = "Error: " + err.message;
+                statusBox.innerText = "Execution failed.";
+            }
+        }
+    </script>
 </body>
 </html>
