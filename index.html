@@ -3,25 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sigma PhD - Central Universal Gateway Portal</title>
+    <title>Sigma PhD - 4-Tier Enterprise SaaS Portal</title>
     
-    <!-- PWA Manifest & Theme Integration -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0b843d">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet">
-    
-    <!-- SheetJS (Excel Export Engine) -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -34,893 +25,384 @@
                         sigmaPurple: '#2b0938',
                     },
                     fontFamily: {
-                        sans: ['Hind Siliguri', 'sans-serif'],
-                        inter: ['Inter', 'sans-serif'],
-                        serif: ['Tiro Bangla', 'serif'],
+                        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
+
     <style>
-        body { 
-            font-family: 'Hind Siliguri', sans-serif; 
+        body {
+            font-family: 'Inter', 'Hind Siliguri', sans-serif;
             background: linear-gradient(-45deg, #0d1b2a, #1b263b, #0b843d, #1a237e, #2b0938, #0f172a);
             background-size: 400% 400%;
             animation: gradualDeepShift 10s ease infinite;
-            margin: 0;
-            padding: 0;
+            color: #e2e8f0;
             min-height: 100vh;
+            user-select: none;
         }
         @keyframes gradualDeepShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        .wave-char {
-            display: inline-block;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            transform: scaleY(1.15);
-            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
-        }
-
-        .watermark-container {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .watermark-text {
-            font-size: clamp(1.4rem, 4vw, 2.8rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: rgba(255, 255, 255, 0.035);
-            white-space: nowrap;
-            transform: rotate(-22deg) scale(1.1);
-            user-select: none;
-        }
-
         .glass-card {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(19, 24, 34, 0.9);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
-
-        .card-ring-wrapper {
-            position: relative;
-            padding: 2px;
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-
-        .card-ring-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                from 0deg,
-                transparent 0%,
-                #ef4444 25%,
-                #f59e0b 50%,
-                #10b981 75%,
-                transparent 100%
-            );
-            animation: rotateRing 4s linear infinite;
-            z-index: 0;
-        }
-
-        @keyframes rotateRing {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .custom-input {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(8, 10, 15, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.12);
             color: #f8fafc;
-            transition: all 0.3s ease;
-            text-align: center;
         }
-
         .custom-input:focus {
             outline: none;
-            border-color: rgba(16, 185, 129, 0.5);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-            background: rgba(15, 23, 42, 0.85);
+            border-color: #0b843d;
+            box-shadow: 0 0 15px rgba(11, 132, 61, 0.3);
         }
-
-        .pad-watermark {
-            background-color: rgba(255, 255, 255, 0.96);
-            background-image: radial-gradient(circle, rgba(11, 132, 61, 0.03) 0%, rgba(26, 35, 126, 0.05) 100%);
-            background-repeat: no-repeat; background-position: center 50%; background-size: 420px 420px;
-        }
-        .poly-badge { clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); }
-        .poly-website { clip-path: polygon(10% 0, 100% 0, 92% 100%, 0 100%); }
-        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #0b843d; border-radius: 3px; }
-        .pulse-balance { animation: pulseText 0.6s ease; }
-        @keyframes pulseText { 0% { transform: scale(1); } 50% { transform: scale(1.12); color: #059669; } 100% { transform: scale(1); } }
     </style>
 </head>
-<body class="flex justify-center items-center p-2 sm:p-4 select-none min-h-screen">
+<body class="flex flex-col items-center justify-start p-2 sm:p-4 min-h-screen">
 
-    <!-- 0. INITIAL AUTHENTICATION CARD (Screen 1) -->
-    <div id="initialAuthScreen" class="w-full max-w-lg my-auto flex items-center justify-center">
-        <div class="card-ring-wrapper w-full">
-            <div class="glass-card relative rounded-2xl p-4 sm:p-6 w-full overflow-hidden z-10">
-                
-                <div class="watermark-container">
-                    <span class="watermark-text">SIGMA PHD SAAS ENGINE</span>
-                </div>
-
-                <div class="relative z-10 flex flex-col items-center">
-                    
-                    <div class="mb-4 text-center">
-                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-wider inline-flex items-center gap-2 sm:gap-3 font-inter">
-                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-red-500 drop-shadow transform -scale-x-100" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M22 6c-1.25 0-2.45.3-3.5 1.05C17.3 4.25 14.3 2.5 11 2.5c-4.7 0-8.5 3.8-8.5 8.5 0 2.2.8 4.2 2.2 5.7L2.5 20s2.5.5 4.5-.5c1.4.7 3 1 4.5 1 5.8 0 10.5-4.7 10.5-10.5 0-1.4-.3-2.7-.8-4C21.7 6 22 6 22 6zm-11 12c-3.6 0-6.5-2.9-6.5-6.5 0-2.3 1.2-4.3 3-5.5 1-.6 2.2-1 3.5-1 3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5z"/>
-                                <path d="M15.5 8.5c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5z"/>
-                            </svg>
-
-                            <span>
-                                <span class="wave-char">S</span>
-                                <span class="wave-char">i</span>
-                                <span class="wave-char">g</span>
-                                <span class="wave-char">m</span>
-                                <span class="wave-char">a</span>
-                                <span class="wave-char">&nbsp;</span>
-                                <span class="wave-char">P</span>
-                                <span class="wave-char">h</span>
-                                <span class="wave-char">D</span>
-                                <span class="wave-char">™</span>
-                            </span>
-
-                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400 drop-shadow" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M22 6c-1.25 0-2.45.3-3.5 1.05C17.3 4.25 14.3 2.5 11 2.5c-4.7 0-8.5 3.8-8.5 8.5 0 2.2.8 4.2 2.2 5.7L2.5 20s2.5.5 4.5-.5c1.4.7 3 1 4.5 1 5.8 0 10.5-4.7 10.5-10.5 0-1.4-.3-2.7-.8-4C21.7 6 22 6 22 6zm-11 12c-3.6 0-6.5-2.9-6.5-6.5 0-2.3 1.2-4.3 3-5.5 1-.6 2.2-1 3.5-1 3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5z"/>
-                                <path d="M15.5 8.5c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5z"/>
-                            </svg>
-                        </h1>
-                    </div>
-
-                    <div id="alertBox" class="hidden w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300"></div>
-
-                    <form id="initialLoginForm" onsubmit="handleInitialAuth(event)" class="w-full max-w-md space-y-3 font-inter">
-                        <div class="input-group">
-                            <input 
-                                type="text" 
-                                id="initialUsername"
-                                required
-                                placeholder="System ID (e.g. admin)"
-                                autocomplete="off"
-                                class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
-                            />
-                        </div>
-
-                        <div class="input-group">
-                            <input 
-                                type="password" 
-                                id="initialPassword"
-                                required
-                                placeholder="Credential Password"
-                                autocomplete="off"
-                                class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
-                            />
-                        </div>
-
-                        <button 
-                            type="submit"
-                            id="authBtn"
-                            class="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:from-red-500 hover:to-emerald-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-emerald-950/40 active:scale-[0.99] transition-all duration-200 text-sm tracking-wide mt-1"
-                        >
-                            Authenticate & Enter Gateway
-                        </button>
-                    </form>
-
-                    <div class="mt-4 text-center">
-                        <a 
-                            href="https://www.sigmaphd.com" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            class="text-xs text-slate-400 hover:text-emerald-400 transition-colors tracking-widest lowercase"
-                        >
-                            www.sigmaphd.com | 4-Tier SaaS Engine
-                        </a>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+    <!-- Toast Notification & Right-Side Notification Ticker (+ format) -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
+        <span id="toast-text">Action successful!</span>
+        <button onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2"><i class="fa-solid fa-xmark text-base"></i></button>
     </div>
 
-    <!-- MAIN WRAPPER CONTAINER (Screen 2: Portal Gateway after Authentication) -->
-    <div id="sigmaMainWrapper" class="hidden w-full max-w-6xl bg-white/95 backdrop-blur-md shadow-2xl rounded-xl border border-gray-400 flex flex-col min-h-[94vh] relative overflow-hidden fade-in">
+    <!-- Top Right Latest Notification Bar (+ format) -->
+    <div id="liveNotificationTicker" class="fixed top-3 right-3 z-50 bg-slate-900/90 border border-emerald-500/50 text-emerald-300 px-3 py-1.5 rounded-full text-xs font-mono shadow-lg flex items-center space-x-1.5 backdrop-blur-md">
+        <span class="animate-ping w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span id="tickerText">+ [System Ready]: ৪-স্তর মাল্টি-টেনেন্ট সিস্টেম সক্রিয়</span>
+    </div>
 
-        <!-- HEADER -->
-        <header id="mainHeader" class="bg-white pt-3 px-3 sm:px-6 pb-2 flex-shrink-0 border-b-2 border-sigmaGreen">
-            <div class="flex flex-row justify-between items-start gap-2">
-                <div class="flex items-center gap-3">
-                    <div id="headerLogoBox" class="w-16 h-16 sm:w-20 sm:h-20 border-2 border-sigmaGreen rounded-2xl flex flex-col items-center justify-center p-1 bg-white text-center flex-shrink-0 shadow-sm">
-                        <i class="fa-solid fa-atom text-2xl sm:text-3xl text-sigmaGreen mb-0.5"></i>
-                        <span class="text-[10px] font-bold text-sigmaNavy uppercase tracking-tighter leading-none">Sigma PhD</span>
-                        <span class="text-[8px] text-gray-600 font-semibold leading-none">SaaS Engine</span>
-                    </div>
-                    <div>
-                        <h1 id="headerTitle" class="text-xl sm:text-3xl font-extrabold text-sigmaNavy tracking-tight leading-none mb-1">Sigma PhD - Multi-Tenant SaaS</h1>
-                        <h2 id="headerSubtitle" class="text-xs sm:text-sm font-bold text-sigmaGreen italic font-serif leading-none tracking-wide">৪-স্তর লাইভ কাউন্টডাউন, ব্যালেন্স ইন বিডিটি (BDT) ও ১০% কমিশন ইঞ্জিন</h2>
-                    </div>
+    <!-- ================= MAIN CONTAINER ================= -->
+    <div class="w-full max-w-xl mx-auto space-y-4 my-auto py-4">
+
+        <!-- HEADER BRANDING -->
+        <div class="glass-card rounded-3xl p-4 sm:p-6 text-center relative overflow-hidden">
+            <h1 class="text-2xl font-extrabold text-white tracking-tight">Sigma PhD™ — 4-Tier SaaS Portal</h1>
+            <p class="font-bengali text-emerald-400 font-semibold text-xs mt-1">সুপার এডমিন, স্টাফ, কোম্পানি ও এন্ড-ইউজার ইউনিভার্সাল গেটওয়ে</p>
+        </div>
+
+        <!-- ================= VIEW 1: SELECTION & LOGIN ================= -->
+        <div id="viewLoginSelection" class="glass-card rounded-3xl p-5 sm:p-6 space-y-5 fade-in">
+            <div class="text-center space-y-1">
+                <h2 class="text-lg font-bold text-amber-400">আপনার স্তর (Layer) সিলেক্ট করে লগইন করুন</h2>
+                <p class="text-xs text-slate-400">টোকেন সিস্টেম ও হায়ারার্কি ভিত্তিক নিরাপদ অ্যাক্সেস</p>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">লেয়ার / স্তর নির্বাচন করুন:</label>
+                    <select id="loginLayerSelect" onchange="onLayerChange()" class="w-full custom-input rounded-2xl py-3 px-4 text-xs font-bold">
+                        <option value="1">১ম স্তর: সুপার এডমিন (Master Owner)</option>
+                        <option value="2">২য় স্তর: অফিস স্টাফ (Contractual Operator)</option>
+                        <option value="3">৩য় স্তর: কোম্পানি ক্লায়েন্ট (Enterprise Client Name & Pass)</option>
+                        <option value="4">৪র্থ স্তর: এন্ড-ইউজার (Customer / License Holder)</option>
+                    </select>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-right hidden sm:block font-mono text-xs">
-                        <div class="font-bold text-sigmaNavy">REG. NO: REG-894520-BD</div>
-                        <div class="text-[11px] text-sigmaGreen italic">www.sigmaphd.com</div>
+
+                <form onsubmit="handleLayerLogin(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1" id="labelUserId">ইউজার আইডি / System ID:</label>
+                        <input type="text" id="loginUsername" required placeholder="আইডি বা ইউজারনেম দিন..." 
+                            class="w-full custom-input rounded-2xl py-3 px-4 text-emerald-400 font-medium text-xs">
                     </div>
-                    <!-- Global System Logout Button -->
-                    <button onclick="handleGlobalSystemLogout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
-                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">পাসওয়ার্ড / টোকেন:</label>
+                        <input type="password" id="loginPassword" required placeholder="পাসওয়ার্ড দিন..." 
+                            class="w-full custom-input rounded-2xl py-3 px-4 text-emerald-400 font-medium text-xs">
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3 px-4 rounded-2xl flex items-center justify-center space-x-2 transition-all shadow-lg text-sm">
+                        <span>সংশ্লিষ্ট প্যানেলে প্রবেশ করুন</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <!-- Action Links for Tier 4 (New User License Activation & Forgot Password) -->
+                <div id="tier4ActionLinks" class="hidden pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+                    <button type="button" onclick="openActivateLicenseModal()" class="text-emerald-400 font-bold hover:underline">
+                        <i class="fa-solid fa-user-plus"></i> Activate License / New User
+                    </button>
+                    <button type="button" onclick="openForgotPasswordModal()" class="text-amber-400 font-bold hover:underline">
+                        <i class="fa-solid fa-key"></i> Forgot Password?
                     </button>
                 </div>
             </div>
+        </div>
 
-            <div class="mt-2.5 flex items-center h-7 font-sans text-[11px] font-bold">
-                <div class="bg-sigmaNavy text-white px-3 sm:px-5 h-full flex items-center poly-badge min-w-[160px] sm:min-w-[230px] shadow">
-                    <span class="text-yellow-300 mr-1.5">ইঞ্জিন স্ট্যাটাস:</span> ৪-স্তর লাইভ কাউন্টার সক্রিয়
+        <!-- ================= VIEW 2: COMMON LAYER DASHBOARD ================= -->
+        <div id="viewLayerDashboard" class="hidden glass-card rounded-3xl p-5 sm:p-6 space-y-4 fade-in">
+            <!-- Top Dashboard Bar -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <span id="badgeLayerName" class="bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase">Layer 1: Super Admin</span>
+                    <h2 id="titleUserHeading" class="text-base font-extrabold text-white mt-1">স্বাগতম, সুপার এডমিন</h2>
                 </div>
-                <div class="bg-gradient-to-r from-sigmaGreen via-emerald-600 to-teal-600 text-white flex-grow h-full flex items-center justify-center px-4 poly-website text-xs font-bold tracking-wider shadow">
-                    Real-Time Countdown & Hierarchical Balance Engine (Balance in BDT)
-                </div>
+                <button onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/40 px-3 py-1.5 rounded-xl text-xs font-bold transition-all">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> লগআউট
+                </button>
             </div>
-        </header>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="flex-grow pad-watermark p-3 sm:p-6 flex flex-col justify-start relative space-y-5">
-
-            <!-- LIVE 4-TIER COUNTDOWN & UNIVERSAL BALANCE ENGINE MATRIX (ALWAYS VISIBLE IN GATEWAY & DASHBOARD) -->
-            <section class="bg-slate-900/95 text-white rounded-2xl p-4 sm:p-5 shadow-2xl border border-emerald-500/40">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-3 mb-4">
-                    <div>
-                        <h3 class="text-sm sm:text-base font-extrabold text-amber-300 flex items-center gap-2">
-                            <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ৪-স্তর লাইভ কাউন্টডাউন ও ইউনিভার্সাল ব্যালেন্স (Balance in BDT)
-                        </h3>
-                        <p class="text-[11px] text-slate-300">প্রতিটি লেয়ারে লাইসেন্স মেয়াদ সেকেন্ডে সেকেন্ডে কাউন্টডাউন হচ্ছে এবং কমিশন অটো-ক্রেডিট হচ্ছে</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="simulateNewEndUserActivation()" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5 transition active:scale-95">
-                            <i class="fa-solid fa-user-plus"></i> নতুন এন্ড-ইউজার অ্যাক্টিভেশন (৳১০০)
-                        </button>
-                        <button onclick="simulateP2PTransfer()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5 transition active:scale-95">
-                            <i class="fa-solid fa-money-bill-transfer"></i> P2P ট্রান্সফার টেস্ট (৳৫০)
+            <!-- Common Features: Balance (+ button) & Validity Countdown & Under Users -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Balance Box -->
+                <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex flex-col justify-between relative">
+                    <div class="flex items-center justify-between text-xs text-slate-400">
+                        <span>ব্যালেন্স (Balance in BDT)</span>
+                        <button onclick="openAddBalanceModal()" class="w-7 h-7 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black rounded-full flex items-center justify-center text-sm shadow transition-all" title="Add Balance">
+                            +
                         </button>
                     </div>
+                    <div id="commonBalanceText" class="text-xl font-extrabold text-amber-400 font-mono mt-2">৳ 25,400.00</div>
+                    <span class="text-[9px] text-slate-500 mt-1">প্লাস (+) বাটনে ক্লিক করে রিচার্জ করুন</span>
                 </div>
 
-                <!-- 4 TIER CARDS GRID -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-inter">
-                    
-                    <!-- TIER 1: SUPER ADMIN -->
-                    <div class="bg-slate-800/90 border border-purple-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-0.5 bg-purple-600/30 border border-purple-400 text-purple-200 rounded text-[10px] font-bold">১ম স্তর (Tier 1)</span>
-                            <i class="fa-solid fa-crown text-amber-400"></i>
-                        </div>
-                        <h4 class="font-bold text-sm text-white font-sans">সুপার এডমিন (মাস্টার ওনার)</h4>
-                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
-                            <div class="text-[10px] text-slate-400">ভ্যালিডিটি কাউন্টার:</div>
-                            <div class="text-xs font-mono font-extrabold text-emerald-400" id="tier1Countdown">UNLIMITED ROOT ACCESS</div>
-                        </div>
-                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
-                            <div>
-                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
-                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier1Balance">৳ 25,400.00</div>
-                            </div>
-                            <span class="text-[10px] text-emerald-400 font-mono" id="tier1LastDelta">+৳0.00</span>
-                        </div>
-                    </div>
-
-                    <!-- TIER 2: OFFICE STAFF -->
-                    <div class="bg-slate-800/90 border border-blue-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-0.5 bg-blue-600/30 border border-blue-400 text-blue-200 rounded text-[10px] font-bold">২য় স্তর (Tier 2)</span>
-                            <span class="text-[10px] font-mono text-cyan-300">[PROV: 6M / CONT: 2Y]</span>
-                        </div>
-                        <h4 class="font-bold text-sm text-white font-sans">অফিস স্টাফ (অপারেটর)</h4>
-                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
-                            <div class="text-[10px] text-slate-400">লাইভ সেকেন্ড কাউন্টডাউন:</div>
-                            <div class="text-xs font-mono font-extrabold text-cyan-400" id="tier2Countdown">179d 23h 59m 59s</div>
-                        </div>
-                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
-                            <div>
-                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
-                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier2Balance">৳ 4,850.50</div>
-                            </div>
-                            <span class="text-[10px] text-emerald-400 font-mono" id="tier2LastDelta">+৳0.00</span>
-                        </div>
-                    </div>
-
-                    <!-- TIER 3: COMPANY CLIENT -->
-                    <div class="bg-slate-800/90 border border-emerald-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-0.5 bg-emerald-600/30 border border-emerald-400 text-emerald-200 rounded text-[10px] font-bold">৩য় স্তর (Tier 3)</span>
-                            <span class="text-[10px] font-mono text-emerald-300">১২ মাস লাইসেন্স</span>
-                        </div>
-                        <h4 class="font-bold text-sm text-white font-sans">কোম্পানি ক্লায়েন্ট (সেন্ট্রাল)</h4>
-                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
-                            <div class="text-[10px] text-slate-400">সাবস্ক্রিপশন কাউন্টডাউন:</div>
-                            <div class="text-xs font-mono font-extrabold text-emerald-400" id="tier3Countdown">364d 23h 59m 59s</div>
-                        </div>
-                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
-                            <div>
-                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
-                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier3Balance">৳ 12,300.50</div>
-                            </div>
-                            <span class="text-[10px] text-emerald-400 font-mono" id="tier3LastDelta">+৳0.00</span>
-                        </div>
-                    </div>
-
-                    <!-- TIER 4: END-USER -->
-                    <div class="bg-slate-800/90 border border-amber-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-0.5 bg-amber-600/30 border border-amber-400 text-amber-200 rounded text-[10px] font-bold">৪র্থ স্তর (Tier 4)</span>
-                            <span class="text-[10px] font-mono text-amber-300">অ্যাক্টিভ: <span id="activeEndUserCount">1,420</span> জন</span>
-                        </div>
-                        <h4 class="font-bold text-sm text-white font-sans">এন্ড-ইউজার (রেফারার বস্)</h4>
-                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
-                            <div class="text-[10px] text-slate-400">আইডি ভ্যালিডিটি কাউন্টডাউন:</div>
-                            <div class="text-xs font-mono font-extrabold text-amber-400" id="tier4Countdown">29d 23h 59m 59s</div>
-                        </div>
-                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
-                            <div>
-                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
-                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier4Balance">৳ 960.00</div>
-                            </div>
-                            <span class="text-[10px] text-emerald-400 font-mono" id="tier4LastDelta">+৳0.00</span>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- LIVE LEDGER / MATH LOG STRIP -->
-                <div class="mt-3 bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 text-[11px] font-mono">
-                    <span class="text-emerald-400 font-bold"><i class="fa-solid fa-calculator"></i> লাইভ ম্যাথ ও অটো-লেজার:</span>
-                    <span id="liveMathLedgerLog" class="text-slate-300">সিস্টেম প্রস্তুত: ১০০ টাকা অ্যাক্টিভেশনে কোম্পানি পাবে ৳৯০ (নিট), রেফারার বস্ ৳৮ এবং আপলাইন চেইন (১ম-৩য় স্তর) ৳২।</span>
-                </div>
-            </section>
-
-            <!-- 1. INITIAL GATEWAY SELECTION VIEW (Company Login Removed as Requested) -->
-            <div id="gatewaySelectionView" class="w-full max-w-md mx-auto fade-in my-auto space-y-4">
-                <div class="bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-purple-300 text-center">
-                    <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
-                        <i class="fa-solid fa-shield-halved text-3xl mb-1 text-amber-300"></i>
-                        <h3 class="text-lg font-bold">সেন্ট্রাল ইউনিভার্সাল গেটওয়ে</h3>
-                        <p class="text-[11px] text-gray-200">৩য় স্তরের কোম্পানি লগইন অপসারণ করা হয়েছে (সেন্ট্রালি পরিচালিত)</p>
-                    </div>
-
-                    <div class="space-y-3">
-                        <button onclick="showSuperAdminLoginView()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-crown"></i> সুপার এডমিন মাস্টার কন্ট্রোল (১ম ও ২য় স্তর)
-                        </button>
-                    </div>
+                <!-- Validity Countdown Box -->
+                <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="text-xs text-slate-400">ভ্যালিডিটি কাউন্টডাউন (Validity)</div>
+                    <div id="commonCountdownText" class="text-sm font-extrabold text-cyan-400 font-mono mt-2">364d 23h 59m 59s</div>
+                    <span class="text-[9px] text-cyan-300 mt-1">রিয়েল-টাইম সেকেন্ড কাউন্টার</span>
                 </div>
             </div>
 
-            <!-- 2. SUPER ADMIN LOGIN VIEW -->
-            <div id="superAdminLoginView" class="hidden w-full max-w-md mx-auto fade-in my-auto">
-                <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-purple-300 text-center">
-                    <div class="flex justify-between items-center mb-3">
-                        <button onclick="backToGateway()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
-                        <span class="text-xs font-bold text-purple-700 font-mono">Master Vault & RLS Auth</span>
-                    </div>
-
-                    <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
-                        <i class="fa-solid fa-user-shield text-3xl mb-1 text-amber-300"></i>
-                        <h3 class="text-lg font-bold">সুপার এডমিন মাস্টার লগইন</h3>
-                        <p class="text-[11px] text-gray-200">১ম স্তর: গ্লোবাল সিস্টেম অথরিটি ও কাস্টম ডোমেইন অ্যাপ্রুভাল</p>
-                    </div>
-
-                    <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
-
-                    <form onsubmit="handleSuperAdminLogin(event)" class="space-y-4 text-left">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">System ID</label>
-                            <input type="text" id="superAdminId" required placeholder="System ID" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Credential Password</label>
-                            <input type="password" id="superAdminPass" required placeholder="Credential Password" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
-                        </div>
-                        <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">Authenticate Master Dashboard</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- 3. SUPER ADMIN DASHBOARD -->
-            <div id="superAdminDashboard" class="hidden space-y-4 fade-in w-full">
-                
-                <div class="bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-md border flex flex-col sm:flex-row justify-between items-center gap-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-                            <i class="fa-solid fa-crown"></i>
-                        </div>
-                        <div>
-                            <span class="font-extrabold text-sigmaNavy text-sm">সুপার এডমিন মাস্টার কন্ট্রোল (১ম স্তর)</span>
-                            <p class="text-[10px] text-gray-500">100+ Companies & 50,000+ End-Users Engine Manager</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openAdminPasswordModal()" class="px-3 py-1.5 bg-gradient-to-r from-sigmaNavy to-blue-800 text-white text-xs font-bold rounded-lg shadow">পাসওয়ার্ড পরিবর্তন</button>
-                        <button onclick="handleAdminLogout()" class="text-xs text-red-600 font-bold px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50">লগআউট</button>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-r from-sigmaNavy via-sigmaBlue to-sigmaPurple rounded-xl p-3 shadow-lg text-white">
-                    <div class="text-xs font-bold text-amber-300 mb-2"><i class="fa-solid fa-bars-progress"></i> মাল্টি-টেনেন্ট নেভিগেশন টুলস:</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <label onclick="switchAdminNav('registerForm')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
-                            <input type="radio" name="adminNavOpt" id="radioReg" checked class="accent-orange-500">
-                            <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-building-circle-arrow-right"></i> নতুন কোম্পানি অনবোর্ডিং (২য় স্তর)</div>
-                        </label>
-                        <label onclick="switchAdminNav('companyList')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
-                            <input type="radio" name="adminNavOpt" id="radioList" class="accent-orange-500">
-                            <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-list-check"></i> কোম্পানির তালিকা ও RLS</div>
-                        </label>
-                        <label onclick="switchAdminNav('sqlConsole')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
-                            <input type="radio" name="adminNavOpt" id="radioSql" class="accent-orange-500">
-                            <div class="text-xs font-extrabold text-amber-300"><i class="fa-solid fa-terminal"></i> Supabase SQL Editor</div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- TAB 1: NEW COMPANY REGISTRATION FORM -->
-                <div id="tabRegisterForm" class="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
-                    <h3 class="text-sm font-bold text-sigmaNavy mb-4 border-b pb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি অনবোর্ডিং ফরম (ইন্ডাস্ট্রি মডিউল ও ৫টি কোড কলাম)
+            <!-- Under Users & Token Statistics -->
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-bold text-white flex items-center space-x-1.5">
+                        <i class="fa-solid fa-users text-emerald-400"></i>
+                        <span>অধিনস্থ ইউজার / টোকেন চেইন</span>
                     </h3>
-                    
-                    <form id="companyEntryForm" onsubmit="submitNewCompanyData(event)" class="space-y-4 text-xs">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block font-bold text-gray-700 mb-1">কোম্পানি আইডি (`company_id`)</label>
-                                <input type="number" id="cId" required placeholder="101" class="w-full border p-2.5 rounded font-mono font-bold bg-gray-50">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-700 mb-1">সিক্রেট পাসওয়ার্ড (`secret_pass`)</label>
-                                <input type="text" id="cPass" required placeholder="পাসওয়ার্ড দিন..." class="w-full border p-2.5 rounded font-mono">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-700 mb-1">ইন্ডাস্ট্রি ক্যাটাগরি</label>
-                                <select id="cIndustry" class="w-full border p-2.5 rounded font-bold bg-gray-50">
-                                    <option value="personal">১. পার্সোনাল হিসাব (Personal Finance)</option>
-                                    <option value="coaching">২. কোচিং সেন্টার (Coaching Center)</option>
-                                    <option value="grocery">৩. গ্রোসারি ও রিটেল (Grocery & Retail)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="p-3 bg-slate-100 border-2 border-slate-300 rounded-xl space-y-2">
-                            <label class="block font-extrabold text-slate-800"><i class="fa-solid fa-sliders text-slate-700"></i> মূল লেআউট সেটিং (`layout_settings` - Full HTML JSON Payload):</label>
-                            <textarea id="cLayoutHtml" rows="2" placeholder='{"full_html": "<!DOCTYPE html>...</html>", "balance_bdt": true}' class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1">
-                                <label class="block font-extrabold text-purple-900">১. layout_html (.html)</label>
-                                <textarea id="cLayoutHtmlCol" rows="2" placeholder="HTML Structure..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
-                            </div>
-                            <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1">
-                                <label class="block font-extrabold text-indigo-900">২. style_css (.css)</label>
-                                <textarea id="cStyleCss" rows="2" placeholder="CSS Styles..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
-                            </div>
-                            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
-                                <label class="block font-extrabold text-emerald-900">৩. interfacebuttonlogic_js (.js)</label>
-                                <textarea id="cInterfaceJs" rows="2" placeholder="UI & Button Logic..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
-                            </div>
-                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
-                                <label class="block font-extrabold text-blue-900">৪. databasefacing_js (.js)</label>
-                                <textarea id="cDatabaseJs" rows="2" placeholder="Supabase RLS & Fetch..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
-                            <label class="block font-extrabold text-amber-900">৫. advanceengine_js (.js) — ১০% কমিশন ইঞ্জিন ও P2P ট্রান্সফার লজিক</label>
-                            <textarea id="cAdvanceEngineJs" rows="2" placeholder="function calculateCommission(amount) { return amount * 0.10; }" class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
-                        </div>
-
-                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-sigmaGreen to-emerald-700 hover:opacity-95 text-white font-bold rounded-lg shadow-lg">
-                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> RLS ও ৪-স্তর কাঠামোসহ নতুন কোম্পানি সংরক্ষণ করুন
-                        </button>
-                    </form>
+                    <p class="text-[10px] text-slate-400 mt-0.5">টোকেন দিয়ে সংযুক্ত মোট সক্রিয় গ্রাহক</p>
                 </div>
-
-                <!-- TAB 2: REGISTERED COMPANIES LIST -->
-                <div id="tabCompanyList" class="hidden bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
-                    <h3 class="text-sm font-bold text-sigmaNavy mb-3 border-b pb-2 flex items-center justify-between">
-                        <span><i class="fa-solid fa-building text-sigmaBlue"></i> নিবন্ধিত কোম্পানি ও টেনেন্ট আইসোলেশন তালিকা</span>
-                        <button onclick="fetchAllCompanies()" class="px-3 py-1 bg-sigmaNavy text-white rounded text-[11px] font-bold"><i class="fa-solid fa-rotate"></i> রিফ্রেশ</button>
-                    </h3>
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead class="bg-sigmaNavy text-white uppercase text-[10px]">
-                                <tr>
-                                    <th class="p-2.5">ID</th>
-                                    <th class="p-2.5">Industry</th>
-                                    <th class="p-2.5">Pass</th>
-                                    <th class="p-2.5">layout_settings</th>
-                                    <th class="p-2.5">layout_html</th>
-                                    <th class="p-2.5">style_css</th>
-                                </tr>
-                            </thead>
-                            <tbody id="companyTableBody" class="divide-y divide-gray-200 text-[11px]"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TAB 3: POSTGRESQL SQL EDITOR CONSOLE -->
-                <div id="tabSqlConsole" class="hidden bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-amber-400 fade-in">
-                    <h3 class="text-sm font-bold text-sigmaNavy mb-2 border-b pb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-terminal text-amber-600"></i> Supabase PostgreSQL SQL Editor Console
-                    </h3>
-                    <p class="text-[11px] text-gray-500 mb-3">ডাটাবেজ লেভেলে Row Level Security (RLS) পলিসি এবং এটমিক RPC ফাংশন টেস্ট করুন।</p>
-                    
-                    <div class="space-y-3 mb-4">
-                        <textarea id="sqlConsoleInput" rows="4" placeholder="SELECT * FROM public.companies WHERE tenant_id = auth.uid();" 
-                                  class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-xs font-mono text-emerald-400 focus:outline-none"></textarea>
-                        <div class="flex justify-between items-center">
-                            <span id="sqlConsoleStatus" class="text-[11px] font-semibold text-amber-600">Ready to execute query.</span>
-                            <div class="flex gap-2">
-                                <button onclick="document.getElementById('sqlConsoleInput').value=''" class="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white font-bold text-xs rounded shadow">Clear</button>
-                                <button onclick="runCustomSqlConsoleQuery()" class="px-5 py-1.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:opacity-90 text-white font-bold text-xs rounded shadow flex items-center gap-1.5">
-                                    <i class="fa-solid fa-play"></i> Run Query
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-3 bg-gray-50 border rounded-lg text-xs font-mono text-gray-700 max-h-40 overflow-y-auto" id="sqlConsoleOutputBox">
-                        Output results will appear here...
-                    </div>
-                </div>
-
-            </div>
-
-        </main>
-
-        <!-- FOOTER -->
-        <footer id="mainFooter" class="bg-white flex-shrink-0 border-t-2 border-sigmaGreen">
-            <div class="grid grid-cols-1 md:grid-cols-12 h-auto text-white font-sans text-xs">
-                <div class="md:col-span-7 bg-sigmaGreen px-4 py-3 flex flex-col justify-center gap-0.5" id="footerLeftBox">
-                    <div class="font-bold" id="footerTitleText">Sigma PhD - Multi-Tenant SaaS Cloud Architecture</div>
-                    <div class="text-[11px] opacity-90 font-mono">REG. NO: REG-894520-BD | Target: 100+ Companies & 50k+ Users</div>
-                </div>
-                <div class="md:col-span-5 bg-gradient-to-r from-sigmaNavy to-purple-900 px-4 py-3 flex flex-col justify-center items-start md:items-end gap-0.5">
-                    <div class="font-mono font-bold">Mobile : +880 1818-589423</div>
-                    <div class="font-mono text-amber-300 text-[11px]">E-mail : info@sigmaphd.com</div>
+                <div class="text-right">
+                    <span id="commonUnderUsersText" class="text-base font-extrabold text-emerald-400 font-mono">1,420 জন</span>
                 </div>
             </div>
-        </footer>
+
+            <!-- Commission Engine & Token Sale Panel Summary -->
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-300">
+                    <span class="text-amber-400"><i class="fa-solid fa-coins"></i> ১০% কমিশন ডিস্ট্রিবিউশন ইঞ্জিন</span>
+                    <span class="text-emerald-400">ইমিডিয়েট বস: ৳৮ | চেইন: ৳২</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    নতুন ইউজার অ্যাক্টিভেশনে কোম্পানি ও সুপার এডমিনের মূল ব্যালেন্সের সাথে স্বয়ংক্রিয়ভাবে কমিশন যুক্ত হয়ে ডানপাশের নোটিফিকেশন বারে প্লাস (+) আকারে আপডেট হচ্ছে।
+                </p>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ADMIN PASSWORD CHANGE MODAL -->
-    <div id="adminPasswordModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeAdminPasswordModal()">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
-            <button onclick="closeAdminPasswordModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2 py-1">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h4 class="text-sm font-bold text-sigmaNavy mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-key text-sigmaGreen"></i> সুপার এডমিন পাসওয়ার্ড পরিবর্তন
-            </h4>
-            <form onsubmit="handleAdminPasswordChange(event)" class="space-y-3 text-xs">
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. Activate License / New User Modal (Tier 4) -->
+    <div id="activateLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeActivateLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-id-card text-emerald-400"></i>
+                <span>Activate License & New User Form</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">কোম্পানিকে ম্যানুয়াল পেমেন্ট করার পর প্রাপ্ত আইডি ও পাসওয়ার্ড এবং রেফারার টোকেন দিয়ে ফর্মটি পূরণ করুন।</p>
+            
+            <form onsubmit="handleLicenseActivationSubmit(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-[10px] text-gray-500 mb-1">এডমিন মোবাইল নাম্বার</label>
-                    <input type="tel" id="adminVerifyMobile" required placeholder="যেমন: +8801818589423" class="w-full border p-2 rounded font-mono">
+                    <label class="block font-semibold text-slate-300 mb-1">পূর্ণ নাম (Full Name):</label>
+                    <input type="text" id="actName" required placeholder="আপনার নাম লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3">
                 </div>
                 <div>
-                    <label class="block text-[10px] text-gray-500 mb-1">পুরাতন পাসওয়ার্ড</label>
-                    <input type="password" id="adminOldPass" required placeholder="পুরাতন পাসওয়ার্ড..." class="w-full border p-2 rounded">
+                    <label class="block font-semibold text-slate-300 mb-1">পূর্ণ ঠিকানা (Address):</label>
+                    <input type="text" id="actAddress" required placeholder="আপনার ঠিকানা লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">ইমেল এড্রেস:</label>
+                        <input type="email" id="actEmail" required placeholder="email@domain.com" class="w-full custom-input rounded-xl py-2.5 px-3">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">মোবাইল নাম্বার:</label>
+                        <input type="tel" id="actMobile" required placeholder="01XXXXXXXXX" class="w-full custom-input rounded-xl py-2.5 px-3">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">ইউজার আইডি (ম্যানুয়াল প্রাপ্ত):</label>
+                        <input type="text" id="actUserId" required placeholder="যেমন: 8942" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">পাসওয়ার্ড:</label>
+                        <input type="password" id="actPassword" required placeholder="পাসওয়ার্ড" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] text-gray-500 mb-1">নতুন পাসওয়ার্ড</label>
-                    <input type="password" id="adminNewPass" required placeholder="নতুন পাসওয়ার্ড..." class="w-full border p-2 rounded">
+                    <label class="block font-semibold text-slate-300 mb-1">ইমিডিয়েট রেফারির টোকেন / কোড:</label>
+                    <input type="text" id="actReferrerToken" required placeholder="যেমন: SIGMA-8942" class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono font-bold">
                 </div>
-                <div>
-                    <label class="block text-[10px] text-gray-500 mb-1">কনফার্ম পাসওয়ার্ড</label>
-                    <input type="password" id="adminConfirmPass" required placeholder="পুনরায় নতুন পাসওয়ার্ড..." class="w-full border p-2 rounded">
-                </div>
-                <button type="submit" class="w-full py-2.5 bg-sigmaGreen hover:bg-emerald-700 text-white font-bold rounded shadow">পাসওয়ার্ড আপডেট করুন</button>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl shadow-lg mt-2">
+                    অ্যাপ্রুভালের জন্য সাবমিট করুন
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC: REAL-TIME 4-TIER COUNTDOWN & BALANCE MATH ENGINE -->
+    <!-- 2. Balance Top-Up Modal (Manual Payment Notice) -->
+    <div id="addBalanceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeAddBalanceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white">ব্যালেন্স রিচার্জ (Top-Up)</h3>
+            
+            <div class="bg-amber-950/40 border border-amber-600/50 rounded-2xl p-3 text-xs text-amber-200 space-y-2">
+                <p class="font-bold">⚠️ পেমেন্ট গেটওয়ে নোটিশ:</p>
+                <p>থার্ড-পার্টি পেমেন্ট গেটওয়েতে স্বয়ংক্রিয় পেমেন্ট নেওয়ার সুযোগ সাময়িকভাবে বন্ধ আছে।</p>
+                <p class="font-extrabold text-amber-400">আপাতত সুযোগ নাই, ম্যানুয়াল পেমেন্ট করেন।</p>
+            </div>
+
+            <form onsubmit="handleManualTopUp(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">টাকার পরিমাণ (BDT):</label>
+                    <input type="number" id="topupAmountInput" value="500" min="50" required class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono font-bold">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl shadow">
+                    ম্যানুয়াল পেমেন্ট রিকোয়েস্ট পাঠান
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeForgotPasswordModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white">পাসওয়ার্ড পুনরুদ্ধার (Forgot Password)</h3>
+            <p class="text-xs text-slate-400">আপনার সিস্টেম আইডি ও ইউজারনেম দিয়ে রিকোয়েস্ট পাঠান। এডমিন যাচাই করে পাসওয়ার্ড পাঠিয়ে দেবেন।</p>
+            
+            <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">ইউজারনেম / System ID:</label>
+                    <input type="text" id="forgotUname" required placeholder="আপনার আইডি লিখুন..." class="w-full custom-input rounded-xl py-2.5 px-3 font-mono">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl shadow">
+                    রিকোয়েস্ট সাবমিট করুন
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(() => {});
-            });
-        }
-
-        function navigateToExtension(pathName, titleText) {
-            try { window.history.pushState({path: pathName}, '', pathName); } catch(e) {}
-        }
-
-        // =========================================================================
-        // 1. REAL-TIME 4-TIER SECOND COUNTDOWN & UNIVERSAL BALANCE ENGINE (BDT)
-        // =========================================================================
-        const tierState = {
-            tier1: { balance: 25400.00, secondsLeft: Infinity },
-            tier2: { balance: 4850.50,  secondsLeft: 180 * 86400 - 1 }, // 6 Months [PROV]
-            tier3: { balance: 12300.50, secondsLeft: 365 * 86400 - 1 }, // 12 Months License
-            tier4: { balance: 960.00,   secondsLeft: 30 * 86400 - 1, activeUsers: 1420 } // 30 Days Cycle
+        // Layer Data Store for 4-Tiers
+        const layerProfiles = {
+            1: { name: "১ম স্তর: সুপার এডমিন (Master Owner)", balance: 45000.00, validity: "UNLIMITED ROOT", users: "৫ জন স্টাফ ও ১০০ কোম্পানি" },
+            2: { name: "২য় স্তর: অফিস স্টাফ (Operator)", balance: 12500.00, validity: "180d 23h 59m", users: "২৫ কোম্পানি" },
+            3: { name: "৩য় স্তর: কোম্পানি ক্লায়েন্ট (Enterprise Client)", balance: 8400.00, validity: "364d 23h 59m", users: "৪৫০ জন গ্রাহক" },
+            4: { name: "৪র্থ স্তর: এন্ড-ইউজার (Customer / License Holder)", balance: 1960.00, validity: "29d 23h 59m", users: "৫ জন রেফারেল" }
         };
 
-        function formatSecondsToCountdown(totalSeconds) {
-            if (!isFinite(totalSeconds)) return "UNLIMITED ROOT ACCESS";
-            if (totalSeconds <= 0) return "EXPIRED - RENEW REQUIRED";
-            const d = Math.floor(totalSeconds / 86400);
-            const h = Math.floor((totalSeconds % 86400) / 3600);
-            const m = Math.floor((totalSeconds % 3600) / 60);
-            const s = totalSeconds % 60;
-            return `${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+        let activeLayerId = 1;
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = text;
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); }, 4000);
+        }
+        function hideToast() { document.getElementById('toast').classList.add('hidden'); }
+
+        function updateTickerNotification(msg) {
+            document.getElementById('tickerText').innerText = `+ ${msg}`;
         }
 
-        // Start 1-second interval tick for all 4 layers
-        setInterval(() => {
-            if (tierState.tier2.secondsLeft > 0) tierState.tier2.secondsLeft--;
-            if (tierState.tier3.secondsLeft > 0) tierState.tier3.secondsLeft--;
-            if (tierState.tier4.secondsLeft > 0) tierState.tier4.secondsLeft--;
-
-            const t2El = document.getElementById('tier2Countdown');
-            const t3El = document.getElementById('tier3Countdown');
-            const t4El = document.getElementById('tier4Countdown');
-
-            if (t2El) t2El.innerText = formatSecondsToCountdown(tierState.tier2.secondsLeft);
-            if (t3El) t3El.innerText = formatSecondsToCountdown(tierState.tier3.secondsLeft);
-            if (t4El) t4El.innerText = formatSecondsToCountdown(tierState.tier4.secondsLeft);
-        }, 1000);
-
-        function updateTierBalanceUI(tierKey, deltaAmount) {
-            tierState[tierKey].balance += deltaAmount;
-            const balEl = document.getElementById(`${tierKey}Balance`);
-            const deltaEl = document.getElementById(`${tierKey}LastDelta`);
-            if (balEl) {
-                balEl.innerText = `৳ ${tierState[tierKey].balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                balEl.classList.remove('pulse-balance');
-                void balEl.offsetWidth;
-                balEl.classList.add('pulse-balance');
-            }
-            if (deltaEl) {
-                const sign = deltaAmount >= 0 ? '+' : '';
-                deltaEl.innerText = `${sign}৳${deltaAmount.toFixed(2)}`;
-                deltaEl.className = deltaAmount >= 0 ? "text-[10px] text-emerald-400 font-mono font-bold" : "text-[10px] text-red-400 font-mono font-bold";
-            }
-        }
-
-        // Blueprint Math: ৳100 Activation -> Company receives ৳100, ৳10 Cashback distributed (৳8 Immediate Boss, ৳2 Upline Chain)
-        function simulateNewEndUserActivation() {
-            const activationFee = 100.00;
-            const totalCommission = activationFee * 0.10; // ৳10.00
-            const immediateBossShare = 8.00;              // Tier 4 Referrer
-            const uplinePool = 2.00;                      // Distributed across Tier 1, 2, 3
-            const tier1Share = 0.80;
-            const tier2Share = 0.60;
-            const tier3Share = (activationFee - totalCommission) + 0.60; // ৳90 net + ৳0.60 chain share
-
-            tierState.tier4.activeUsers += 1;
-            tierState.tier4.secondsLeft += 86400; // Add +1 day bonus validity on referral
-            document.getElementById('activeEndUserCount').innerText = tierState.tier4.activeUsers.toLocaleString();
-
-            updateTierBalanceUI('tier1', tier1Share);
-            updateTierBalanceUI('tier2', tier2Share);
-            updateTierBalanceUI('tier3', tier3Share);
-            updateTierBalanceUI('tier4', immediateBossShare);
-
-            document.getElementById('liveMathLedgerLog').innerText = 
-                `[অ্যাক্টিভেশন +৳১০০] কোম্পানি (৩য় স্তর) +৳${tier3Share.toFixed(2)} | রেফারার বস্ (৪র্থ স্তর) +৳৮.০০ | স্টাফ (২য় স্তর) +৳০.৬০ | সুপার এডমিন (১ম স্তর) +৳০.৮০`;
-        }
-
-        // Blueprint Math: P2P Transfer of ৳50 from Tier 3 to Tier 4
-        function simulateP2PTransfer() {
-            const amount = 50.00;
-            if (tierState.tier3.balance < amount) return alert('পর্যাপ্ত ব্যালেন্স নেই!');
-            updateTierBalanceUI('tier3', -amount);
-            updateTierBalanceUI('tier4', amount);
-            document.getElementById('liveMathLedgerLog').innerText = 
-                `[P2P ট্রান্সফার -৳৫০] ৩য় স্তর থেকে ৪র্থ স্তরে ৳৫০.০০ সফলভাবে ট্রান্সফার হয়েছে (Email OTP Verified)।`;
-        }
-
-        // =========================================================================
-        // 2. AUTHENTICATION & NAVIGATION HANDLERS
-        // =========================================================================
-        async function handleInitialAuth(event) {
-            event.preventDefault();
-            const userField = document.getElementById('initialUsername');
-            const passField = document.getElementById('initialPassword');
-            const alertBox = document.getElementById('alertBox');
-            const authBtn = document.getElementById('authBtn');
-
-            const username = userField.value.trim();
-            const password = passField.value.trim();
-
-            alertBox.className = "w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300";
-            authBtn.disabled = true;
-            authBtn.innerText = "Authenticating via Stealth API...";
-
-            try {
-                const response = await fetch('/api/secure-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'verify_admin',
-                        payload: { admin_id: username, password: password }
-                    })
-                });
-
-                const result = await response.json();
-                if (!response.ok || !result.success) {
-                    throw new Error(result.error || "ভুল System ID বা Credential Password!");
-                }
-
-                alertBox.classList.add("bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/40");
-                alertBox.innerText = "✓ Authenticated! Entering Central Gateway...";
-                alertBox.classList.remove("hidden");
-
-                setTimeout(() => {
-                    document.getElementById('initialAuthScreen').classList.add('hidden');
-                    document.getElementById('sigmaMainWrapper').classList.remove('hidden');
-                    navigateToExtension('/portal/gateway', 'Gateway Portal');
-                }, 400);
-
-            } catch (err) {
-                alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
-                alertBox.innerText = "✕ " + (err.message || "Access Denied!");
-                alertBox.classList.remove("hidden");
-                authBtn.disabled = false;
-                authBtn.innerText = "Authenticate & Enter Gateway";
-            }
-        }
-
-        function handleGlobalSystemLogout() {
-            if (confirm('আপনি কি নিশ্চিতভাবে এই সেশন থেকে লগআউট করতে চান?')) {
-                document.getElementById('sigmaMainWrapper').classList.add('hidden');
-                document.getElementById('superAdminDashboard').classList.add('hidden');
-                document.getElementById('superAdminLoginView').classList.add('hidden');
-                document.getElementById('gatewaySelectionView').classList.remove('hidden');
-                document.getElementById('initialAuthScreen').classList.remove('hidden');
-                document.getElementById('initialUsername').value = '';
-                document.getElementById('initialPassword').value = '';
-                navigateToExtension('/', 'Home');
-                const alertBox = document.getElementById('alertBox');
-                if(alertBox) alertBox.classList.add('hidden');
-                const authBtn = document.getElementById('authBtn');
-                if(authBtn) { authBtn.disabled = false; authBtn.innerText = "Authenticate & Enter Gateway"; }
-            }
-        }
-
-        function showSuperAdminLoginView() {
-            document.getElementById('gatewaySelectionView').classList.add('hidden');
-            document.getElementById('superAdminLoginView').classList.remove('hidden');
-            navigateToExtension('/admin/login', 'Super Admin Login');
-        }
-
-        function backToGateway() {
-            document.getElementById('superAdminLoginView').classList.add('hidden');
-            document.getElementById('gatewaySelectionView').classList.remove('hidden');
-            navigateToExtension('/portal/gateway', 'Gateway Portal');
-        }
-
-        async function handleSuperAdminLogin(e) {
-            e.preventDefault();
-            const id = document.getElementById('superAdminId').value.trim();
-            const pass = document.getElementById('superAdminPass').value.trim();
-            const errBox = document.getElementById('adminLoginError');
-            const submitBtn = document.getElementById('superAdminLoginBtn');
+        function onLayerChange() {
+            const layerVal = document.getElementById('loginLayerSelect').value;
+            const actionLinks = document.getElementById('tier4ActionLinks');
+            const labelUser = document.getElementById('labelUserId');
             
-            if(errBox) errBox.classList.add('hidden');
-            if(submitBtn) { submitBtn.innerText = "Authenticating RLS Vault..."; submitBtn.disabled = true; }
-
-            try {
-                const response = await fetch('/api/secure-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'verify_admin',
-                        payload: { admin_id: id, password: pass }
-                    })
-                });
-
-                const result = await response.json();
-                if (!response.ok || !result.success) {
-                    throw new Error(result.error || "ভুল System ID বা Credential Password!");
-                }
-
-                document.getElementById('superAdminLoginView').classList.add('hidden');
-                document.getElementById('superAdminDashboard').classList.remove('hidden');
-                switchAdminNav('registerForm');
-                navigateToExtension('/admin/dashboard', 'Master Control');
-
-            } catch(ex) {
-                if(errBox) {
-                    errBox.innerText = ex.message || "ভুল System ID বা Credential Password!";
-                    errBox.classList.remove('hidden');
-                }
-            } finally {
-                if(submitBtn) { submitBtn.innerText = "Authenticate Master Dashboard"; submitBtn.disabled = false; }
+            if(layerVal === "4") {
+                actionLinks.classList.remove('hidden');
+                labelUser.innerText = "ইউজার আইডি (User ID):";
+            } else if(layerVal === "3") {
+                actionLinks.classList.add('hidden');
+                labelUser.innerText = "কোম্পানির নাম / ইউজারনেম:";
+            } else {
+                actionLinks.classList.add('hidden');
+                labelUser.innerText = "System ID / Operator ID:";
             }
         }
 
-        function handleAdminLogout() {
-            document.getElementById('superAdminDashboard').classList.add('hidden');
-            document.getElementById('superAdminLoginView').classList.remove('hidden');
-            navigateToExtension('/admin/login', 'Super Admin Login');
+        // Layer Login Handler
+        function handleLayerLogin(event) {
+            event.preventDefault();
+            activeLayerId = document.getElementById('loginLayerSelect').value;
+            const uname = document.getElementById('loginUsername').value.trim();
+
+            const profile = layerProfiles[activeLayerId];
+
+            // Update Dashboard UI
+            document.getElementById('badgeLayerName').innerText = profile.name;
+            document.getElementById('titleUserHeading').innerText = `স্বাগতম, ${uname || 'User'}`;
+            document.getElementById('commonBalanceText').innerText = `৳ ${profile.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('commonCountdownText').innerText = profile.validity;
+            document.getElementById('commonUnderUsersText').innerText = profile.users;
+
+            // Switch Views
+            document.getElementById('viewLoginSelection').classList.add('hidden');
+            document.getElementById('viewLayerDashboard').classList.remove('hidden');
+
+            showToast(`সফলভাবে ${profile.name} প্যানেলে প্রবেশ করেছেন!`);
+            updateTickerNotification(`[Login]: ${profile.name} প্যানেল সচল হয়েছে`);
         }
 
-        function openAdminPasswordModal() {
-            document.getElementById('adminVerifyMobile').value = '';
-            document.getElementById('adminOldPass').value = '';
-            document.getElementById('adminNewPass').value = '';
-            document.getElementById('adminConfirmPass').value = '';
-            document.getElementById('adminPasswordModal').classList.remove('hidden');
+        function handleLogOut() {
+            document.getElementById('viewLayerDashboard').classList.add('hidden');
+            document.getElementById('viewLoginSelection').classList.remove('hidden');
+            showToast('সফলভাবে লগআউট করা হয়েছে');
+            updateTickerNotification('[Logout]: সিস্টেম গেটওয়েতে ফিরে এসেছে');
         }
 
-        function closeAdminPasswordModal() {
-            document.getElementById('adminPasswordModal').classList.add('hidden');
+        // Modals Control
+        function openActivateLicenseModal() { document.getElementById('activateLicenseModal').classList.remove('hidden'); }
+        function closeActivateLicenseModal() { document.getElementById('activateLicenseModal').classList.add('hidden'); }
+
+        function handleLicenseActivationSubmit(event) {
+            event.preventDefault();
+            closeActivateLicenseModal();
+            showToast('লাইসেন্স অ্যাক্টিভেশন ফর্ম সফলভাবে জমা হয়েছে! এডমিন অনুমোদনের পর ৪র্থ স্তরে যুক্ত হবেন।');
+            updateTickerNotification('[License Request]: নতুন ইউজারের লাইসেন্স অ্যাপ্রুভালের অপেক্ষায়');
         }
 
-        async function handleAdminPasswordChange(e) {
-            e.preventDefault();
-            alert('পাসওয়ার্ড সফলভাবে আপডেট করা হয়েছে।');
-            closeAdminPasswordModal();
+        function openAddBalanceModal() { document.getElementById('addBalanceModal').classList.remove('hidden'); }
+        function closeAddBalanceModal() { document.getElementById('addBalanceModal').classList.add('hidden'); }
+
+        function handleManualTopUp(event) {
+            event.preventDefault();
+            const amt = parseFloat(document.getElementById('topupAmountInput').value) || 0;
+            layerProfiles[activeLayerId].balance += amt;
+            document.getElementById('commonBalanceText').innerText = `৳ ${layerProfiles[activeLayerId].balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            closeAddBalanceModal();
+            showToast(`৳${amt} টাকার ম্যানুয়াল পেমেন্ট রিকোয়েস্ট পাঠানো হয়েছে!`);
+            updateTickerNotification(`+ [Manual Top-up]: ৳${amt} রিচার্জ রিকোয়েস্ট পেন্ডিং`);
         }
 
-        function switchAdminNav(target) {
-            document.getElementById('tabRegisterForm').classList.add('hidden');
-            document.getElementById('tabCompanyList').classList.add('hidden');
-            document.getElementById('tabSqlConsole').classList.add('hidden');
+        function openForgotPasswordModal() { document.getElementById('forgotPasswordModal').classList.remove('hidden'); }
+        function closeForgotPasswordModal() { document.getElementById('forgotPasswordModal').classList.add('hidden'); }
 
-            if (target === 'registerForm') {
-                document.getElementById('tabRegisterForm').classList.remove('hidden');
-                document.getElementById('radioReg').checked = true;
-                navigateToExtension('/admin/dashboard/register', 'Register Form');
-            } else if (target === 'companyList') {
-                document.getElementById('tabCompanyList').classList.remove('hidden');
-                document.getElementById('radioList').checked = true;
-                fetchAllCompanies();
-                navigateToExtension('/admin/dashboard/companies-list', 'Companies List');
-            } else if (target === 'sqlConsole') {
-                document.getElementById('tabSqlConsole').classList.remove('hidden');
-                document.getElementById('radioSql').checked = true;
-                navigateToExtension('/admin/dashboard/sql-console', 'SQL Console');
-            }
-        }
-
-        async function submitNewCompanyData(e) {
-            e.preventDefault();
-            alert('নতুন কোম্পানি ও RLS মডিউলার এন্ট্রি সফলভাবে সম্পন্ন হয়েছে!');
-        }
-
-        async function fetchAllCompanies() {
-            const tbody = document.getElementById('companyTableBody');
-            tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানি তালিকা লোড হচ্ছে...</td></tr>`;
-        }
-
-        async function runCustomSqlConsoleQuery() {
-            const outputBox = document.getElementById('sqlConsoleOutputBox');
-            outputBox.innerText = "Supabase PostgreSQL RLS query executed successfully via /api/v1/stream.";
+        function handleForgotPasswordSubmit(event) {
+            event.preventDefault();
+            closeForgotPasswordModal();
+            showToast('পাসওয়ার্ড পুনরুদ্ধারের রিকোয়েস্ট সুপার এডমিনের কাছে পাঠানো হয়েছে!');
+            updateTickerNotification('[Password Reset]: রিকোয়েস্ট সফলভাবে সাবমিট হয়েছে');
         }
     </script>
 </body>
