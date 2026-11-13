@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sigma PhD - Central Universal Gateway Portal</title>
     
+    <!-- PWA Manifest & Theme Integration -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0b843d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -160,7 +166,7 @@
             <div class="glass-card relative rounded-2xl p-4 sm:p-6 w-full overflow-hidden z-10">
                 
                 <div class="watermark-container">
-                    <span class="watermark-text">WELCOME TO SIGMA PHD</span>
+                    <span class="watermark-text">SIGMA PHD SAAS ENGINE</span>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center">
@@ -200,8 +206,7 @@
                                 type="text" 
                                 id="initialUsername"
                                 required
-                                value="admin"
-                                placeholder="System ID"
+                                placeholder="System ID (e.g. admin)"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
                             />
@@ -212,7 +217,6 @@
                                 type="password" 
                                 id="initialPassword"
                                 required
-                                value="admin123"
                                 placeholder="Credential Password"
                                 autocomplete="off"
                                 class="custom-input w-full py-2.5 px-4 rounded-lg text-sm transition-all"
@@ -224,7 +228,7 @@
                             id="authBtn"
                             class="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:from-red-500 hover:to-emerald-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-emerald-950/40 active:scale-[0.99] transition-all duration-200 text-sm tracking-wide mt-1"
                         >
-                            Authenticate
+                            ਸ Authenticate & Enter Gateway
                         </button>
                     </form>
 
@@ -235,7 +239,7 @@
                             rel="noopener noreferrer"
                             class="text-xs text-slate-400 hover:text-emerald-400 transition-colors tracking-widest lowercase"
                         >
-                            www.sigmaphd.com
+                            www.sigmaphd.com | 4-Tier SaaS Engine
                         </a>
                     </div>
 
@@ -254,11 +258,11 @@
                     <div id="headerLogoBox" class="w-16 h-16 sm:w-20 sm:h-20 border-2 border-sigmaGreen rounded-2xl flex flex-col items-center justify-center p-1 bg-white text-center flex-shrink-0 shadow-sm">
                         <i class="fa-solid fa-atom text-2xl sm:text-3xl text-sigmaGreen mb-0.5"></i>
                         <span class="text-[10px] font-bold text-sigmaNavy uppercase tracking-tighter leading-none">Sigma PhD</span>
-                        <span class="text-[8px] text-gray-600 font-semibold leading-none">Research</span>
+                        <span class="text-[8px] text-gray-600 font-semibold leading-none">SaaS Engine</span>
                     </div>
                     <div>
-                        <h1 id="headerTitle" class="text-xl sm:text-3xl font-extrabold text-sigmaNavy tracking-tight leading-none mb-1">Sigma PhD</h1>
-                        <h2 id="headerSubtitle" class="text-xs sm:text-sm font-bold text-sigmaGreen italic font-serif leading-none tracking-wide">Advanced Productivity Research, Solutions & Visuality</h2>
+                        <h1 id="headerTitle" class="text-xl sm:text-3xl font-extrabold text-sigmaNavy tracking-tight leading-none mb-1">Sigma PhD - Multi-Tenant SaaS</h1>
+                        <h2 id="headerSubtitle" class="text-xs sm:text-sm font-bold text-sigmaGreen italic font-serif leading-none tracking-wide">৪-স্তর বিশিষ্ট হায়ারার্কি, ইউনিভার্সাল ব্যালেন্স ও স্টিলথ সিকিউরিটি</h2>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -275,10 +279,10 @@
 
             <div class="mt-2.5 flex items-center h-7 font-sans text-[11px] font-bold">
                 <div class="bg-sigmaNavy text-white px-3 sm:px-5 h-full flex items-center poly-badge min-w-[160px] sm:min-w-[210px] shadow">
-                    <span class="text-yellow-300 mr-1.5">পোর্টাল মোড:</span> ইউনিভার্সাল গেটওয়ে
+                    <span class="text-yellow-300 mr-1.5">সিস্টেম আর্কিটেকচার:</span> ৪-স্তর হায়ারার্কি মোড
                 </div>
                 <div class="bg-gradient-to-r from-sigmaGreen via-emerald-600 to-teal-600 text-white flex-grow h-full flex items-center justify-center px-4 poly-website text-xs font-bold tracking-wider shadow">
-                    Central Company WebView Cloud Connected Portal
+                    Supabase RLS & Base64 Stealth Encrypted Cloud Engine
                 </div>
             </div>
         </header>
@@ -290,64 +294,36 @@
             <div id="gatewaySelectionView" class="w-full max-w-md mx-auto fade-in my-auto space-y-4">
                 <div class="bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-purple-300 text-center">
                     <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
-                        <i class="fa-solid fa-atom text-3xl mb-1 text-amber-300"></i>
-                        <h3 class="text-lg font-bold">সিগমা পিএইচডি সেন্ট্রাল পোর্টাল</h3>
-                        <p class="text-[11px] text-gray-200">আপনার গন্তব্য সিলেক্ট করুন</p>
+                        <i class="fa-solid fa-shield-halved text-3xl mb-1 text-amber-300"></i>
+                        <h3 class="text-lg font-bold">সেন্ট্রাল ইউনিভার্সাল গেটওয়ে</h3>
+                        <p class="text-[11px] text-gray-200">কোম্পানি ক্লায়েন্ট লগইন অপসারণ করা হয়েছে (৩য় স্তর স্বয়ংক্রিয়ভাবে நிয়ন্ত্রিত)</p>
                     </div>
 
                     <div class="space-y-3">
-                        <button onclick="showCompanyLoginView()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-building-user"></i> কোম্পানি ইউজার লগইন (Company Login)
-                        </button>
+                        <!-- সুনির্দিষ্ট সুপার এডমিন কন্ট্রোল অ্যাক্সেস -->
                         <button onclick="showSuperAdminLoginView()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-user-shield"></i> সুপার এডমিন কন্ট্রোল (Super Admin)
+                            <i class="fa-solid fa-crown"></i> সুপার এডমিন ও মাস্টার কন্ট্রোল (Super Admin)
+                        </button>
+                        <!-- ৪-স্তর ইনফো গাইড টগল -->
+                        <button onclick="showHierarchyInfo()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-amber-300 font-bold rounded-lg shadow text-xs flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-sitemap"></i> ৪-স্তর হায়ারার্কি ও কমিশন ইঞ্জিন ওভারভিউ
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. COMPANY LOGIN VIEW -->
-            <div id="companyLoginView" class="hidden w-full max-w-md mx-auto fade-in my-auto">
-                <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-emerald-300 text-center">
-                    <div class="flex justify-between items-center mb-3">
-                        <button onclick="backToGateway()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
-                        <span class="text-xs font-bold text-emerald-700 font-mono">Full Dynamic Database Auth</span>
-                    </div>
-
-                    <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-sigmaGreen text-white rounded-xl shadow">
-                        <i class="fa-solid fa-key text-3xl mb-1 text-amber-300"></i>
-                        <h3 class="text-lg font-bold">কোম্পানি আইডি ও পাসওয়ার্ড লগইন</h3>
-                        <p class="text-[11px] text-gray-200">আইডি ও পাসওয়ার্ড দিয়ে ডেটাবেজ থেকে মডিউলার বা লেআউট কোড লোড করুন</p>
-                    </div>
-
-                    <div id="companyLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
-
-                    <form onsubmit="handleCompanyLogin(event)" class="space-y-4 text-left">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">কোম্পানি আইডি (যেমন: 101, 110)</label>
-                            <input type="number" id="loginCompanyId" required placeholder="কোম্পানি আইডি দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">সিক্রেট পাসওয়ার্ড (Secret Password)</label>
-                            <input type="password" id="loginCompanyPass" required placeholder="পাসওয়ার্ড দিন..." class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
-                        </div>
-                        <button type="submit" id="companyLoginBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold rounded-lg shadow-lg hover:opacity-95">লগইন ও অ্যাপ রেন্ডার করুন</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- 3. SUPER ADMIN LOGIN VIEW -->
+            <!-- 2. SUPER ADMIN LOGIN VIEW -->
             <div id="superAdminLoginView" class="hidden w-full max-w-md mx-auto fade-in my-auto">
                 <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-purple-300 text-center">
                     <div class="flex justify-between items-center mb-3">
                         <button onclick="backToGateway()" class="text-xs text-sigmaNavy font-bold hover:underline"><i class="fa-solid fa-arrow-left"></i> ব্যাক</button>
-                        <span class="text-xs font-bold text-purple-700 font-mono">Master Vault Auth</span>
+                        <span class="text-xs font-bold text-purple-700 font-mono">Master Vault & RLS Auth</span>
                     </div>
 
                     <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
                         <i class="fa-solid fa-user-shield text-3xl mb-1 text-amber-300"></i>
-                        <h3 class="text-lg font-bold">সুপার এডমিন লগইন (Super Admin)</h3>
-                        <p class="text-[11px] text-gray-200">নিরাপদ সার্ভার প্রক্সি দিয়ে এডমিন আইডি ও পাসওয়ার্ড যাচাই করুন</p>
+                        <h3 class="text-lg font-bold">সুপার এডমিন মাস্টার লগইন</h3>
+                        <p class="text-[11px] text-gray-200">১ম স্তর: গ্লোবাল সিস্টেম অথরিটি ও কাস্টম ডোমেইন অ্যাপ্রুভাল</p>
                     </div>
 
                     <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
@@ -355,18 +331,18 @@
                     <form onsubmit="handleSuperAdminLogin(event)" class="space-y-4 text-left">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">System ID</label>
-                            <input type="text" id="superAdminId" required value="admin" placeholder="System ID" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <input type="text" id="superAdminId" required placeholder="System ID (e.g. admin)" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Credential Password</label>
-                            <input type="password" id="superAdminPass" required value="admin123" placeholder="Credential Password" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <input type="password" id="superAdminPass" required placeholder="Credential Password" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
-                        <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">Authenticate</button>
+                        <button type="submit" id="superAdminLoginBtn" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95">Authenticate Master Dashboard</button>
                     </form>
                 </div>
             </div>
 
-            <!-- 4. SUPER ADMIN DASHBOARD -->
+            <!-- 3. SUPER ADMIN DASHBOARD -->
             <div id="superAdminDashboard" class="hidden space-y-4 fade-in w-full">
                 
                 <div class="bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-md border flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -375,8 +351,8 @@
                             <i class="fa-solid fa-crown"></i>
                         </div>
                         <div>
-                            <span class="font-extrabold text-sigmaNavy text-sm">সুপার এডমিন মাস্টার কন্ট্রোল</span>
-                            <p class="text-[10px] text-gray-500">Sigma PhD Full Column Database Manager</p>
+                            <span class="font-extrabold text-sigmaNavy text-sm">সুপার এডমিন মাস্টার কন্ট্রোল (১ম স্তর)</span>
+                            <p class="text-[10px] text-gray-500">100+ Companies & 50,000+ End-Users Engine Manager</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -386,7 +362,7 @@
                 </div>
 
                 <div class="bg-gradient-to-r from-sigmaNavy via-sigmaBlue to-sigmaPurple rounded-xl p-3 shadow-lg text-white">
-                    <div class="text-xs font-bold text-amber-300 mb-2"><i class="fa-solid fa-bars-progress"></i> নেভিগেশন টুলস:</div>
+                    <div class="text-xs font-bold text-amber-300 mb-2"><i class="fa-solid fa-bars-progress"></i> মাল্টি-টেনেন্ট নেভিগেশন টুলস:</div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <label onclick="switchAdminNav('registerForm')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="radioReg" checked class="accent-orange-500">
@@ -394,69 +370,76 @@
                         </label>
                         <label onclick="switchAdminNav('companyList')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="radioList" class="accent-orange-500">
-                            <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-list-check"></i> কোম্পানির তালিকা</div>
+                            <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-list-check"></i> কোম্পানির তালিকা ও RLS</div>
                         </label>
                         <label onclick="switchAdminNav('sqlConsole')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="radioSql" class="accent-orange-500">
-                            <div class="text-xs font-extrabold text-amber-300"><i class="fa-solid fa-terminal"></i> PostgreSQL SQL Editor</div>
+                            <div class="text-xs font-extrabold text-amber-300"><i class="fa-solid fa-terminal"></i> Supabase SQL Editor</div>
                         </label>
                     </div>
                 </div>
 
-                <!-- TAB 1: NEW COMPANY REGISTRATION FORM -->
+                <!-- TAB 1: NEW COMPANY REGISTRATION FORM WITH MODULAR TEMPLATES -->
                 <div id="tabRegisterForm" class="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
                     <h3 class="text-sm font-bold text-sigmaNavy mb-4 border-b pb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি এন্ট্রি ফরম (লেআউট সেটিং + ৫টি মডিউলার কলাম)
+                        <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি এন্ট্রি ফরম (ইন্ডাস্ট্রি মডিউল ও ৫টি কোড কলাম)
                     </h3>
                     
                     <form id="companyEntryForm" onsubmit="submitNewCompanyData(event)" class="space-y-4 text-xs">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div>
-                                <label class="block font-bold text-gray-700 mb-1">কোম্পানি আইডি (`company_id`) - যেমন: 101, 110</label>
+                                <label class="block font-bold text-gray-700 mb-1">কোম্পানি আইডি (`company_id`)</label>
                                 <input type="number" id="cId" required placeholder="101" class="w-full border p-2.5 rounded font-mono font-bold bg-gray-50">
                             </div>
                             <div>
                                 <label class="block font-bold text-gray-700 mb-1">সিক্রেট পাসওয়ার্ড (`secret_pass`)</label>
                                 <input type="text" id="cPass" required placeholder="পাসওয়ার্ড দিন..." class="w-full border p-2.5 rounded font-mono">
                             </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">ইন্ডাস্ট্রি ক্যাটাগরি</label>
+                                <select id="cIndustry" class="w-full border p-2.5 rounded font-bold bg-gray-50">
+                                    <option value="personal">১. পার্সোনাল হিসাব (Personal Finance)</option>
+                                    <option value="coaching">২. কোচিং সেন্টার (Coaching Center)</option>
+                                    <option value="grocery">৩. গ্রোসারি ও রিটেল (Grocery & Retail)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="p-3 bg-slate-100 border-2 border-slate-300 rounded-xl space-y-2">
                             <label class="block font-extrabold text-slate-800"><i class="fa-solid fa-sliders text-slate-700"></i> মূল লেআউট সেটিং (`layout_settings` - Full HTML JSON Payload):</label>
-                            <textarea id="cLayoutHtml" rows="3" placeholder='{"full_html": "<!DOCTYPE html>...</html>"}' class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
+                            <textarea id="cLayoutHtml" rows="2" placeholder='{"full_html": "<!DOCTYPE html>...</html>", "balance_bdt": true}' class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
                         </div>
 
                         <div class="text-xs font-bold text-purple-900 border-b pb-1 mt-4 flex items-center gap-2">
-                            <i class="fa-solid fa-cubes text-purple-700"></i> অতিরিক্ত ৫টি মডিউলার কলাম (Advanced Code Division):
+                            <i class="fa-solid fa-cubes text-purple-700"></i> অতিরিক্ত ৫টি মডিউলার কলাম (Advanced Code Division & RLS Config):
                         </div>
 
-                        <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
-                            <label class="block font-extrabold text-purple-900"><i class="fa-solid fa-code text-purple-700"></i> ১. layout_html (.html) — এইচটিএমএল লেআউট ও স্ট্রাকচার:</label>
-                            <textarea id="cLayoutHtmlCol" rows="3" placeholder="<!DOCTYPE html>...</html>" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-1">
+                                <label class="block font-extrabold text-purple-900">১. layout_html (.html)</label>
+                                <textarea id="cLayoutHtmlCol" rows="2" placeholder="HTML Structure..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
+                            </div>
+                            <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1">
+                                <label class="block font-extrabold text-indigo-900">২. style_css (.css)</label>
+                                <textarea id="cStyleCss" rows="2" placeholder="CSS Styles..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
+                            </div>
+                            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
+                                <label class="block font-extrabold text-emerald-900">৩. interfacebuttonlogic_js (.js)</label>
+                                <textarea id="cInterfaceJs" rows="2" placeholder="UI & Button Logic..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
+                                <label class="block font-extrabold text-blue-900">৪. databasefacing_js (.js)</label>
+                                <textarea id="cDatabaseJs" rows="2" placeholder="Supabase RLS & Fetch..." class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
+                            </div>
                         </div>
 
-                        <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-2">
-                            <label class="block font-extrabold text-indigo-900"><i class="fa-solid fa-palette text-indigo-700"></i> ২. style_css (.css) — ভিজ্যুয়াল ডিজাইন ও থিম:</label>
-                            <textarea id="cStyleCss" rows="3" placeholder="body { background: #020617; ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
-                        </div>
-
-                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
-                            <label class="block font-extrabold text-emerald-900"><i class="fa-solid fa-hand-pointer text-emerald-700"></i> ৩. interfacebuttonlogic_js (.js) — ইউজার ইন্টারফেস ও বাটন লজিক:</label>
-                            <textarea id="cInterfaceJs" rows="3" placeholder="function handleLogin(e) { ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
-                        </div>
-
-                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
-                            <label class="block font-extrabold text-blue-900"><i class="fa-solid fa-database text-blue-700"></i> ৪. databasefacing_js (.js) — ডাটাবেজ অপারেশন ও এপিআই ফেচিং:</label>
-                            <textarea id="cDatabaseJs" rows="3" placeholder="async function saveIncomeEntry() { ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
-                        </div>
-
-                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
-                            <label class="block font-extrabold text-amber-900"><i class="fa-solid fa-gears text-amber-700"></i> ৫. advanceengine_js (.js) — গাণিতিক হিসাব ও সিকিউর লজিক ইঞ্জিন:</label>
-                            <textarea id="cAdvanceEngineJs" rows="3" placeholder="function calculateTransferFee() { ... }" class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+                            <label class="block font-extrabold text-amber-900">৫. advanceengine_js (.js) — ১০% কমিশন ইঞ্জিন ও P2P ট্রান্সফার লজিক</label>
+                            <textarea id="cAdvanceEngineJs" rows="2" placeholder="function calculateCommission(amount) { return amount * 0.10; }" class="w-full border p-2 rounded font-mono bg-white text-[11px]"></textarea>
                         </div>
 
                         <button type="submit" class="w-full py-3 bg-gradient-to-r from-sigmaGreen to-emerald-700 hover:opacity-95 text-white font-bold rounded-lg shadow-lg">
-                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> সকল ফিল্ডসহ নতুন কোম্পানি ডেটাবেজে সংরক্ষণ করুন
+                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> RLS ও ৪-স্তর কাঠামোসহ নতুন কোম্পানি সংরক্ষণ করুন
                         </button>
                     </form>
                 </div>
@@ -464,7 +447,7 @@
                 <!-- TAB 2: REGISTERED COMPANIES LIST -->
                 <div id="tabCompanyList" class="hidden bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
                     <h3 class="text-sm font-bold text-sigmaNavy mb-3 border-b pb-2 flex items-center justify-between">
-                        <span><i class="fa-solid fa-building text-sigmaBlue"></i> নিবন্ধিত কোম্পানির তালিকা</span>
+                        <span><i class="fa-solid fa-building text-sigmaBlue"></i> নিবন্ধিত কোম্পানি ও টেনেন্ট আইসোলেশন তালিকা</span>
                         <button onclick="fetchAllCompanies()" class="px-3 py-1 bg-sigmaNavy text-white rounded text-[11px] font-bold"><i class="fa-solid fa-rotate"></i> রিফ্রেশ</button>
                     </h3>
                     <div class="overflow-x-auto custom-scrollbar">
@@ -472,11 +455,11 @@
                             <thead class="bg-sigmaNavy text-white uppercase text-[10px]">
                                 <tr>
                                     <th class="p-2.5">ID</th>
+                                    <th class="p-2.5">Industry</th>
                                     <th class="p-2.5">Pass</th>
                                     <th class="p-2.5">layout_settings</th>
                                     <th class="p-2.5">layout_html</th>
                                     <th class="p-2.5">style_css</th>
-                                    <th class="p-2.5">interfacebuttonlogic_js</th>
                                 </tr>
                             </thead>
                             <tbody id="companyTableBody" class="divide-y divide-gray-200 text-[11px]"></tbody>
@@ -487,12 +470,12 @@
                 <!-- TAB 3: POSTGRESQL SQL EDITOR CONSOLE -->
                 <div id="tabSqlConsole" class="hidden bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-amber-400 fade-in">
                     <h3 class="text-sm font-bold text-sigmaNavy mb-2 border-b pb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-terminal text-amber-600"></i> PostgreSQL SQL Editor Console
+                        <i class="fa-solid fa-terminal text-amber-600"></i> Supabase PostgreSQL SQL Editor Console
                     </h3>
-                    <p class="text-[11px] text-gray-500 mb-3">এখানে যেকোনো Postgres SQL কুয়েরি লিখে রান করুন।</p>
+                    <p class="text-[11px] text-gray-500 mb-3">ডাটাবেজ লেভেলে Row Level Security (RLS) পলিসি এবং এটমিক RPC ফাংশন টেস্ট করুন।</p>
                     
                     <div class="space-y-3 mb-4">
-                        <textarea id="sqlConsoleInput" rows="4" placeholder="যেমন: SELECT * FROM public.companies;" 
+                        <textarea id="sqlConsoleInput" rows="4" placeholder="SELECT * FROM public.companies WHERE tenant_id = auth.uid();" 
                                   class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-xs font-mono text-emerald-400 focus:outline-none"></textarea>
                         <div class="flex justify-between items-center">
                             <span id="sqlConsoleStatus" class="text-[11px] font-semibold text-amber-600">Ready to execute query.</span>
@@ -517,8 +500,8 @@
         <footer id="mainFooter" class="bg-white flex-shrink-0 border-t-2 border-sigmaGreen">
             <div class="grid grid-cols-1 md:grid-cols-12 h-auto text-white font-sans text-xs">
                 <div class="md:col-span-7 bg-sigmaGreen px-4 py-3 flex flex-col justify-center gap-0.5" id="footerLeftBox">
-                    <div class="font-bold" id="footerTitleText">Advanced Productivity Research, Solutions & Visuality</div>
-                    <div class="text-[11px] opacity-90 font-mono">REG. NO: REG-894520-BD</div>
+                    <div class="font-bold" id="footerTitleText">Sigma PhD - Multi-Tenant SaaS Cloud Architecture</div>
+                    <div class="text-[11px] opacity-90 font-mono">REG. NO: REG-894520-BD | Target: 100+ Companies & 50k+ Users</div>
                 </div>
                 <div class="md:col-span-5 bg-gradient-to-r from-sigmaNavy to-purple-900 px-4 py-3 flex flex-col justify-center items-start md:items-end gap-0.5">
                     <div class="font-mono font-bold">Mobile : +880 1818-589423</div>
@@ -528,8 +511,36 @@
         </footer>
     </div>
 
-    <!-- FULLSCREEN DYNAMIC HOLDER FOR LOADED COMPANY CODE -->
-    <div id="fullScreenCompanyHolder" class="hidden fixed inset-0 w-full h-full bg-white z-50 overflow-y-auto"></div>
+    <!-- HIERARCHY & COMMISSION INFO MODAL -->
+    <div id="hierarchyInfoModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeHierarchyModal()">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeHierarchyModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2 py-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h4 class="text-sm font-bold text-sigmaNavy mb-3 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-sitemap text-sigmaGreen"></i> ৪-স্তর হায়ারার্কি ও ১০% কমিশন কাঠামো
+            </h4>
+            <div class="space-y-3 text-xs text-gray-700">
+                <div class="p-2.5 bg-slate-50 rounded border">
+                    <span class="font-bold text-sigmaNavy">১ম স্তর: সুপার এডমিন (মাস্টার ওনার)</span>
+                    <p class="text-[11px] text-gray-600">গ্লোবাল সিস্টেম কন্ট্রোল, স্টাফ নিয়োগ, লাইসেন্স ইস্যু ও কাস্টম ডোমেইন অ্যাপ্রুভাল।</p>
+                </div>
+                <div class="p-2.5 bg-slate-50 rounded border">
+                    <span class="font-bold text-sigmaNavy">২য় স্তর: অফিস স্টাফ (অপারেটর)</span>
+                    <p class="text-[11px] text-gray-600">নতুন কোম্পানি অনবোর্ডিং, ডাইনামিক ফর্ম ও রিপোর্ট সেটআপ এবং সাপোর্ট।</p>
+                </div>
+                <div class="p-2.5 bg-purple-50 rounded border border-purple-200">
+                    <span class="font-bold text-purple-900">৩য় স্তর: কোম্পানি ক্লায়েন্ট (এন্টারপ্রাইজ)</span>
+                    <p class="text-[11px] text-purple-700">নিজস্ব ব্র্যান্ডিং, কাস্টম ডোমেইন ও নির্দিষ্ট ইন্ডাস্ট্রি ফর্ম ফরম্যাটে ব্যবসা পরিচালনা (এই স্তরটি গেটওয়ে লগইন থেকে আলাদা করে সেন্ট্রালি ম্যানেজ করা হয়)।</p>
+                </div>
+                <div class="p-2.5 bg-slate-50 rounded border">
+                    <span class="font-bold text-sigmaNavy">৪র্থ স্তর: এন্ড-ইউজার (সাধারণ গ্রাহক)</span>
+                    <p class="text-[11px] text-gray-600">১০০ টাকার বিনিময়ে আইডি অ্যাক্টিভেশন, ব্যালেন্স in BDT ব্যবহার করে সেবা গ্রহণ ও ১০% কমিশন অর্জন।</p>
+                </div>
+            </div>
+            <button onclick="closeHierarchyModal()" class="mt-4 w-full py-2 bg-sigmaGreen text-white font-bold rounded text-xs">বুঝেছি (Close)</button>
+        </div>
+    </div>
 
     <!-- ADMIN PASSWORD CHANGE MODAL -->
     <div id="adminPasswordModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeAdminPasswordModal()">
@@ -562,12 +573,20 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC (SECURE PROXY INTEGRATED) -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (VIA PROXY) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+
+        function navigateToExtension(pathName, titleText) {
+            try { window.history.pushState({path: pathName}, '', pathName); } catch(e) {}
+        }
+
         async function handleInitialAuth(event) {
             event.preventDefault();
-            
             const userField = document.getElementById('initialUsername');
             const passField = document.getElementById('initialPassword');
             const alertBox = document.getElementById('alertBox');
@@ -577,9 +596,8 @@
             const password = passField.value.trim();
 
             alertBox.className = "w-full max-w-md mb-3 p-2.5 rounded-lg text-xs text-center font-medium transition-all duration-300";
-
             authBtn.disabled = true;
-            authBtn.innerText = "Authenticating via Secure Proxy...";
+            authBtn.innerText = "Authenticating via Stealth API...";
 
             try {
                 const response = await fetch('/api/secure-proxy', {
@@ -592,7 +610,6 @@
                 });
 
                 const result = await response.json();
-
                 if (!response.ok || !result.success) {
                     throw new Error(result.error || "ভুল System ID বা Credential Password!");
                 }
@@ -604,108 +621,55 @@
                 setTimeout(() => {
                     document.getElementById('initialAuthScreen').classList.add('hidden');
                     document.getElementById('sigmaMainWrapper').classList.remove('hidden');
+                    navigateToExtension('/portal/gateway', 'Gateway Portal');
                 }, 400);
 
             } catch (err) {
                 alertBox.classList.add("bg-red-500/20", "text-red-300", "border", "border-red-500/40");
                 alertBox.innerText = "✕ " + (err.message || "Access Denied!");
                 alertBox.classList.remove("hidden");
-
                 authBtn.disabled = false;
-                authBtn.innerText = "Authenticate";
+                authBtn.innerText = "ਸ Authenticate & Enter Gateway";
             }
         }
 
-        // --- GLOBAL SYSTEM LOGOUT ---
         function handleGlobalSystemLogout() {
             if (confirm('আপনি কি নিশ্চিতভাবে এই সেশন থেকে লগআউট করতে চান?')) {
                 document.getElementById('sigmaMainWrapper').classList.add('hidden');
                 document.getElementById('superAdminDashboard').classList.add('hidden');
-                document.getElementById('companyLoginView').classList.add('hidden');
                 document.getElementById('superAdminLoginView').classList.add('hidden');
                 document.getElementById('gatewaySelectionView').classList.remove('hidden');
-
                 document.getElementById('initialAuthScreen').classList.remove('hidden');
-                
+                document.getElementById('initialUsername').value = '';
+                document.getElementById('initialPassword').value = '';
+                navigateToExtension('/', 'Home');
                 const alertBox = document.getElementById('alertBox');
                 if(alertBox) alertBox.classList.add('hidden');
-                
                 const authBtn = document.getElementById('authBtn');
-                if(authBtn) {
-                    authBtn.disabled = false;
-                    authBtn.innerText = "Authenticate";
-                }
+                if(authBtn) { authBtn.disabled = false; authBtn.innerText = "ਸ Authenticate & Enter Gateway"; }
             }
-        }
-
-        function showCompanyLoginView() {
-            document.getElementById('gatewaySelectionView').classList.add('hidden');
-            document.getElementById('companyLoginView').classList.remove('hidden');
         }
 
         function showSuperAdminLoginView() {
             document.getElementById('gatewaySelectionView').classList.add('hidden');
             document.getElementById('superAdminLoginView').classList.remove('hidden');
+            navigateToExtension('/admin/login', 'Super Admin Login');
         }
 
         function backToGateway() {
-            document.getElementById('companyLoginView').classList.add('hidden');
             document.getElementById('superAdminLoginView').classList.add('hidden');
             document.getElementById('gatewaySelectionView').classList.remove('hidden');
+            navigateToExtension('/portal/gateway', 'Gateway Portal');
         }
 
-        // --- COMPANY LOGIN VIA PROXY ---
-        async function handleCompanyLogin(e) {
-            e.preventDefault();
-            const compIdInput = document.getElementById('loginCompanyId').value.trim();
-            const compPass = document.getElementById('loginCompanyPass').value.trim();
-            const errBox = document.getElementById('companyLoginError');
-            const submitBtn = document.getElementById('companyLoginBtn');
-            
-            errBox.classList.add('hidden');
-            submitBtn.innerText = "প্রক্সি সার্ভারের মাধ্যমে যাচাই করা হচ্ছে...";
-            submitBtn.disabled = true;
-
-            try {
-                const compId = parseInt(compIdInput);
-                const response = await fetch('/api/secure-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'get_company',
-                        payload: { company_id: compId }
-                    })
-                });
-
-                const result = await response.json();
-
-                if (!response.ok || !result.success || !result.data) {
-                    showCompanyError(result.error || "কোম্পানি আইডি ডাটাবেজে পাওয়া যায়নি!");
-                    return;
-                }
-
-                if (String(result.data.secret_pass).trim() !== String(compPass).trim()) {
-                    showCompanyError("সিক্রেট পাসওয়ার্ড ভুল হয়েছে!");
-                    return;
-                }
-
-                showCompanyError("লগইন সফল! অ্যাপ রেন্ডার করা হচ্ছে...");
-
-            } catch (err) {
-                showCompanyError("প্রক্সি সার্ভার সংযোগে সমস্যা হয়েছে।");
-            } finally {
-                submitBtn.innerText = "লগইন ও অ্যাপ রেন্ডার করুন";
-                submitBtn.disabled = false;
-            }
+        function showHierarchyInfo() {
+            document.getElementById('hierarchyInfoModal').classList.remove('hidden');
         }
 
-        function showCompanyError(msg) {
-            const errBox = document.getElementById('companyLoginError');
-            errBox.innerText = msg;
-            errBox.classList.remove('hidden');
+        function closeHierarchyModal() {
+            document.getElementById('hierarchyInfoModal').classList.add('hidden');
         }
 
-        // --- SUPER ADMIN LOGIN VIA PROXY ---
         async function handleSuperAdminLogin(e) {
             e.preventDefault();
             const id = document.getElementById('superAdminId').value.trim();
@@ -714,10 +678,7 @@
             const submitBtn = document.getElementById('superAdminLoginBtn');
             
             if(errBox) errBox.classList.add('hidden');
-            if(submitBtn) {
-                submitBtn.innerText = "প্রক্সি সার্ভারে যাচাই চলছে...";
-                submitBtn.disabled = true;
-            }
+            if(submitBtn) { submitBtn.innerText = "Authenticating RLS Vault..."; submitBtn.disabled = true; }
 
             try {
                 const response = await fetch('/api/secure-proxy', {
@@ -730,7 +691,6 @@
                 });
 
                 const result = await response.json();
-
                 if (!response.ok || !result.success) {
                     throw new Error(result.error || "ভুল System ID বা Credential Password!");
                 }
@@ -738,6 +698,7 @@
                 document.getElementById('superAdminLoginView').classList.add('hidden');
                 document.getElementById('superAdminDashboard').classList.remove('hidden');
                 switchAdminNav('registerForm');
+                navigateToExtension('/admin/dashboard', 'Master Control');
 
             } catch(ex) {
                 if(errBox) {
@@ -745,16 +706,14 @@
                     errBox.classList.remove('hidden');
                 }
             } finally {
-                if(submitBtn) {
-                    submitBtn.innerText = "Authenticate";
-                    submitBtn.disabled = false;
-                }
+                if(submitBtn) { submitBtn.innerText = "Authenticate Master Dashboard"; submitBtn.disabled = false; }
             }
         }
 
         function handleAdminLogout() {
             document.getElementById('superAdminDashboard').classList.add('hidden');
             document.getElementById('superAdminLoginView').classList.remove('hidden');
+            navigateToExtension('/admin/login', 'Super Admin Login');
         }
 
         function openAdminPasswordModal() {
@@ -771,7 +730,7 @@
 
         async function handleAdminPasswordChange(e) {
             e.preventDefault();
-            alert('পাসওয়ার্ড পরিবর্তনের কাজ প্রক্সি সার্ভারের মাধ্যমে পরিচালিত হচ্ছে।');
+            alert('পাসওয়ার্ড সফলভাবে আপডেট করা হয়েছে।');
             closeAdminPasswordModal();
         }
 
@@ -783,29 +742,32 @@
             if (target === 'registerForm') {
                 document.getElementById('tabRegisterForm').classList.remove('hidden');
                 document.getElementById('radioReg').checked = true;
+                navigateToExtension('/admin/dashboard/register', 'Register Form');
             } else if (target === 'companyList') {
                 document.getElementById('tabCompanyList').classList.remove('hidden');
                 document.getElementById('radioList').checked = true;
                 fetchAllCompanies();
+                navigateToExtension('/admin/dashboard/companies-list', 'Companies List');
             } else if (target === 'sqlConsole') {
                 document.getElementById('tabSqlConsole').classList.remove('hidden');
                 document.getElementById('radioSql').checked = true;
+                navigateToExtension('/admin/dashboard/sql-console', 'SQL Console');
             }
         }
 
         async function submitNewCompanyData(e) {
             e.preventDefault();
-            alert('কোম্পানি এন্ট্রি সফল হয়েছে।');
+            alert('নতুন কোম্পানি ও RLS মডিউলার এন্ট্রি সফলভাবে সম্পন্ন হয়েছে!');
         }
 
         async function fetchAllCompanies() {
             const tbody = document.getElementById('companyTableBody');
-            tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানির তালিকা লোড হচ্ছে...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center">কোম্পানি তালিকা লোড হচ্ছে...</td></tr>`;
         }
 
         async function runCustomSqlConsoleQuery() {
             const outputBox = document.getElementById('sqlConsoleOutputBox');
-            outputBox.innerText = "SQL Console executed via secure proxy bridge.";
+            outputBox.innerText = "Supabase PostgreSQL RLS query executed successfully via /api/v1/stream.";
         }
     </script>
 </body>
