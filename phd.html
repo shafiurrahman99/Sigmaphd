@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sigma PhD - Central Universal Gateway Portal</title>
+    
+    <!-- PWA Manifest & Theme Integration -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0b843d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -227,12 +234,12 @@
 
                     <div class="mt-4 text-center">
                         <a 
-                            href="https://sigmaphd.vercel.app" 
+                            href="https://www.sigmaphd.com" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             class="text-xs text-slate-400 hover:text-emerald-400 transition-colors tracking-widest lowercase"
                         >
-                            sigmaphd.vercel.app
+                            www.sigmaphd.com
                         </a>
                     </div>
 
@@ -261,7 +268,7 @@
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block font-mono text-xs">
                         <div class="font-bold text-sigmaNavy">REG. NO: REG-894520-BD</div>
-                        <div class="text-[11px] text-sigmaGreen italic">sigmaphd.vercel.app</div>
+                        <div class="text-[11px] text-sigmaGreen italic">www.sigmaphd.com</div>
                     </div>
                     <!-- Global System Logout Button -->
                     <button onclick="handleGlobalSystemLogout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
@@ -344,7 +351,7 @@
                     <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
                         <i class="fa-solid fa-user-shield text-3xl mb-1 text-amber-300"></i>
                         <h3 class="text-lg font-bold">সুপার এডমিন লগইন (Super Admin)</h3>
-                        <p class="text-[11px] text-gray-200">নিরাপদ Vercel API প্রক্সি দিয়ে এডমিন আইডি ও পাসওয়ার্ড যাচাই করুন</p>
+                        <p class="text-[11px] text-gray-200">নিরাপদ সার্ভার প্রক্সি দিয়ে এডমিন আইডি ও পাসওয়ার্ড যাচাই করুন</p>
                     </div>
 
                     <div id="adminLoginError" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-xs rounded-lg border border-red-200 text-left"></div>
@@ -559,15 +566,24 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC (SECURE VERCEL SERVERLESS PROXY API) -->
+    <!-- JAVASCRIPT LOGIC (SECURE SERVERLESS PROXY API & PWA SERVICE WORKER REGISTRATION) -->
     <script>
+        // --- PWA SERVICE WORKER REGISTRATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => console.log('Service Worker Registered Successfully:', reg.scope))
+                    .catch((err) => console.log('Service Worker Registration Failed:', err));
+            });
+        }
+
         function navigateToExtension(pathName, titleText) {
             try {
                 window.history.pushState({path: pathName}, '', pathName);
             } catch(e) {}
         }
 
-        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (Using Vercel Secure API) ---
+        // --- STEP 1: INITIAL LOGIN CARD AUTHENTICATION ENGINE (Using Secure API) ---
         async function handleInitialAuth(event) {
             event.preventDefault();
             
@@ -716,7 +732,7 @@
             errBox.classList.remove('hidden');
         }
 
-        // --- SUPER ADMIN LOGIN (Using Vercel Secure API) ---
+        // --- SUPER ADMIN LOGIN (Using Secure API) ---
         async function handleSuperAdminLogin(e) {
             e.preventDefault();
             const id = document.getElementById('superAdminId').value.trim();
