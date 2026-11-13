@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Sigma PhD - Company Portal (company.html)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style id="dynamicStyleContainer"></style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl bg-slate-900 border border-emerald-500/50 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-base font-extrabold text-emerald-400"><i class="fa-solid fa-building-user mr-2"></i>Tier 3: Company Enterprise Portal</h1>
+                <p class="text-[11px] text-slate-400">Company ID: <strong class="text-amber-400">105</strong> | Custom Domain & Branding</p>
+            </div>
+            <button onclick="logoutCompany()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow">Log Out</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">License: <strong class="text-emerald-400">Active (335 Days)</strong></div>
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">Sub-Users: <strong class="text-amber-400">5,120 Active</strong></div>
+        </div>
+    </div>
+
+    <script>
+        function logoutCompany() {
+            window.location.href = 'company.html';
+        }
+    </script>
+</body>
+</html>
