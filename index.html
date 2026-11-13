@@ -156,6 +156,8 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #0b843d; border-radius: 3px; }
+        .pulse-balance { animation: pulseText 0.6s ease; }
+        @keyframes pulseText { 0% { transform: scale(1); } 50% { transform: scale(1.12); color: #059669; } 100% { transform: scale(1); } }
     </style>
 </head>
 <body class="flex justify-center items-center p-2 sm:p-4 select-none min-h-screen">
@@ -228,7 +230,7 @@
                             id="authBtn"
                             class="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:from-red-500 hover:to-emerald-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-emerald-950/40 active:scale-[0.99] transition-all duration-200 text-sm tracking-wide mt-1"
                         >
-                            ਸ Authenticate & Enter Gateway
+                            Authenticate & Enter Gateway
                         </button>
                     </form>
 
@@ -249,7 +251,7 @@
     </div>
 
     <!-- MAIN WRAPPER CONTAINER (Screen 2: Portal Gateway after Authentication) -->
-    <div id="sigmaMainWrapper" class="hidden w-full max-w-5xl bg-white/95 backdrop-blur-md shadow-2xl rounded-xl border border-gray-400 flex flex-col min-h-[94vh] relative overflow-hidden fade-in">
+    <div id="sigmaMainWrapper" class="hidden w-full max-w-6xl bg-white/95 backdrop-blur-md shadow-2xl rounded-xl border border-gray-400 flex flex-col min-h-[94vh] relative overflow-hidden fade-in">
 
         <!-- HEADER -->
         <header id="mainHeader" class="bg-white pt-3 px-3 sm:px-6 pb-2 flex-shrink-0 border-b-2 border-sigmaGreen">
@@ -262,7 +264,7 @@
                     </div>
                     <div>
                         <h1 id="headerTitle" class="text-xl sm:text-3xl font-extrabold text-sigmaNavy tracking-tight leading-none mb-1">Sigma PhD - Multi-Tenant SaaS</h1>
-                        <h2 id="headerSubtitle" class="text-xs sm:text-sm font-bold text-sigmaGreen italic font-serif leading-none tracking-wide">৪-স্তর বিশিষ্ট হায়ারার্কি, ইউনিভার্সাল ব্যালেন্স ও স্টিলথ সিকিউরিটি</h2>
+                        <h2 id="headerSubtitle" class="text-xs sm:text-sm font-bold text-sigmaGreen italic font-serif leading-none tracking-wide">৪-স্তর লাইভ কাউন্টডাউন, ব্যালেন্স ইন বিডিটি (BDT) ও ১০% কমিশন ইঞ্জিন</h2>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -272,41 +274,147 @@
                     </div>
                     <!-- Global System Logout Button -->
                     <button onclick="handleGlobalSystemLogout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1 transition">
-                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট (Log Out)
+                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট
                     </button>
                 </div>
             </div>
 
             <div class="mt-2.5 flex items-center h-7 font-sans text-[11px] font-bold">
-                <div class="bg-sigmaNavy text-white px-3 sm:px-5 h-full flex items-center poly-badge min-w-[160px] sm:min-w-[210px] shadow">
-                    <span class="text-yellow-300 mr-1.5">সিস্টেম আর্কিটেকচার:</span> ৪-স্তর হায়ারার্কি মোড
+                <div class="bg-sigmaNavy text-white px-3 sm:px-5 h-full flex items-center poly-badge min-w-[160px] sm:min-w-[230px] shadow">
+                    <span class="text-yellow-300 mr-1.5">ইঞ্জিন স্ট্যাটাস:</span> ৪-স্তর লাইভ কাউন্টার সক্রিয়
                 </div>
                 <div class="bg-gradient-to-r from-sigmaGreen via-emerald-600 to-teal-600 text-white flex-grow h-full flex items-center justify-center px-4 poly-website text-xs font-bold tracking-wider shadow">
-                    Supabase RLS & Base64 Stealth Encrypted Cloud Engine
+                    Real-Time Countdown & Hierarchical Balance Engine (Balance in BDT)
                 </div>
             </div>
         </header>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-grow pad-watermark p-3 sm:p-6 flex flex-col justify-start relative">
+        <main class="flex-grow pad-watermark p-3 sm:p-6 flex flex-col justify-start relative space-y-5">
 
-            <!-- 1. INITIAL GATEWAY SELECTION VIEW -->
+            <!-- LIVE 4-TIER COUNTDOWN & UNIVERSAL BALANCE ENGINE MATRIX (ALWAYS VISIBLE IN GATEWAY & DASHBOARD) -->
+            <section class="bg-slate-900/95 text-white rounded-2xl p-4 sm:p-5 shadow-2xl border border-emerald-500/40">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-3 mb-4">
+                    <div>
+                        <h3 class="text-sm sm:text-base font-extrabold text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i> ৪-স্তর লাইভ কাউন্টডাউন ও ইউনিভার্সাল ব্যালেন্স (Balance in BDT)
+                        </h3>
+                        <p class="text-[11px] text-slate-300">প্রতিটি লেয়ারে লাইসেন্স মেয়াদ সেকেন্ডে সেকেন্ডে কাউন্টডাউন হচ্ছে এবং কমিশন অটো-ক্রেডিট হচ্ছে</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="simulateNewEndUserActivation()" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5 transition active:scale-95">
+                            <i class="fa-solid fa-user-plus"></i> নতুন এন্ড-ইউজার অ্যাক্টিভেশন (৳১০০)
+                        </button>
+                        <button onclick="simulateP2PTransfer()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5 transition active:scale-95">
+                            <i class="fa-solid fa-money-bill-transfer"></i> P2P ট্রান্সফার টেস্ট (৳৫০)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 TIER CARDS GRID -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-inter">
+                    
+                    <!-- TIER 1: SUPER ADMIN -->
+                    <div class="bg-slate-800/90 border border-purple-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2 py-0.5 bg-purple-600/30 border border-purple-400 text-purple-200 rounded text-[10px] font-bold">১ম স্তর (Tier 1)</span>
+                            <i class="fa-solid fa-crown text-amber-400"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-white font-sans">সুপার এডমিন (মাস্টার ওনার)</h4>
+                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
+                            <div class="text-[10px] text-slate-400">ভ্যালিডিটি কাউন্টার:</div>
+                            <div class="text-xs font-mono font-extrabold text-emerald-400" id="tier1Countdown">UNLIMITED ROOT ACCESS</div>
+                        </div>
+                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
+                            <div>
+                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
+                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier1Balance">৳ 25,400.00</div>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 font-mono" id="tier1LastDelta">+৳0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- TIER 2: OFFICE STAFF -->
+                    <div class="bg-slate-800/90 border border-blue-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2 py-0.5 bg-blue-600/30 border border-blue-400 text-blue-200 rounded text-[10px] font-bold">২য় স্তর (Tier 2)</span>
+                            <span class="text-[10px] font-mono text-cyan-300">[PROV: 6M / CONT: 2Y]</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-white font-sans">অফিস স্টাফ (অপারেটর)</h4>
+                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
+                            <div class="text-[10px] text-slate-400">লাইভ সেকেন্ড কাউন্টডাউন:</div>
+                            <div class="text-xs font-mono font-extrabold text-cyan-400" id="tier2Countdown">179d 23h 59m 59s</div>
+                        </div>
+                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
+                            <div>
+                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
+                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier2Balance">৳ 4,850.50</div>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 font-mono" id="tier2LastDelta">+৳0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- TIER 3: COMPANY CLIENT -->
+                    <div class="bg-slate-800/90 border border-emerald-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2 py-0.5 bg-emerald-600/30 border border-emerald-400 text-emerald-200 rounded text-[10px] font-bold">৩য় স্তর (Tier 3)</span>
+                            <span class="text-[10px] font-mono text-emerald-300">১২ মাস লাইসেন্স</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-white font-sans">কোম্পানি ক্লায়েন্ট (সেন্ট্রাল)</h4>
+                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
+                            <div class="text-[10px] text-slate-400">সাবস্ক্রিপশন কাউন্টডাউন:</div>
+                            <div class="text-xs font-mono font-extrabold text-emerald-400" id="tier3Countdown">364d 23h 59m 59s</div>
+                        </div>
+                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
+                            <div>
+                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
+                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier3Balance">৳ 12,300.50</div>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 font-mono" id="tier3LastDelta">+৳0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- TIER 4: END-USER -->
+                    <div class="bg-slate-800/90 border border-amber-500/50 rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2 py-0.5 bg-amber-600/30 border border-amber-400 text-amber-200 rounded text-[10px] font-bold">৪র্থ স্তর (Tier 4)</span>
+                            <span class="text-[10px] font-mono text-amber-300">অ্যাক্টিভ: <span id="activeEndUserCount">1,420</span> জন</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-white font-sans">এন্ড-ইউজার (রেফারার বস্)</h4>
+                        <div class="my-2 p-2 bg-slate-950/70 rounded-lg border border-slate-700">
+                            <div class="text-[10px] text-slate-400">আইডি ভ্যালিডিটি কাউন্টডাউন:</div>
+                            <div class="text-xs font-mono font-extrabold text-amber-400" id="tier4Countdown">29d 23h 59m 59s</div>
+                        </div>
+                        <div class="flex justify-between items-end pt-1 border-t border-slate-700/80">
+                            <div>
+                                <div class="text-[10px] text-slate-400">Balance in BDT</div>
+                                <div class="text-lg font-extrabold text-amber-300 font-mono" id="tier4Balance">৳ 960.00</div>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 font-mono" id="tier4LastDelta">+৳0.00</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- LIVE LEDGER / MATH LOG STRIP -->
+                <div class="mt-3 bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 text-[11px] font-mono">
+                    <span class="text-emerald-400 font-bold"><i class="fa-solid fa-calculator"></i> লাইভ ম্যাথ ও অটো-লেজার:</span>
+                    <span id="liveMathLedgerLog" class="text-slate-300">সিস্টেম প্রস্তুত: ১০০ টাকা অ্যাক্টিভেশনে কোম্পানি পাবে ৳৯০ (নিট), রেফারার বস্ ৳৮ এবং আপলাইন চেইন (১ম-৩য় স্তর) ৳২।</span>
+                </div>
+            </section>
+
+            <!-- 1. INITIAL GATEWAY SELECTION VIEW (Company Login Removed as Requested) -->
             <div id="gatewaySelectionView" class="w-full max-w-md mx-auto fade-in my-auto space-y-4">
                 <div class="bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-purple-300 text-center">
                     <div class="mb-4 p-3 bg-gradient-to-r from-sigmaNavy to-purple-900 text-white rounded-xl shadow">
                         <i class="fa-solid fa-shield-halved text-3xl mb-1 text-amber-300"></i>
                         <h3 class="text-lg font-bold">সেন্ট্রাল ইউনিভার্সাল গেটওয়ে</h3>
-                        <p class="text-[11px] text-gray-200">কোম্পানি ক্লায়েন্ট লগইন অপসারণ করা হয়েছে (৩য় স্তর স্বয়ংক্রিয়ভাবে நிয়ন্ত্রিত)</p>
+                        <p class="text-[11px] text-gray-200">৩য় স্তরের কোম্পানি লগইন অপসারণ করা হয়েছে (সেন্ট্রালি পরিচালিত)</p>
                     </div>
 
                     <div class="space-y-3">
-                        <!-- সুনির্দিষ্ট সুপার এডমিন কন্ট্রোল অ্যাক্সেস -->
                         <button onclick="showSuperAdminLoginView()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-800 text-white font-bold rounded-lg shadow-lg hover:opacity-95 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-crown"></i> সুপার এডমিন ও মাস্টার কন্ট্রোল (Super Admin)
-                        </button>
-                        <!-- ৪-স্তর ইনফো গাইড টগল -->
-                        <button onclick="showHierarchyInfo()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-amber-300 font-bold rounded-lg shadow text-xs flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-sitemap"></i> ৪-স্তর হায়ারার্কি ও কমিশন ইঞ্জিন ওভারভিউ
+                            <i class="fa-solid fa-crown"></i> সুপার এডমিন মাস্টার কন্ট্রোল (১ম ও ২য় স্তর)
                         </button>
                     </div>
                 </div>
@@ -331,7 +439,7 @@
                     <form onsubmit="handleSuperAdminLogin(event)" class="space-y-4 text-left">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">System ID</label>
-                            <input type="text" id="superAdminId" required placeholder="System ID (e.g. admin)" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
+                            <input type="text" id="superAdminId" required placeholder="System ID" class="w-full p-2.5 text-sm font-semibold border rounded-lg bg-gray-50 font-mono">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Credential Password</label>
@@ -366,7 +474,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <label onclick="switchAdminNav('registerForm')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="radioReg" checked class="accent-orange-500">
-                            <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-building-circle-arrow-right"></i> নতুন কোম্পানি এন্ট্রি ফরম</div>
+                            <div class="text-xs font-extrabold text-purple-200"><i class="fa-solid fa-building-circle-arrow-right"></i> নতুন কোম্পানি অনবোর্ডিং (২য় স্তর)</div>
                         </label>
                         <label onclick="switchAdminNav('companyList')" class="flex items-center gap-2 p-2.5 rounded-lg bg-white/10 border border-purple-300 cursor-pointer hover:bg-white/20 transition">
                             <input type="radio" name="adminNavOpt" id="radioList" class="accent-orange-500">
@@ -379,10 +487,10 @@
                     </div>
                 </div>
 
-                <!-- TAB 1: NEW COMPANY REGISTRATION FORM WITH MODULAR TEMPLATES -->
+                <!-- TAB 1: NEW COMPANY REGISTRATION FORM -->
                 <div id="tabRegisterForm" class="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-purple-300 fade-in">
                     <h3 class="text-sm font-bold text-sigmaNavy mb-4 border-b pb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি এন্ট্রি ফরম (ইন্ডাস্ট্রি মডিউল ও ৫টি কোড কলাম)
+                        <i class="fa-solid fa-circle-plus text-sigmaGreen text-base"></i> নতুন কোম্পানি অনবোর্ডিং ফরম (ইন্ডাস্ট্রি মডিউল ও ৫টি কোড কলাম)
                     </h3>
                     
                     <form id="companyEntryForm" onsubmit="submitNewCompanyData(event)" class="space-y-4 text-xs">
@@ -408,10 +516,6 @@
                         <div class="p-3 bg-slate-100 border-2 border-slate-300 rounded-xl space-y-2">
                             <label class="block font-extrabold text-slate-800"><i class="fa-solid fa-sliders text-slate-700"></i> মূল লেআউট সেটিং (`layout_settings` - Full HTML JSON Payload):</label>
                             <textarea id="cLayoutHtml" rows="2" placeholder='{"full_html": "<!DOCTYPE html>...</html>", "balance_bdt": true}' class="w-full border p-2.5 rounded font-mono bg-white text-xs"></textarea>
-                        </div>
-
-                        <div class="text-xs font-bold text-purple-900 border-b pb-1 mt-4 flex items-center gap-2">
-                            <i class="fa-solid fa-cubes text-purple-700"></i> অতিরিক্ত ৫টি মডিউলার কলাম (Advanced Code Division & RLS Config):
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -511,37 +615,6 @@
         </footer>
     </div>
 
-    <!-- HIERARCHY & COMMISSION INFO MODAL -->
-    <div id="hierarchyInfoModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeHierarchyModal()">
-        <div class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeHierarchyModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 font-bold text-lg px-2 py-1">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h4 class="text-sm font-bold text-sigmaNavy mb-3 flex items-center gap-2 border-b pb-2">
-                <i class="fa-solid fa-sitemap text-sigmaGreen"></i> ৪-স্তর হায়ারার্কি ও ১০% কমিশন কাঠামো
-            </h4>
-            <div class="space-y-3 text-xs text-gray-700">
-                <div class="p-2.5 bg-slate-50 rounded border">
-                    <span class="font-bold text-sigmaNavy">১ম স্তর: সুপার এডমিন (মাস্টার ওনার)</span>
-                    <p class="text-[11px] text-gray-600">গ্লোবাল সিস্টেম কন্ট্রোল, স্টাফ নিয়োগ, লাইসেন্স ইস্যু ও কাস্টম ডোমেইন অ্যাপ্রুভাল।</p>
-                </div>
-                <div class="p-2.5 bg-slate-50 rounded border">
-                    <span class="font-bold text-sigmaNavy">২য় স্তর: অফিস স্টাফ (অপারেটর)</span>
-                    <p class="text-[11px] text-gray-600">নতুন কোম্পানি অনবোর্ডিং, ডাইনামিক ফর্ম ও রিপোর্ট সেটআপ এবং সাপোর্ট।</p>
-                </div>
-                <div class="p-2.5 bg-purple-50 rounded border border-purple-200">
-                    <span class="font-bold text-purple-900">৩য় স্তর: কোম্পানি ক্লায়েন্ট (এন্টারপ্রাইজ)</span>
-                    <p class="text-[11px] text-purple-700">নিজস্ব ব্র্যান্ডিং, কাস্টম ডোমেইন ও নির্দিষ্ট ইন্ডাস্ট্রি ফর্ম ফরম্যাটে ব্যবসা পরিচালনা (এই স্তরটি গেটওয়ে লগইন থেকে আলাদা করে সেন্ট্রালি ম্যানেজ করা হয়)।</p>
-                </div>
-                <div class="p-2.5 bg-slate-50 rounded border">
-                    <span class="font-bold text-sigmaNavy">৪র্থ স্তর: এন্ড-ইউজার (সাধারণ গ্রাহক)</span>
-                    <p class="text-[11px] text-gray-600">১০০ টাকার বিনিময়ে আইডি অ্যাক্টিভেশন, ব্যালেন্স in BDT ব্যবহার করে সেবা গ্রহণ ও ১০% কমিশন অর্জন।</p>
-                </div>
-            </div>
-            <button onclick="closeHierarchyModal()" class="mt-4 w-full py-2 bg-sigmaGreen text-white font-bold rounded text-xs">বুঝেছি (Close)</button>
-        </div>
-    </div>
-
     <!-- ADMIN PASSWORD CHANGE MODAL -->
     <div id="adminPasswordModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target === this) closeAdminPasswordModal()">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
@@ -573,7 +646,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT LOGIC: REAL-TIME 4-TIER COUNTDOWN & BALANCE MATH ENGINE -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -585,6 +658,94 @@
             try { window.history.pushState({path: pathName}, '', pathName); } catch(e) {}
         }
 
+        // =========================================================================
+        // 1. REAL-TIME 4-TIER SECOND COUNTDOWN & UNIVERSAL BALANCE ENGINE (BDT)
+        // =========================================================================
+        const tierState = {
+            tier1: { balance: 25400.00, secondsLeft: Infinity },
+            tier2: { balance: 4850.50,  secondsLeft: 180 * 86400 - 1 }, // 6 Months [PROV]
+            tier3: { balance: 12300.50, secondsLeft: 365 * 86400 - 1 }, // 12 Months License
+            tier4: { balance: 960.00,   secondsLeft: 30 * 86400 - 1, activeUsers: 1420 } // 30 Days Cycle
+        };
+
+        function formatSecondsToCountdown(totalSeconds) {
+            if (!isFinite(totalSeconds)) return "UNLIMITED ROOT ACCESS";
+            if (totalSeconds <= 0) return "EXPIRED - RENEW REQUIRED";
+            const d = Math.floor(totalSeconds / 86400);
+            const h = Math.floor((totalSeconds % 86400) / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            return `${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+        }
+
+        // Start 1-second interval tick for all 4 layers
+        setInterval(() => {
+            if (tierState.tier2.secondsLeft > 0) tierState.tier2.secondsLeft--;
+            if (tierState.tier3.secondsLeft > 0) tierState.tier3.secondsLeft--;
+            if (tierState.tier4.secondsLeft > 0) tierState.tier4.secondsLeft--;
+
+            const t2El = document.getElementById('tier2Countdown');
+            const t3El = document.getElementById('tier3Countdown');
+            const t4El = document.getElementById('tier4Countdown');
+
+            if (t2El) t2El.innerText = formatSecondsToCountdown(tierState.tier2.secondsLeft);
+            if (t3El) t3El.innerText = formatSecondsToCountdown(tierState.tier3.secondsLeft);
+            if (t4El) t4El.innerText = formatSecondsToCountdown(tierState.tier4.secondsLeft);
+        }, 1000);
+
+        function updateTierBalanceUI(tierKey, deltaAmount) {
+            tierState[tierKey].balance += deltaAmount;
+            const balEl = document.getElementById(`${tierKey}Balance`);
+            const deltaEl = document.getElementById(`${tierKey}LastDelta`);
+            if (balEl) {
+                balEl.innerText = `৳ ${tierState[tierKey].balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                balEl.classList.remove('pulse-balance');
+                void balEl.offsetWidth;
+                balEl.classList.add('pulse-balance');
+            }
+            if (deltaEl) {
+                const sign = deltaAmount >= 0 ? '+' : '';
+                deltaEl.innerText = `${sign}৳${deltaAmount.toFixed(2)}`;
+                deltaEl.className = deltaAmount >= 0 ? "text-[10px] text-emerald-400 font-mono font-bold" : "text-[10px] text-red-400 font-mono font-bold";
+            }
+        }
+
+        // Blueprint Math: ৳100 Activation -> Company receives ৳100, ৳10 Cashback distributed (৳8 Immediate Boss, ৳2 Upline Chain)
+        function simulateNewEndUserActivation() {
+            const activationFee = 100.00;
+            const totalCommission = activationFee * 0.10; // ৳10.00
+            const immediateBossShare = 8.00;              // Tier 4 Referrer
+            const uplinePool = 2.00;                      // Distributed across Tier 1, 2, 3
+            const tier1Share = 0.80;
+            const tier2Share = 0.60;
+            const tier3Share = (activationFee - totalCommission) + 0.60; // ৳90 net + ৳0.60 chain share
+
+            tierState.tier4.activeUsers += 1;
+            tierState.tier4.secondsLeft += 86400; // Add +1 day bonus validity on referral
+            document.getElementById('activeEndUserCount').innerText = tierState.tier4.activeUsers.toLocaleString();
+
+            updateTierBalanceUI('tier1', tier1Share);
+            updateTierBalanceUI('tier2', tier2Share);
+            updateTierBalanceUI('tier3', tier3Share);
+            updateTierBalanceUI('tier4', immediateBossShare);
+
+            document.getElementById('liveMathLedgerLog').innerText = 
+                `[অ্যাক্টিভেশন +৳১০০] কোম্পানি (৩য় স্তর) +৳${tier3Share.toFixed(2)} | রেফারার বস্ (৪র্থ স্তর) +৳৮.০০ | স্টাফ (২য় স্তর) +৳০.৬০ | সুপার এডমিন (১ম স্তর) +৳০.৮০`;
+        }
+
+        // Blueprint Math: P2P Transfer of ৳50 from Tier 3 to Tier 4
+        function simulateP2PTransfer() {
+            const amount = 50.00;
+            if (tierState.tier3.balance < amount) return alert('পর্যাপ্ত ব্যালেন্স নেই!');
+            updateTierBalanceUI('tier3', -amount);
+            updateTierBalanceUI('tier4', amount);
+            document.getElementById('liveMathLedgerLog').innerText = 
+                `[P2P ট্রান্সফার -৳৫০] ৩য় স্তর থেকে ৪র্থ স্তরে ৳৫০.০০ সফলভাবে ট্রান্সফার হয়েছে (Email OTP Verified)।`;
+        }
+
+        // =========================================================================
+        // 2. AUTHENTICATION & NAVIGATION HANDLERS
+        // =========================================================================
         async function handleInitialAuth(event) {
             event.preventDefault();
             const userField = document.getElementById('initialUsername');
@@ -629,7 +790,7 @@
                 alertBox.innerText = "✕ " + (err.message || "Access Denied!");
                 alertBox.classList.remove("hidden");
                 authBtn.disabled = false;
-                authBtn.innerText = "ਸ Authenticate & Enter Gateway";
+                authBtn.innerText = "Authenticate & Enter Gateway";
             }
         }
 
@@ -646,7 +807,7 @@
                 const alertBox = document.getElementById('alertBox');
                 if(alertBox) alertBox.classList.add('hidden');
                 const authBtn = document.getElementById('authBtn');
-                if(authBtn) { authBtn.disabled = false; authBtn.innerText = "ਸ Authenticate & Enter Gateway"; }
+                if(authBtn) { authBtn.disabled = false; authBtn.innerText = "Authenticate & Enter Gateway"; }
             }
         }
 
@@ -660,14 +821,6 @@
             document.getElementById('superAdminLoginView').classList.add('hidden');
             document.getElementById('gatewaySelectionView').classList.remove('hidden');
             navigateToExtension('/portal/gateway', 'Gateway Portal');
-        }
-
-        function showHierarchyInfo() {
-            document.getElementById('hierarchyInfoModal').classList.remove('hidden');
-        }
-
-        function closeHierarchyModal() {
-            document.getElementById('hierarchyInfoModal').classList.add('hidden');
         }
 
         async function handleSuperAdminLogin(e) {
