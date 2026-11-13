@@ -1,12 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
 
+// Vercel Environment Variables থেকে সিক্রেট লোড হচ্ছে (কোডে হার্ডকোড করা নেই)
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'sigma_phd_super_secure_secret_key';
 
+const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
 export default async function handler(req, res) {
-  // ক্যাচ ব্লকে যেন সবসময় JSON ফরম্যাটে এরর যায়, তাই হেডার আগে থেকেই সেট করে রাখা
   res.setHeader('Content-Type', 'application/json');
 
   if (req.method !== 'POST') {
@@ -14,31 +16,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      return.status(200).json({ success: false, error: 'Server Environment Variables Missing!' });
-    }
-
-    const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { action, payload } = req.body || {};
 
-    // ১. সুপার এডমিন ভেরিফিকেশন
+    // ১. সুপার এডমিন ভেরিফিকেশন প্রক্সি
     if (action === 'verify_admin') {
       const { admin_id, password } = payload || {};
+      
+      const { data, error } = await supabaseServer
+        .from('super_admin_vault')
+        .select('*')
+        .eq('admin_id', admin_id)
+        .maybeSingle();
 
-      if (admin_id === "admin" && password === "admin123") {
-        const token = jwt.sign({ admin_id, role: 'super_admin' }, JWT_SECRET, { expiresIn: '2h' });
-        return res.status(200).json({ success: true, token, data: { admin_id } });
+      if (error || !data || String(data.password).trim() !== String(password).trim()) {
+        return res.status(200).json({ success: false, error: 'ভুল এডমিন আইডি বা পাসওয়ার্ড!' });
       }
 
-      return res.status(200).json({ success: false, error: 'ভুল System ID বা Credential Password!' });
+      const token = jwt.sign({ admin_id, role: 'super_admin' }, JWT_SECRET, { expiresIn: '2h' });
+      return res.status(200).json({ success: true, token, data: { admin_id } });
     }
 
-    // ২. কোম্পানি ডেটা ফেচিং
+    // ২. কোম্পানি ডেটা ফেচিং প্রক্সি
     if (action === 'get_company') {
       const { company_id } = payload || {};
       
       const { data, error } = await supabaseServer
-        .from('sigma_enterprises')
+        .from('companies')
         .select('*')
         .eq('company_id', company_id)
         .maybeSingle();
@@ -54,7 +57,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: false, error: 'Invalid action specified.' });
 
   } catch (err) {
-    // কোনো ক্র্যাশ বা আনহ্যান্ডলড এরর হলে সেটিও JSON আকারে পাঠানো যাতে ফ্রন্টএণ্ডে JSON.parse এরর না আসে
-    return res.status(200).json({ success: false, error: err.message || 'Internal Server Error' });
+    return res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
   }
 }
