@@ -93,45 +93,7 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-950">
 
-    <!-- Global State Variables (Database-Driven) -->
-    <script>
-        const GLOBAL_COMPANY_ID = 105;
-        let currentUserId = "8942"; 
-        let currentCompositeUserId = "105_8942"; 
-        let currentUserMobile = "01818589423"; 
-        let currentUserPassword = "123456";
-        
-        let isModeratorLoggedIn = false;
-        let currentWalletBalance = 2100.00;
-        let currentValidityDays = 25;
-        let activeDevices = 1;
-        let totalSubUsers = 5;
-
-        let runningIncome = 0.00;
-        let runningExpense = 0.00;
-        let totalIncome2026 = 0.00;
-        let totalExpense2026 = 0.00;
-
-        let loanGivenTotal = 0.00;
-        let loanTakenTotal = 0.00;
-
-        // Database Fetched State Arrays (Initially Empty)
-        let lotInventory = [];
-        let pendingLotRequests = [];
-        let loanGivenRecords = [];
-        let loanTakenRecords = [];
-        let marketExpenses = [];
-
-        // Cash Memo State
-        let memoCartItems = [];
-        let savedCompanyProfile = {
-            name: 'Sigma PhD Enterprise',
-            address: 'Narayanganj, Dhaka Division, Bangladesh',
-            mobile: '01818589423',
-            footerNote: 'বিক্রিত মাল ফেরত নেওয়া হয় না। ধন্যবাদ, আবার আসবেন।'
-        };
-    </script>
-
+   
     <!-- Toast Notification -->
     <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
         <span id="toast-text">Action successful!</span>
