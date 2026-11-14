@@ -983,6 +983,71 @@
             }
         }
 
+        // --- Database Data Synchronization Function ---
+        async function fetchDashboardDataFromDB() {
+            const result = await callServerProxy('FETCH_DASHBOARD_DATA', {});
+            if (result.success && result.data) {
+                const dbData = result.data;
+
+                // 1. Map Daily Expenses from DB
+                if (dbData.daily_expenses && dbData.daily_expenses.length > 0) {
+                    marketExpenses = dbData.daily_expenses.map(item => ({
+                        id: item.id,
+                        date: item.expense_date,
+                        desc: item.description,
+                        amount: Number(item.amount),
+                        status: item.status
+                    }));
+                }
+
+                // 2. Map Loan Records from DB
+                loanGivenRecords = [];
+                loanTakenRecords = [];
+                loanGivenTotal = 0;
+                loanTakenTotal = 0;
+
+                if (dbData.loan_records) {
+                    dbData.loan_records.forEach(item => {
+                        if (item.loan_category === 'Receivable') {
+                            loanGivenRecords.push({
+                                id: item.id,
+                                date: item.entry_date,
+                                person: item.person_name,
+                                amount: Number(item.amount),
+                                returned: item.is_returned,
+                                returnDate: item.return_date || '',
+                                extraFee: Number(item.extra_fee_or_charge || 0)
+                            });
+                            if (!item.is_returned) loanGivenTotal += Number(item.amount);
+                        } else {
+                            loanTakenRecords.push({
+                                id: item.id,
+                                date: item.entry_date,
+                                person: item.person_name,
+                                amount: Number(item.amount),
+                                returned: item.is_returned,
+                                returnDate: item.return_date || '',
+                                extraCharge: Number(item.extra_fee_or_charge || 0)
+                            });
+                            if (!item.is_returned) loanTakenTotal += Number(item.amount);
+                        }
+                    });
+                }
+
+                // 3. Map Business Profile
+                if (dbData.business_profile) {
+                    savedCompanyProfile = {
+                        name: dbData.business_profile.company_name || savedCompanyProfile.name,
+                        address: dbData.business_profile.address || savedCompanyProfile.address,
+                        mobile: dbData.business_profile.mobile || savedCompanyProfile.mobile,
+                        footerNote: dbData.business_profile.footer_note || savedCompanyProfile.footerNote
+                    };
+                }
+
+                updateFinancialDisplays();
+            }
+        }
+
         function showToast(text) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-text').innerText = text;
@@ -1153,7 +1218,6 @@
                 return;
             }
 
-            // Sync with backend via proxy
             await callServerProxy('REQUEST_LOT', {
                 lot_no: lotNo,
                 quantity: qty,
@@ -1314,12 +1378,15 @@
             currentUserId = inputVal.length <= 4 ? inputVal.padStart(4, '0') : inputVal.slice(-4);
             currentCompositeUserId = `${companyId}_${currentUserId}`;
 
-            const completeSignIn = () => {
+            const completeSignIn = async () => {
                 document.getElementById('currentLoggedInUser').innerText = currentUserId;
                 document.getElementById('userCouponCode').innerText = `SIGMA-${currentUserId}`;
                 document.getElementById('page1').classList.add('hidden');
                 document.getElementById('page2').classList.remove('hidden');
-                updateFinancialDisplays();
+                
+                // Fetch live data from Supabase DB on login
+                await fetchDashboardDataFromDB();
+                
                 showToast(`Signed in successfully! Composite ID: ${currentCompositeUserId}`);
             };
 
@@ -1328,7 +1395,7 @@
                 currentWalletBalance = result.user.wallet_balance || currentWalletBalance;
                 currentValidityDays = result.user.validity_days || currentValidityDays;
             }
-            completeSignIn();
+            await completeSignIn();
         }
 
         async function handleLogOut() {
