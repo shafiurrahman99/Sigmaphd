@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -169,7 +169,7 @@
             <div class="flex items-start justify-between mb-5">
                 <div>
                     <h1 class="text-2xl font-extrabold text-white tracking-tight">My Develop App</h1>
-                    <p class="font-bengali text-emerald-400 font-semibold text-sm mt-0.5 tracking-wide">নিজের হাতের গড়া</p>
+                    <p class="text-emerald-400 font-semibold text-xs mt-0.5 tracking-wide">Custom Built</p>
                 </div>
                 <div class="text-right">
                     <span class="gradient-text font-black text-lg italic tracking-wider block">Sigma PhD™</span>
@@ -181,16 +181,16 @@
             <form onsubmit="handleMainSignIn(event)" class="space-y-4">
                 <input type="hidden" id="signInCompanyId" value="105">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">4-Digit User ID or Mobile</label>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">User ID / Mobile</label>
                     <input type="text" id="mainUserId" value="8942" required
-                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm" placeholder="User ID">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">Password</label>
                     <div class="relative">
                         <input type="password" id="mainUserPassword" value="123456" required
-                            class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                            class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm" placeholder="Password">
                     </div>
                 </div>
 
@@ -503,11 +503,108 @@
     <div id="buyLicenseLandingModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
             <button onclick="closeBuyLicenseLandingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white">Buy New ID / License</h3>
+            <h3 class="text-lg font-bold text-white">Buy New ID</h3>
             <form onsubmit="handleLandingBuySubmit(event)" class="space-y-3">
-                <input type="text" id="landingBuyMobile" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
-                <input type="email" id="landingBuyEmail" placeholder="email@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
-                <button type="submit" class="w-full buy-btn-gradient text-slate-950 font-black py-3 rounded-xl text-xs">Complete Payment</button>
+                <input type="text" id="landingBuyMobile" placeholder="Mobile" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="email" id="landingBuyEmail" placeholder="Email" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <button type="submit" class="w-full buy-btn-gradient text-slate-950 font-black py-3 rounded-xl text-xs">Pay</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modLoginModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeModLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Mod Login</h3>
+            <form onsubmit="handleModLogin(event)" class="space-y-3">
+                <input type="text" id="modUserId" placeholder="User ID" value="8942" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs">
+                <input type="password" id="modPassword" placeholder="Pass" value="123456" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs">
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addDeviceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Device</h3>
+            <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3">
+                <input type="text" id="deviceNameInput" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <label class="flex items-center space-x-2 bg-[#080a0f] p-3 rounded-xl border border-slate-700 text-xs cursor-pointer">
+                    <input type="radio" name="devicePayMethod" value="Wallet" checked>
+                    <span>Deduct ৳100</span>
+                </label>
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addBalanceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeAddBalanceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Balance</h3>
+            <form onsubmit="handleAddBalanceSubmit(event)" class="space-y-3">
+                <input type="number" id="rechargeAmount" value="500" min="50" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs" placeholder="Amount">
+                <select id="paymentGatewaySelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                    <option value="bKash">bKash</option>
+                    <option value="Nagad">Nagad</option>
+                </select>
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Proceed</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Income / Expense Modal -->
+    <div id="incomeModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeIncomeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 id="incomeModalTitle" class="text-lg font-bold text-white">New Entry</h3>
+            <form onsubmit="handleIncomeSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1 ml-1">Type</label>
+                    <select id="incomeEntryType" onchange="updateIncomeModalStyle()" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs focus:outline-none focus:border-emerald-500">
+                        <option value="Income">Income</option>
+                        <option value="Expense">Expense</option>
+                    </select>
+                </div>
+                <input type="date" id="incomeDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="text" id="incomeDesc" placeholder="Desc" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="number" id="incomeAmount" placeholder="Amount" min="1" step="any" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs">
+                <button type="submit" id="incomeSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeLoanModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Loan Record</h3>
+            <form onsubmit="handleLoanSubmit(event)" class="space-y-3">
+                <select id="loanType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                    <option value="Receivable">Receivable</option>
+                    <option value="Payable">Payable</option>
+                </select>
+                <input type="date" id="loanDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="text" id="loanPersonName" placeholder="Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="number" id="loanAmount" placeholder="Amount" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 text-xs">
+                <button type="submit" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-xl text-xs">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="marketModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeMarketModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Expense Record</h3>
+            <form onsubmit="handleMarketSubmit(event)" class="space-y-3">
+                <input type="date" id="marketDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="text" id="marketDesc" placeholder="Desc" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="number" id="marketAmount" placeholder="Amount" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400 text-xs">
+                <select id="marketStatus" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                    <option value="Paid">Paid</option>
+                    <option value="Due">Due</option>
+                </select>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">Save</button>
             </form>
         </div>
     </div>
@@ -558,13 +655,13 @@
     <div id="incomeModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
             <button onclick="closeIncomeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 id="incomeModalTitle" class="text-lg font-bold text-white">New Income / Expense Entry</h3>
+            <h3 id="incomeModalTitle" class="text-lg font-bold text-white">New Income / Expense</h3>
             <form onsubmit="handleIncomeSubmit(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1 ml-1">Entry Type (Income / Expense)</label>
+                    <label class="block text-xs text-slate-400 mb-1 ml-1">Type</label>
                     <select id="incomeEntryType" onchange="updateIncomeModalStyle()" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs focus:outline-none focus:border-emerald-500">
-                        <option value="Income">Income (+ আয়)</option>
-                        <option value="Expense">Expense (- ব্যয়)</option>
+                        <option value="Income">Income (+)</option>
+                        <option value="Expense">Expense (-)</option>
                     </select>
                 </div>
                 <input type="date" id="incomeDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
@@ -581,8 +678,8 @@
             <h3 class="text-lg font-bold text-white">Add Loan Record</h3>
             <form onsubmit="handleLoanSubmit(event)" class="space-y-3">
                 <select id="loanType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
-                    <option value="Receivable">Receivable (পাবো)</option>
-                    <option value="Payable">Payable (দেবো)</option>
+                    <option value="Receivable">Receivable</option>
+                    <option value="Payable">Payable</option>
                 </select>
                 <input type="date" id="loanDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
                 <input type="text" id="loanPersonName" placeholder="Person Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
@@ -749,7 +846,7 @@
             <div id="dashboardChatMessages" class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 h-44 overflow-y-auto space-y-2 text-xs">
                 <div class="bg-[#18202d] p-2.5 rounded-lg text-slate-300">
                     <span class="text-amber-400 font-bold block text-[11px]">Admin Support (105):</span>
-                    স্বাগতম! লট অনুমোদন বা আইডি সেল সংক্রান্ত যেকোনো প্রশ্ন এখানে লিখুন।
+                    Welcome! Ask any questions regarding lot approval or ID sales here.
                 </div>
             </div>
             <form onsubmit="handleDashboardChatSend(event)" class="flex space-x-2">
@@ -759,46 +856,74 @@
         </div>
     </div>
 
+    <!-- Business Setup Pop-up Modal (One-Time DB Save) -->
+    <div id="businessSetupModal" class="hidden fixed inset-0 z-[70] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
+            <button onclick="document.getElementById('businessSetupModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-store text-amber-400"></i>
+                <span>Business Setup (One-Time DB Save)</span>
+            </h3>
+
+            <div class="space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                    <span id="businessSetupStatusBadge" class="text-[10px] text-emerald-400 font-semibold hidden"><i class="fa-solid fa-lock mr-1"></i>Locked (Saved)</span>
+                </div>
+                <input type="text" id="memoCompanyName" placeholder="Company Name" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                <input type="text" id="memoCompanyMobile" placeholder="Mobile" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                <input type="text" id="memoCompanyAddress" placeholder="Address" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                <input type="text" id="memoFooterNote" placeholder="Footer Note" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-300">
+                
+                <div id="businessSetupActionArea" class="pt-1">
+                    <button type="button" onclick="saveBusinessSetupDB()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save Business Setup (One-Time)</span>
+                    </button>
+                </div>
+                <div id="businessSetupLockedNotice" class="hidden text-center text-[11px] text-amber-400 bg-amber-950/20 border border-amber-500/30 rounded-xl p-2">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>Business setup is locked. To update, please contact the Super Admin / Company support.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Customizable Cash Memo Builder Modal (Cart System) -->
     <div id="cashMemoModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-lg rounded-3xl p-4 sm:p-5 shadow-2xl relative space-y-3 my-auto max-h-[92vh] overflow-y-auto">
             <button onclick="document.getElementById('cashMemoModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                <i class="fa-solid fa-receipt text-indigo-400"></i>
-                <span>Custom Cash Memo Builder (Cart System)</span>
-            </h3>
-
-            <!-- Step 1: User Business Header & Footer Setup -->
-            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
-                <p class="text-amber-400 font-bold text-[11px] uppercase tracking-wider">1. Business Header & Footer Setup</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input type="text" id="memoCompanyName" placeholder="Company / Shop Name" class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-                    <input type="text" id="memoCompanyMobile" placeholder="Company Mobile" class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-                </div>
-                <input type="text" id="memoCompanyAddress" placeholder="Business Address" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-                <input type="text" id="memoFooterNote" placeholder="Footer Note (e.g., ধন্যবাদ, আবার আসবেন)" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-300">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-receipt text-indigo-400"></i>
+                    <span>Cash Memo (Calculator & Cart)</span>
+                </h3>
+                <button type="button" onclick="openBusinessSetupModal()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-400 font-bold px-2.5 py-1 rounded-xl text-[11px] flex items-center space-x-1">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Business Setup</span>
+                </button>
             </div>
 
-            <!-- Step 2: Customer Information -->
+            <!-- Step 2: Customer Details (Calculator Mode / Front-End Only) -->
             <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
-                <p class="text-emerald-400 font-bold text-[11px] uppercase tracking-wider">2. Customer Details</p>
+                <p class="text-emerald-400 font-bold text-[11px] uppercase tracking-wider">2. Customer Details (Front-End Calculator)</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="text" id="memoCustomerName" placeholder="Customer Name" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                     <input type="text" id="memoCustomerMobile" placeholder="Customer Mobile" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
             </div>
 
-            <!-- Step 3: Add Products to Cart -->
+            <!-- Step 3: Product Calculator & Cart Items -->
             <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
-                <p class="text-indigo-400 font-bold text-[11px] uppercase tracking-wider">3. Add Product to Cart</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-indigo-400 font-bold text-[11px] uppercase tracking-wider">3. Product Calculator (Front-End)</span>
+                </div>
                 <div class="grid grid-cols-12 gap-1.5">
-                    <input type="text" id="memoProdDesc" placeholder="Product Description" class="col-span-6 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-slate-200">
+                    <input type="text" id="memoProdDesc" placeholder="Item Name" class="col-span-6 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-slate-200">
                     <input type="number" id="memoProdQty" placeholder="Qty" min="1" value="1" class="col-span-2 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2 text-center text-slate-200">
                     <input type="number" id="memoProdRate" placeholder="Rate" min="0" class="col-span-4 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-emerald-400">
                 </div>
                 <button type="button" onclick="addProductToMemoCart()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center space-x-1">
                     <i class="fa-solid fa-cart-plus"></i>
-                    <span>Add Item to Cart</span>
+                    <span>Add Item to Calculator Cart</span>
                 </button>
 
                 <!-- Cart Table -->
@@ -824,7 +949,7 @@
 
             <button type="button" onclick="saveAndPreviewA4Memo()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg flex items-center justify-center space-x-1.5">
                 <i class="fa-solid fa-file-pdf"></i>
-                <span>Save & Generate A4 PDF Preview</span>
+                <span>Generate A4 PDF Preview</span>
             </button>
         </div>
     </div>
@@ -961,11 +1086,96 @@
 
     <!-- Script Section -->
     <script>
-        function showToast(text) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-text').innerText = text;
-            toast.classList.remove('hidden');
-            setTimeout(() => { toast.classList.add('hidden'); }, 3500);
+        let isBusinessSetupSavedOnce = false;
+
+        function openBusinessSetupModal() {
+            document.getElementById('memoCompanyName').value = savedCompanyProfile.name;
+            document.getElementById('memoCompanyAddress').value = savedCompanyProfile.address;
+            document.getElementById('memoCompanyMobile').value = savedCompanyProfile.mobile;
+            document.getElementById('memoFooterNote').value = savedCompanyProfile.footerNote;
+
+            if (isBusinessSetupSavedOnce) {
+                document.getElementById('memoCompanyName').disabled = true;
+                document.getElementById('memoCompanyMobile').disabled = true;
+                document.getElementById('memoCompanyAddress').disabled = true;
+                document.getElementById('memoFooterNote').disabled = true;
+                document.getElementById('businessSetupActionArea').classList.add('hidden');
+                document.getElementById('businessSetupStatusBadge').classList.remove('hidden');
+                document.getElementById('businessSetupLockedNotice').classList.remove('hidden');
+            }
+
+            document.getElementById('businessSetupModal').classList.remove('hidden');
+        }
+
+        function saveBusinessSetupDB(event) {
+            if (event) event.preventDefault();
+            if (isBusinessSetupSavedOnce) {
+                showToast('Business setup is already saved. Contact Super Admin to update.');
+                return;
+            }
+
+            savedCompanyProfile = {
+                name: document.getElementById('memoCompanyName').value.trim() || 'My Business',
+                address: document.getElementById('memoCompanyAddress').value.trim() || 'Bangladesh',
+                mobile: document.getElementById('memoCompanyMobile').value.trim() || currentUserMobile,
+                footerNote: document.getElementById('memoFooterNote').value.trim() || 'Thank you.'
+            };
+
+            isBusinessSetupSavedOnce = true;
+
+            document.getElementById('memoCompanyName').disabled = true;
+            document.getElementById('memoCompanyMobile').disabled = true;
+            document.getElementById('memoCompanyAddress').disabled = true;
+            document.getElementById('memoFooterNote').disabled = true;
+
+            document.getElementById('businessSetupActionArea').classList.add('hidden');
+            document.getElementById('businessSetupStatusBadge').classList.remove('hidden');
+            document.getElementById('businessSetupLockedNotice').classList.remove('hidden');
+
+            showToast('Business setup saved successfully and locked!');
+            document.getElementById('businessSetupModal').classList.add('hidden');
+        }
+
+        function saveAndPreviewA4Memo() {
+            if (memoCartItems.length === 0) {
+                showToast('Please add items to cart.');
+                return;
+            }
+
+            const customerName = document.getElementById('memoCustomerName').value.trim() || 'Customer';
+            const customerMobile = document.getElementById('memoCustomerMobile').value.trim() || 'N/A';
+
+            document.getElementById('a4CompanyName').innerText = savedCompanyProfile.name;
+            document.getElementById('a4CompanyAddress').innerText = savedCompanyProfile.address;
+            document.getElementById('a4CompanyMobile').innerText = savedCompanyProfile.mobile;
+            document.getElementById('a4FooterNote').innerText = savedCompanyProfile.footerNote;
+            document.getElementById('a4SignatureName').innerText = savedCompanyProfile.name;
+
+            document.getElementById('a4CustomerName').innerText = customerName;
+            document.getElementById('a4CustomerMobile').innerText = customerMobile;
+            document.getElementById('a4MemoNo').innerText = `INV-${Math.floor(100000 + Math.random() * 900000)}`;
+            document.getElementById('a4MemoDate').innerText = new Date().toLocaleDateString('en-GB');
+            document.getElementById('a4SellerCompId').innerText = currentCompositeUserId;
+
+            let grandTotal = 0;
+            document.getElementById('a4ItemsTableBody').innerHTML = memoCartItems.map((item, idx) => {
+                grandTotal += item.total;
+                return `
+                    <tr>
+                        <td class="border border-slate-400 py-2 px-3 text-center">${idx + 1}</td>
+                        <td class="border border-slate-400 py-2 px-3 font-medium">${item.desc}</td>
+                        <td class="border border-slate-400 py-2 px-3 text-center">${item.qty}</td>
+                        <td class="border border-slate-400 py-2 px-3 text-right">${item.rate.toLocaleString()}</td>
+                        <td class="border border-slate-400 py-2 px-3 text-right font-semibold">${item.total.toLocaleString()}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('a4GrandTotal').innerText = formatMoney(grandTotal);
+
+            document.getElementById('cashMemoModal').classList.add('hidden');
+            document.getElementById('a4PdfPreviewModal').classList.remove('hidden');
+            showToast('A4 PDF Preview generated successfully.');
         }
 
         function hideToast() { document.getElementById('toast').classList.add('hidden'); }
@@ -1423,11 +1633,11 @@
             document.getElementById('loanReturnExtraAmount').value = 0;
 
             if (category === 'Receivable') {
-                document.getElementById('loanReturnModalTitle').innerText = 'Receivable Return (টাকা ফেরত প্রাপ্তি)';
-                document.getElementById('loanReturnExtraLabel').innerText = 'Extra Received Amount / Profit (৳) [Added to Income]';
+                document.getElementById('loanReturnModalTitle').innerText = 'Receivable Return';
+                document.getElementById('loanReturnExtraLabel').innerText = 'Extra Received / Profit (৳) [Added to Income]';
             } else {
-                document.getElementById('loanReturnModalTitle').innerText = 'Payable Return (ধার পরিশোধ)';
-                document.getElementById('loanReturnExtraLabel').innerText = 'Extra Charge / Fee Paid (৳) [Only Charge Added to Expense]';
+                document.getElementById('loanReturnModalTitle').innerText = 'Payable Return';
+                document.getElementById('loanReturnExtraLabel').innerText = 'Extra Charge / Fee (৳) [Added to Expense]';
             }
 
             document.getElementById('loanReturnModal').classList.remove('hidden');
@@ -1455,7 +1665,7 @@
                 totalIncome2026 += totalReturnedToIncome;
                 loanGivenTotal = Math.max(0, loanGivenTotal - record.amount);
 
-                showToast(`Receivable Returned! ৳${totalReturnedToIncome.toLocaleString()} Income-এ যুক্ত হয়েছে।`);
+                showToast(`Received! ৳${totalReturnedToIncome.toLocaleString()} added to Income.`);
             } else {
                 const record = loanTakenRecords[index];
                 record.returned = true;
@@ -1468,7 +1678,6 @@
                 }
                 loanTakenTotal = Math.max(0, loanTakenTotal - record.amount);
 
-                // If this payable record originated from a Market Due expense, update market expense status to Paid
                 if (record.isMarketDue && record.id) {
                     const marketExp = marketExpenses.find(exp => exp.id === record.id);
                     if (marketExp) {
@@ -1476,7 +1685,7 @@
                     }
                 }
 
-                showToast(`Payable Returned! অতিরিক্ত চার্জ ৳${extraAmt.toLocaleString()} Expense-এ যুক্ত হয়েছে।`);
+                showToast(`Paid! Extra charge ৳${extraAmt.toLocaleString()} added to Expense.`);
             }
 
             updateFinancialDisplays();
@@ -1628,10 +1837,6 @@
         }
 
         function openCashMemoModal() {
-            document.getElementById('memoCompanyName').value = savedCompanyProfile.name;
-            document.getElementById('memoCompanyAddress').value = savedCompanyProfile.address;
-            document.getElementById('memoCompanyMobile').value = savedCompanyProfile.mobile;
-            document.getElementById('memoFooterNote').value = savedCompanyProfile.footerNote;
             renderMemoCartTable();
             document.getElementById('cashMemoModal').classList.remove('hidden');
         }
@@ -1665,7 +1870,7 @@
 
             let grandTotal = 0;
             if (memoCartItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-2 text-center text-slate-500">কার্টে কোনো পণ্য নেই</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-2 text-center text-slate-500">Cart is empty</td></tr>`;
             } else {
                 tbody.innerHTML = memoCartItems.map((item, idx) => {
                     grandTotal += item.total;
@@ -1687,7 +1892,7 @@
 
         function saveAndPreviewA4Memo() {
             if (memoCartItems.length === 0) {
-                showToast('কার্টে পণ্য যোগ করুন।');
+                showToast('Please add items to cart.');
                 return;
             }
 
@@ -1695,7 +1900,7 @@
                 name: document.getElementById('memoCompanyName').value.trim() || 'My Business',
                 address: document.getElementById('memoCompanyAddress').value.trim() || 'Bangladesh',
                 mobile: document.getElementById('memoCompanyMobile').value.trim() || currentUserMobile,
-                footerNote: document.getElementById('memoFooterNote').value.trim() || 'ধন্যবাদ।'
+                footerNote: document.getElementById('memoFooterNote').value.trim() || 'Thank you.'
             };
 
             const customerName = document.getElementById('memoCustomerName').value.trim() || 'Customer';
@@ -1779,3 +1984,4 @@
     </script>
 </body>
 </html>
+```
