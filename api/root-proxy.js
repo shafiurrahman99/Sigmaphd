@@ -1,9 +1,15 @@
+
+
 const PROXY_API_URL = "/api/root-proxy";
+
+
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase Environment Variables
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// --- SigmaPHD Environment Variables Mapping ---
+const SUPABASE_URL = process.env.SIGMAPHD_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SIGMAPHD_SERVICE_ROLE_KEY;
+const SUPABASE_ANON_KEY = process.env.SIGMAPHD_ANON_KEY;
+const SUPABASE_JWT_SECRET = process.env.SIGMAPHD_JWT_SECRET;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
