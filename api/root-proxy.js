@@ -1,8 +1,3 @@
-
-
-const PROXY_API_URL = "/api/root-proxy";
-
-
 import { createClient } from '@supabase/supabase-js';
 
 // --- SigmaPHD Environment Variables Mapping ---
@@ -148,39 +143,6 @@ export default async function handler(req, res) {
 
                 if (lotErr) throw lotErr;
                 result = { success: true, message: 'Lot request handled' };
-                break;
-
-            case 'SELL_LOT_ID':
-                const { error: sellErr } = await supabase
-                    .from('lot_licenses')
-                    .insert([{
-                        company_id,
-                        user_id,
-                        composite_user_id,
-                        lot_no: payload.lot_no,
-                        assigned_user_id: payload.assigned_user_id,
-                        assigned_password: payload.assigned_password,
-                        seller_token: payload.seller_token,
-                        buyer_info: payload.buyer_info,
-                        is_sold: true
-                    }]);
-
-                if (sellErr) throw sellErr;
-                result = { success: true, message: 'License sold successfully' };
-                break;
-
-            default:
-                result = { success: false, error: `Invalid action: ${action}` };
-        }
-
-        return res.status(200).json(result);
-
-    } catch (err) {
-        console.error('Root Proxy Error:', err.message);
-        return res.status(500).json({ success: false, error: err.message });
-    }
-}
-
                 break;
 
             case 'SELL_LOT_ID':
