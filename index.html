@@ -1,9 +1,366 @@
-
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Develop App - Database Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#07090d',
+                        cardBg: '#131822',
+                        innerDark: '#080a0f',
+                        accentGreen: '#0fa968',
+                        accentOrange: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Hind Siliguri', sans-serif;
+            background-color: #07090d;
+            color: #e2e8f0;
+            user-select: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .buy-btn-gradient {
+            background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 50%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+
+        .buy-btn-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 10px;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #a4MemoPrintArea, #a4MemoPrintArea * {
+                visibility: visible;
+            }
+            #a4MemoPrintArea {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0;
+                padding: 15mm;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                z-index: 9999;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-950">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
+        <span id="toast-text">Action successful!</span>
+        <button onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2">
+            <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+    </div>
+
+    <!-- ================= PAGE 1: LOGIN & LANDING ================= -->
+    <div id="page1" class="w-full max-w-md mx-auto space-y-4 my-auto py-4">
+        <div class="bg-[#131822] rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800/80 relative overflow-hidden">
+            <div class="flex items-start justify-between mb-5">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">My Develop App</h1>
+                    <p class="font-bengali text-emerald-400 font-semibold text-sm mt-0.5 tracking-wide">ডাইরেক্ট ডাটাবেজ কানেক্টেড</p>
+                </div>
+                <div class="text-right">
+                    <span class="gradient-text font-black text-lg italic tracking-wider block">Sigma PhD™</span>
+                    <span class="text-[10px] text-slate-400 font-mono">Company ID: <strong class="text-amber-400">105</strong></span>
+                </div>
+            </div>
+
+            <!-- Sign In Form -->
+            <form onsubmit="handleMainSignIn(event)" class="space-y-4">
+                <input type="hidden" id="signInCompanyId" value="105">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">4-Digit User ID or Mobile</label>
+                    <input type="text" id="mainUserId" value="8942" required
+                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 ml-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="mainUserPassword" value="123456" required
+                            class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-lg shadow-emerald-900/20 text-base mt-2">
+                    <span>Sign In & Load DB Data</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </form>
+
+            <div class="my-4 border-t border-slate-800"></div>
+
+            <button type="button" onclick="openBuyLicenseLandingModal()" 
+                class="w-full buy-btn-gradient text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 text-base">
+                <i class="fa-solid fa-credit-card text-base text-slate-900"></i>
+                <span>Buy New ID / License</span>
+            </button>
+        </div>
+    </div>
 
 
-<script>
+    <!-- ================= PAGE 2: DASHBOARD ================= -->
+    <div id="page2" class="hidden w-full max-w-md mx-auto space-y-4 py-2">
+        <!-- Accounts Toggle Button Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2.5 shadow-xl flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 flex items-center space-x-2">
+                <i class="fa-solid fa-user-gear text-emerald-400"></i>
+                <span>User Account & Devices</span>
+            </span>
+            <button type="button" onclick="toggleAccountsSection()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1.5 transition-all shadow">
+                <i class="fa-solid fa-chevron-down" id="accountsToggleIcon"></i>
+                <span id="accountsToggleText">Show Accounts</span>
+            </button>
+        </div>
+
+        <!-- Collapsible Accounts & Devices Section -->
+        <div id="accountsSectionContainer" class="hidden space-y-4">
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between shadow-xl">
+                <div class="flex items-center space-x-3">
+                    <div class="relative cursor-pointer" onclick="openAddDeviceModal()" title="Add New Device">
+                        <div class="w-10 h-10 bg-emerald-950/80 border border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 text-lg">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-slate-950 font-black w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">+</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-bold text-white flex items-center space-x-1">
+                            <span id="activeDeviceCount">1</span> Device Active 
+                            <span class="text-slate-400 font-normal">(Max 2)</span>
+                        </h2>
+                        <span class="text-[10px] text-amber-400 font-mono">Composite ID: <strong id="displayCompositeId">105_8942</strong></span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block font-medium">Balance</span>
+                        <span id="walletBalanceText" class="text-emerald-400 font-extrabold text-sm font-mono">৳ 2100.00</span>
+                    </div>
+                    <button onclick="openAddBalanceModal()" class="w-8 h-8 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black rounded-xl flex items-center justify-center text-base shadow-md transition-all">+</button>
+                </div>
+            </div>
+
+            <!-- Top Profile Bar -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between shadow-xl">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 font-bold">
+                        <i class="fa-solid fa-user-check text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-white">ID: <strong id="currentLoggedInUser" class="text-emerald-400">8942</strong></h3>
+                        <p class="text-[10px] text-amber-400 font-semibold mt-0.5">Validity: <span id="accountValidityDays">25</span> days</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button type="button" onclick="openSettingsModal(event)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1.5 px-2.5 rounded-xl text-xs">Settings</button>
+                    <button type="button" onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 font-bold py-1.5 px-2.5 rounded-xl text-xs">Log Out</button>
+                </div>
+            </div>
+
+            <!-- Lot Inventory Box -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-300 font-bold"><i class="fa-solid fa-layer-group text-amber-400 mr-1.5"></i>Purchased Lots (DB)</span>
+                    <span class="text-emerald-400 font-extrabold">Available IDs: <span id="availableLotIdsCount">0</span></span>
+                </div>
+                <div id="lotInventorySummaryList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2 shadow-xl">
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-center shadow-md">Dashboard</button>
+                <button onclick="openCashMemoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-center shadow-md flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Cash Memo</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Monthly Financial Summary Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs sm:text-sm font-bold text-white"><i class="fa-solid fa-chart-line text-emerald-400 mr-1.5"></i>Database Financial Summary</h3>
+                <button onclick="openIncomeModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs">+ New Income</button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="py-2.5 px-3">Type / Category</th>
+                            <th class="py-2.5 px-2">Total Income (৳)</th>
+                            <th class="py-2.5 px-2">Total Expense (৳)</th>
+                            <th class="py-2.5 px-2 text-right">Net Surplus (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 font-medium">
+                        <tr class="bg-emerald-950/20 text-emerald-400 font-bold">
+                            <td class="py-3 px-3">Database Total (2026)</td>
+                            <td id="totalIncome2026" class="py-3 px-2">৳ 0.00</td>
+                            <td id="totalExpense2026" class="py-3 px-2 text-rose-400">৳ 0.00</td>
+                            <td id="totalSurplus2026" class="py-3 px-2 text-right">৳ 0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loan Management Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs sm:text-sm font-bold text-white"><i class="fa-solid fa-hand-holding-dollar text-amber-400 mr-1.5"></i>Loan Records (DB)</h3>
+                <button onclick="openLoanModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs">+ New Loan</button>
+            </div>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+                    <span class="text-amber-400 font-bold">Receivable (পাবো)</span>
+                    <span id="loanGivenTotalText" class="text-emerald-400 font-extrabold">Total: ৳ 0</span>
+                </div>
+                <div id="loanGivenList" class="space-y-2"></div>
+            </div>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+                    <span class="text-rose-400 font-bold">Payable (দেবো)</span>
+                    <span id="loanTakenTotalText" class="text-rose-400 font-extrabold">Total: ৳ 0</span>
+                </div>
+                <div id="loanTakenList" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- Daily Expenses Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs sm:text-sm font-bold text-white"><i class="fa-solid fa-cart-shopping text-indigo-400 mr-1.5"></i>Daily Expenses (DB)</h3>
+                <button onclick="openMarketModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">+ Expense</button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="py-2.5 px-2">Date</th>
+                            <th class="py-2.5 px-2">Description</th>
+                            <th class="py-2.5 px-2">Amount (৳)</th>
+                            <th class="py-2.5 px-2 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marketExpenseList" class="divide-y divide-slate-800/50 font-medium"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    <div id="incomeModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeIncomeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Income / Expense Entry</h3>
+            <form onsubmit="handleIncomeSubmit(event)" class="space-y-3">
+                <select id="incomeEntryType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs">
+                    <option value="Income">Income (+ আয়)</option>
+                    <option value="Expense">Expense (- ব্যয়)</option>
+                </select>
+                <input type="date" id="incomeDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="text" id="incomeDesc" placeholder="Description" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="number" id="incomeAmount" placeholder="Amount (৳)" min="1" step="any" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs">
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Save to DB</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeLoanModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Loan Record</h3>
+            <form onsubmit="handleLoanSubmit(event)" class="space-y-3">
+                <select id="loanType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                    <option value="Receivable">Receivable (পাবো)</option>
+                    <option value="Payable">Payable (দেবো)</option>
+                </select>
+                <input type="date" id="loanDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="text" id="loanPersonName" placeholder="Person Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="number" id="loanAmount" placeholder="Amount (৳)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400 text-xs">
+                <button type="submit" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-xl text-xs">Save Loan to DB</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="marketModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeMarketModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Expense Record</h3>
+            <form onsubmit="handleMarketSubmit(event)" class="space-y-3">
+                <input type="date" id="marketDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="text" id="marketDesc" placeholder="Description" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                <input type="number" id="marketAmount" placeholder="Amount (৳)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400 text-xs">
+                <select id="marketStatus" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
+                    <option value="Paid">Paid</option>
+                    <option value="Due">Due (Payable)</option>
+                </select>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">Save Expense to DB</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Section -->
+    <script>
         const PROXY_API_URL = "/api/root-proxy";
 
         // গ্লোবাল ভেরিয়েবলসমূহ ডিক্লেয়ার করা হলো
@@ -283,5 +640,5 @@
             if(document.getElementById('loanDate')) document.getElementById('loanDate').value = today;
         });
     </script>
-
+</body>
 </html>
