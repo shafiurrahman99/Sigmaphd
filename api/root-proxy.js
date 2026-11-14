@@ -57,9 +57,10 @@ export default async function handler(req, res) {
                     .from('income_expense')
                     .insert([{
                         company_id,
-                        user_id: composite_user_id,
-                        type: payload.type,
-                        date: payload.date,
+                        user_id,
+                        composite_user_id,
+                        entry_type: payload.entry_type,
+                        entry_date: payload.entry_date,
                         description: payload.description,
                         amount: payload.amount
                     }]);
@@ -73,12 +74,13 @@ export default async function handler(req, res) {
                     .from('loan_records')
                     .insert([{
                         company_id,
-                        user_id: composite_user_id,
-                        category: payload.category,
-                        date: payload.date,
-                        person_name: payload.person,
+                        user_id,
+                        composite_user_id,
+                        loan_category: payload.loan_category,
+                        entry_date: payload.entry_date,
+                        person_name: payload.person_name,
                         amount: payload.amount,
-                        returned: false
+                        is_returned: false
                     }]);
 
                 if (loanErr) throw loanErr;
@@ -89,9 +91,9 @@ export default async function handler(req, res) {
                 const { error: settleErr } = await supabase
                     .from('loan_records')
                     .update({ 
-                        returned: true, 
+                        is_returned: true, 
                         return_date: payload.return_date, 
-                        extra_amount: payload.extra_amount 
+                        extra_fee_or_charge: payload.extra_fee_or_charge 
                     })
                     .eq('id', payload.id);
 
@@ -104,8 +106,9 @@ export default async function handler(req, res) {
                     .from('daily_expenses')
                     .insert([{
                         company_id,
-                        user_id: composite_user_id,
-                        date: payload.date,
+                        user_id,
+                        composite_user_id,
+                        expense_date: payload.expense_date,
                         description: payload.description,
                         amount: payload.amount,
                         status: payload.status
@@ -120,11 +123,13 @@ export default async function handler(req, res) {
                     .from('business_profile')
                     .upsert([{
                         company_id,
-                        name: payload.name,
+                        user_id,
+                        composite_user_id,
+                        company_name: payload.company_name,
                         address: payload.address,
                         mobile: payload.mobile,
-                        footer_note: payload.footerNote
-                    }], { onConflict: 'company_id' });
+                        footer_note: payload.footer_note
+                    }], { onConflict: 'company_id,user_id' });
 
                 if (profileErr) throw profileErr;
                 result = { success: true, message: 'Business profile saved' };
@@ -136,9 +141,11 @@ export default async function handler(req, res) {
                     .from('lot_inventory')
                     .insert([{
                         company_id,
-                        user_id: composite_user_id,
+                        user_id,
+                        composite_user_id,
                         lot_no: payload.lot_no,
-                        qty: payload.qty,
+                        quantity: payload.quantity,
+                        net_payable: payload.net_payable,
                         status: payload.status || 'Pending'
                     }]);
 
@@ -151,12 +158,14 @@ export default async function handler(req, res) {
                     .from('lot_licenses')
                     .insert([{
                         company_id,
-                        seller_user_id: composite_user_id,
+                        user_id,
+                        composite_user_id,
                         lot_no: payload.lot_no,
-                        sold_user_id: payload.sold_user_id,
-                        sold_password: payload.sold_password,
+                        assigned_user_id: payload.assigned_user_id,
+                        assigned_password: payload.assigned_password,
+                        seller_token: payload.seller_token,
                         buyer_info: payload.buyer_info,
-                        token_code: payload.token_code
+                        is_sold: true
                     }]);
 
                 if (sellErr) throw sellErr;
