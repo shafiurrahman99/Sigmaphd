@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// --- SigmaPHD Environment Variables Mapping ---
 const SUPABASE_URL = process.env.SIGMAPHD_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SIGMAPHD_SERVICE_ROLE_KEY;
 
@@ -32,7 +31,7 @@ export default async function handler(req, res) {
             case 'LOGIN':
                 const { data: userAuth, error: authError } = await supabase
                     .from('users_auth')
-                    .select('*')
+                    .select('company_id, user_id, composite_user_id, mobile, password, wallet_balance, validity_days, coupon_code')[span_2](start_span)[span_2](end_span)
                     .eq('company_id', company_id)
                     .eq('user_id', user_id)
                     .single();
@@ -47,26 +46,26 @@ export default async function handler(req, res) {
                 break;
 
             case 'FETCH_DASHBOARD_DATA':
-                // ১. ডেইলিস খরচ ফেচ করা
+                // ১. ডেইলিস খরচ ফেচ করা (daily_expenses)[span_3](start_span)[span_3](end_span)
                 const { data: dailyExpenses, error: dExpErr } = await supabase
                     .from('daily_expenses')
-                    .select('*')
+                    .select('id, company_id, user_id, composite_user_id, expense_date, description, amount, status, created_at')[span_4](start_span)[span_4](end_span)
                     .eq('company_id', company_id)
                     .eq('user_id', user_id);
                 if (dExpErr) throw dExpErr;
 
-                // ২. লোন রেকর্ড ফেচ করা
+                // ২. লোন রেকর্ড ফেচ করা (loan_records)[span_5](start_span)[span_5](end_span)
                 const { data: loanRecords, error: lRecErr } = await supabase
                     .from('loan_records')
-                    .select('*')
+                    .select('id, company_id, user_id, composite_user_id, loan_category, entry_date, person_name, amount, is_returned, return_date, extra_fee_or_charge, created_at')[span_6](start_span)[span_6](end_span)
                     .eq('company_id', company_id)
                     .eq('user_id', user_id);
                 if (lRecErr) throw lRecErr;
 
-                // ৩. ইনকাম ও এক্সপেন্স রেকর্ড ফেচ করা
+                // ৩. ইনকাম ও এক্সপেন্স রেকর্ড ফেচ করা (income_expense)[span_7](start_span)[span_7](end_span)
                 const { data: incomeExpense, error: incExpListErr } = await supabase
                     .from('income_expense')
-                    .select('*')
+                    .select('id, company_id, user_id, composite_user_id, entry_type, entry_date, description, amount, created_at')[span_8](start_span)[span_8](end_span)
                     .eq('company_id', company_id)
                     .eq('user_id', user_id);
                 if (incExpListErr) throw incExpListErr;
@@ -93,7 +92,6 @@ export default async function handler(req, res) {
                         description: payload.description,
                         amount: payload.amount
                     }]);
-                
                 if (incExpErr) throw incExpErr;
                 result = { success: true, message: 'Income/Expense added successfully' };
                 break;
@@ -111,7 +109,6 @@ export default async function handler(req, res) {
                         amount: payload.amount,
                         is_returned: false
                     }]);
-
                 if (loanErr) throw loanErr;
                 result = { success: true, message: 'Loan record saved' };
                 break;
@@ -128,7 +125,6 @@ export default async function handler(req, res) {
                         amount: payload.amount,
                         status: payload.status
                     }]);
-
                 if (expErr) throw expErr;
                 result = { success: true, message: 'Daily expense recorded' };
                 break;
