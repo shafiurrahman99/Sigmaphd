@@ -32,3 +32,21 @@
                     }
                 };
                 break;
+
+
+            case 'LOGIN':
+                const { data: userAuth, error: authError } = await supabase
+                    .from('users_auth')
+                    .select('*')
+                    .eq('company_id', company_id)
+                    .eq('user_id', user_id)
+                    .single();
+
+                if (authError || !userAuth) {
+                    result = { success: false, message: 'User not found' };
+                } else if (userAuth.password && userAuth.password !== payload.password) {
+                    result = { success: false, message: 'Incorrect password!' };
+                } else {
+                    result = { success: true, user: userAuth };
+                }
+                break;
