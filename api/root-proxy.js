@@ -8,8 +8,6 @@ import { createClient } from '@supabase/supabase-js';
 // --- SigmaPHD Environment Variables Mapping ---
 const SUPABASE_URL = process.env.SIGMAPHD_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SIGMAPHD_SERVICE_ROLE_KEY;
-const SUPABASE_ANON_KEY = process.env.SIGMAPHD_ANON_KEY;
-const SUPABASE_JWT_SECRET = process.env.SIGMAPHD_JWT_SECRET;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -24,12 +22,11 @@ export default async function handler(req, res) {
     );
 
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+        return res.status(200).end();
     }
 
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        return res.status(405).json({ success: false, error: 'Method Not Allowed' });
     }
 
     try {
@@ -151,6 +148,39 @@ export default async function handler(req, res) {
 
                 if (lotErr) throw lotErr;
                 result = { success: true, message: 'Lot request handled' };
+                break;
+
+            case 'SELL_LOT_ID':
+                const { error: sellErr } = await supabase
+                    .from('lot_licenses')
+                    .insert([{
+                        company_id,
+                        user_id,
+                        composite_user_id,
+                        lot_no: payload.lot_no,
+                        assigned_user_id: payload.assigned_user_id,
+                        assigned_password: payload.assigned_password,
+                        seller_token: payload.seller_token,
+                        buyer_info: payload.buyer_info,
+                        is_sold: true
+                    }]);
+
+                if (sellErr) throw sellErr;
+                result = { success: true, message: 'License sold successfully' };
+                break;
+
+            default:
+                result = { success: false, error: `Invalid action: ${action}` };
+        }
+
+        return res.status(200).json(result);
+
+    } catch (err) {
+        console.error('Root Proxy Error:', err.message);
+        return res.status(500).json({ success: false, error: err.message });
+    }
+}
+
                 break;
 
             case 'SELL_LOT_ID':
