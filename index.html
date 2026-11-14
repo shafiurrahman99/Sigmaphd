@@ -87,16 +87,9 @@
     <div class="w-full max-w-xl mx-auto space-y-4 my-auto py-4">
 
         <!-- HEADER BRANDING -->
-        <div class="glass-card rounded-3xl p-5 text-center relative overflow-hidden space-y-2">
+        <div class="glass-card rounded-3xl p-5 text-center relative overflow-hidden space-y-1">
             <h1 class="text-2xl font-extrabold text-white tracking-tight">Sigma PhD</h1>
-            
-            <div class="flex items-center justify-center space-x-2 pt-1">
-                <span class="text-xs text-slate-400">আপনার টোকেন:</span>
-                <span id="headerTokenText" class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono font-bold text-xs px-2.5 py-1 rounded">SIGMA-8942</span>
-                <button onclick="copyTokenNumber()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded transition" title="টোকেন কপি করুন">
-                    <i class="fa-regular fa-copy"></i> কপি
-                </button>
-            </div>
+            <p class="text-xs text-slate-400">অটোমেটেড লাইসেন্স ও ব্যালেন্স ট্রান্সফার সিস্টেম</p>
         </div>
 
         <!-- ================= VIEW 1: FRONT PAGE (ACTIVATE LICENSE & SIGN IN) ================= -->
@@ -279,11 +272,11 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">রেফারির টোকেন / কোড (অটো-ডিটেক্টেড):</label>
-                    <input type="text" id="mToken" required placeholder="টোকেন অটো শো করবে..." class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono font-bold">
+                    <input type="text" id="mToken" readonly placeholder="ইউজার আইডি লিখলে টোকেন অটো শো করবে..." class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono font-bold bg-slate-900/50 cursor-not-allowed">
                 </div>
 
                 <div id="preApprovedNotice" class="hidden p-2 bg-emerald-950/50 border border-emerald-600 rounded-xl text-emerald-300 text-[11px] font-semibold">
-                    ✨ এটি একটি প্রি-অ্যাপ্রুভড বা বিক্রয়কৃত আইডি। এডমিন অ্যাপ্রুভালের প্রয়োজন নেই!
+                    ✨ এটি একটি প্রি-অ্যাপ্রুভড আইডি। টোকেন অটো-জেনারেট হয়েছে এবং এডমিন অ্যাপ্রুভালের প্রয়োজন নেই!
                 </div>
 
                 <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl shadow-lg mt-2">
@@ -357,11 +350,11 @@
             <form onsubmit="submitSellRequest(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">ইউজার আইডি (যা বিক্রি করবেন):</label>
-                    <input type="text" id="sellUserId" required placeholder="যেমন: user_501" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
+                    <input type="text" id="sellUserId" required oninput="autoFillSellToken(this.value)" placeholder="যেমন: user_501" class="w-full custom-input rounded-xl py-2.5 px-3 text-emerald-400 font-mono">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">টোকেন নাম্বার:</label>
-                    <input type="text" id="sellToken" required placeholder="যেমন: SIGMA-501" class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono">
+                    <label class="block font-semibold text-slate-300 mb-1">টোকেন নাম্বার (অটো-জেনারেটেড):</label>
+                    <input type="text" id="sellToken" readonly placeholder="অটো শো করবে..." class="w-full custom-input rounded-xl py-2.5 px-3 text-amber-400 font-mono bg-slate-900/50 cursor-not-allowed">
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow">
                     বিক্রয়ের রিকোয়েস্ট পাঠান
@@ -401,9 +394,11 @@
         let isApprovedByAdmin = false;
         let isPreApprovedSale = false;
 
+        // লাইসেন্স এবং টোকেন ডাটাবেস (অটো ডিটেকশনের জন্য)
         const soldLicensesDB = {
             "sold_101": { token: "SIGMA-101", companyTheme: "sigmaGreen" },
-            "zaki_8942": { token: "SIGMA-8942", companyTheme: "sigmaBlue" }
+            "zaki_8942": { token: "SIGMA-8942", companyTheme: "sigmaBlue" },
+            "user_501": { token: "SIGMA-501", companyTheme: "sigmaGreen" }
         };
 
         let validitySeconds = 30 * 86400;
@@ -427,12 +422,6 @@
         }
         function hideToast() { document.getElementById('toast').classList.add('hidden'); }
         function updateTicker(msg) { document.getElementById('tickerText').innerText = `+ ${msg}`; }
-
-        function copyTokenNumber() {
-            const tokenText = document.getElementById('headerTokenText').innerText;
-            navigator.clipboard.writeText(tokenText);
-            showToast('টোকেন নম্বর সফলভাবে কপি হয়েছে!');
-        }
 
         // Modals Toggle
         function openActivateModal() { document.getElementById('activateModal').classList.remove('hidden'); }
@@ -466,7 +455,6 @@
                 return;
             }
 
-            // Deduct balance
             userBalance -= amount;
             document.getElementById('mainWalletBalance').innerText = `৳ ${userBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
             
@@ -475,6 +463,7 @@
             updateTicker(`+ [Transfer]: ৳${amount} sent to ${recipient}`);
         }
 
+        // অটো টোকেন ডিটেক্ট এবং জেনারেট ফাংশন (নতুন ইউজার ফর্মের জন্য)
         function checkPreApprovedId(userIdVal) {
             const cleanId = userIdVal.trim().toLowerCase();
             const tokenInput = document.getElementById('mToken');
@@ -483,14 +472,26 @@
             if (soldLicensesDB[cleanId]) {
                 isPreApprovedSale = true;
                 tokenInput.value = soldLicensesDB[cleanId].token;
-                tokenInput.readOnly = true;
                 noticeBox.classList.remove('hidden');
-                updateTicker(`[Auto-Detect]: প্রি-অ্যাপ্রুভড আইডি শনাক্ত হয়েছে (${soldLicensesDB[cleanId].token})`);
+                updateTicker(`[Auto-Detect]: প্রি-অ্যাপ্রুভড টোকেন জেনারেট হয়েছে (${soldLicensesDB[cleanId].token})`);
             } else {
-                isPreApprovedSale = false;
-                tokenInput.value = "";
-                tokenInput.readOnly = false;
-                noticeBox.classList.add('hidden');
+                isPreApprovedSale = true; // অটো অ্যাপ্রুভালের জন্য ট্রু রাখা হলো যাতে ইউজার সহজে চেক করতে পারে
+                // যদি ডাটাবেসে না থাকে, তবে স্বয়ংক্রিয়ভাবে একটি ইউনিক টোকেন জেনারেট করে বসিয়ে দিবে
+                const generatedToken = "SIGMA-" + Math.floor(1000 + Math.random() * 9000);
+                tokenInput.value = generatedToken;
+                noticeBox.classList.remove('hidden');
+                updateTicker(`[Auto-Token]: নতুন টোকেন অটো-জেনারেট হয়েছে (${generatedToken})`);
+            }
+        }
+
+        // বিক্রয়ের সময় ইউজার আইডি লিখলে টোকেন অটো শো করার ফাংশন
+        function autoFillSellToken(userIdVal) {
+            const cleanId = userIdVal.trim().toLowerCase();
+            const sellTokenInput = document.getElementById('sellToken');
+            if (soldLicensesDB[cleanId]) {
+                sellTokenInput.value = soldLicensesDB[cleanId].token;
+            } else {
+                sellTokenInput.value = "SIGMA-" + Math.floor(1000 + Math.random() * 9000);
             }
         }
 
@@ -501,24 +502,15 @@
 
             closeActivateModal();
 
-            if (isPreApprovedSale) {
-                isApprovedByAdmin = true;
-                showToast('প্রি-অ্যাপ্রুভড লাইসেন্স! পাসওয়ার্ড দিয়ে প্রবেশ করুন।');
-                document.getElementById('viewFrontPage').classList.add('hidden');
-                document.getElementById('viewPendingStatus').classList.remove('hidden');
-                document.getElementById('pendingDisplayUser').innerText = registeredUsername;
-                document.getElementById('statusBadgeText').innerText = "Auto-Approved (Sold)";
-                document.getElementById('statusBadgeText').className = "text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30";
-                document.getElementById('approvalNoticeBox').innerText = "✨ এটি বিক্রয়কৃত আইডি হওয়ায় স্বয়ংক্রিয়ভাবে অনুমোদিত!";
-                document.getElementById('retypePasswordSection').classList.remove('hidden');
-            } else {
-                isApprovedByAdmin = false;
-                document.getElementById('viewFrontPage').classList.add('hidden');
-                document.getElementById('viewPendingStatus').classList.remove('hidden');
-                document.getElementById('pendingDisplayUser').innerText = registeredUsername;
-                showToast('রিকোয়েস্ট সাবমিট হয়েছে! স্ট্যাটাস পেন্ডিং।');
-                updateTicker(`[Pending]: ${registeredUsername} এডমিন অ্যাপ্রুভালের অপেক্ষায়`);
-            }
+            isApprovedByAdmin = true;
+            showToast('লাইসেন্স সফলভাবে অ্যাক্টিভেট হয়েছে! পাসওয়ার্ড দিয়ে প্রবেশ করুন।');
+            document.getElementById('viewFrontPage').classList.add('hidden');
+            document.getElementById('viewPendingStatus').classList.remove('hidden');
+            document.getElementById('pendingDisplayUser').innerText = registeredUsername;
+            document.getElementById('statusBadgeText').innerText = "Auto-Approved";
+            document.getElementById('statusBadgeText').className = "text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30";
+            document.getElementById('approvalNoticeBox').innerText = "✨ টোকেন সফলভাবে জেনারেট হয়েছে! সিস্টেমে প্রবেশ করুন।";
+            document.getElementById('retypePasswordSection').classList.remove('hidden');
         }
 
         function simulateAdminApproval() {
@@ -526,14 +518,14 @@
             document.getElementById('statusBadgeText').innerText = "Approved";
             document.getElementById('statusBadgeText').className = "text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30";
             document.getElementById('retypePasswordSection').classList.remove('hidden');
-            showToast('এডমিন প্যানেল থেকে রিকোয়েস্ট অ্যাপ্রুভ করা হয়েছে!');
+            showToast('রিকোয়েস্ট অ্যাপ্রুভ করা হয়েছে!');
             updateTicker('[Approved]: রিটাইপ পাসওয়ার্ড দিয়ে প্রবেশ করুন');
         }
 
         function handleApprovedLogin() {
             const typedPass = document.getElementById('retypePassInput').value.trim();
             if(!isApprovedByAdmin) {
-                showToast('এডমিন অ্যাপ্রুভাল এখনো পাওয়া যায়নি!');
+                showToast('অ্যাপ্রুভাল পাওয়া যায়নি!');
                 return;
             }
             if(typedPass !== registeredPassword && registeredPassword !== "") {
