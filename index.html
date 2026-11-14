@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -100,6 +100,7 @@
         let currentUserId = "8942"; 
         let currentCompositeUserId = "105_8942"; 
         let currentUserMobile = "01818589423"; 
+        let currentUserPassword = "123456";
         
         let isModeratorLoggedIn = false;
         let currentWalletBalance = 2100.00;
@@ -136,12 +137,12 @@
         ];
         let loanTakenRecords = [
             { id: 101, date: '2026-11-02', person: 'করিম স্টোর (Karim Store)', amount: 4000, returned: false, returnDate: '', extraCharge: 0 },
-            { id: 102, date: '2026-11-14', person: 'স্টেশনারি ও কাগজপত্র (Due Expense)', amount: 650, returned: false, returnDate: '', extraCharge: 0 }
+            { id: 102, date: '2026-11-14', person: 'স্টেশনারি ও কাগজপত্র', amount: 650, returned: false, returnDate: '', extraCharge: 0, isMarketDue: true }
         ];
         let marketExpenses = [
-            { date: '2026-11-12', desc: 'বাজার ও কাঁচামাল ক্রয়', amount: 1250, status: 'Paid' },
-            { date: '2026-11-13', desc: 'ইন্টারনেট ও অফিস বিল', amount: 1800, status: 'Paid' },
-            { date: '2026-11-14', desc: 'স্টেশনারি ও কাগজপত্র', amount: 650, status: 'Due' }
+            { id: 1, date: '2026-11-12', desc: 'বাজার ও কাঁচামাল ক্রয়', amount: 1250, status: 'Paid' },
+            { id: 2, date: '2026-11-13', desc: 'ইন্টারনেট ও অফিস বিল', amount: 1800, status: 'Paid' },
+            { id: 3, date: '2026-11-14', desc: 'স্টেশনারি ও কাগজপত্র', amount: 650, status: 'Due' }
         ];
 
         // Cash Memo State
@@ -257,6 +258,20 @@
 
     <!-- ================= PAGE 2: DASHBOARD ================= -->
     <div id="page2" class="hidden w-full max-w-md mx-auto space-y-4 py-2">
+        <!-- Accounts Toggle Button Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2.5 shadow-xl flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 flex items-center space-x-2">
+                <i class="fa-solid fa-user-gear text-emerald-400"></i>
+                <span>User Account & Devices</span>
+            </span>
+            <button type="button" onclick="toggleAccountsSection()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1.5 transition-all shadow">
+                <i class="fa-solid fa-chevron-down" id="accountsToggleIcon"></i>
+                <span id="accountsToggleText">Show Accounts</span>
+            </button>
+        </div>
+
+        <!-- Collapsible Accounts & Devices Section -->
+        <div id="accountsSectionContainer" class="hidden space-y-4">
         <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between shadow-xl">
             <div class="flex items-center space-x-3">
                 <div class="relative cursor-pointer" onclick="openAddDeviceModal()" title="Add New Device">
@@ -362,6 +377,7 @@
                 <div id="lotInventorySummaryList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
             </div>
         </div>
+        </div><!-- End of Collapsible Accounts Section -->
 
         <!-- Navigation Tabs Bar -->
         <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2 shadow-xl">
@@ -538,15 +554,23 @@
         </div>
     </div>
 
+    <!-- New Income / Expense Modal (Updated with type selector) -->
     <div id="incomeModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
             <button onclick="closeIncomeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white">Add Income</h3>
+            <h3 id="incomeModalTitle" class="text-lg font-bold text-white">New Income / Expense Entry</h3>
             <form onsubmit="handleIncomeSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1 ml-1">Entry Type (Income / Expense)</label>
+                    <select id="incomeEntryType" onchange="updateIncomeModalStyle()" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs focus:outline-none focus:border-emerald-500">
+                        <option value="Income">Income (+ আয়)</option>
+                        <option value="Expense">Expense (- ব্যয়)</option>
+                    </select>
+                </div>
                 <input type="date" id="incomeDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
                 <input type="text" id="incomeDesc" placeholder="Description" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs">
-                <input type="number" id="incomeAmount" placeholder="Amount (৳)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 text-xs">
-                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Save Income</button>
+                <input type="number" id="incomeAmount" placeholder="Amount (৳)" min="1" step="any" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold text-xs">
+                <button type="submit" id="incomeSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all">Save Income</button>
             </form>
         </div>
     </div>
@@ -805,7 +829,7 @@
         </div>
     </div>
 
-    <!-- A4 Size PDF Print Preview Modal -->
+    <!-- A4 Size PDF Print Preview Modal (Centered Company Info & Cash Memo Badge) -->
     <div id="a4PdfPreviewModal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-start p-2 sm:p-4 overflow-y-auto">
         <div class="w-full max-w-3xl flex items-center justify-between bg-[#131822] border border-slate-700 rounded-2xl px-4 py-3 mb-3 sticky top-0 z-10">
             <span class="text-xs sm:text-sm font-bold text-white flex items-center space-x-2">
@@ -826,17 +850,19 @@
         <!-- Actual A4 Printable Sheet -->
         <div id="a4MemoPrintArea" class="bg-white text-slate-900 w-full max-w-[210mm] min-h-[297mm] p-6 sm:p-10 rounded-lg shadow-2xl flex flex-col justify-between">
             <div>
-                <!-- Company Header -->
-                <div class="border-b-2 border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <div>
-                        <h1 id="a4CompanyName" class="text-2xl font-extrabold text-slate-900 tracking-tight">Sigma PhD Enterprise</h1>
-                        <p id="a4CompanyAddress" class="text-xs text-slate-600 mt-0.5">Narayanganj, Dhaka Division, Bangladesh</p>
-                        <p class="text-xs text-slate-700 font-semibold mt-0.5">Mobile: <span id="a4CompanyMobile">01818589423</span></p>
+                <!-- Centered Company Header & Cash Memo Title -->
+                <div class="border-b-2 border-slate-800 pb-4 text-center space-y-1">
+                    <h1 id="a4CompanyName" class="text-2xl font-extrabold text-slate-900 tracking-tight">Sigma PhD Enterprise</h1>
+                    <p id="a4CompanyAddress" class="text-xs text-slate-600">Narayanganj, Dhaka Division, Bangladesh</p>
+                    <p class="text-xs text-slate-700 font-semibold">Mobile: <span id="a4CompanyMobile">01818589423</span></p>
+                    
+                    <div class="pt-2">
+                        <span class="inline-block bg-slate-900 text-white text-xs font-extrabold px-5 py-1.5 rounded uppercase tracking-widest">CASH MEMO</span>
                     </div>
-                    <div class="sm:text-right">
-                        <span class="inline-block bg-slate-900 text-white text-xs font-extrabold px-3 py-1 rounded uppercase tracking-widest">CASH MEMO</span>
-                        <p class="text-xs text-slate-600 mt-1.5 font-mono">Memo No: <strong id="a4MemoNo">INV-2026-8942</strong></p>
-                        <p class="text-xs text-slate-600">Date: <strong id="a4MemoDate"></strong></p>
+                    
+                    <div class="flex justify-center items-center space-x-6 pt-2 text-xs text-slate-600">
+                        <p class="font-mono">Memo No: <strong id="a4MemoNo" class="text-slate-900">INV-2026-8942</strong></p>
+                        <p>Date: <strong id="a4MemoDate" class="text-slate-900"></strong></p>
                     </div>
                 </div>
 
@@ -902,11 +928,38 @@
                 <div class="flex justify-between"><span class="text-slate-400">Composite ID:</span><span class="text-emerald-400 font-mono font-bold" id="settingsCompId">105_8942</span></div>
                 <div class="flex justify-between"><span class="text-slate-400">Personal Coupon:</span><span class="text-amber-400 font-mono font-bold" id="settingsCoupon">SIGMA-8942</span></div>
             </div>
-            <button onclick="document.getElementById('settingsModal').classList.add('hidden'); showToast('Settings saved!');" class="w-full bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs">Done</button>
+
+            <!-- Change Password Form inside Settings Modal -->
+            <form onsubmit="handleChangePasswordSubmit(event)" class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2.5 text-xs">
+                <p class="text-amber-400 font-bold flex items-center space-x-1.5 border-b border-slate-800 pb-1.5">
+                    <i class="fa-solid fa-key"></i>
+                    <span>Change Account Password</span>
+                </p>
+                <div>
+                    <label class="block text-slate-400 mb-1">Current Password</label>
+                    <input type="password" id="oldPasswordInput" placeholder="Enter current password" required
+                        class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">New Password</label>
+                    <input type="password" id="newPasswordInput" placeholder="Enter new password (min 4 chars)" minlength="4" required
+                        class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Confirm New Password</label>
+                    <input type="password" id="confirmNewPasswordInput" placeholder="Re-enter new password" minlength="4" required
+                        class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 focus:outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-2.5 rounded-xl text-xs shadow transition-all">
+                    Update Password
+                </button>
+            </form>
+
+            <button onclick="document.getElementById('settingsModal').classList.add('hidden');" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs">Close</button>
         </div>
     </div>
 
-    <!-- Script Section: Secure Backend Integration with Preview Fallback -->
+    <!-- Script Section -->
     <script>
         function showToast(text) {
             const toast = document.getElementById('toast');
@@ -1251,20 +1304,53 @@
         }
 
         // ==========================================
-        // SECURE FORM SUBMISSIONS
+        // SECURE FORM SUBMISSIONS (UPDATED INCOME/EXPENSE)
         // ==========================================
+        function updateIncomeModalStyle() {
+            const type = document.getElementById('incomeEntryType').value;
+            const selectEl = document.getElementById('incomeEntryType');
+            const amountEl = document.getElementById('incomeAmount');
+            const btnEl = document.getElementById('incomeSubmitBtn');
+
+            if (type === 'Income') {
+                selectEl.classList.remove('text-rose-400');
+                selectEl.classList.add('text-emerald-400');
+                amountEl.classList.remove('text-rose-400');
+                amountEl.classList.add('text-emerald-400');
+                btnEl.className = 'w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition-all';
+                btnEl.innerText = 'Save Income';
+            } else {
+                selectEl.classList.remove('text-emerald-400');
+                selectEl.classList.add('text-rose-400');
+                amountEl.classList.remove('text-emerald-400');
+                amountEl.classList.add('text-rose-400');
+                btnEl.className = 'w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-xl text-xs transition-all';
+                btnEl.innerText = 'Save Expense';
+            }
+        }
+
         async function handleIncomeSubmit(event) {
             event.preventDefault();
+            const entryType = document.getElementById('incomeEntryType').value;
+            const date = document.getElementById('incomeDate').value;
             const desc = document.getElementById('incomeDesc').value;
             const amount = parseFloat(document.getElementById('incomeAmount').value) || 0;
             
-            runningIncome += amount;
-            totalIncome2026 += amount;
+            if (entryType === 'Income') {
+                runningIncome += amount;
+                totalIncome2026 += amount;
+                showToast(`Income ৳${amount.toLocaleString()} added to Income!`);
+            } else {
+                runningExpense += amount;
+                totalExpense2026 += amount;
+                marketExpenses.unshift({ date, desc, amount, status: 'Paid' });
+                showToast(`Expense ৳${amount.toLocaleString()} added to Expense!`);
+            }
+
             updateFinancialDisplays();
             document.getElementById('incomeDesc').value = '';
             document.getElementById('incomeAmount').value = '';
             closeIncomeModal();
-            showToast('Income record saved!');
         }
 
         async function handleMarketSubmit(event) {
@@ -1273,21 +1359,23 @@
             const desc = document.getElementById('marketDesc').value;
             const amount = parseFloat(document.getElementById('marketAmount').value) || 0;
             const status = document.getElementById('marketStatus').value;
+            const newExpenseId = Date.now();
 
             runningExpense += amount;
             totalExpense2026 += amount;
-            marketExpenses.unshift({ date, desc, amount, status });
+            marketExpenses.unshift({ id: newExpenseId, date, desc, amount, status });
 
             if (status === 'Due') {
                 loanTakenTotal += amount;
                 loanTakenRecords.unshift({
-                    id: Date.now(),
+                    id: newExpenseId,
                     date,
-                    person: `${desc} (Due Expense)`,
+                    person: desc,
                     amount,
                     returned: false,
                     returnDate: '',
-                    extraCharge: 0
+                    extraCharge: 0,
+                    isMarketDue: true
                 });
             }
 
@@ -1380,6 +1468,14 @@
                 }
                 loanTakenTotal = Math.max(0, loanTakenTotal - record.amount);
 
+                // If this payable record originated from a Market Due expense, update market expense status to Paid
+                if (record.isMarketDue && record.id) {
+                    const marketExp = marketExpenses.find(exp => exp.id === record.id);
+                    if (marketExp) {
+                        marketExp.status = 'Paid';
+                    }
+                }
+
                 showToast(`Payable Returned! অতিরিক্ত চার্জ ৳${extraAmt.toLocaleString()} Expense-এ যুক্ত হয়েছে।`);
             }
 
@@ -1454,10 +1550,57 @@
             if(e) e.stopPropagation();
             document.getElementById('settingsCompId').innerText = currentCompositeUserId;
             document.getElementById('settingsCoupon').innerText = `SIGMA-${currentUserId}`;
+            document.getElementById('oldPasswordInput').value = '';
+            document.getElementById('newPasswordInput').value = '';
+            document.getElementById('confirmNewPasswordInput').value = '';
             document.getElementById('settingsModal').classList.remove('hidden');
         }
 
-        function openIncomeModal() { document.getElementById('incomeModal').classList.remove('hidden'); }
+        function handleChangePasswordSubmit(event) {
+            event.preventDefault();
+            const oldPass = document.getElementById('oldPasswordInput').value;
+            const newPass = document.getElementById('newPasswordInput').value;
+            const confirmPass = document.getElementById('confirmNewPasswordInput').value;
+
+            if (oldPass !== currentUserPassword) {
+                showToast('বর্তমান পাসওয়ার্ড (Current Password) সঠিক নয়!');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                showToast('নতুন পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মিলছে না!');
+                return;
+            }
+            if (newPass === oldPass) {
+                showToast('নতুন পাসওয়ার্ডটি আগের পাসওয়ার্ডের চেয়ে ভিন্ন হতে হবে।');
+                return;
+            }
+
+            currentUserPassword = newPass;
+            document.getElementById('mainUserPassword').value = newPass;
+            document.getElementById('settingsModal').classList.add('hidden');
+            showToast('অ্যাকাউন্টের পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!');
+        }
+
+        function toggleAccountsSection() {
+            const container = document.getElementById('accountsSectionContainer');
+            const icon = document.getElementById('accountsToggleIcon');
+            const text = document.getElementById('accountsToggleText');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                icon.className = 'fa-solid fa-chevron-up';
+                text.innerText = 'Hide Accounts';
+            } else {
+                container.classList.add('hidden');
+                icon.className = 'fa-solid fa-chevron-down';
+                text.innerText = 'Show Accounts';
+            }
+        }
+
+        function openIncomeModal() {
+            document.getElementById('incomeEntryType').value = 'Income';
+            updateIncomeModalStyle();
+            document.getElementById('incomeModal').classList.remove('hidden');
+        }
         function closeIncomeModal() { document.getElementById('incomeModal').classList.add('hidden'); }
 
         function openLoanModal() { document.getElementById('loanModal').classList.remove('hidden'); }
@@ -1636,4 +1779,3 @@
     </script>
 </body>
 </html>
-```
