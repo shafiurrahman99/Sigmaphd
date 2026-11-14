@@ -1,13 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-
-// Vercel Environment Variables থেকে সিক্রেট লোড হচ্ছে (কোডে হার্ডকোড করা নেই)
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'sigma_phd_super_secure_secret_key';
-
 const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 
