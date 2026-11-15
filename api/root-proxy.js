@@ -46,7 +46,6 @@ export default async function handler(req, res) {
                 break;
 
             case 'FETCH_DASHBOARD_DATA':
-                // ১. ডেইলিস খরচ ফেচ করা (daily_expenses)
                 const { data: dailyExpenses, error: dExpErr } = await supabase
                     .from('daily_expenses')
                     .select('id, company_id, user_id, composite_user_id, expense_date, description, amount, status, created_at')
@@ -54,7 +53,6 @@ export default async function handler(req, res) {
                     .eq('user_id', user_id);
                 if (dExpErr) throw dExpErr;
 
-                // ২. লোন রেকর্ড ফেচ করা (loan_records)
                 const { data: loanRecords, error: lRecErr } = await supabase
                     .from('loan_records')
                     .select('id, company_id, user_id, composite_user_id, loan_category, entry_date, person_name, amount, is_returned, return_date, extra_fee_or_charge, created_at')
@@ -62,7 +60,6 @@ export default async function handler(req, res) {
                     .eq('user_id', user_id);
                 if (lRecErr) throw lRecErr;
 
-                // ৩. ইনকাম ও এক্সপেন্স রেকর্ড ফেচ করা (income_expense)
                 const { data: incomeExpense, error: incExpListErr } = await supabase
                     .from('income_expense')
                     .select('id, company_id, user_id, composite_user_id, entry_type, entry_date, description, amount, created_at')
@@ -127,6 +124,20 @@ export default async function handler(req, res) {
                     }]);
                 if (expErr) throw expErr;
                 result = { success: true, message: 'Daily expense recorded' };
+                break;
+
+            // নতুন যোগ করা: Buy New ID / License হ্যান্ডলার
+            case 'BUY_NEW_LICENSE':
+                const { error: licenseErr } = await supabase
+                    .from('users_auth')
+                    .insert([{
+                        mobile: payload.mobile,
+                        coupon_code: payload.email,
+                        validity_days: 30, // ডিফল্ট ৩০ দিন ভ্যালিডিটি
+                        wallet_balance: 0.00
+                    }]);
+                if (licenseErr) throw licenseErr;
+                result = { success: true, message: 'License request submitted successfully' };
                 break;
 
             default:
