@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
+
 const SUPABASE_URL = process.env.SIGMAPHD_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SIGMAPHD_SERVICE_ROLE_KEY;
-const JWT_SECRET = process.env.SIGMAPHD_JWT_SECRET || 'sigma_phd_super_secure_secret_key';
+
 const supabaseServer = createClient(SIGMAPHD_URL, SIGMAPHD_SERVICE_ROLE_KEY);
 
 export default async function handler(req, res) {
