@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const regSubmitBtn = document.getElementById('regSubmitBtn');
     const simulateApproveBtn = document.getElementById('simulateApproveBtn');
-    let regState = 'register'; // 'register' | 'pending' | 'approved'
+    let regState = 'register'; 
 
     const showStatus = (text, isError = false) => {
         statusMessage.classList.remove(
@@ -43,17 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
         togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
     });
 
-    forgotPasswordBtn.addEventListener('click', () => {
-        switchView(forgotForm);
-    });
-
-    registerNewBtn.addEventListener('click', () => {
-        switchView(registerForm);
-    });
-
-    backButtons.forEach(btn => {
-        btn.addEventListener('click', () => switchView(signInForm));
-    });
+    forgotPasswordBtn.addEventListener('click', () => switchView(forgotForm));
+    registerNewBtn.addEventListener('click', () => switchView(registerForm));
+    backButtons.forEach(btn => btn.addEventListener('click', () => switchView(signInForm)));
 
     // Sign In Submit
     signInForm.addEventListener('submit', async (e) => {
@@ -79,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showStatus(result.message, true);
             }
         } catch (err) {
-            showStatus(`Signing in as "${userId}"... (Server connection pending)`);
+            showStatus('Server connection error!', true);
         }
     });
 
@@ -93,10 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('regPassword').value.trim();
 
         if (regState === 'approved') {
-            if (!userId || !password) {
-                showStatus('Please enter User ID and Password to Sign In.', true);
-                return;
-            }
             showStatus(`Approved! Signing in as "${userId}" (${companyId})...`);
             return;
         }
@@ -111,19 +99,33 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        regState = 'pending';
-        regSubmitBtn.textContent = 'Pending...';
-        regSubmitBtn.classList.remove('from-indigo-600', 'via-indigo-500', 'to-purple-600', 'hover:from-indigo-500', 'hover:to-purple-500');
-        regSubmitBtn.classList.add('from-amber-600', 'via-amber-500', 'to-orange-600');
-        simulateApproveBtn.classList.remove('hidden');
+        try {
+            const response = await fetch('/api/root-proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'register', companyId, userId, fullName, email, password })
+            });
+            const result = await response.json();
 
-        ['regCompanyId', 'regFullName', 'regEmail'].forEach(id => {
-            const el = document.getElementById(id);
-            el.readOnly = true;
-            el.classList.add('opacity-70');
-        });
+            if (result.success) {
+                regState = 'pending';
+                regSubmitBtn.textContent = 'Pending...';
+                regSubmitBtn.classList.remove('from-indigo-600', 'via-indigo-500', 'to-purple-600');
+                regSubmitBtn.classList.add('from-amber-600', 'via-amber-500', 'to-orange-600');
+                simulateApproveBtn.classList.remove('hidden');
 
-        showStatus(`Request submitted for "${userId}". Waiting for admin approval...`);
+                ['regCompanyId', 'regUserId', 'regFullName', 'regEmail', 'regPassword'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.readOnly = true;
+                    el.classList.add('opacity-70');
+                });
+                showStatus(result.message);
+            } else {
+                showStatus(result.message, true);
+            }
+        } catch (err) {
+            showStatus('Registration request failed.', true);
+        }
     });
 
     // Simulate Admin Approval
@@ -131,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         regState = 'approved';
         regSubmitBtn.textContent = 'Sign In';
         regSubmitBtn.classList.remove('from-amber-600', 'via-amber-500', 'to-orange-600');
-        regSubmitBtn.classList.add('from-emerald-600', 'via-teal-500', 'to-cyan-600', 'hover:from-emerald-500', 'hover:to-cyan-500');
+        regSubmitBtn.classList.add('from-emerald-600', 'via-teal-500', 'to-cyan-600');
         simulateApproveBtn.classList.add('hidden');
         showStatus('Admin Approved! You can now click Sign In directly.');
     });
