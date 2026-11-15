@@ -1,10 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+import jwt from 'jsonwebtoken';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const JWT_SECRET = process.env.JWT_SECRET || 'sigma_phd_super_secure_secret_key';
+const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
