@@ -126,15 +126,14 @@ export default async function handler(req, res) {
                 result = { success: true, message: 'Daily expense recorded' };
                 break;
 
-            // নতুন যোগ করা: Buy New ID / License হ্যান্ডলার
+            // Buy New ID / License হ্যান্ডলার (license_requests টেবিলে ডেটা সেভ করার জন্য)
             case 'BUY_NEW_LICENSE':
                 const { error: licenseErr } = await supabase
-                    .from('users_auth')
+                    .from('license_requests')
                     .insert([{
                         mobile: payload.mobile,
-                        coupon_code: payload.email,
-                        validity_days: 30, // ডিফল্ট ৩০ দিন ভ্যালিডিটি
-                        wallet_balance: 0.00
+                        email: payload.email,
+                        status: 'Pending'
                     }]);
                 if (licenseErr) throw licenseErr;
                 result = { success: true, message: 'License request submitted successfully' };
