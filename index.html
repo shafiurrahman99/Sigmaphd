@@ -899,6 +899,35 @@
             showToast('Logged out');
         }
 
+        // Buy New ID / License সাবমিট হ্যান্ডলার
+        async function handleLandingBuySubmit(e) {
+            e.preventDefault();
+            const mobile = document.getElementById('landingBuyMobile').value.trim();
+            const email = document.getElementById('landingBuyEmail').value.trim();
+
+            try {
+                const response = await fetch(PROXY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'BUY_NEW_LICENSE',
+                        payload: { mobile, email }
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('লাইসেন্স রিকোয়েস্ট সফলভাবে জমা হয়েছে!');
+                    closeBuyLicenseLandingModal();
+                    document.getElementById('landingBuyMobile').value = '';
+                    document.getElementById('landingBuyEmail').value = '';
+                } else {
+                    showToast(result.error || 'সংরক্ষণ ব্যর্থ হয়েছে!');
+                }
+            } catch (err) {
+                showToast('সার্ভার কানেকশন ত্রুটি!');
+            }
+        }
+
         // ফর্ম সাবমিশন হ্যান্ডলারসমূহ (প্রক্সি API কল)
         async function handleIncomeSubmit(e) {
             e.preventDefault();
@@ -1044,7 +1073,6 @@
         function copyCouponCode() { showToast('Copied'); }
         function handleSendMessage(e) { e.preventDefault(); showToast('Message sent'); }
         function handleDashboardChatSend(e) { e.preventDefault(); showToast('Chat sent'); }
-        function handleLandingBuySubmit(e) { e.preventDefault(); closeBuyLicenseLandingModal(); }
         function handleModLogin(e) { e.preventDefault(); closeModLoginModal(); }
         function handleAddDeviceSubmit(e) { e.preventDefault(); closeAddDeviceModal(); }
         function handleAddBalanceSubmit(e) { e.preventDefault(); closeAddBalanceModal(); }
