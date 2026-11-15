@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 
 const supabaseUrl = process.env.SIGMAPHD_URL;
-const supabaseKey = process.env.SIGMAPHD_SERVICE_ROLE_KEY;
+const supabaseKey = process.env.SIGMAPHD_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
