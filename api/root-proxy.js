@@ -122,4 +122,11 @@ export default async function handler(req, res) {
     } catch (err) {
         return res.status(500).json({ success: false, message: 'Internal Server Error', error: err.message });
     }
+try {
+  // Your Supabase/Octokit logic here
+} catch (error) {
+  console.error("Proxy Error:", error.message);
+  return res.status(500.json({ error: error.message }));
+}
+
 }
