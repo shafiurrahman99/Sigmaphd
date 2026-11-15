@@ -68,39 +68,6 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-950">
 
-    <!-- Global State Variables (DB Mapped & Zero/Null Initialized) -->
-    <script>
-        const PROXY_URL = '/api/root-proxy';
-        let GLOBAL_COMPANY_ID = null;
-        let currentUserId = ""; 
-        let currentCompositeUserId = ""; 
-        let currentUserMobile = ""; 
-        let currentUserPassword = "";
-        
-        let isModeratorLoggedIn = false;
-        let currentWalletBalance = 0.00;
-        let currentValidityDays = 0;
-        let activeDevices = 0;
-        let totalSubUsers = 0;
-
-        let runningIncome = 0.00;
-        let runningExpense = 0.00;
-        let totalIncome2026 = 0.00;
-        let totalExpense2026 = 0.00;
-
-        let loanGivenTotal = 0.00;
-        let loanTakenTotal = 0.00;
-
-        // Dynamic State Arrays (Loaded from DB Tables via Proxy)
-        let lotInventory = [];
-        let pendingLotRequests = [];
-        let loanGivenRecords = [];
-        let loanTakenRecords = [];
-        let marketExpenses = [];
-        let memoCartItems = [];
-        let savedCompanyProfile = { name: '', address: '', mobile: '', footerNote: '' };
-    </script>
-
     <!-- Toast Notification -->
     <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
         <span id="toast-text">Action successful!</span>
@@ -251,9 +218,6 @@
                     </h3>
                     <div class="flex items-center space-x-1 mt-0.5">
                         <p class="text-[10px] text-amber-400 font-semibold">Validity: <span id="accountValidityDays">0</span> days</p>
-                        <button type="button" onclick="openExtendValidityModal(event)" class="w-4 h-4 bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-slate-950 font-black rounded-full flex items-center justify-center text-[10px] transition-all" title="Extend Validity">
-                            +
-                        </button>
                     </div>
                 </div>
             </div>
@@ -634,27 +598,6 @@
         </div>
     </div>
 
-    <!-- Loan Return Modal -->
-    <div id="loanReturnModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
-            <button onclick="closeLoanReturnModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 id="loanReturnModalTitle" class="text-base font-bold text-white">Loan Return Settlement</h3>
-            <form onsubmit="handleLoanReturnSubmit(event)" class="space-y-3 text-xs">
-                <input type="hidden" id="returnLoanCategory">
-                <input type="hidden" id="returnLoanIndex">
-                <div>
-                    <label class="block text-slate-400 mb-1">Return Date</label>
-                    <input type="date" id="loanReturnDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                </div>
-                <div>
-                    <label id="loanReturnExtraLabel" class="block text-slate-400 mb-1">Extra Fee / Charge (৳)</label>
-                    <input type="number" id="loanReturnExtraAmount" value="0" min="0" step="any" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold">
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-extrabold py-3 rounded-xl text-xs">Confirm Return</button>
-            </form>
-        </div>
-    </div>
-
     <!-- My Chat Modal (forum_chat) -->
     <div id="myChatModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
@@ -732,74 +675,6 @@
         </div>
     </div>
 
-    <!-- A4 Size PDF Print Preview Modal -->
-    <div id="a4PdfPreviewModal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-start p-2 sm:p-4 overflow-y-auto">
-        <div class="w-full max-w-3xl flex items-center justify-between bg-[#131822] border border-slate-700 rounded-2xl px-4 py-3 mb-3 sticky top-0 z-10">
-            <span class="text-xs sm:text-sm font-bold text-white flex items-center space-x-2">
-                <i class="fa-solid fa-file-invoice text-emerald-400"></i>
-                <span>A4 Size Cash Memo PDF Preview</span>
-            </span>
-            <div class="flex items-center space-x-2">
-                <button type="button" onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs">Print</button>
-                <button type="button" onclick="document.getElementById('a4PdfPreviewModal').classList.add('hidden')" class="bg-slate-800 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs">Close</button>
-            </div>
-        </div>
-
-        <div id="a4MemoPrintArea" class="bg-white text-slate-900 w-full max-w-[210mm] min-h-[297mm] p-6 sm:p-10 rounded-lg shadow-2xl flex flex-col justify-between">
-            <div>
-                <div class="border-b-2 border-slate-800 pb-4 text-center space-y-1">
-                    <h1 id="a4CompanyName" class="text-2xl font-extrabold text-slate-900">-</h1>
-                    <p id="a4CompanyAddress" class="text-xs text-slate-600">-</p>
-                    <p class="text-xs text-slate-700 font-semibold">Mobile: <span id="a4CompanyMobile">-</span></p>
-                    <div class="pt-2">
-                        <span class="inline-block bg-slate-900 text-white text-xs font-extrabold px-5 py-1.5 rounded uppercase tracking-widest">CASH MEMO</span>
-                    </div>
-                    <div class="flex justify-center items-center space-x-6 pt-2 text-xs text-slate-600">
-                        <p class="font-mono">Memo No: <strong id="a4MemoNo" class="text-slate-900">-</strong></p>
-                        <p>Date: <strong id="a4MemoDate" class="text-slate-900">-</strong></p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-100 border border-slate-300 rounded-lg p-3 my-4 flex justify-between text-xs">
-                    <div><span class="text-slate-500">Customer Name:</span> <strong id="a4CustomerName" class="text-slate-900 ml-1">-</strong></div>
-                    <div><span class="text-slate-500">Customer Mobile:</span> <strong id="a4CustomerMobile" class="text-slate-900 ml-1">-</strong></div>
-                </div>
-
-                <table class="w-full border-collapse border border-slate-400 text-xs mt-2">
-                    <thead>
-                        <tr class="bg-slate-200 text-slate-900">
-                            <th class="border border-slate-400 py-2 px-3 text-center w-12">SL</th>
-                            <th class="border border-slate-400 py-2 px-3 text-left">Description</th>
-                            <th class="border border-slate-400 py-2 px-3 text-center w-20">Qty</th>
-                            <th class="border border-slate-400 py-2 px-3 text-right w-28">Rate (৳)</th>
-                            <th class="border border-slate-400 py-2 px-3 text-right w-32">Total (৳)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="a4ItemsTableBody"></tbody>
-                    <tfoot>
-                        <tr class="bg-slate-100 font-extrabold text-sm">
-                            <td colspan="4" class="border border-slate-400 py-2.5 px-3 text-right">Grand Total (৳):</td>
-                            <td id="a4GrandTotal" class="border border-slate-400 py-2.5 px-3 text-right text-slate-900">৳ 0.00</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <div class="pt-12 mt-8">
-                <div class="flex justify-between items-end pt-8">
-                    <div class="text-center"><div class="w-40 border-t border-slate-600 pt-1 text-xs text-slate-600">Customer Signature</div></div>
-                    <div class="text-center">
-                        <p class="font-bengali italic font-bold text-slate-800 text-sm mb-1" id="a4SignatureName">Authorized</p>
-                        <div class="w-44 border-t border-slate-800 pt-1 text-xs font-bold text-slate-900">Authorized Signature</div>
-                    </div>
-                </div>
-                <div class="border-t border-slate-300 mt-6 pt-3 text-center text-xs text-slate-600">
-                    <p id="a4FooterNote" class="font-semibold">-</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Settings Modal -->
     <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
@@ -810,19 +685,32 @@
                 <div class="flex justify-between"><span class="text-slate-400">Composite ID:</span><span class="text-emerald-400 font-mono font-bold" id="settingsComposite">-</span></div>
                 <div class="flex justify-between"><span class="text-slate-400">Personal Coupon:</span><span class="text-amber-400 font-mono font-bold" id="settingsCoupon">-</span></div>
             </div>
-
-            <form onsubmit="handleChangePasswordSubmit(event)" class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2.5 text-xs">
-                <p class="text-amber-400 font-bold border-b border-slate-800 pb-1.5"><i class="fa-solid fa-key"></i> Change Password</p>
-                <input type="password" id="oldPasswordInput" placeholder="Current Password" required class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-                <input type="password" id="newPasswordInput" placeholder="New Password" minlength="4" required class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400">
-                <button type="submit" class="w-full bg-amber-500 text-slate-950 font-extrabold py-2.5 rounded-xl text-xs">Update Password</button>
-            </form>
             <button onclick="document.getElementById('settingsModal').classList.add('hidden');" class="w-full bg-slate-800 text-slate-200 font-bold py-2.5 rounded-xl text-xs">Close</button>
         </div>
     </div>
 
     <!-- Script Section: Dynamic Database Sync via PROXY_URL -->
     <script>
+        const PROXY_URL = '/api/root-proxy';
+        let GLOBAL_COMPANY_ID = null;
+        let currentUserId = ""; 
+        let currentCompositeUserId = ""; 
+        
+        let currentWalletBalance = 0.00;
+        let currentValidityDays = 0;
+        let activeDevices = 0;
+
+        let runningIncome = 0.00;
+        let runningExpense = 0.00;
+        let totalIncome2026 = 0.00;
+        let totalExpense2026 = 0.00;
+
+        let lotInventory = [];
+        let loanGivenRecords = [];
+        let loanTakenRecords = [];
+        let marketExpenses = [];
+        let incomeExpenseRecords = [];
+
         function showToast(text) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-text').innerText = text;
@@ -832,19 +720,29 @@
         function hideToast() { document.getElementById('toast').classList.add('hidden'); }
         function formatMoney(amount) { return '৳ ' + Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-        // ডাটাবেজ থেকে ডেটা লোড করার প্রধান ফাংশন
+        // ডাটাবেজ থেকে ড্যাশবোর্ড ডেটা ফেচ করা
         async function fetchDashboardData(company_id, user_id) {
             try {
                 const response = await fetch(PROXY_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'FETCH_DASHBOARD_DATA', company_id, user_id })
+                    body: JSON.stringify({ 
+                        action: 'FETCH_DASHBOARD_DATA', 
+                        company_id, 
+                        user_id,
+                        composite_user_id: currentCompositeUserId 
+                    })
                 });
                 const result = await response.json();
                 if (result.success) {
                     marketExpenses = result.data.daily_expenses || [];
-                    loanGivenRecords = result.data.loan_records || [];
-                    loanTakenRecords = result.data.loan_records || [];
+                    const allLoans = result.data.loan_records || [];
+                    incomeExpenseRecords = result.data.income_expense || [];
+
+                    loanGivenRecords = allLoans.filter(l => l.loan_category === 'Receivable');
+                    loanTakenRecords = allLoans.filter(l => l.loan_category === 'Payable');
+
+                    calculateFinancialTotals();
                     updateFinancialDisplays();
                 }
             } catch (err) {
@@ -852,14 +750,38 @@
             }
         }
 
+        function calculateFinancialTotals() {
+            totalIncome2026 = 0;
+            totalExpense2026 = 0;
+            runningIncome = 0;
+            runningExpense = 0;
+
+            const currentMonthStr = new Date().toISOString().slice(0, 7);
+
+            incomeExpenseRecords.forEach(item => {
+                const amt = parseFloat(item.amount || 0);
+                const itemMonth = item.entry_date ? item.entry_date.slice(0, 7) : '';
+
+                if (item.entry_type === 'Income') {
+                    totalIncome2026 += amt;
+                    if (itemMonth === currentMonthStr) runningIncome += amt;
+                } else if (item.entry_type === 'Expense') {
+                    totalExpense2026 += amt;
+                    if (itemMonth === currentMonthStr) runningExpense += amt;
+                }
+            });
+        }
+
         function updateFinancialDisplays() {
             document.getElementById('walletBalanceText').innerText = formatMoney(currentWalletBalance);
             document.getElementById('accountValidityDays').innerText = currentValidityDays;
             document.getElementById('activeDeviceCount').innerText = activeDevices;
             document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
+            
             document.getElementById('totalIncome2026').innerText = formatMoney(totalIncome2026);
             document.getElementById('totalExpense2026').innerText = formatMoney(totalExpense2026);
             document.getElementById('totalSurplus2026').innerText = formatMoney(totalIncome2026 - totalExpense2026);
+            
             document.getElementById('runningMonthIncome').innerText = formatMoney(runningIncome);
             document.getElementById('runningMonthExpense').innerText = formatMoney(runningExpense);
             document.getElementById('runningMonthSurplus').innerText = formatMoney(runningIncome - runningExpense);
@@ -877,12 +799,33 @@
 
             if (loanGivenRecords.length === 0) {
                 givenContainer.innerHTML = `<p class="text-slate-500 text-center text-xs py-1">No database records found.</p>`;
+                document.getElementById('loanGivenTotalText').innerText = `Total: ৳ 0.00`;
+            } else {
+                let gTotal = 0;
+                givenContainer.innerHTML = loanGivenRecords.map(loan => {
+                    gTotal += parseFloat(loan.amount || 0);
+                    return `<div class="flex justify-between items-center text-xs bg-[#131822] p-2 rounded-lg">
+                        <span class="text-slate-200">${loan.person_name} (${loan.entry_date})</span>
+                        <span class="text-emerald-400 font-bold">৳ ${Number(loan.amount).toLocaleString()}</span>
+                    </div>`;
+                }).join('');
+                document.getElementById('loanGivenTotalText').innerText = `Total: ৳ ${gTotal.toLocaleString()}`;
             }
+
             if (loanTakenRecords.length === 0) {
                 takenContainer.innerHTML = `<p class="text-slate-500 text-center text-xs py-1">No database records found.</p>`;
+                document.getElementById('loanTakenTotalText').innerText = `Total: ৳ 0.00`;
+            } else {
+                let tTotal = 0;
+                takenContainer.innerHTML = loanTakenRecords.map(loan => {
+                    tTotal += parseFloat(loan.amount || 0);
+                    return `<div class="flex justify-between items-center text-xs bg-[#131822] p-2 rounded-lg">
+                        <span class="text-slate-200">${loan.person_name} (${loan.entry_date})</span>
+                        <span class="text-rose-400 font-bold">৳ ${Number(loan.amount).toLocaleString()}</span>
+                    </div>`;
+                }).join('');
+                document.getElementById('loanTakenTotalText').innerText = `Total: ৳ ${tTotal.toLocaleString()}`;
             }
-            document.getElementById('loanGivenTotalText').innerText = `Total: ৳ 0.00`;
-            document.getElementById('loanTakenTotalText').innerText = `Total: ৳ 0.00`;
         }
 
         function renderExpenseList() {
@@ -910,7 +853,7 @@
             listEl.innerHTML = lotInventory.length > 0 ? '' : '<p class="text-slate-500 text-center py-1">No lots found in database.</p>';
         }
 
-        // --- Authentication & Proxy Action ---
+        // লগইন সাবমিট হ্যান্ডলার
         async function handleMainSignIn(event) {
             event.preventDefault();
             const company_id = parseInt(document.getElementById('signInCompanyId').value);
@@ -940,7 +883,7 @@
                     document.getElementById('page2').classList.remove('hidden');
                     
                     updateFinancialDisplays();
-                    fetchDashboardData(company_id, user_id);
+                    await fetchDashboardData(company_id, user_id);
                     showToast('লগইন সফল হয়েছে!');
                 } else {
                     showToast(result.message || 'Login failed!');
@@ -956,7 +899,104 @@
             showToast('Logged out');
         }
 
-        // Modal Controls & Handlers
+        // ফর্ম সাবমিশন হ্যান্ডলারসমূহ (প্রক্সি API কল)
+        async function handleIncomeSubmit(e) {
+            e.preventDefault();
+            const entry_type = document.getElementById('incomeEntryType').value;
+            const entry_date = document.getElementById('incomeDate').value;
+            const description = document.getElementById('incomeDesc').value;
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+
+            try {
+                const response = await fetch(PROXY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'ADD_INCOME_EXPENSE',
+                        company_id: GLOBAL_COMPANY_ID,
+                        user_id: currentUserId,
+                        composite_user_id: currentCompositeUserId,
+                        payload: { entry_type, entry_date, description, amount }
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('সফলভাবে সংরক্ষিত হয়েছে!');
+                    closeIncomeModal();
+                    await fetchDashboardData(GLOBAL_COMPANY_ID, currentUserId);
+                } else {
+                    showToast(result.error || 'ব্যর্থ হয়েছে!');
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি!');
+            }
+        }
+
+        async function handleLoanSubmit(e) {
+            e.preventDefault();
+            const loan_category = document.getElementById('loanType').value;
+            const entry_date = document.getElementById('loanDate').value;
+            const person_name = document.getElementById('loanPersonName').value;
+            const amount = parseFloat(document.getElementById('loanAmount').value);
+
+            try {
+                const response = await fetch(PROXY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'ADD_LOAN',
+                        company_id: GLOBAL_COMPANY_ID,
+                        user_id: currentUserId,
+                        composite_user_id: currentCompositeUserId,
+                        payload: { loan_category, entry_date, person_name, amount }
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('লোন রেকর্ড সংরক্ষিত হয়েছে!');
+                    closeLoanModal();
+                    await fetchDashboardData(GLOBAL_COMPANY_ID, currentUserId);
+                } else {
+                    showToast(result.error || 'ব্যর্থ হয়েছে!');
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি!');
+            }
+        }
+
+        async function handleMarketSubmit(e) {
+            e.preventDefault();
+            const expense_date = document.getElementById('marketDate').value;
+            const description = document.getElementById('marketDesc').value;
+            const amount = parseFloat(document.getElementById('marketAmount').value);
+            const status = document.getElementById('marketStatus').value;
+
+            try {
+                const response = await fetch(PROXY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'ADD_DAILY_EXPENSE',
+                        company_id: GLOBAL_COMPANY_ID,
+                        user_id: currentUserId,
+                        composite_user_id: currentCompositeUserId,
+                        payload: { expense_date, description, amount, status }
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('খরচ রেকর্ড করা হয়েছে!');
+                    closeMarketModal();
+                    await fetchDashboardData(GLOBAL_COMPANY_ID, currentUserId);
+                } else {
+                    showToast(result.error || 'ব্যর্থ হয়েছে!');
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি!');
+            }
+        }
+
+        // মোডাল কন্ট্রোল ও ইউটিলিটি
         function openBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.remove('hidden'); }
         function closeBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.add('hidden'); }
         function openModLoginModal() { document.getElementById('modLoginModal').classList.remove('hidden'); }
@@ -975,17 +1015,31 @@
         function closeBuyLotModal() { document.getElementById('buyLotModal').classList.add('hidden'); }
         function openSellLicenseModal() { document.getElementById('sellLicenseModal').classList.remove('hidden'); }
         function closeSellLicenseModal() { document.getElementById('sellLicenseModal').classList.add('hidden'); }
-        function openLoanReturnModal() { document.getElementById('loanReturnModal').classList.remove('hidden'); }
-        function closeLoanReturnModal() { document.getElementById('loanReturnModal').classList.add('hidden'); }
         function openMyChatModal() { document.getElementById('myChatModal').classList.remove('hidden'); }
+        function openCashMemoModal() { document.getElementById('cashMemoModal').classList.remove('hidden'); }
+        
         function openSettingsModal() { 
             document.getElementById('settingsCompId').innerText = GLOBAL_COMPANY_ID || '-';
             document.getElementById('settingsComposite').innerText = currentCompositeUserId || '-';
             document.getElementById('settingsCoupon').innerText = document.getElementById('userCouponCode').innerText;
             document.getElementById('settingsModal').classList.remove('hidden'); 
         }
-        function toggleAccountsSection() { document.getElementById('accountsSectionContainer').classList.toggle('hidden'); }
-        function openCashMemoModal() { document.getElementById('cashMemoModal').classList.remove('hidden'); }
+
+        function toggleAccountsSection() { 
+            const container = document.getElementById('accountsSectionContainer');
+            const toggleText = document.getElementById('accountsToggleText');
+            const toggleIcon = document.getElementById('accountsToggleIcon');
+            
+            container.classList.toggle('hidden');
+            if(container.classList.contains('hidden')) {
+                toggleText.innerText = 'Show Accounts';
+                toggleIcon.className = 'fa-solid fa-chevron-down';
+            } else {
+                toggleText.innerText = 'Hide Accounts';
+                toggleIcon.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
         function toggleYear(id) { document.getElementById(id).classList.toggle('hidden'); }
         function copyCouponCode() { showToast('Copied'); }
         function handleSendMessage(e) { e.preventDefault(); showToast('Message sent'); }
@@ -994,12 +1048,6 @@
         function handleModLogin(e) { e.preventDefault(); closeModLoginModal(); }
         function handleAddDeviceSubmit(e) { e.preventDefault(); closeAddDeviceModal(); }
         function handleAddBalanceSubmit(e) { e.preventDefault(); closeAddBalanceModal(); }
-        function handleIncomeSubmit(e) { e.preventDefault(); closeIncomeModal(); }
-        function handleLoanSubmit(e) { e.preventDefault(); closeLoanModal(); }
-        function handleMarketSubmit(e) { e.preventDefault(); closeMarketModal(); }
-        function handleSellNewIdSubmit(e) { e.preventDefault(); closeSellLicenseModal(); }
-        function handleLoanReturnSubmit(e) { e.preventDefault(); closeLoanReturnModal(); }
-        function handleChangePasswordSubmit(e) { e.preventDefault(); showToast('Password updated'); }
         function addProductToMemoCart() {}
         function saveAndPreviewA4Memo() {}
         function calculateLotPrice() {}
