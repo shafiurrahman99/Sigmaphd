@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
+
 const supabaseUrl = process.env.SIGMAPHD_URL;
 const supabaseKey = process.env.SIGMAPHD_SERVICE_ROLE_KEY;
 
