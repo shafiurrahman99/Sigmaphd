@@ -31,7 +31,7 @@ export default async function handler(req, res) {
             case 'LOGIN':
                 const { data: userAuth, error: authError } = await supabase
                     .from('users_auth')
-                    .select('company_id, user_id, composite_user_id, mobile, password, wallet_balance, validity_days, coupon_code')[span_2](start_span)[span_2](end_span)
+                    .select('company_id, user_id, composite_user_id, mobile, password, wallet_balance, validity_days, coupon_code')
                     .eq('company_id', company_id)
                     .eq('user_id', user_id)
                     .single();
@@ -46,26 +46,26 @@ export default async function handler(req, res) {
                 break;
 
             case 'FETCH_DASHBOARD_DATA':
-                // ১. ডেইলিস খরচ ফেচ করা (daily_expenses)[span_3](start_span)[span_3](end_span)
+                // ১. ডেইলিস খরচ ফেচ করা (daily_expenses)
                 const { data: dailyExpenses, error: dExpErr } = await supabase
                     .from('daily_expenses')
-                    .select('id, company_id, user_id, composite_user_id, expense_date, description, amount, status, created_at')[span_4](start_span)[span_4](end_span)
+                    .select('id, company_id, user_id, composite_user_id, expense_date, description, amount, status, created_at')
                     .eq('company_id', company_id)
                     .eq('user_id', user_id);
                 if (dExpErr) throw dExpErr;
 
-                // ২. লোন রেকর্ড ফেচ করা (loan_records)[span_5](start_span)[span_5](end_span)
+                // ২. লোন রেকর্ড ফেচ করা (loan_records)
                 const { data: loanRecords, error: lRecErr } = await supabase
                     .from('loan_records')
-                    .select('id, company_id, user_id, composite_user_id, loan_category, entry_date, person_name, amount, is_returned, return_date, extra_fee_or_charge, created_at')[span_6](start_span)[span_6](end_span)
+                    .select('id, company_id, user_id, composite_user_id, loan_category, entry_date, person_name, amount, is_returned, return_date, extra_fee_or_charge, created_at')
                     .eq('company_id', company_id)
                     .eq('user_id', user_id);
                 if (lRecErr) throw lRecErr;
 
-                // ৩. ইনকাম ও এক্সপেন্স রেকর্ড ফেচ করা (income_expense)[span_7](start_span)[span_7](end_span)
+                // ৩. ইনকাম ও এক্সপেন্স রেকর্ড ফেচ করা (income_expense)
                 const { data: incomeExpense, error: incExpListErr } = await supabase
                     .from('income_expense')
-                    .select('id, company_id, user_id, composite_user_id, entry_type, entry_date, description, amount, created_at')[span_8](start_span)[span_8](end_span)
+                    .select('id, company_id, user_id, composite_user_id, entry_type, entry_date, description, amount, created_at')
                     .eq('company_id', company_id)
                     .eq('user_id', user_id);
                 if (incExpListErr) throw incExpListErr;
@@ -73,9 +73,9 @@ export default async function handler(req, res) {
                 result = {
                     success: true,
                     data: {
-                        daily_expenses: dailyExpenses,
-                        loan_records: loanRecords,
-                        income_expense: incomeExpense
+                        daily_expenses: dailyExpenses || [],
+                        loan_records: loanRecords || [],
+                        income_expense: incomeExpense || []
                     }
                 };
                 break;
