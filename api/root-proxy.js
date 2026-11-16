@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ success: false, error: 'Method Not Allowed' });
     }
 
-    const { action, company_id, user_id, composite_user_id, payload } = req.body;
+    const { action, user_id, composite_user_id, payload } = req.body;
 
     try {
         switch (action) {
@@ -34,7 +34,6 @@ export default async function handler(req, res) {
                 const { data, error } = await supabaseServer
                     .from('buy_new_license')
                     .select('*')
-                    .eq('company_id', company_id)
                     .eq('user_id', user_id)
                     .single();
 
