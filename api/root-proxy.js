@@ -5,8 +5,10 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+
 export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    // CORS হেডার যুক্ত করা
+    res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader(
@@ -19,112 +21,121 @@ export default async function handler(req, res) {
         return;
     }
 
-    const { action } = req.body || req.query;
+    if (req.method !== 'POST') {
+        return res.status(405).json({ success: false, error: 'Method Not Allowed' });
+    }
+
+    const { action, company_id, user_id, composite_user_id, payload } = req.body;
 
     try {
         switch (action) {
-            case 'signin': {
-                const { userId, password } = req.body;
-                if (!userId || !password) {
-                    return res.status(400).json({ success: false, message: 'User ID and password are required.' });
-                }
-
-                // Fixed: using supabaseServer
-                const { data: users, error } = await supabaseServer
-                    .from('users')
+            case 'LOGIN': {
+                const { password } = payload;
+                const { data, error } = await supabase
+                    .from('users_auth')
                     .select('*')
-                    .eq('user_id', userId);
+                    .eq('company_id', company_id)
+                    .eq('user_id', user_id)
+                    .single();
 
-                if (error || !users || users.length === 0) {
-                    return res.status(401).json({ success: false, message: 'Invalid User ID or Password.' });
+                if (error || !data) {
+                    return res.status(401).json({ success: false, message: 'Invalid User or Company ID!' });
                 }
 
-                const user = users[0];
-                if (user.status !== 'approved') {
-                    return res.status(403).json({ success: false, message: `Account is currently ${user.status}. Please wait for admin approval.` });
+                if (data.password !== password) {
+                    return res.status(401).json({ success: false, message: 'Incorrect Password!' });
                 }
 
-                return res.status(200).json({
-                    success: true,
-                    message: 'Sign in successful!',
-                    user: { company_id: user.company_id, user_id: user.user_id, full_name: user.full_name }
-                });
+                return res.status(200).json({ success: true, user: data });
             }
 
-            case 'register': {
-                const { companyId, userId, fullName, email, password } = req.body;
-                if (!companyId || !userId || !fullName || !email || !password) {
-                    return res.status(400).json({ success: false, message: 'All registration fields are required.' });
-                }
-
-                // Fixed: using supabaseServer
-                const { data, error } = await supabaseServer
-                    .from('users')
-                    .insert([
-                        {
-                            company_id: companyId,
-                            user_id: userId,
-                            full_name: fullName,
-                            email: email,
-                            password_hash: password, // Note: Make sure to hash passwords in production!
-                            status: 'pending'
-                        }
-                    ])
-                    .select();
-
-                if (error) {
-                    return res.status(400).json({ success: false, message: error.message });
-                }
-
-                return res.status(201).json({
-                    success: true,
-                    message: 'Registration submitted successfully. Waiting for admin approval.',
-                    data: data[0]
-                });
-            }
-
-            case 'send_otp': {
-                const { userId } = req.body;
-                if (!userId) {
-                    return res.status(400).json({ success: false, message: 'User ID is required.' });
-                }
-
-                // Fixed: using supabaseServer
-                const { data: users, error: userError } = await supabaseServer
-                    .from('users')
-                    .select('company_id, user_id, email')
-                    .eq('user_id', userId);
-
-                if (userError || !users || users.length === 0) {
-                    return res.status(404).json({ success: false, message: 'User ID not found.' });
-                }
-
-                const user = users[0];
-                const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-                const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-
-                // Fixed: using supabaseServer
-                await supabaseServer.from('otp_codes').insert([
-                    {
-                        company_id: user.company_id,
-                        user_id: user.user_id,
-                        otp_code: otpCode,
-                        expires_at: expiresAt.toISOString(),
-                        is_used: false
-                    }
+            case 'FETCH_DASHBOARD_DATA': {
+                // সমান্তরালভাবে (parallel) ডাটাবেজ থেকে সব রেকর্ড ফেচ করা
+                const [incomeExpenseRes, loanRes, dailyExpenseRes] = await Promise.all([
+                    supabase.from('income_expense').select('*').eq('composite_user_id', composite_user_id),
+                    supabase.from('loan_records').select('*').eq('composite_user_id', composite_user_id),
+                    supabase.from('daily_expenses').select('*').eq('composite_user_id', composite_user_id)
                 ]);
 
                 return res.status(200).json({
                     success: true,
-                    message: `OTP sent successfully for User ID: ${userId}`
+                    data: {
+                        income_expense: incomeExpenseRes.data || [],
+                        loan_records: loanRes.data || [],
+                        daily_expenses: dailyExpenseRes.data || []
+                    }
                 });
             }
 
+            case 'BUY_NEW_LICENSE': {
+                const { mobile, email } = payload;
+                const { data, error } = await supabase
+                    .from('user_devices') // অথবা আপনার লাইসেন্স রিকোয়েস্ট টেবিল
+                    .insert([{ mobile, email, status: 'Pending', created_at: new Date() }]);
+
+                if (error) throw error;
+                return res.status(200).json({ success: true, data });
+            }
+
+            case 'ADD_INCOME_EXPENSE': {
+                const { entry_type, entry_date, description, amount } = payload;
+                const { data, error } = await supabase
+                    .from('income_expense')
+                    .insert([{
+                        company_id,
+                        user_id,
+                        composite_user_id,
+                        entry_type,
+                        entry_date,
+                        description,
+                        amount
+                    }]);
+
+                if (error) throw error;
+                return res.status(200).json({ success: true, data });
+            }
+
+            case 'ADD_LOAN': {
+                const { loan_category, entry_date, person_name, amount } = payload;
+                const { data, error } = await supabase
+                    .from('loan_records')
+                    .insert([{
+                        company_id,
+                        user_id,
+                        composite_user_id,
+                        loan_category,
+                        entry_date,
+                        person_name,
+                        amount
+                    }]);
+
+                if (error) throw error;
+                return res.status(200).json({ success: true, data });
+            }
+
+            case 'ADD_DAILY_EXPENSE': {
+                const { expense_date, description, amount, status } = payload;
+                const { data, error } = await supabase
+                    .from('daily_expenses')
+                    .insert([{
+                        company_id,
+                        user_id,
+                        composite_user_id,
+                        expense_date,
+                        description,
+                        amount,
+                        status
+                    }]);
+
+                if (error) throw error;
+                return res.status(200).json({ success: true, data });
+            }
+
             default:
-                return res.status(400).json({ success: false, message: 'Invalid action specified.' });
+                return res.status(400).json({ success: false, error: 'Invalid Action Provided' });
         }
     } catch (err) {
-        console.error("Proxy Error:", err.message);
-        return res.status(500).json({ success: false, message: 'Internal Server Error', error: err.message });
+        console.error('Proxy Error:', err.message);
+        return res.status(500).json({ success: false, error: err.message });
     }
 }
