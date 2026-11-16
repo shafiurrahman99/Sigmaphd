@@ -107,7 +107,6 @@ export default async function handler(req, res) {
                     .insert([{
                         company_id,
                         user_id,
-                        composite_user_id,
                         loan_category,
                         entry_date,
                         person_name,
@@ -125,7 +124,6 @@ export default async function handler(req, res) {
                     .insert([{
                         company_id,
                         user_id,
-                        composite_user_id,
                         expense_date,
                         description,
                         amount,
