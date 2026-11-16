@@ -206,11 +206,15 @@ async function handleLogOut() {
     showToast('Logged out');
 }
 
-// Buy New ID / License সাবমিট হ্যান্ডলার
+// Buy New ID / License সাবমিট হ্যান্ডলার (আপডেট করা হয়েছে)
 async function handleLandingBuySubmit(e) {
     e.preventDefault();
-    const mobile = document.getElementById('landingBuyMobile').value.trim();
-    const email = document.getElementById('landingBuyEmail').value.trim();
+    const customer_mobile = document.getElementById('landingBuyMobile').value.trim();
+    const customer_email = document.getElementById('landingBuyEmail').value.trim();
+    
+    // যদি আপনার ফর্মে পেমেন্ট আইডি ফিল্ড থাকে, তবে নিচের মতো নিতে পারেন (না থাকলে এটি ফাকা থাকবে)
+    const paymentIdEl = document.getElementById('landingBuyPaymentId');
+    const payment_id = paymentIdEl ? paymentIdEl.value.trim() : '';
 
     try {
         const response = await fetch(PROXY_URL, {
@@ -218,7 +222,7 @@ async function handleLandingBuySubmit(e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'BUY_NEW_LICENSE',
-                payload: { mobile, email }
+                payload: { customer_mobile, customer_email, payment_id }
             })
         });
         const result = await response.json();
@@ -227,6 +231,7 @@ async function handleLandingBuySubmit(e) {
             closeBuyLicenseLandingModal();
             document.getElementById('landingBuyMobile').value = '';
             document.getElementById('landingBuyEmail').value = '';
+            if (paymentIdEl) paymentIdEl.value = '';
         } else {
             showToast(result.error || 'সংরক্ষণ ব্যর্থ হয়েছে!');
         }
