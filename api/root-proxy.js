@@ -32,7 +32,7 @@ export default async function handler(req, res) {
             case 'LOGIN': {
                 const { password } = payload;
                 const { data, error } = await supabaseServer
-                    .from('users_auth')
+                    .from('buy_new_license')
                     .select('*')
                     .eq('company_id', company_id)
                     .eq('user_id', user_id)
