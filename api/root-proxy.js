@@ -90,7 +90,6 @@ export default async function handler(req, res) {
                     .insert([{
                         company_id,
                         user_id,
-                        composite_user_id,
                         entry_type,
                         entry_date,
                         description,
