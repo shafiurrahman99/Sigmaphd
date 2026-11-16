@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         switch (action) {
             case 'LOGIN': {
                 const { password } = payload;
-                const { data, error } = await supabase
+                const { data, error } = await supabaseServer
                     .from('users_auth')
                     .select('*')
                     .eq('company_id', company_id)
@@ -52,9 +52,9 @@ export default async function handler(req, res) {
             case 'FETCH_DASHBOARD_DATA': {
                 // সমান্তরালভাবে (parallel) ডাটাবেজ থেকে সব রেকর্ড ফেচ করা
                 const [incomeExpenseRes, loanRes, dailyExpenseRes] = await Promise.all([
-                    supabase.from('income_expense').select('*').eq('composite_user_id', composite_user_id),
-                    supabase.from('loan_records').select('*').eq('composite_user_id', composite_user_id),
-                    supabase.from('daily_expenses').select('*').eq('composite_user_id', composite_user_id)
+                    supabaseServer.from('income_expense').select('*').eq('composite_user_id', composite_user_id),
+                    supabaseServer.from('loan_records').select('*').eq('composite_user_id', composite_user_id),
+                    supabaseServer.from('daily_expenses').select('*').eq('composite_user_id', composite_user_id)
                 ]);
 
                 return res.status(200).json({
@@ -68,10 +68,16 @@ export default async function handler(req, res) {
             }
 
             case 'BUY_NEW_LICENSE': {
-                const { mobile, email } = payload;
-                const { data, error } = await supabase
-                    .from('user_devices') // অথবা আপনার লাইসেন্স রিকোয়েস্ট টেবিল
-                    .insert([{ mobile, email, status: 'Pending', created_at: new Date() }]);
+                const { customer_mobile, customer_email, payment_id } = payload;
+                const { data, error } = await supabaseServer
+                    .from('buy_new_license')
+                    .insert([{ 
+                        customer_mobile, 
+                        customer_email, 
+                        payment_id: payment_id || '', 
+                        status: 'Pending', 
+                        created_at: new Date() 
+                    }]);
 
                 if (error) throw error;
                 return res.status(200).json({ success: true, data });
@@ -79,7 +85,7 @@ export default async function handler(req, res) {
 
             case 'ADD_INCOME_EXPENSE': {
                 const { entry_type, entry_date, description, amount } = payload;
-                const { data, error } = await supabase
+                const { data, error } = await supabaseServer
                     .from('income_expense')
                     .insert([{
                         company_id,
@@ -97,7 +103,7 @@ export default async function handler(req, res) {
 
             case 'ADD_LOAN': {
                 const { loan_category, entry_date, person_name, amount } = payload;
-                const { data, error } = await supabase
+                const { data, error } = await supabaseServer
                     .from('loan_records')
                     .insert([{
                         company_id,
@@ -115,7 +121,7 @@ export default async function handler(req, res) {
 
             case 'ADD_DAILY_EXPENSE': {
                 const { expense_date, description, amount, status } = payload;
-                const { data, error } = await supabase
+                const { data, error } = await supabaseServer
                     .from('daily_expenses')
                     .insert([{
                         company_id,
