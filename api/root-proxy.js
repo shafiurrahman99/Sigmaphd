@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabaseServer = createClient(SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY);
+const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -29,7 +29,8 @@ export default async function handler(req, res) {
                     return res.status(400).json({ success: false, message: 'User ID and password are required.' });
                 }
 
-                const { data: users, error } = await supabase
+                // Fixed: using supabaseServer
+                const { data: users, error } = await supabaseServer
                     .from('users')
                     .select('*')
                     .eq('user_id', userId);
@@ -56,7 +57,8 @@ export default async function handler(req, res) {
                     return res.status(400).json({ success: false, message: 'All registration fields are required.' });
                 }
 
-                const { data, error } = await supabase
+                // Fixed: using supabaseServer
+                const { data, error } = await supabaseServer
                     .from('users')
                     .insert([
                         {
@@ -64,7 +66,7 @@ export default async function handler(req, res) {
                             user_id: userId,
                             full_name: fullName,
                             email: email,
-                            password_hash: password,
+                            password_hash: password, // Note: Make sure to hash passwords in production!
                             status: 'pending'
                         }
                     ])
@@ -87,7 +89,8 @@ export default async function handler(req, res) {
                     return res.status(400).json({ success: false, message: 'User ID is required.' });
                 }
 
-                const { data: users, error: userError } = await supabase
+                // Fixed: using supabaseServer
+                const { data: users, error: userError } = await supabaseServer
                     .from('users')
                     .select('company_id, user_id, email')
                     .eq('user_id', userId);
@@ -100,7 +103,8 @@ export default async function handler(req, res) {
                 const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
                 const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-                await supabase.from('otp_codes').insert([
+                // Fixed: using supabaseServer
+                await supabaseServer.from('otp_codes').insert([
                     {
                         company_id: user.company_id,
                         user_id: user.user_id,
@@ -120,13 +124,7 @@ export default async function handler(req, res) {
                 return res.status(400).json({ success: false, message: 'Invalid action specified.' });
         }
     } catch (err) {
+        console.error("Proxy Error:", err.message);
         return res.status(500).json({ success: false, message: 'Internal Server Error', error: err.message });
     }
-try {
-  // Your Supabase/Octokit logic here
-} catch (error) {
-  console.error("Proxy Error:", error.message);
-  return res.status(500.json({ error: error.message }));
-}
-
 }
