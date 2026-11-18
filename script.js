@@ -1,34 +1,26 @@
+/**
+ * =========================================================================
+ * SIGMA PhD™ - PRODUCTION SCRIPT (Direct Database Integration)
+ * =========================================================================
+ */
+
 let GLOBAL_COMPANY_ID = "101";
-let currentUserId = "admin";
-let currentCompositeUserId = "101_admin";
-let validityExpiryTime = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
+let currentUserId = "";
+let currentCompositeUserId = "";
+let validityExpiryTime = new Date().getTime();
 let activeDevices = 1;
 
-let accountsMasterRecords = [
-    { id: 'acc_1', company_id: '101', user_id: 'top_boss', password: '123', composite_user_id: '101_top_boss', wallet_balance: 0.00, upline_id: null },
-    { id: 'acc_2', company_id: '101', user_id: 'mid_leader', password: '123', composite_user_id: '101_mid_leader', wallet_balance: 0.00, upline_id: '101_top_boss' },
-    { id: 'acc_3', company_id: '101', user_id: 'admin', password: '1234', composite_user_id: '101_admin', wallet_balance: 0.00, upline_id: '101_mid_leader' },
-    { id: 'acc_4', company_id: '101', user_id: 'sub_user_01', password: '123', composite_user_id: '101_sub_user_01', wallet_balance: 0.00, upline_id: '101_admin', status: 'In_Stock', lot_id: 'LT-9042' }
-];
-
-let incomeExpenseRecords = [
-    { entry_type: 'Income', entry_date: '2026-11-01', description: 'Initial Capital', amount: 50000, timestamp: Date.now() - 100000 }
-];
+// ডেমো ডাটা রিমুভ করে এম্পটি অ্যারে রাখা হলো, যা ডাটাবেজ থেকে লোড হবে
+let accountsMasterRecords = [];
+let incomeExpenseRecords = [];
 let loanGivenRecords = [];
 let loanTakenRecords = [];
 let marketExpenses = [];
-let memoCart = [{ desc: 'Software License Key', qty: 1, rate: 500, total: 500 }];
+let memoCart = [];
 
 let activePrivatePartner = null;
-let universalMessages = [
-    { sender: 'top_boss', text: 'সবাইকে স্বাগতম! আমাদের নতুন লট এবং ড্যাশবোর্ড সিস্টেম এখন লাইভ।', time: '08:30 PM' },
-    { sender: 'mid_leader', text: 'ধন্যবাদ! হিসাব-নিকাশ এবং ক্যাশ মেমো খুব সুন্দর কাজ করছে।', time: '08:35 PM' }
-];
-let privateMessagesMap = {
-    'top_boss': [{ sender: 'top_boss', text: 'হ্যালো! তোমার লট স্টক কেমন চলছে?', time: '08:40 PM' }],
-    'mid_leader': [{ sender: 'mid_leader', text: 'ভাই, নতুন আইডি সেলের কমিশন ঠিকমতো যোগ হচ্ছে।', time: '08:45 PM' }],
-    'sub_user_01': [{ sender: 'sub_user_01', text: 'আসসালামু আলাইকুম, আমি নতুন একাউন্ট অ্যাক্টিভ করেছি।', time: '08:50 PM' }]
-};
+let universalMessages = [];
+let privateMessagesMap = {};
 
 function showToast(text) {
     const toast = document.getElementById('toast');
@@ -45,59 +37,92 @@ function formatMoney(num) {
     return '৳ ' + Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// Secure API Communication via Proxy
+// -------------------------------------------------------------------------
+// DIRECT BACKEND & DATABASE COMMUNICATION (PROXY / API)
+// -------------------------------------------------------------------------
 async function callBackendApi(action, payload) {
     try {
         const response = await fetch('api/root-proxy.js', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action, composite_user_id: currentCompositeUserId, payload })
+            body: JSON.stringify({ 
+                action, 
+                company_id: GLOBAL_COMPANY_ID, 
+                composite_user_id: currentCompositeUserId, 
+                payload 
+            })
         });
         const result = await response.json();
         return result;
     } catch (err) {
-        console.error('API Error:', err);
-        return { success: false, message: 'Network or server communication error.' };
+        console.error('Database API Error:', err);
+        return { success: false, message: 'Network or database connection error.' };
     }
 }
 
-function handleMainSignIn(e) {
+// -------------------------------------------------------------------------
+// AUTHENTICATION & LOGIN (FETCH FROM accounts_master TABLE)
+// -------------------------------------------------------------------------
+async function handleMainSignIn(e) {
     e.preventDefault();
     const uid = document.getElementById('mainUserId').value.trim();
     const pass = document.getElementById('mainUserPassword').value.trim();
-    const user = accountsMasterRecords.find(u => u.user_id === uid && u.password === pass);
 
-    if (user) {
+    // সরাসরি ডাটাবেজ থেকে ইউজার ভেরিফিকেশন কল
+    const res = await callBackendApi('authenticate_user', { user_id: uid, password: pass });
+
+    if (res.success && res.user) {
+        const user = res.user;
         currentUserId = user.user_id;
         currentCompositeUserId = user.composite_user_id;
+        validityExpiryTime = new Date().getTime() + (user.validity_days * 24 * 60 * 60 * 1000);
+
         document.getElementById('currentLoggedInUser').innerText = currentUserId;
         document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
         document.getElementById('userCouponCode').innerText = 'SIGMA-' + currentUserId.toUpperCase();
         document.getElementById('sellAutoCouponCode').innerText = 'SIGMA-' + currentUserId.toUpperCase();
-        updateWalletDisplay();
+        
+        document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance);
         
         document.getElementById('page1').classList.add('hidden');
         document.getElementById('page2').classList.remove('hidden');
         
-        renderAllDashboardTables();
-        renderLotInventory();
+        // ডাটাবেজ থেকে ড্যাশবোর্ডের সমস্ত টেবিল ডাটা লোড করা
+        await loadAllDatabaseRecords();
+        
         showToast('স্বাগতম ' + currentUserId + '! সফলভাবে লগইন হয়েছে।');
     } else {
-        showToast('ভুল ইউজার আইডি অথবা পাসওয়ার্ড! (ডেমো: admin / 1234)');
+        showToast(res.message || 'ভুল ইউজার আইডি অথবা পাসওয়ার্ড!');
     }
 }
 
 function handleLogOut() {
+    currentUserId = "";
+    currentCompositeUserId = "";
     document.getElementById('page2').classList.add('hidden');
     document.getElementById('page1').classList.remove('hidden');
     showToast('সফলভাবে লগআউট করা হয়েছে।');
 }
 
 function updateWalletDisplay() {
-    const user = accountsMasterRecords.find(u => u.user_id === currentUserId);
-    if (user) {
-        document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance);
+    // ডাটাবেজ থেকে লেটেস্ট ব্যালেন্স ফেচ করা যেতে পারে অথবা লোকাল আপডেট রাখা যায়
+}
+
+// -------------------------------------------------------------------------
+// LOAD ALL TABLES DATA FROM DATABASE
+// -------------------------------------------------------------------------
+async function loadAllDatabaseRecords() {
+    const res = await callBackendApi('fetch_dashboard_data', {});
+    if (res.success) {
+        incomeExpenseRecords = res.income_expenses || [];
+        loanGivenRecords = res.loans_receivable || [];
+        loanTakenRecords = res.loans_payable || [];
+        marketExpenses = res.daily_expenses || [];
+        accountsMasterRecords = res.accounts || [];
+        universalMessages = res.public_chats || [];
     }
+    renderAllDashboardTables();
+    renderLotInventory();
 }
 
 function startValidityCountdown() {
@@ -124,6 +149,9 @@ function renderAllDashboardTables() {
     renderMarketExpensesTable();
 }
 
+// -------------------------------------------------------------------------
+// MONTHLY SUMMARY TABLE (income_expense TABLE)
+// -------------------------------------------------------------------------
 function renderMonthlySummaryTable() {
     let totalInc = 0;
     let totalExp = 0;
@@ -147,7 +175,7 @@ function renderMonthlySummaryTable() {
 
     marketExpenses.forEach(m => {
         if (m.status === 'Paid') {
-            const monthKey = m.date ? m.date.slice(0, 7) : '2026-11';
+            const monthKey = m.expense_date ? m.expense_date.slice(0, 7) : '2026-11';
             if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { inc: 0, exp: 0 };
             totalExp += Number(m.amount);
             monthlyMap[monthKey].exp += Number(m.amount);
@@ -176,6 +204,7 @@ function renderMonthlySummaryTable() {
 
 function openIncomeModal() { document.getElementById('incomeModal').classList.remove('hidden'); }
 function closeIncomeModal() { document.getElementById('incomeModal').classList.add('hidden'); }
+
 async function handleIncomeSubmit(e) {
     e.preventDefault();
     const type = document.getElementById('incomeEntryType').value;
@@ -183,50 +212,51 @@ async function handleIncomeSubmit(e) {
     const desc = document.getElementById('incomeDesc').value.trim();
     const amount = parseFloat(document.getElementById('incomeAmount').value) || 0;
 
-    await callBackendApi('save_income_expense', { type, date, desc, amount });
-    incomeExpenseRecords.push({ entry_type: type, entry_date: date, description: desc, amount, timestamp: Date.now() });
-    closeIncomeModal();
-    renderAllDashboardTables();
-    showToast(`${type} এন্ট্রি সফলভাবে সেভ হয়েছে!`);
+    const res = await callBackendApi('save_income_expense', { type, date, desc, amount });
+    if (res.success) {
+        incomeExpenseRecords.push({ entry_type: type, entry_date: date, description: desc, amount });
+        closeIncomeModal();
+        renderAllDashboardTables();
+        showToast(`${type} এন্ট্রি সফলভাবে ডাটাবেজে সেভ হয়েছে!`);
+    } else {
+        showToast(res.message || 'সেভ করতে সমস্যা হয়েছে।');
+    }
 }
 
 function openLoanModal() { document.getElementById('loanModal').classList.remove('hidden'); }
 function closeLoanModal() { document.getElementById('loanModal').classList.add('hidden'); }
+
 async function handleLoanSubmit(e) {
     e.preventDefault();
     const type = document.getElementById('loanType').value;
     const date = document.getElementById('loanDate').value;
     const person = document.getElementById('loanPersonName').value.trim();
     const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
-    const id = 'LN-' + Date.now();
 
-    await callBackendApi('save_loan', { type, date, person, amount });
-    if (type === 'Receivable') {
-        loanGivenRecords.push({ id, date, person, amount, settled: false });
-        incomeExpenseRecords.push({ entry_type: 'IncomeDeduction', entry_date: date, description: `Receivable Given: ${person}`, amount, timestamp: Date.now() });
-        showToast('Receivable এন্ট্রি হয়েছে এবং ইনকাম থেকে মাইনাস করা হয়েছে।');
+    const res = await callBackendApi('save_loan', { category: type, date, person_name: person, amount });
+    if (res.success) {
+        await loadAllDatabaseRecords();
+        closeLoanModal();
+        showToast('লোন রেকর্ড ডাটাবেজে সংরক্ষিত হয়েছে।');
     } else {
-        loanTakenRecords.push({ id, date, person, amount, settled: false });
-        showToast('Payable রেকর্ড সেভ হয়েছে।');
+        showToast(res.message || 'লোন রেকর্ড সংরক্ষণ ব্যর্থ হয়েছে।');
     }
-    closeLoanModal();
-    renderAllDashboardTables();
 }
 
 function renderLoanTables() {
     let givenTotal = 0;
     const givenList = document.getElementById('loanGivenList');
     givenList.innerHTML = loanGivenRecords.length === 0 ? '<p class="text-[11px] text-slate-500">No Receivable records.</p>' : loanGivenRecords.map(l => {
-        if (!l.settled) givenTotal += l.amount;
+        if (l.status !== 'Paid') givenTotal += Number(l.amount);
         return `
             <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
                 <div>
-                    <span class="font-bold text-slate-200">${l.person}</span>
-                    <span class="text-[10px] text-slate-400 block">${l.date} • ${l.settled ? '<span class="text-emerald-400">Settled</span>' : '<span class="text-amber-400">Pending</span>'}</span>
+                    <span class="font-bold text-slate-200">${l.person_name}</span>
+                    <span class="text-[10px] text-slate-400 block">${l.entry_date} • ${l.status === 'Paid' ? '<span class="text-emerald-400">Settled</span>' : '<span class="text-amber-400">Pending</span>'}</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <span class="font-mono font-bold text-amber-400">${formatMoney(l.amount)}</span>
-                    ${!l.settled ? `<button onclick="openSettleModal('${l.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
+                    ${l.status !== 'Paid' ? `<button onclick="openSettleModal('${l.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
                 </div>
             </div>
         `;
@@ -236,16 +266,16 @@ function renderLoanTables() {
     let takenTotal = 0;
     const takenList = document.getElementById('loanTakenList');
     takenList.innerHTML = loanTakenRecords.length === 0 ? '<p class="text-[11px] text-slate-500">No Payable records.</p>' : loanTakenRecords.map(l => {
-        if (!l.settled) takenTotal += l.amount;
+        if (l.status !== 'Paid') takenTotal += Number(l.amount);
         return `
             <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
                 <div>
-                    <span class="font-bold text-slate-200">${l.person}</span>
-                    <span class="text-[10px] text-slate-400 block">${l.date} • ${l.settled ? '<span class="text-emerald-400">Paid</span>' : '<span class="text-rose-400">Due</span>'}</span>
+                    <span class="font-bold text-slate-200">${l.person_name}</span>
+                    <span class="text-[10px] text-slate-400 block">${l.entry_date} • ${l.status === 'Paid' ? '<span class="text-emerald-400">Paid</span>' : '<span class="text-rose-400">Due</span>'}</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <span class="font-mono font-bold text-rose-400">${formatMoney(l.amount)}</span>
-                    ${!l.settled ? `<button onclick="openSettleModal('${l.id}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
+                    ${l.status !== 'Paid' ? `<button onclick="openSettleModal('${l.id}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
                 </div>
             </div>
         `;
@@ -258,36 +288,26 @@ function openSettleModal(id) {
     document.getElementById('settleLoanModal').classList.remove('hidden');
 }
 function closeSettleModal() { document.getElementById('settleLoanModal').classList.add('hidden'); }
+
 async function handleSettleLoanSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('settleLoanId').value;
     const date = document.getElementById('settleDate').value;
     const extra = parseFloat(document.getElementById('settleExtraAmount').value) || 0;
 
-    await callBackendApi('settle_loan', { id, date, extra });
-
-    const given = loanGivenRecords.find(l => l.id === id);
-    if (given && !given.settled) {
-        given.settled = true;
-        incomeExpenseRecords.push({ entry_type: 'Income', entry_date: date, description: `Receivable Settled: ${given.person}`, amount: given.amount, timestamp: Date.now() });
-        showToast('Receivable সেটেল হয়েছে এবং ইনকামে যোগ হয়েছে!');
+    const res = await callBackendApi('settle_loan', { id, settle_date: date, extra_amount: extra });
+    if (res.success) {
+        await loadAllDatabaseRecords();
+        closeSettleModal();
+        showToast('লোন সফলভাবে সেটেল করা হয়েছে!');
+    } else {
+        showToast(res.message || 'সেটেলমেন্ট ব্যর্থ হয়েছে।');
     }
-
-    const taken = loanTakenRecords.find(l => l.id === id);
-    if (taken && !taken.settled) {
-        taken.settled = true;
-        if (extra > 0) {
-            incomeExpenseRecords.push({ entry_type: 'Expense', entry_date: date, description: `Payable Extra/Charge: ${taken.person}`, amount: extra, timestamp: Date.now() });
-        }
-        showToast('Payable লোন সেটেল করা হয়েছে!');
-    }
-
-    closeSettleModal();
-    renderAllDashboardTables();
 }
 
 function openMarketModal() { document.getElementById('marketModal').classList.remove('hidden'); }
 function closeMarketModal() { document.getElementById('marketModal').classList.add('hidden'); }
+
 async function handleMarketSubmit(e) {
     e.preventDefault();
     const date = document.getElementById('marketDate').value;
@@ -295,31 +315,33 @@ async function handleMarketSubmit(e) {
     const amount = parseFloat(document.getElementById('marketAmount').value) || 0;
     const status = document.getElementById('marketStatus').value;
 
-    await callBackendApi('save_market_expense', { date, desc, amount, status });
-    marketExpenses.push({ id: 'EXP-' + Date.now(), date, desc, amount, status });
-    closeMarketModal();
-    renderAllDashboardTables();
-    showToast('দৈনিক খরচ যুক্ত হয়েছে!');
+    const res = await callBackendApi('save_market_expense', { expense_date: date, description: desc, amount, status });
+    if (res.success) {
+        await loadAllDatabaseRecords();
+        closeMarketModal();
+        showToast('দৈনিক খরচ ডাটাবেজে যুক্ত হয়েছে!');
+    } else {
+        showToast(res.message || 'খরচ যুক্ত করতে সমস্যা হয়েছে।');
+    }
 }
 
-function toggleMarketStatus(id) {
-    const item = marketExpenses.find(m => m.id === id);
-    if (item) {
-        item.status = item.status === 'Paid' ? 'Due' : 'Paid';
-        renderAllDashboardTables();
+async function toggleMarketStatus(id) {
+    const res = await callBackendApi('toggle_market_expense_status', { id });
+    if (res.success) {
+        await loadAllDatabaseRecords();
     }
 }
 
 function renderMarketExpensesTable() {
     const tbody = document.getElementById('marketExpenseList');
     if (marketExpenses.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-slate-500">No daily expenses recorded.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-slate-500">No daily expenses recorded in database.</td></tr>';
         return;
     }
     tbody.innerHTML = marketExpenses.map(m => `
         <tr class="text-slate-300">
-            <td class="py-2 px-2 font-mono text-[11px]">${m.date}</td>
-            <td class="py-2 px-2">${m.desc}</td>
+            <td class="py-2 px-2 font-mono text-[11px]">${m.expense_date}</td>
+            <td class="py-2 px-2">${m.description}</td>
             <td class="py-2 px-2 font-mono text-rose-400 font-bold">${formatMoney(m.amount)}</td>
             <td class="py-2 px-2 text-right">
                 <button onclick="toggleMarketStatus('${m.id}')" class="${m.status === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[10px] font-bold">
@@ -336,6 +358,7 @@ function openBuyLotModal() {
     document.getElementById('buyLotModal').classList.remove('hidden');
 }
 function closeBuyLotModal() { document.getElementById('buyLotModal').classList.add('hidden'); }
+
 function calculateLotPrice() {
     const qty = parseInt(document.getElementById('lotQuantitySelect').value) || 10;
     const sub = qty * 100;
@@ -350,25 +373,14 @@ async function handleCashPayLot() {
     const lotNo = document.getElementById('generatedLotNumber').innerText;
     const qty = parseInt(document.getElementById('lotQuantitySelect').value) || 10;
     
-    await callBackendApi('buy_lot', { lotNo, qty });
-
-    for (let i = 1; i <= qty; i++) {
-        const subId = `sub_${lotNo.toLowerCase().replace('-', '')}_${String(i).padStart(2, '0')}`;
-        accountsMasterRecords.push({
-            id: 'acc_' + Date.now() + '_' + i,
-            company_id: GLOBAL_COMPANY_ID,
-            user_id: subId,
-            password: 'pass' + Math.floor(1000 + Math.random() * 9000),
-            composite_user_id: `${GLOBAL_COMPANY_ID}_${subId}`,
-            wallet_balance: 0.00,
-            upline_id: currentCompositeUserId,
-            status: 'In_Stock',
-            lot_id: lotNo
-        });
+    const res = await callBackendApi('buy_lot', { lot_id: lotNo, quantity: qty });
+    if (res.success) {
+        await loadAllDatabaseRecords();
+        closeBuyLotModal();
+        showToast(`${lotNo} লটের ${qty}টি আইডি সফলভাবে ডাটাবেজ ইনভেন্টরিতে যুক্ত হয়েছে!`);
+    } else {
+        showToast(res.message || 'লট ক্রয় ব্যর্থ হয়েছে।');
     }
-    closeBuyLotModal();
-    renderLotInventory();
-    showToast(`${lotNo} লটের ${qty}টি আইডি ইনভেন্টরিতে যুক্ত হয়েছে!`);
 }
 
 function renderLotInventory() {
@@ -400,7 +412,7 @@ function renderLotInventory() {
 
 function populateSelectedLotCredentials() {
     const selectedId = document.getElementById('sellLotIdSelect').value;
-    const item = accountsMasterRecords.find(a => a.id === selectedId);
+    const item = accountsMasterRecords.find(a => String(a.id) === String(selectedId));
     if (item) {
         document.getElementById('sellAssignedUserId').value = item.user_id;
         document.getElementById('sellAssignedPassword').value = item.password;
@@ -417,66 +429,73 @@ function closeSellLicenseModal() { document.getElementById('sellLicenseModal').c
 async function handleSellNewIdSubmit(e) {
     e.preventDefault();
     const selectedId = document.getElementById('sellLotIdSelect').value;
-    const item = accountsMasterRecords.find(a => a.id === selectedId);
+    const item = accountsMasterRecords.find(a => String(a.id) === String(selectedId));
     if (!item) {
         showToast('বিক্রি করার জন্য কোনো ইন-স্টক আইডি নেই!');
         return;
     }
 
-    await callBackendApi('process_id_sale_cashback', { seller_composite_id: currentCompositeUserId, sold_item_id: item.id });
+    // ব্যাকএন্ডে সংরক্ষিত stored function (process_id_sale_cashback) কল করা হবে
+    const res = await callBackendApi('process_id_sale_cashback', { 
+        seller_composite_id: currentCompositeUserId, 
+        sold_item_id: item.id 
+    });
 
-    item.status = 'Active';
-    const seller = accountsMasterRecords.find(u => u.user_id === currentUserId);
-    if (seller) {
-        seller.wallet_balance += 8.00;
+    if (res.success) {
+        await loadAllDatabaseRecords();
+        closeSellLicenseModal();
+        showToast(`আইডি (${item.user_id}) বিক্রি সম্পন্ন এবং Weighted Cashback বণ্টিত হয়েছে!`);
+    } else {
+        showToast(res.message || 'আইডি বিক্রি প্রক্রিয়া সম্পন্ন করা যায়নি।');
     }
-    updateWalletDisplay();
-    renderLotInventory();
-    closeSellLicenseModal();
-    showToast(`আইডি (${item.user_id}) বিক্রি সম্পন্ন! ওয়ালেটে +৳ 8.00 যোগ হয়েছে।`);
 }
 
 function openBuyValidityModal() { document.getElementById('buyValidityModal').classList.remove('hidden'); }
 function closeBuyValidityModal() { document.getElementById('buyValidityModal').classList.add('hidden'); }
+
 async function handleBuyValiditySubmit(e) {
     e.preventDefault();
     const trxId = document.getElementById('validityTrxId').value;
-    await callBackendApi('buy_validity', { trxId });
-    validityExpiryTime += (30 * 24 * 60 * 60 * 1000);
-    closeBuyValidityModal();
-    showToast('মেয়াদ সফলভাবে আরও ৩০ দিন বাড়ানো হয়েছে!');
+    const res = await callBackendApi('buy_validity', { trx_id: trxId });
+    if (res.success) {
+        validityExpiryTime += (30 * 24 * 60 * 60 * 1000);
+        closeBuyValidityModal();
+        showToast('মেয়াদ সফলভাবে আরও ৩০ দিন বাড়ানো হয়েছে!');
+    } else {
+        showToast(res.message || 'Validity extension failed.');
+    }
 }
 
 function openBalanceTransferModal() { document.getElementById('balanceTransferModal').classList.remove('hidden'); }
 function closeBalanceTransferModal() { document.getElementById('balanceTransferModal').classList.add('hidden'); }
+
 async function handleBalanceTransferSubmit(e) {
     e.preventDefault();
     const recipient = document.getElementById('transferRecipientId').value;
     const amount = parseFloat(document.getElementById('transferAmount').value) || 0;
 
-    await callBackendApi('balance_transfer', { recipient, amount });
-
-    const seller = accountsMasterRecords.find(u => u.user_id === currentUserId);
-    if (seller && seller.wallet_balance >= amount) {
-        seller.wallet_balance -= amount;
-        updateWalletDisplay();
+    const res = await callBackendApi('balance_transfer', { recipient_id: recipient, amount });
+    if (res.success) {
+        await loadAllDatabaseRecords();
         closeBalanceTransferModal();
         showToast('ব্যালেন্স ট্রান্সফার সফল হয়েছে!');
     } else {
-        showToast('পর্যাপ্ত ব্যালেন্স নেই!');
+        showToast(res.message || 'পর্যাপ্ত ব্যালেন্স বা ভুল প্রাপক আইডি!');
     }
 }
 
 function openBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.remove('hidden'); }
 function closeBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.add('hidden'); }
+
 async function handleLandingBuySubmit(e) {
     e.preventDefault();
     closeBuyLicenseLandingModal();
-    showToast('নতুন আইডির আবেদন ও পেমেন্ট রিকোয়েস্ট জমা হয়েছে!');
+    showToast('নতুন আইডির আবেদন ও পেমেন্ট রিকোয়েস্ট ডাটাবেজে জমা হয়েছে!');
 }
 
 function openAddDeviceModal() { document.getElementById('addDeviceModal').classList.remove('hidden'); }
 function closeAddDeviceModal() { document.getElementById('addDeviceModal').classList.add('hidden'); }
+
 async function handleAddDeviceSubmit(e) {
     e.preventDefault();
     if (activeDevices < 2) {
@@ -489,6 +508,9 @@ async function handleAddDeviceSubmit(e) {
     }
 }
 
+// -------------------------------------------------------------------------
+// CHAT SYSTEM (forum_chat TABLE)
+// -------------------------------------------------------------------------
 function openMyChatModal() {
     exitIndividualChat();
     renderChatUsersList();
@@ -511,12 +533,12 @@ function renderChatUsersList() {
 function renderUniversalMessages() {
     const box = document.getElementById('universalChatBox');
     box.innerHTML = universalMessages.map(m => {
-        const isMe = m.sender === currentUserId;
+        const isMe = m.user_id === currentUserId;
         return `
             <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You (' + m.sender + ')' : m.sender} • ${m.time}</span>
+                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You (' + m.user_id + ')' : m.user_id}</span>
                 <div class="${isMe ? 'bg-emerald-600 text-slate-950 font-semibold' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">
-                    ${m.text}
+                    ${m.message}
                 </div>
             </div>
         `;
@@ -530,24 +552,21 @@ async function sendUniversalMessage(e) {
     const text = input.value.trim();
     if (!text) return;
 
-    await callBackendApi('send_chat', { channel: 'Public_Forum', text });
-
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    universalMessages.push({ sender: currentUserId, text, time: now });
-    input.value = '';
-    renderUniversalMessages();
+    const res = await callBackendApi('send_chat', { channel: 'Public_Forum', message: text });
+    if (res.success) {
+        universalMessages.push({ user_id: currentUserId, message: text });
+        input.value = '';
+        renderUniversalMessages();
+    }
 }
 
 function openIndividualChat(partnerId) {
     activePrivatePartner = partnerId;
-    if (!privateMessagesMap[partnerId]) privateMessagesMap[partnerId] = [];
-    
     document.getElementById('universalChatView').classList.add('hidden');
     document.getElementById('individualChatView').classList.remove('hidden');
     document.getElementById('chatBackBtn').classList.remove('hidden');
     document.getElementById('chatModalTitle').innerHTML = `<i class="fa-solid fa-user-lock text-indigo-400"></i><span>${partnerId}</span>`;
     document.getElementById('activeChatPartnerName').innerText = partnerId;
-    
     renderIndividualMessages();
 }
 
@@ -568,12 +587,12 @@ function renderIndividualMessages() {
         return;
     }
     box.innerHTML = msgs.map(m => {
-        const isMe = m.sender === currentUserId;
+        const isMe = m.user_id === currentUserId;
         return `
             <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You' : m.sender} • ${m.time}</span>
+                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You' : m.user_id}</span>
                 <div class="${isMe ? 'bg-indigo-600 text-white font-medium' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">
-                    ${m.text}
+                    ${m.message}
                 </div>
             </div>
         `;
@@ -588,12 +607,14 @@ async function sendIndividualMessage(e) {
     const text = input.value.trim();
     if (!text) return;
 
-    await callBackendApi('send_chat', { channel: 'DM_' + currentUserId + '_' + activePrivatePartner, text });
-
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    privateMessagesMap[activePrivatePartner].push({ sender: currentUserId, text, time: now });
-    input.value = '';
-    renderIndividualMessages();
+    const channelName = 'DM_' + [currentUserId, activePrivatePartner].sort().join('_');
+    const res = await callBackendApi('send_chat', { channel: channelName, message: text });
+    if (res.success) {
+        if (!privateMessagesMap[activePrivatePartner]) privateMessagesMap[activePrivatePartner] = [];
+        privateMessagesMap[activePrivatePartner].push({ user_id: currentUserId, message: text });
+        input.value = '';
+        renderIndividualMessages();
+    }
 }
 
 function openCashMemoModal() { document.getElementById('cashMemoModal').classList.remove('hidden'); }
