@@ -757,6 +757,11 @@
     <!-- Hidden A4 Print Area -->
     <div id="a4MemoPrintArea" class="hidden"></div>
     
+<!-- সেটিংস বাটন -->
+<button onclick="openUserPassModal()" class="btn-settings" style="background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+    ⚙️ user_password_change
+</button>
+
 <!-- User & Password Change Modal -->
 <div id="userPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center;">
     <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 420px; padding: 24px; color: #f8fafc; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
@@ -766,14 +771,14 @@
             <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
         </div>
 
-        <!-- বর্তমান আইডি ও অটো ইমেইল শো -->
+        <!-- ডাটাবেজ ফিল্ড অনুযায়ী কম্পোজিট আইডি ও বায়ার ইমেইল প্রদর্শন বক্স -->
         <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color: #94a3b8;">Composite ID:</span>
+                <span style="color: #94a3b8;">composite_user_id:</span>
                 <span id="modalCompositeId" style="color: #34d399; font-weight: bold;">--</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #94a3b8;">Email Address:</span>
+                <span style="color: #94a3b8;">buyer_email:</span>
                 <span id="modalAutoEmail" style="color: #fbbf24; font-weight: 500;">--</span>
             </div>
             <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
