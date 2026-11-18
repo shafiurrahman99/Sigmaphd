@@ -144,26 +144,81 @@ export default async function handler(req, res) {
 
             // সেল আইডি এবং আলাদা কলামে বায়ারের নাম, মোবাইল ও ইমেইল সংরক্ষণ
             case 'process_id_sale_cashback': {
-                const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email } = payload;
+    const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload;
 
-                const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
-                    status: 'Active',
-                    buyer_name: buyer_name,
-                    buyer_mobile: buyer_mobile,
-                    buyer_email: buyer_email
-                }).eq('id', sold_item_id);
+    // ১. বিক্রি হওয়া আইডি আপডেট করা
+    const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
+        status: 'Active',
+        buyer_name: buyer_name,
+        buyer_mobile: buyer_mobile,
+        buyer_email: buyer_email,
+        used_coupon: coupon_code
+    }).eq('id', sold_item_id);
 
-                if (updateError) throw updateError;
+    if (updateError) throw updateError;
 
-                const { error } = await supabaseServer.rpc('process_id_sale_cashback', {
-                    p_seller_composite_id: seller_composite_id,
-                    p_direct_bonus: 8.00,
-                    p_chain_pool: 2.00
-                });
+    // ২. সেলারের তথ্য এবং আপলাইন চেইন বের করা
+    const { data: sellerData } = await supabaseServer
+        .from('accounts_master')
+        .select('wallet_balance, upline_id, composite_user_id')
+        .eq('composite_user_id', seller_composite_id)
+        .single();
 
-                if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Sale and cashback processed.' });
-            }
+    let directBonus = 8.00; // বিক্রেতার ডিরেক্ট বোনাস
+    let chainPoolTotal = 2.00; // চেইন পুলের মোট টাকা (যা রেশিও অনুযায়ী ভাগ হবে)
+    let totalSellerNewBalance = (sellerData?.wallet_balance || 0) + directBonus;
+
+    // ৩. আপলাইন চেইন সংগ্রহ করা (ডাইনামিক এন সংখ্যক মেম্বার বা হাজার জন পর্যন্ত)
+    let uplinesChain = [];
+    let currentUplineId = sellerData?.upline_id;
+    
+    while (currentUplineId && currentUplineId !== seller_composite_id) {
+        const { data: upData } = await supabaseServer
+            .from('accounts_master')
+            .select('composite_user_id, wallet_balance, upline_id')
+            .eq('composite_user_id', currentUplineId)
+            .single();
+            
+        if (!upData) break;
+        uplinesChain.push(upData);
+        currentUplineId = upData.upline_id;
+        if (uplinesChain.length > 1000) break; // সুরক্ষা লিমিট
+    }
+
+    let N = uplinesChain.length;
+
+    if (N === 0) {
+        // চেইনে আর কেউ না থাকলে (একা থাকলে) চেইনের পুরো ২ টাকাও সেলার নিজেই পাবেন (মোট ১০ টাকা)
+        totalSellerNewBalance += chainPoolTotal;
+    } else {
+        // প্রফেশনাল ম্যাথমেটিক্যাল ওয়েটেড রেশিও হিসাব (Arithmetic Progression Weighting)
+        // সবচেয়ে কাছের জন পাবে সবচেয়ে বেশি, আর সবচেয়ে দূরের জন (টপ) পাবে সবচেয়ে কম।
+        let totalWeight = (N * (N + 1)) / 2; // সমান্তর ধারার যোগফল সূত্র
+        
+        for (let i = 0; i < N; i++) {
+            let currentWeight = N - i; // i=0 এর জন্য সর্বোচ্চ, i=N-1 এর জন্য সর্বনিম্ন (1)
+            let shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
+            
+            let targetCompositeId = uplinesChain[i].composite_user_id;
+            let targetOldBalance = uplinesChain[i].wallet_balance || 0;
+            
+            // রেশিও অনুযায়ী প্রতিটি আপলাইনের ওয়ালেট আপডেট করা
+            await supabaseServer.from('accounts_master')
+                .update({ wallet_balance: targetOldBalance + shareAmount })
+                .eq('composite_user_id', targetCompositeId);
+        }
+    }
+
+    // ৪. সেলারের চূড়ান্ত ওয়ালেট ব্যালেন্স আপডেট
+    await supabaseServer.from('accounts_master')
+        .update({ wallet_balance: totalSellerNewBalance })
+        .eq('composite_user_id', seller_composite_id);
+
+    return res.status(200).json({ 
+        success: true, 
+        message: `Sale processed successfully with proportional distribution for ${N} uplines.` 
+    });
+}
 
             // ল্যান্ডিং পেজ থেকে নতুন লাইসেন্স বা আইডি আবেদন (আলাদা কলামে সেভ)
             case 'register_new_license': {
