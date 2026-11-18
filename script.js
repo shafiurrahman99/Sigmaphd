@@ -1,6 +1,6 @@
 /**
  * =========================================================================
- * SIGMA PhD™ - PRODUCTION SCRIPT (Direct Database Integration)
+ * SIGMA PhD™ - PRODUCTION SCRIPT (JavaScript Logic & API Connector)
  * =========================================================================
  */
 
@@ -10,7 +10,6 @@ let currentCompositeUserId = "";
 let validityExpiryTime = new Date().getTime();
 let activeDevices = 1;
 
-// ডেমো ডাটা রিমুভ করে এম্পটি অ্যারে রাখা হলো, যা ডাটাবেজ থেকে লোড হবে
 let accountsMasterRecords = [];
 let incomeExpenseRecords = [];
 let loanGivenRecords = [];
@@ -42,7 +41,7 @@ function formatMoney(num) {
 // -------------------------------------------------------------------------
 async function callBackendApi(action, payload) {
     try {
-        const response = await fetch('api/root-proxy', {
+        const response = await fetch('/api/root-proxy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -61,35 +60,30 @@ async function callBackendApi(action, payload) {
 }
 
 // -------------------------------------------------------------------------
-// AUTHENTICATION & LOGIN (FETCH FROM accounts_master TABLE)
+// AUTHENTICATION & LOGIN
 // -------------------------------------------------------------------------
 async function handleMainSignIn(e) {
     e.preventDefault();
     const uid = document.getElementById('mainUserId').value.trim();
     const pass = document.getElementById('mainUserPassword').value.trim();
 
-    // সরাসরি ডাটাবেজ থেকে ইউজার ভেরিফিকেশন কল
     const res = await callBackendApi('authenticate_user', { user_id: uid, password: pass });
 
     if (res.success && res.user) {
         const user = res.user;
         currentUserId = user.user_id;
         currentCompositeUserId = user.composite_user_id;
-        validityExpiryTime = new Date().getTime() + (user.validity_days * 24 * 60 * 60 * 1000);
+        validityExpiryTime = new Date().getTime() + ((user.validity_days || 30) * 24 * 60 * 60 * 1000);
 
         document.getElementById('currentLoggedInUser').innerText = currentUserId;
         document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
         document.getElementById('userCouponCode').innerText = 'SIGMA-' + currentUserId.toUpperCase();
-        document.getElementById('sellAutoCouponCode').innerText = 'SIGMA-' + currentUserId.toUpperCase();
-        
-        document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance);
+        document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
         
         document.getElementById('page1').classList.add('hidden');
         document.getElementById('page2').classList.remove('hidden');
         
-        // ডাটাবেজ থেকে ড্যাশবোর্ডের সমস্ত টেবিল ডাটা লোড করা
         await loadAllDatabaseRecords();
-        
         showToast('স্বাগতম ' + currentUserId + '! সফলভাবে লগইন হয়েছে।');
     } else {
         showToast(res.message || 'ভুল ইউজার আইডি অথবা পাসওয়ার্ড!');
@@ -102,10 +96,6 @@ function handleLogOut() {
     document.getElementById('page2').classList.add('hidden');
     document.getElementById('page1').classList.remove('hidden');
     showToast('সফলভাবে লগআউট করা হয়েছে।');
-}
-
-function updateWalletDisplay() {
-    // ডাটাবেজ থেকে লেটেস্ট ব্যালেন্স ফেচ করা যেতে পারে অথবা লোকাল আপডেট রাখা যায়
 }
 
 // -------------------------------------------------------------------------
@@ -150,7 +140,7 @@ function renderAllDashboardTables() {
 }
 
 // -------------------------------------------------------------------------
-// MONTHLY SUMMARY TABLE (income_expense TABLE)
+// MONTHLY SUMMARY TABLE
 // -------------------------------------------------------------------------
 function renderMonthlySummaryTable() {
     let totalInc = 0;
@@ -214,10 +204,9 @@ async function handleIncomeSubmit(e) {
 
     const res = await callBackendApi('save_income_expense', { type, date, desc, amount });
     if (res.success) {
-        incomeExpenseRecords.push({ entry_type: type, entry_date: date, description: desc, amount });
+        await loadAllDatabaseRecords();
         closeIncomeModal();
-        renderAllDashboardTables();
-        showToast(`${type} এন্ট্রি সফলভাবে ডাটাবেজে সেভ হয়েছে!`);
+        showToast(`${type} এন্ট্রি সফলভাবে সেভ হয়েছে!`);
     } else {
         showToast(res.message || 'সেভ করতে সমস্যা হয়েছে।');
     }
@@ -237,9 +226,9 @@ async function handleLoanSubmit(e) {
     if (res.success) {
         await loadAllDatabaseRecords();
         closeLoanModal();
-        showToast('লোন রেকর্ড ডাটাবেজে সংরক্ষিত হয়েছে।');
+        showToast('লোন রেকর্ড সংরক্ষিত হয়েছে।');
     } else {
-        showToast(res.message || 'লোন রেকর্ড সংরক্ষণ ব্যর্থ হয়েছে।');
+        showToast(res.message || 'সংরক্ষণ ব্যর্থ হয়েছে।');
     }
 }
 
@@ -299,7 +288,7 @@ async function handleSettleLoanSubmit(e) {
     if (res.success) {
         await loadAllDatabaseRecords();
         closeSettleModal();
-        showToast('লোন সফলভাবে সেটেল করা হয়েছে!');
+        showToast('লোন সেটেল করা হয়েছে!');
     } else {
         showToast(res.message || 'সেটেলমেন্ট ব্যর্থ হয়েছে।');
     }
@@ -319,7 +308,7 @@ async function handleMarketSubmit(e) {
     if (res.success) {
         await loadAllDatabaseRecords();
         closeMarketModal();
-        showToast('দৈনিক খরচ ডাটাবেজে যুক্ত হয়েছে!');
+        showToast('দৈনিক খরচ যুক্ত হয়েছে!');
     } else {
         showToast(res.message || 'খরচ যুক্ত করতে সমস্যা হয়েছে।');
     }
@@ -335,7 +324,7 @@ async function toggleMarketStatus(id) {
 function renderMarketExpensesTable() {
     const tbody = document.getElementById('marketExpenseList');
     if (marketExpenses.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-slate-500">No daily expenses recorded in database.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-slate-500">No daily expenses recorded.</td></tr>';
         return;
     }
     tbody.innerHTML = marketExpenses.map(m => `
@@ -352,6 +341,9 @@ function renderMarketExpensesTable() {
     `).join('');
 }
 
+// -------------------------------------------------------------------------
+// LOT & LICENSE MANAGEMENT (Separate Columns for Buyer Data)
+// -------------------------------------------------------------------------
 function openBuyLotModal() {
     document.getElementById('generatedLotNumber').innerText = 'LT-' + Math.floor(1000 + Math.random() * 9000);
     calculateLotPrice();
@@ -377,7 +369,7 @@ async function handleCashPayLot() {
     if (res.success) {
         await loadAllDatabaseRecords();
         closeBuyLotModal();
-        showToast(`${lotNo} লটের ${qty}টি আইডি সফলভাবে ডাটাবেজ ইনভেন্টরিতে যুক্ত হয়েছে!`);
+        showToast(`${lotNo} লটের ${qty}টি আইডি ইনভেন্টরিতে যুক্ত হয়েছে!`);
     } else {
         showToast(res.message || 'লট ক্রয় ব্যর্থ হয়েছে।');
     }
@@ -393,60 +385,53 @@ function renderLotInventory() {
     const selectEl = document.getElementById('sellLotIdSelect');
 
     if (inStockItems.length === 0) {
-        listEl.innerHTML = '<p class="text-slate-500">No In_Stock IDs available.</p>';
-        selectEl.innerHTML = '<option value="">No Stock Available</option>';
+        if(listEl) listEl.innerHTML = '<p class="text-slate-500">No In_Stock IDs available.</p>';
+        if(selectEl) selectEl.innerHTML = '<option value="">No Stock Available</option>';
     } else {
-        listEl.innerHTML = inStockItems.map(item => `
-            <div class="flex justify-between items-center bg-[#131822] px-2 py-1 rounded border border-slate-800">
-                <span class="text-amber-400 font-mono">${item.lot_id} • ${item.user_id}</span>
-                <span class="text-emerald-400 font-bold">In_Stock</span>
-            </div>
-        `).join('');
-
-        selectEl.innerHTML = inStockItems.map(item => `
-            <option value="${item.id}">${item.lot_id} - ${item.user_id} (In_Stock)</option>
-        `).join('');
-        populateSelectedLotCredentials();
-    }
-}
-
-function populateSelectedLotCredentials() {
-    const selectedId = document.getElementById('sellLotIdSelect').value;
-    const item = accountsMasterRecords.find(a => String(a.id) === String(selectedId));
-    if (item) {
-        document.getElementById('sellAssignedUserId').value = item.user_id;
-        document.getElementById('sellAssignedPassword').value = item.password;
+        if(listEl) {
+            listEl.innerHTML = inStockItems.map(item => `
+                <div class="flex justify-between items-center bg-[#131822] px-2 py-1 rounded border border-slate-800">
+                    <span class="text-amber-400 font-mono">${item.lot_id} • ${item.user_id}</span>
+                    <span class="text-emerald-400 font-bold">In_Stock</span>
+                </div>
+            `).join('');
+        }
+        if(selectEl) {
+            selectEl.innerHTML = inStockItems.map(item => `
+                <option value="${item.id}">${item.lot_id} - ${item.user_id} (In_Stock)</option>
+            `).join('');
+        }
     }
 }
 
 function openSellLicenseModal() {
     renderLotInventory();
-    document.getElementById('sellLotIdSelect').onchange = populateSelectedLotCredentials;
     document.getElementById('sellLicenseModal').classList.remove('hidden');
 }
 function closeSellLicenseModal() { document.getElementById('sellLicenseModal').classList.add('hidden'); }
 
+// Sell New ID: Saves buyer_name, buyer_mobile, buyer_email in separate columns
 async function handleSellNewIdSubmit(e) {
     e.preventDefault();
     const selectedId = document.getElementById('sellLotIdSelect').value;
-    const item = accountsMasterRecords.find(a => String(a.id) === String(selectedId));
-    if (!item) {
-        showToast('বিক্রি করার জন্য কোনো ইন-স্টক আইডি নেই!');
-        return;
-    }
+    const name = document.getElementById('sellBuyerName').value.trim();
+    const mobile = document.getElementById('sellBuyerMobile').value.trim();
+    const email = document.getElementById('sellBuyerEmail').value.trim();
 
-    // ব্যাকএন্ডে সংরক্ষিত stored function (process_id_sale_cashback) কল করা হবে
     const res = await callBackendApi('process_id_sale_cashback', { 
         seller_composite_id: currentCompositeUserId, 
-        sold_item_id: item.id 
+        sold_item_id: selectedId,
+        buyer_name: name,
+        buyer_mobile: mobile,
+        buyer_email: email
     });
 
     if (res.success) {
         await loadAllDatabaseRecords();
         closeSellLicenseModal();
-        showToast(`আইডি (${item.user_id}) বিক্রি সম্পন্ন এবং Weighted Cashback বণ্টিত হয়েছে!`);
+        showToast('আইডি বিক্রি সফল হয়েছে এবং ক্রেতার তথ্য আলাদা কলামে সেভ হয়েছে!');
     } else {
-        showToast(res.message || 'আইডি বিক্রি প্রক্রিয়া সম্পন্ন করা যায়নি।');
+        showToast(res.message || 'আইডি বিক্রি সম্পন্ন করা যায়নি।');
     }
 }
 
@@ -460,7 +445,7 @@ async function handleBuyValiditySubmit(e) {
     if (res.success) {
         validityExpiryTime += (30 * 24 * 60 * 60 * 1000);
         closeBuyValidityModal();
-        showToast('মেয়াদ সফলভাবে আরও ৩০ দিন বাড়ানো হয়েছে!');
+        showToast('মেয়াদ সফলভাবে ৩০ দিন বাড়ানো হয়েছে!');
     } else {
         showToast(res.message || 'Validity extension failed.');
     }
@@ -480,17 +465,34 @@ async function handleBalanceTransferSubmit(e) {
         closeBalanceTransferModal();
         showToast('ব্যালেন্স ট্রান্সফার সফল হয়েছে!');
     } else {
-        showToast(res.message || 'পর্যাপ্ত ব্যালেন্স বা ভুল প্রাপক আইডি!');
+        showToast(res.message || 'ব্যালেন্স ট্রান্সফার ব্যর্থ হয়েছে।');
     }
 }
 
 function openBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.remove('hidden'); }
 function closeBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.add('hidden'); }
 
+// Buy New ID / License Landing: Saves buyer_name, buyer_mobile, buyer_email in separate columns
 async function handleLandingBuySubmit(e) {
     e.preventDefault();
-    closeBuyLicenseLandingModal();
-    showToast('নতুন আইডির আবেদন ও পেমেন্ট রিকোয়েস্ট ডাটাবেজে জমা হয়েছে!');
+    const name = document.getElementById('landingBuyerName').value.trim();
+    const mobile = document.getElementById('landingBuyMobile').value.trim();
+    const email = document.getElementById('landingBuyEmail').value.trim();
+    const trxId = document.getElementById('landingBuyPaymentId').value.trim();
+
+    const res = await callBackendApi('register_new_license', {
+        name: name,
+        mobile: mobile,
+        email: email,
+        trx_id: trxId
+    });
+
+    if (res.success) {
+        closeBuyLicenseLandingModal();
+        showToast('নতুন আইডির আবেদন ও পেমেন্ট আলাদা কলামে জমা হয়েছে!');
+    } else {
+        showToast(res.message || 'সাবমিট করতে সমস্যা হয়েছে।');
+    }
 }
 
 function openAddDeviceModal() { document.getElementById('addDeviceModal').classList.remove('hidden'); }
@@ -509,7 +511,7 @@ async function handleAddDeviceSubmit(e) {
 }
 
 // -------------------------------------------------------------------------
-// CHAT SYSTEM (forum_chat TABLE)
+// CHAT & CASH MEMO LOGIC
 // -------------------------------------------------------------------------
 function openMyChatModal() {
     exitIndividualChat();
@@ -582,10 +584,6 @@ function renderIndividualMessages() {
     if (!activePrivatePartner) return;
     const box = document.getElementById('individualChatBox');
     const msgs = privateMessagesMap[activePrivatePartner] || [];
-    if (msgs.length === 0) {
-        box.innerHTML = `<p class="text-center text-slate-500 py-6">Start a private conversation with ${activePrivatePartner}...</p>`;
-        return;
-    }
     box.innerHTML = msgs.map(m => {
         const isMe = m.user_id === currentUserId;
         return `
@@ -641,7 +639,7 @@ function lockBusinessSetup() {
     const btn = document.getElementById('lockBusinessSetupBtn');
     btn.innerText = 'Locked (Saved)';
     btn.classList.replace('bg-amber-600', 'bg-slate-700');
-    showToast('বিজনেস সেটআপ সফলভাবে লক করা হয়েছে!');
+    showToast('বিজনেস সেটআপ লক করা হয়েছে!');
 }
 
 function addProductToMemoCart() {
@@ -714,7 +712,7 @@ function openA4PdfPreview() {
 }
 
 function saveMemoToDevice() {
-    showToast('ক্যাশ মেমো সফলভাবে মাই ডিভাইসে সেভ হয়েছে!');
+    showToast('ক্যাশ মেমো সেভ হয়েছে!');
     document.getElementById('a4PdfPreviewModal').classList.add('hidden');
 }
 
