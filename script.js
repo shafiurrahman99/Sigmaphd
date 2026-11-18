@@ -404,16 +404,23 @@ function renderLotInventory() {
     }
 }
 
+// মডাল ওপেন করার সময় ইউজারের কুপন কোড অটো বসিয়ে দেওয়া
 function openSellLicenseModal() {
     renderLotInventory();
+    const userCoupon = document.getElementById('userCouponCode').innerText;
+    document.getElementById('sellCouponCodeInput').value = userCoupon;
     document.getElementById('sellLicenseModal').classList.remove('hidden');
 }
-function closeSellLicenseModal() { document.getElementById('sellLicenseModal').classList.add('hidden'); }
 
-// Sell New ID: Saves buyer_name, buyer_mobile, buyer_email in separate columns
+function closeSellLicenseModal() { 
+    document.getElementById('sellLicenseModal').classList.add('hidden'); 
+}
+
+// আইডি বিক্রি ও কুপন কোডসহ ডেটা সাবমিট করার ফাংশন
 async function handleSellNewIdSubmit(e) {
     e.preventDefault();
     const selectedId = document.getElementById('sellLotIdSelect').value;
+    const couponCode = document.getElementById('sellCouponCodeInput').value;
     const name = document.getElementById('sellBuyerName').value.trim();
     const mobile = document.getElementById('sellBuyerMobile').value.trim();
     const email = document.getElementById('sellBuyerEmail').value.trim();
@@ -421,6 +428,7 @@ async function handleSellNewIdSubmit(e) {
     const res = await callBackendApi('process_id_sale_cashback', { 
         seller_composite_id: currentCompositeUserId, 
         sold_item_id: selectedId,
+        coupon_code: couponCode,
         buyer_name: name,
         buyer_mobile: mobile,
         buyer_email: email
@@ -429,7 +437,7 @@ async function handleSellNewIdSubmit(e) {
     if (res.success) {
         await loadAllDatabaseRecords();
         closeSellLicenseModal();
-        showToast('আইডি বিক্রি সফল হয়েছে এবং ক্রেতার তথ্য আলাদা কলামে সেভ হয়েছে!');
+        showToast('আইডি বিক্রি সফল হয়েছে এবং চেইন হিসাব অনুযায়ী ক্যাশব্যাক যুক্ত হয়েছে!');
     } else {
         showToast(res.message || 'আইডি বিক্রি সম্পন্ন করা যায়নি।');
     }
