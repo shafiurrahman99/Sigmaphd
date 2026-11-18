@@ -175,10 +175,9 @@
                     </div>
 
                     <div class="flex items-center space-x-2">
-                        <button type="button" onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
-                            <i class="fa-solid fa-gear text-xs text-amber-400"></i>
-                            <span>Settings</span>
-                        </button>
+                        <button onclick="openUserPassModal()" class="btn-settings" style="background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+    ⚙️ user_password_change
+</button>
                         <button type="button" onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
                             <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
                             <span>Log Out</span>
@@ -755,7 +754,62 @@
 
     <!-- Hidden A4 Print Area -->
     <div id="a4MemoPrintArea" class="hidden"></div>
+    
+<!-- User & Password Change Modal -->
+<div id="userPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 420px; padding: 24px; color: #f8fafc; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 18px; color: #38bdf8;">user_password_change</h3>
+            <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
+        </div>
 
+        <!-- বর্তমান আইডি ও অটো ইমেইল শো -->
+        <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <span style="color: #94a3b8;">Composite ID:</span>
+                <span id="modalCompositeId" style="color: #34d399; font-weight: bold;">--</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94a3b8;">Email Address:</span>
+                <span id="modalAutoEmail" style="color: #fbbf24; font-weight: 500;">--</span>
+            </div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
+                * পরিবর্তনের কনফার্মেশন নোটিফিকেশন এই ইমেইলে পাঠানো হবে।
+            </div>
+        </div>
+
+        <!-- ইনপুট ফর্ম -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
+                <input type="text" id="newUsernameInput" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+            </div>
+
+            <div>
+                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুরাতন পাসওয়ার্ড (Old Password) *</label>
+                <input type="password" id="oldPasswordInput" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+            </div>
+
+            <div>
+                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন পাসওয়ার্ড (New Password) *</label>
+                <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+            </div>
+
+            <div>
+                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুনরায় নতুন পাসওয়ার্ড (Confirm New Password) *</label>
+                <input type="password" id="confirmPasswordInput" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+            </div>
+        </div>
+
+        <!-- Accept & Login Again বাটন -->
+        <button id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+            Accept & Login Again
+        </button>
+
+    </div>
+</div>
+   
     <!-- External Script Integration -->
     <script src="script.js"></script>
 </body>
