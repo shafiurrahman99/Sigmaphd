@@ -734,14 +734,17 @@ function printMemoPdf() {
     printArea.classList.add('hidden');
 }
 function openUserPassModal() {
-    const currentCompId = localStorage.getItem('composite_user_id') || '';
-    const currentEmail = localStorage.getItem('user_email') || 'user@example.com';
+    // লোকালস্টোরেজ বা সেশন থেকে কম্পোজিট আইডি এবং ইমেইল নেওয়া
+    const currentCompId = localStorage.getItem('composite_user_id') || localStorage.getItem('user_id') || 'N/A';
+    const currentEmail = localStorage.getItem('user_email') || localStorage.getItem('email') || 'user@example.com';
     const currentUserId = localStorage.getItem('user_id') || '';
 
+    // মোডালের ভেতরে ডাটা বসিয়ে দেওয়া
     document.getElementById('modalCompositeId').innerText = currentCompId;
     document.getElementById('modalAutoEmail').innerText = currentEmail;
     document.getElementById('newUsernameInput').value = currentUserId;
 
+    // মোডাল দৃশ্যমান করা
     document.getElementById('userPassModal').style.display = 'flex';
 }
 
@@ -754,7 +757,9 @@ async function submitUserPasswordChange() {
     const oldPassword = document.getElementById('oldPasswordInput').value.trim();
     const newPassword = document.getElementById('newPasswordInput').value.trim();
     const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
-    const compositeUserId = localStorage.getItem('composite_user_id');
+    
+    // ফিক্সড কম্পোজিট আইডি বা ইউজার আইডি নেওয়া
+    const compositeUserId = document.getElementById('modalCompositeId').innerText;
     const userEmail = document.getElementById('modalAutoEmail').innerText;
 
     if (!oldPassword || !newPassword || !confirmPassword) {
@@ -777,7 +782,7 @@ async function submitUserPasswordChange() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'user_password_change',
-                composite_user_id: compositeUserId,
+                composite_user_id: compositeUserId, // ফিক্সড কম্পোজিট আইডি পাঠানো হচ্ছে
                 payload: {
                     new_username: newUsername,
                     old_password: oldPassword,
