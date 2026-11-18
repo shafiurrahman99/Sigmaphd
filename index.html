@@ -175,10 +175,10 @@
                     </div>
 
                     <div class="flex items-center space-x-2">
-                       <!-- সেটিংস বাটন -->
-<button onclick="openUserPassModal()" class="btn-settings" style="background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-    ⚙️ user_password_change
-</button>
+                        <!-- সেটিংস বাটন (পাসওয়ার্ড পরিবর্তনের মোডাল ওপেন করবে) -->
+                        <button onclick="openUserPassModal()" class="bg-blue-600 hover:bg-blue-500 text-white border-none py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer shadow">
+                            ⚙️ Password Change
+                        </button>
 
                         <button type="button" onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
                             <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
@@ -447,53 +447,52 @@
         </div>
     </div>
 
-   <!-- Sell ID Modal (অটো কুপন কোড এবং সঠিক ক্যাশব্যাক বিবরণসহ) -->
-<div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
-        <button onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-        <h3 class="text-base font-bold text-white flex items-center space-x-2">
-            <i class="fa-solid fa-paper-plane text-emerald-400"></i>
-            <span>Sell New ID (From Lot)</span>
-        </h3>
+    <!-- Sell ID Modal -->
+    <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
+            <button onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-paper-plane text-emerald-400"></i>
+                <span>Sell New ID (From Lot)</span>
+            </h3>
 
-        <!-- ক্যাশব্যাক ব্রেকডাউন নোটিশ -->
-        <div class="bg-[#080a0f] border border-emerald-500/30 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1">
-            <div class="flex justify-between font-semibold text-emerald-400">
-                <span>Direct Bonus:</span>
-                <span>৳ 8.00 (Fixed)</span>
+            <div class="bg-[#080a0f] border border-emerald-500/30 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1">
+                <div class="flex justify-between font-semibold text-emerald-400">
+                    <span>Direct Bonus:</span>
+                    <span>৳ 8.00 (Fixed)</span>
+                </div>
+                <div class="flex justify-between text-amber-400">
+                    <span>Chain Pool:</span>
+                    <span>৳ 2.00 (Proportional Ratio)</span>
+                </div>
             </div>
-            <div class="flex justify-between text-amber-400">
-                <span>Chain Pool:</span>
-                <span>৳ 2.00 (Proportional Ratio)</span>
-            </div>
+
+            <form onsubmit="handleSellNewIdSubmit(event)" class="space-y-2.5 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Select Lot ID to Sell</label>
+                    <select id="sellLotIdSelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold"></select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Coupon Code (Auto)</label>
+                    <input type="text" id="sellCouponCodeInput" readonly class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-amber-400 font-bold font-mono">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Name</label>
+                    <input type="text" id="sellBuyerName" placeholder="Buyer Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Mobile Number</label>
+                    <input type="text" id="sellBuyerMobile" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Email Address</label>
+                    <input type="email" id="sellBuyerEmail" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg mt-1">Submit & Sell ID (৳8 + ৳2 Chain)</button>
+            </form>
         </div>
-
-        <form onsubmit="handleSellNewIdSubmit(event)" class="space-y-2.5 text-xs">
-            <div>
-                <label class="block text-slate-400 mb-1">Select Lot ID to Sell</label>
-                <select id="sellLotIdSelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold"></select>
-            </div>
-            <div>
-                <label class="block text-slate-400 mb-1">Coupon Code (Auto)</label>
-                <!-- অটো কুপন কোড ইনপুট ফিল্ড -->
-                <input type="text" id="sellCouponCodeInput" readonly class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-amber-400 font-bold font-mono">
-            </div>
-            <div>
-                <label class="block text-slate-400 mb-1">Buyer Name</label>
-                <input type="text" id="sellBuyerName" placeholder="Buyer Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-            </div>
-            <div>
-                <label class="block text-slate-400 mb-1">Buyer Mobile Number</label>
-                <input type="text" id="sellBuyerMobile" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-            </div>
-            <div>
-                <label class="block text-slate-400 mb-1">Buyer Email Address</label>
-                <input type="email" id="sellBuyerEmail" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-            </div>
-            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg mt-1">Submit & Sell ID (৳8 + ৳2 Chain)</button>
-        </form>
     </div>
-</div>
+
     <!-- Balance Transfer Modal -->
     <div id="balanceTransferModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
@@ -742,81 +741,64 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
-            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-base font-bold text-white">Settings</h3>
-            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
-                <div class="flex justify-between"><span class="text-slate-400">Composite ID:</span><span id="settingsComposite" class="text-emerald-400 font-mono"></span></div>
+    <!-- User & Password Change Modal -->
+    <div id="userPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 420px; padding: 24px; color: #f8fafc; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 18px; color: #38bdf8;">user_password_change</h3>
+                <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
             </div>
-            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="w-full bg-slate-800 text-slate-200 py-2 rounded-xl">Close</button>
+
+            <!-- ডাটাবেজ ফিল্ড অনুযায়ী কম্পোজিট আইডি ও বায়ার ইমেইল প্রদর্শন বক্স -->
+            <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: #94a3b8;">composite_user_id:</span>
+                    <span id="modalCompositeId" style="color: #34d399; font-weight: bold;">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #94a3b8;">buyer_email:</span>
+                    <span id="modalAutoEmail" style="color: #fbbf24; font-weight: 500;">--</span>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
+                    * পরিবর্তনের কনফার্মেশন নোটিফিকেশন এই ইমেইলে পাঠানো হবে।
+                </div>
+            </div>
+
+            <!-- ইনপুট ফর্ম -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
+                    <input type="text" id="newUsernameInput" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুরাতন পাসওয়ার্ড (Old Password) *</label>
+                    <input type="password" id="oldPasswordInput" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন পাসওয়ার্ড (New Password) *</label>
+                    <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুনরায় নতুন পাসওয়ার্ড (Confirm New Password) *</label>
+                    <input type="password" id="confirmPasswordInput" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <!-- Accept & Login Again বাটন -->
+            <button id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                Accept & Login Again
+            </button>
+
         </div>
     </div>
 
     <!-- Hidden A4 Print Area -->
     <div id="a4MemoPrintArea" class="hidden"></div>
     
-<!-- সেটিংস বাটন -->
-<button onclick="openUserPassModal()" class="btn-settings" style="background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-    ⚙️ user_password_change
-</button>
-
-<!-- User & Password Change Modal -->
-<div id="userPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 420px; padding: 24px; color: #f8fafc; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #334155; padding-bottom: 10px;">
-            <h3 style="margin: 0; font-size: 18px; color: #38bdf8;">user_password_change</h3>
-            <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
-        </div>
-
-        <!-- ডাটাবেজ ফিল্ড অনুযায়ী কম্পোজিট আইডি ও বায়ার ইমেইল প্রদর্শন বক্স -->
-        <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color: #94a3b8;">composite_user_id:</span>
-                <span id="modalCompositeId" style="color: #34d399; font-weight: bold;">--</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #94a3b8;">buyer_email:</span>
-                <span id="modalAutoEmail" style="color: #fbbf24; font-weight: 500;">--</span>
-            </div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
-                * পরিবর্তনের কনফার্মেশন নোটিফিকেশন এই ইমেইলে পাঠানো হবে।
-            </div>
-        </div>
-
-        <!-- ইনপুট ফর্ম -->
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div>
-                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
-                <input type="text" id="newUsernameInput" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
-            </div>
-
-            <div>
-                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুরাতন পাসওয়ার্ড (Old Password) *</label>
-                <input type="password" id="oldPasswordInput" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
-            </div>
-
-            <div>
-                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন পাসওয়ার্ড (New Password) *</label>
-                <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
-            </div>
-
-            <div>
-                <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুনরায় নতুন পাসওয়ার্ড (Confirm New Password) *</label>
-                <input type="password" id="confirmPasswordInput" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
-            </div>
-        </div>
-
-        <!-- Accept & Login Again বাটন -->
-        <button id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
-            Accept & Login Again
-        </button>
-
-    </div>
-</div>
-   
     <!-- External Script Integration -->
     <script src="script.js"></script>
 </body>
