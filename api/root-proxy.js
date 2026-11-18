@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export default async function handler(req, res) {
-    // Only allow POST requests for security bridging
     if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
         return res.status(405).json({ success: false, message: `Method ${req.method} Not Allowed` });
@@ -15,17 +14,15 @@ export default async function handler(req, res) {
     try {
         const { action, company_id = "101", composite_user_id, payload } = req.body;
 
-        // লগইন, ডাটা ফেচ এবং গেম/পেমেন্ট বা লট ক্রয়ের ক্ষেত্রে composite_user_id বাধ্যতামূলক নয় এমন অ্যাকশনগুলো এখানে যুক্ত করা হলো
-        const publicActions = ['authenticate_user', 'fetch_dashboard_data', 'buy_lot', 'buy_validity'];
+        // লগইন ছাড়াই যে রিকোয়েস্টগুলো পাস হবে
+        const publicActions = ['authenticate_user', 'fetch_dashboard_data', 'buy_lot', 'buy_validity', 'register_new_license'];
         if (!composite_user_id && !publicActions.includes(action)) {
             return res.status(401).json({ success: false, message: 'Unauthorized: Missing Composite User ID context.' });
         }
 
         console.log(`[SECURE PROXY] Action: ${action} | User: ${composite_user_id || 'Public/System'}`);
 
-        // Route the action securely to respective backend handlers or database queries
         switch (action) {
-            // ১. ইউজার অথেন্টিকেশন (accounts_master টেবিল চেক)
             case 'authenticate_user': {
                 const { user_id, password } = payload;
                 const { data, error } = await supabaseServer
@@ -42,7 +39,6 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, user: data });
             }
 
-            // ২. ড্যাশবোর্ডের সমস্ত টেবিল ডাটা একসাথে ফেচ করা
             case 'fetch_dashboard_data': {
                 const [incExp, loansRec, loansPay, marketExp, accounts, chats] = await Promise.all([
                     supabaseServer.from('income_expense').select('*').eq('composite_user_id', composite_user_id).order('entry_date', { ascending: false }),
@@ -64,7 +60,6 @@ export default async function handler(req, res) {
                 });
             }
 
-            // ৩. আয় বা ব্যয় সেভ করা
             case 'save_income_expense': {
                 const { type, date, desc, amount } = payload;
                 const { error } = await supabaseServer.from('income_expense').insert([{
@@ -80,7 +75,6 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Income/Expense recorded securely.' });
             }
 
-            // ৪. লোন বা ধার রেকর্ড সেভ করা
             case 'save_loan': {
                 const { category, date, person_name, amount } = payload;
                 const { error } = await supabaseServer.from('loan_records').insert([{
@@ -97,7 +91,6 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Loan record synchronized.' });
             }
 
-            // ৫. লোন সেটেলমেন্ট করা
             case 'settle_loan': {
                 const { id, settle_date, extra_amount } = payload;
                 const { error } = await supabaseServer.from('loan_records')
@@ -107,7 +100,6 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Loan settlement processed.' });
             }
 
-            // ৬. দৈনিক বাজার খরচ সেভ করা
             case 'save_market_expense': {
                 const { expense_date, description, amount, status } = payload;
                 const { error } = await supabaseServer.from('daily_expenses').insert([{
@@ -123,7 +115,6 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Daily market expense logged.' });
             }
 
-            // ৭. লট ক্রয় করে ইনভেন্টরিতে আইডি যোগ করা (কম্পোজিট আইডি ছাড়াই গ্লোবালি কাজ করবে)
             case 'buy_lot': {
                 const { lot_id, quantity } = payload;
                 const compId = composite_user_id ? composite_user_id.split('_')[0] : company_id;
@@ -148,17 +139,22 @@ export default async function handler(req, res) {
 
                 const { error } = await supabaseServer.from('accounts_master').insert(rowsToInsert);
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Lot purchased and inventory updated.' });
+                return res.status(200).json({ success: true, message: 'Lot purchased successfully.' });
             }
 
-            // ৮. আইডি বিক্রি এবং Stored Procedure (process_id_sale_cashback) ট্রিগার করা
+            // সেল আইডি এবং আলাদা কলামে বায়ারের নাম, মোবাইল ও ইমেইল সংরক্ষণ
             case 'process_id_sale_cashback': {
-                const { seller_composite_id, sold_item_id } = payload;
+                const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email } = payload;
 
-                // আইডি স্ট্যাটাস Active করা
-                await supabaseServer.from('accounts_master').update({ status: 'Active' }).eq('id', sold_item_id);
+                const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
+                    status: 'Active',
+                    buyer_name: buyer_name,
+                    buyer_mobile: buyer_mobile,
+                    buyer_email: buyer_email
+                }).eq('id', sold_item_id);
 
-                // পোস্টগ্রেজুএসের Stored Procedure কল করা
+                if (updateError) throw updateError;
+
                 const { error } = await supabaseServer.rpc('process_id_sale_cashback', {
                     p_seller_composite_id: seller_composite_id,
                     p_direct_bonus: 8.00,
@@ -166,22 +162,38 @@ export default async function handler(req, res) {
                 });
 
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Cashback and weighted distribution executed.' });
+                return res.status(200).json({ success: true, message: 'Sale and cashback processed.' });
             }
 
-            // ৯. মেয়াদ বৃদ্ধি (Validity)
-            case 'buy_validity': {
-                const { trx_id } = payload;
+            // ল্যান্ডিং পেজ থেকে নতুন লাইসেন্স বা আইডি আবেদন (আলাদা কলামে সেভ)
+            case 'register_new_license': {
+                const { name, mobile, email, trx_id } = payload;
+                const compId = company_id || "101";
+                const randomUserId = 'user_' + Math.floor(1000 + Math.random() * 9000);
+
+                const { error } = await supabaseServer.from('accounts_master').insert([{
+                    company_id: compId,
+                    user_id: randomUserId,
+                    password: 'pass' + Math.floor(1000 + Math.random() * 9000),
+                    role: 'User',
+                    status: 'Pending',
+                    request_type: 'Single',
+                    buyer_name: name,
+                    buyer_mobile: mobile,
+                    buyer_email: email,
+                    wallet_balance: 0.00
+                }]);
+
+                if (error) throw error;
+                return res.status(200).json({ success: true, message: 'License request saved with separate columns.' });
+            }
+
+            case 'buy_validity':
                 return res.status(200).json({ success: true, message: 'Validity extended successfully.' });
-            }
 
-            // ১০. ব্যালেন্স ট্রান্সফার
-            case 'balance_transfer': {
-                const { recipient_id, amount } = payload;
+            case 'balance_transfer':
                 return res.status(200).json({ success: true, message: 'Balance transferred securely.' });
-            }
 
-            // ১১. চ্যাট মেসেজ পাঠানো
             case 'send_chat': {
                 const { channel, message } = payload;
                 const { error } = await supabaseServer.from('forum_chat').insert([{
