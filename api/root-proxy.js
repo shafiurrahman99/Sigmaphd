@@ -287,19 +287,19 @@ export default async function handler(req, res) {
 
                 const currentRecipientBalance = parseFloat(recipientData.wallet_balance || 0);
 
-                // ৩. প্রেরকের অ্যাকাউন্ট থেকে টাকা মাইনাস করা
+               // ৩. প্রেরকের অ্যাকাউন্ট থেকে টাকা মাইনাস করা
                 const { error: updateSenderErr } = await supabaseServer
                     .from('accounts_master')
                     .update({ wallet_balance: currentSenderBalance - transferAmount })
                     .eq('composite_user_id', composite_user_id);
 
-                if (updateErr) throw updateSenderErr; // সুপাবেজ আপডেট এরর চেক
+                if (updateSenderErr) throw updateSenderErr;
 
-                // ৪. প্রাপকের অ্যাকাউন্টে সমপরিমাণ টাকা প্লাস করা
+                // ৪. প্রাপকের অ্যাকাউন্ট আপডেট করার সময় composite_user_id অথবা user_id যেকোনো একটি দিয়ে নির্ভুলভাবে টার্গেট করা
                 const { error: updateRecipientErr } = await supabaseServer
                     .from('accounts_master')
                     .update({ wallet_balance: currentRecipientBalance + transferAmount })
-                    .eq('composite_user_id', recipientData.composite_user_id);
+                    .or(`composite_user_id.eq.${recipientData.composite_user_id},user_id.eq.${recipientData.user_id}`);
 
                 if (updateRecipientErr) throw updateRecipientErr;
 
