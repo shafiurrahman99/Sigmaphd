@@ -45,6 +45,7 @@ export default async function handler(req, res) {
                     supabaseServer.from('loan_records').select('*').eq('composite_user_id', composite_user_id).eq('loan_category', 'Receivable'),
                     supabaseServer.from('loan_records').select('*').eq('composite_user_id', composite_user_id).eq('loan_category', 'Payable'),
                     supabaseServer.from('daily_expenses').select('*').eq('composite_user_id', composite_user_id).order('expense_date', { ascending: false }),
+                    // সুপাবেজ থেকে শুধুমাত্র বর্তমান ইউজারের কেনা (owner_id মিল থাকা) এবং ইন-স্টক থাকা লটগুলো ফিল্টার করার ব্যবস্থা
                     supabaseServer.from('accounts_master').select('*').eq('company_id', company_id),
                     supabaseServer.from('forum_chat').select('*').eq('company_id', company_id).eq('chat_channel', 'Public_Forum').order('created_at', { ascending: true })
                 ]);
@@ -126,12 +127,13 @@ export default async function handler(req, res) {
                     rowsToInsert.push({
                         company_id: compId,
                         user_id: subId,
+                        composite_user_id: `${compId}_${subId}`,
                         password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                         role: 'User',
                         status: 'In_Stock',
                         request_type: 'Lot',
                         lot_id,
-                        owner_user_id: ownerId,
+                        owner_id: ownerId, // লটের প্রকৃত মালিক হিসেবে ইউজারের আইডি সেট করা হলো
                         upline_id: ownerId,
                         wallet_balance: 0.00
                     });
@@ -142,82 +144,81 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Lot purchased successfully.' });
             }
 
-           case 'process_id_sale_cashback': {
-    const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload;
+            case 'process_id_sale_cashback': {
+                const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload;
 
-    // ১. আইডি স্ট্যাটাস আপডেট এবং নতুন ওনার বা বায়ারের তথ্য সেট করা
-    const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
-        status: 'Active',
-        buyer_name: buyer_name,
-        buyer_mobile: buyer_mobile,
-        buyer_email: buyer_email,
-        coupon_code: coupon_code
-    }).eq('id', sold_item_id);
+                // ১. আইডি স্ট্যাটাস আপডেট এবং বায়ারের তথ্য সেট করা
+                const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
+                    status: 'Active',
+                    buyer_name: buyer_name,
+                    buyer_mobile: buyer_mobile,
+                    buyer_email: buyer_email,
+                    coupon_code: coupon_code
+                }).eq('id', sold_item_id);
 
-    if (updateError) throw updateError;
+                if (updateError) throw updateError;
 
-    // ২. সেলারের তথ্য এবং তার ওয়ালেট ব্যালেন্স আনা
-    const { data: sellerData } = await supabaseServer
-        .from('accounts_master')
-        .select('wallet_balance, upline_id, composite_user_id')
-        .eq('composite_user_id', seller_composite_id)
-        .single();
+                // ২. সেলারের তথ্য এবং তার ওয়ালেট ব্যালেন্স আনা
+                const { data: sellerData } = await supabaseServer
+                    .from('accounts_master')
+                    .select('wallet_balance, upline_id, composite_user_id')
+                    .eq('composite_user_id', seller_composite_id)
+                    .single();
 
-    let directBonus = 8.00; // বিক্রেতার ফিক্সড ডিরেক্ট বোনাস
-    let chainPoolTotal = 2.00; // চেইন পুলের জন্য বরাদ্দ মোট ২ টাকা
-    let totalSellerNewBalance = (sellerData?.wallet_balance || 0) + directBonus;
+                let directBonus = 8.00; // বিক্রেতার ফিক্সড ডিরেক্ট বোনাস
+                let chainPoolTotal = 2.00; // চেইন পুলের জন্য বরাদ্দ মোট ২ টাকা
+                let totalSellerNewBalance = (sellerData?.wallet_balance || 0) + directBonus;
 
-    // ৩. আপলাইন চেইন সংগ্রহ করা (প্রপোর্শনাল রেশিও হিসাবের জন্য)
-    let uplinesChain = [];
-    let currentUplineId = sellerData?.upline_id;
-    
-    while (currentUplineId && currentUplineId !== seller_composite_id) {
-        const { data: upData } = await supabaseServer
-            .from('accounts_master')
-            .select('composite_user_id, wallet_balance, upline_id')
-            .eq('composite_user_id', currentUplineId)
-            .single();
-            
-        if (!upData) break;
-        uplinesChain.push(upData);
-        currentUplineId = upData.upline_id;
-        if (uplinesChain.length > 1000) break;
-    }
+                // ৩. আপলাইন চেইন সংগ্রহ করা (প্রপোর্শনাল রেশিও হিসাবের জন্য)
+                let uplinesChain = [];
+                let currentUplineId = sellerData?.upline_id;
+                
+                while (currentUplineId && currentUplineId !== seller_composite_id) {
+                    const { data: upData } = await supabaseServer
+                        .from('accounts_master')
+                        .select('composite_user_id, wallet_balance, upline_id')
+                        .eq('composite_user_id', currentUplineId)
+                        .single();
+                        
+                    if (!upData) break;
+                    uplinesChain.push(upData);
+                    currentUplineId = upData.upline_id;
+                    if (uplinesChain.length > 1000) break;
+                }
 
-    let N = uplinesChain.length;
+                let N = uplinesChain.length;
 
-    if (N === 0) {
-        // চেইনে কেউ না থাকলে চেইনের ২ টাকাও সেলার নিজেই পাবেন (মোট ১০ টাকা)
-        totalSellerNewBalance += chainPoolTotal;
-    } else {
-        // প্রফেশনাল ম্যাথমেটিক্যাল ওয়েটেড রেশিও হিসাব (নিকটবর্তী আপলাইন বেশি পাবে, টপ কম পাবে)
-        let totalWeight = (N * (N + 1)) / 2; 
-        
-        for (let i = 0; i < N; i++) {
-            let currentWeight = N - i; 
-            let shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
-            
-            let targetCompositeId = uplinesChain[i].composite_user_id;
-            let targetOldBalance = uplinesChain[i].wallet_balance || 0;
-            
-            await supabaseServer.from('accounts_master')
-                .update({ wallet_balance: targetOldBalance + shareAmount })
-                .eq('composite_user_id', targetCompositeId);
-        }
-    }
+                if (N === 0) {
+                    // চেইনে কেউ না থাকলে চেইনের ২ টাকাও সেলার নিজেই পাবেন (মোট ১০ টাকা)
+                    totalSellerNewBalance += chainPoolTotal;
+                } else {
+                    // প্রফেশনাল ম্যাথমেটিক্যাল ওয়েটেড রেশিও হিসাব (নিকটবর্তী আপলাইন বেশি পাবে, টপ কম পাবে)
+                    let totalWeight = (N * (N + 1)) / 2; 
+                    
+                    for (let i = 0; i < N; i++) {
+                        let currentWeight = N - i; 
+                        let shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
+                        
+                        let targetCompositeId = uplinesChain[i].composite_user_id;
+                        let targetOldBalance = uplinesChain[i].wallet_balance || 0;
+                        
+                        await supabaseServer.from('accounts_master')
+                            .update({ wallet_balance: targetOldBalance + shareAmount })
+                            .eq('composite_user_id', targetCompositeId);
+                    }
+                }
 
-    // ৪. সেলারের চূড়ান্ত ওয়ালেট আপডেট
-    await supabaseServer.from('accounts_master')
-        .update({ wallet_balance: totalSellerNewBalance })
-        .eq('composite_user_id', seller_composite_id);
+                // ৪. সেলারের চূড়ান্ত ওয়ালেট আপডেট
+                await supabaseServer.from('accounts_master')
+                    .update({ wallet_balance: totalSellerNewBalance })
+                    .eq('composite_user_id', seller_composite_id);
 
-    return res.status(200).json({ 
-        success: true, 
-        message: 'Proportional chain distribution and direct bonus applied successfully.' 
-    });
-}
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'Proportional chain distribution and direct bonus applied successfully.' 
+                });
+            }
 
-            // ল্যান্ডিং পেজ থেকে নতুন লাইসেন্স বা আইডি আবেদন (আলাদা কলামে সেভ)
             case 'register_new_license': {
                 const { name, mobile, email, trx_id } = payload;
                 const compId = company_id || "101";
@@ -226,6 +227,7 @@ export default async function handler(req, res) {
                 const { error } = await supabaseServer.from('accounts_master').insert([{
                     company_id: compId,
                     user_id: randomUserId,
+                    composite_user_id: `${compId}_${randomUserId}`,
                     password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                     role: 'User',
                     status: 'Pending',
