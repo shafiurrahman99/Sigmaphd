@@ -142,11 +142,10 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Lot purchased successfully.' });
             }
 
-            // সেল আইডি এবং আলাদা কলামে বায়ারের নাম, মোবাইল ও ইমেইল সংরক্ষণ
-            case 'process_id_sale_cashback': {
+           case 'process_id_sale_cashback': {
     const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload;
 
-    // ১. বিক্রি হওয়া আইডি আপডেট করা
+    // ১. আইডি স্ট্যাটাস আপডেট এবং নতুন ওনার বা বায়ারের তথ্য সেট করা
     const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
         status: 'Active',
         buyer_name: buyer_name,
@@ -157,18 +156,18 @@ export default async function handler(req, res) {
 
     if (updateError) throw updateError;
 
-    // ২. সেলারের তথ্য এবং আপলাইন চেইন বের করা
+    // ২. সেলারের তথ্য এবং তার ওয়ালেট ব্যালেন্স আনা
     const { data: sellerData } = await supabaseServer
         .from('accounts_master')
         .select('wallet_balance, upline_id, composite_user_id')
         .eq('composite_user_id', seller_composite_id)
         .single();
 
-    let directBonus = 8.00; // বিক্রেতার ডিরেক্ট বোনাস
-    let chainPoolTotal = 2.00; // চেইন পুলের মোট টাকা (যা রেশিও অনুযায়ী ভাগ হবে)
+    let directBonus = 8.00; // বিক্রেতার ফিক্সড ডিরেক্ট বোনাস
+    let chainPoolTotal = 2.00; // চেইন পুলের জন্য বরাদ্দ মোট ২ টাকা
     let totalSellerNewBalance = (sellerData?.wallet_balance || 0) + directBonus;
 
-    // ৩. আপলাইন চেইন সংগ্রহ করা (ডাইনামিক এন সংখ্যক মেম্বার বা হাজার জন পর্যন্ত)
+    // ৩. আপলাইন চেইন সংগ্রহ করা (প্রপোর্শনাল রেশিও হিসাবের জন্য)
     let uplinesChain = [];
     let currentUplineId = sellerData?.upline_id;
     
@@ -182,41 +181,39 @@ export default async function handler(req, res) {
         if (!upData) break;
         uplinesChain.push(upData);
         currentUplineId = upData.upline_id;
-        if (uplinesChain.length > 1000) break; // সুরক্ষা লিমিট
+        if (uplinesChain.length > 1000) break;
     }
 
     let N = uplinesChain.length;
 
     if (N === 0) {
-        // চেইনে আর কেউ না থাকলে (একা থাকলে) চেইনের পুরো ২ টাকাও সেলার নিজেই পাবেন (মোট ১০ টাকা)
+        // চেইনে কেউ না থাকলে চেইনের ২ টাকাও সেলার নিজেই পাবেন (মোট ১০ টাকা)
         totalSellerNewBalance += chainPoolTotal;
     } else {
-        // প্রফেশনাল ম্যাথমেটিক্যাল ওয়েটেড রেশিও হিসাব (Arithmetic Progression Weighting)
-        // সবচেয়ে কাছের জন পাবে সবচেয়ে বেশি, আর সবচেয়ে দূরের জন (টপ) পাবে সবচেয়ে কম।
-        let totalWeight = (N * (N + 1)) / 2; // সমান্তর ধারার যোগফল সূত্র
+        // প্রফেশনাল ম্যাথমেটিক্যাল ওয়েটেড রেশিও হিসাব (নিকটবর্তী আপলাইন বেশি পাবে, টপ কম পাবে)
+        let totalWeight = (N * (N + 1)) / 2; 
         
         for (let i = 0; i < N; i++) {
-            let currentWeight = N - i; // i=0 এর জন্য সর্বোচ্চ, i=N-1 এর জন্য সর্বনিম্ন (1)
+            let currentWeight = N - i; 
             let shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
             
             let targetCompositeId = uplinesChain[i].composite_user_id;
             let targetOldBalance = uplinesChain[i].wallet_balance || 0;
             
-            // রেশিও অনুযায়ী প্রতিটি আপলাইনের ওয়ালেট আপডেট করা
             await supabaseServer.from('accounts_master')
                 .update({ wallet_balance: targetOldBalance + shareAmount })
                 .eq('composite_user_id', targetCompositeId);
         }
     }
 
-    // ৪. সেলারের চূড়ান্ত ওয়ালেট ব্যালেন্স আপডেট
+    // ৪. সেলারের চূড়ান্ত ওয়ালেট আপডেট
     await supabaseServer.from('accounts_master')
         .update({ wallet_balance: totalSellerNewBalance })
         .eq('composite_user_id', seller_composite_id);
 
     return res.status(200).json({ 
         success: true, 
-        message: `Sale processed successfully with proportional distribution for ${N} uplines.` 
+        message: 'Proportional chain distribution and direct bonus applied successfully.' 
     });
 }
 
