@@ -60,7 +60,52 @@ export default async function handler(req, res) {
                     public_chats: chats.data || []
                 });
             }
+case 'user_password_change': {
+                const { new_username, old_password, new_password, email } = payload;
 
+                const { data: userRecord, error: fetchErr } = await supabaseServer
+                    .from('accounts_master')
+                    .select('*')
+                    .eq('composite_user_id', composite_user_id)
+                    .single();
+
+                if (fetchErr || !userRecord) {
+                    return res.status(200).json({ success: false, message: 'ইউজার অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
+                }
+
+                if (userRecord.password !== old_password) {
+                    return res.status(200).json({ success: false, message: 'পুরাতন পাসওয়ার্ডটি ভুল দিয়েছেন!' });
+                }
+
+                const updatedUserId = new_username ? new_username.trim() : userRecord.user_id;
+
+                if (updatedUserId !== userRecord.user_id) {
+                    const { data: existingUser } = await supabaseServer
+                        .from('accounts_master')
+                        .select('user_id')
+                        .eq('user_id', updatedUserId)
+                        .single();
+
+                    if (existingUser) {
+                        return res.status(200).json({ success: false, message: 'এই ইউজারনেমটি ইতিমধ্যে ব্যবহৃত হচ্ছে, অন্য নাম দিন।' });
+                    }
+                }
+
+                const { error: updateErr } = await supabaseServer
+                    .from('accounts_master')
+                    .update({
+                        user_id: updatedUserId,
+                        password: new_password
+                    })
+                    .eq('composite_user_id', composite_user_id);
+
+                if (updateErr) throw updateErr;
+
+                return res.status(200).json({
+                    success: true,
+                    message: `সফলভাবে তথ্য আপডেট হয়েছে এবং ${email} ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল আইডি (Composite ID) সুরক্ষিত আছে। এখন পুনরায় লগইন করুন।`
+                });
+            }
             case 'save_income_expense': {
                 const { type, date, desc, amount } = payload;
                 const { error } = await supabaseServer.from('income_expense').insert([{
