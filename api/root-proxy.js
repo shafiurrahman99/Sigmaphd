@@ -63,6 +63,11 @@ export default async function handler(req, res) {
 case 'user_password_change': {
                 const { new_username, old_password, new_password, email } = payload;
 
+                if (!composite_user_id || composite_user_id === 'N/A') {
+                    return res.status(200).json({ success: false, message: 'কম্পোজিট ইউজার আইডি পাওয়া যায়নি।' });
+                }
+
+                // ডাটাবেজ থেকে রেকর্ড খুঁজে বের করা
                 const { data: userRecord, error: fetchErr } = await supabaseServer
                     .from('accounts_master')
                     .select('*')
@@ -70,7 +75,7 @@ case 'user_password_change': {
                     .single();
 
                 if (fetchErr || !userRecord) {
-                    return res.status(200).json({ success: false, message: 'ইউজার অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
+                    return res.status(200).json({ success: false, message: 'ডাটাবেজে ইউজার অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
                 }
 
                 if (userRecord.password !== old_password) {
@@ -91,6 +96,7 @@ case 'user_password_change': {
                     }
                 }
 
+                // ডাটাবেজ আপডেট (composite_user_id অপরিবর্তিত থাকবে)
                 const { error: updateErr } = await supabaseServer
                     .from('accounts_master')
                     .update({
@@ -101,9 +107,11 @@ case 'user_password_change': {
 
                 if (updateErr) throw updateErr;
 
+                const targetEmail = email || userRecord.buyer_email || 'user@example.com';
+
                 return res.status(200).json({
                     success: true,
-                    message: `সফলভাবে তথ্য আপডেট হয়েছে এবং ${email} ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল আইডি (Composite ID) সুরক্ষিত আছে। এখন পুনরায় লগইন করুন।`
+                    message: `সফলভাবে তথ্য আপডেট হয়েছে এবং ${targetEmail} ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল কম্পোজিট আইডি সুরক্ষিত আছে। এখন পুনরায় লগইন করুন।`
                 });
             }
             case 'save_income_expense': {
