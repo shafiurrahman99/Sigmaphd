@@ -152,7 +152,7 @@ export default async function handler(req, res) {
         buyer_name: buyer_name,
         buyer_mobile: buyer_mobile,
         buyer_email: buyer_email,
-        used_coupon: coupon_code
+        coupon_code: coupon_code
     }).eq('id', sold_item_id);
 
     if (updateError) throw updateError;
