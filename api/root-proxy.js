@@ -219,19 +219,23 @@ export default async function handler(req, res) {
                 });
             }
 
-            case 'register_new_license': {
+           case 'register_new_license': {
                 const { name, mobile, email, trx_id } = payload;
                 const compId = company_id || "101";
                 const randomUserId = 'user_' + Math.floor(1000 + Math.random() * 9000);
+                
+                // রিকোয়েস্ট টাইপ সিঙ্গেল হলে ওনার আইডিতে বাই ডিফল্ট অ্যাডমিনের কম্পোজিট আইডি বসবে
+                const defaultAdminCompositeId = compId + '_admin';
 
                 const { error } = await supabaseServer.from('accounts_master').insert([{
                     company_id: compId,
                     user_id: randomUserId,
-                    composite_user_id: `${compId}_${randomUserId}`,
                     password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                     role: 'User',
                     status: 'Pending',
                     request_type: 'Single',
+                    owner_id: defaultAdminCompositeId, // সিঙ্গেল রিকোয়েস্টের জন্য অ্যাডমিনের কম্পোজিট আইডি অ্যাসাইন করা হলো
+                    upline_id: defaultAdminCompositeId,
                     buyer_name: name,
                     buyer_mobile: mobile,
                     buyer_email: email,
@@ -239,7 +243,7 @@ export default async function handler(req, res) {
                 }]);
 
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'License request saved with separate columns.' });
+                return res.status(200).json({ success: true, message: 'Single license request registered with admin ownership.' });
             }
 
             case 'buy_validity':
