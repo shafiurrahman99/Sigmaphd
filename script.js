@@ -404,6 +404,7 @@ function renderLotInventory() {
     }
 }
 
+
 // মডাল ওপেন করার সময় ইউজারের কুপন কোড অটো বসিয়ে দেওয়া
 function openSellLicenseModal() {
     renderLotInventory();
