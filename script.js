@@ -42,7 +42,7 @@ function formatMoney(num) {
 // -------------------------------------------------------------------------
 async function callBackendApi(action, payload) {
     try {
-        const response = await fetch('api/root-proxy.js', {
+        const response = await fetch('api/root-proxy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
