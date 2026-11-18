@@ -839,6 +839,30 @@ async function submitUserPasswordChange() {
     }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    // আপনার লট ডাটার সোর্স (যদি ডাটাবেজ বা API থেকে ফেচ করতে হয়, তবে এখানে ডেটা লোড করার ব্যবস্থা থাকবে)
+    // উদাহরণস্বরূপ: lotsData অ্যারেতে আপনার লট আইডি এবং পাসওয়ার্ডগুলো থাকবে।
+    
+    const lotIdSelectElement = document.getElementById('lotIdSelect'); // আপনার সিলেক্ট ড্রপডাউনের আইডি
+    const lotPasswordElement = document.getElementById('lotPassword'); // পাসওয়ার্ড দেখানোর ইনপুট ফিল্ডের আইডি
+
+    if (lotIdSelectElement && lotPasswordElement) {
+        lotIdSelectElement.addEventListener('change', function() {
+            const selectedLotId = this.value;
+            
+            // lotsData থেকে সিলেক্ট করা লট আইডি খুঁজে বের করা
+            // (উল্লেখ্য: আপনার প্রজেক্টে lotsData নামের অ্যারে বা অবজেক্ট ডিক্লেয়ার থাকতে হবে)
+            const lotInfo = typeof lotsData !== 'undefined' ? lotsData.find(item => item.lot_id === selectedLotId) : null;
+            
+            if (lotInfo && lotInfo.password) {
+                lotPasswordElement.value = lotInfo.password;
+            } else {
+                lotPasswordElement.value = ''; // লট না মিললে ফিল্ড খালি রাখবে
+            }
+        });
+    }
+});
+
 window.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     if(document.getElementById('incomeDate')) document.getElementById('incomeDate').value = today;
