@@ -734,17 +734,15 @@ function printMemoPdf() {
     printArea.classList.add('hidden');
 }
 function openUserPassModal() {
-    // লোকালস্টোরেজ বা সেশন থেকে কম্পোজিট আইডি এবং ইমেইল নেওয়া
-    const currentCompId = localStorage.getItem('composite_user_id') || localStorage.getItem('user_id') || 'N/A';
-    const currentEmail = localStorage.getItem('user_email') || localStorage.getItem('email') || 'user@example.com';
+    const currentCompId = localStorage.getItem('composite_user_id') || '';
+    // লোকালস্টোরেজে buyer_email সেভ করা থাকলে সেটি দেখাবে
+    const buyerEmail = localStorage.getItem('buyer_email') || localStorage.getItem('user_email') || 'N/A';
     const currentUserId = localStorage.getItem('user_id') || '';
 
-    // মোডালের ভেতরে ডাটা বসিয়ে দেওয়া
     document.getElementById('modalCompositeId').innerText = currentCompId;
-    document.getElementById('modalAutoEmail').innerText = currentEmail;
+    document.getElementById('modalAutoEmail').innerText = buyerEmail; // এখানে buyer_email শো করবে
     document.getElementById('newUsernameInput').value = currentUserId;
 
-    // মোডাল দৃশ্যমান করা
     document.getElementById('userPassModal').style.display = 'flex';
 }
 
