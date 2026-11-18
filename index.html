@@ -89,10 +89,10 @@
                 </div>
             </div>
 
-            <!-- Sign In Form -->
+            <!-- Sign In Form (user_name & password) -->
             <form onsubmit="handleMainSignIn(event)" class="space-y-4">
                 <div>
-                    <input type="text" id="mainUserId" required placeholder="Enter User ID (e.g., admin)" value="admin"
+                    <input type="text" id="mainUserName" required placeholder="Enter Username (e.g., admin)" value="admin"
                         class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
                 </div>
                 <div>
@@ -169,13 +169,12 @@
                             <i class="fa-solid fa-user-check text-sm"></i>
                         </div>
                         <div>
-                            <h3 class="text-xs font-bold text-white">ID: <strong id="currentLoggedInUser" class="text-emerald-400">admin</strong></h3>
+                            <h3 class="text-xs font-bold text-white">User: <strong id="currentLoggedInUser" class="text-emerald-400">admin</strong></h3>
                             <p class="text-[10px] text-slate-400 font-medium mt-0.5" id="validityStatusText">Validity Countdown</p>
                         </div>
                     </div>
 
                     <div class="flex items-center space-x-2">
-                        <!-- সেটিংস বাটন (পাসওয়ার্ড পরিবর্তনের মোডাল ওপেন করবে) -->
                         <button onclick="openUserPassModal()" class="bg-blue-600 hover:bg-blue-500 text-white border-none py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer shadow">
                             ⚙️ Password Change
                         </button>
