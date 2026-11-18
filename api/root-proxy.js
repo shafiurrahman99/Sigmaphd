@@ -116,7 +116,7 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Daily market expense logged.' });
             }
 
-            case 'buy_lot': {
+           case 'buy_lot': {
                 const { lot_id, quantity } = payload;
                 const compId = composite_user_id ? composite_user_id.split('_')[0] : company_id;
                 const ownerId = composite_user_id || (compId + '_admin');
@@ -127,13 +127,13 @@ export default async function handler(req, res) {
                     rowsToInsert.push({
                         company_id: compId,
                         user_id: subId,
-                        composite_user_id: `${compId}_${subId}`,
+                        // composite_user_id এখানে আর পাঠানো হচ্ছে না, যাতে ডাটাবেজ কনস্ট্রেইন্ট এরর না দেয়
                         password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                         role: 'User',
                         status: 'In_Stock',
                         request_type: 'Lot',
                         lot_id,
-                        owner_id: ownerId, // লটের প্রকৃত মালিক হিসেবে ইউজারের আইডি সেট করা হলো
+                        owner_id: ownerId,
                         upline_id: ownerId,
                         wallet_balance: 0.00
                     });
