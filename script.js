@@ -77,6 +77,10 @@ async function handleMainSignIn(e) {
         currentUserName = user.user_name || uname;
         currentCompositeUserId = user.composite_user_id;
         
+        // ইউজারের মোবাইল নম্বরের শেষ ৪ ডিজিট বের করা (ডাটাবেজ থেকে অথবা ডিফল্ট)
+        let buyerMobile = user.buyer_mobile || '01818589423'; 
+        let lastFourDigits = buyerMobile.length >= 4 ? buyerMobile.slice(-4) : '8423';
+        
         // লোকালস্টোরেজে ডেটা সেভ করা
         localStorage.setItem('composite_user_id', user.composite_user_id);
         localStorage.setItem('user_name', user.user_name || uname);
@@ -86,7 +90,10 @@ async function handleMainSignIn(e) {
 
         document.getElementById('currentLoggedInUser').innerText = currentUserName;
         document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
-        document.getElementById('userCouponCode').innerText = 'SIGMA-' + currentUserName.toUpperCase();
+        
+        // কুপন কোডটি SIGMA_ এবং মোবাইলের শেষ ৪ ডিজিট দিয়ে সেট করা হলো (যেমন: SIGMA_8423)
+        document.getElementById('userCouponCode').innerText = 'SIGMA_' + lastFourDigits;
+        
         document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
         
         document.getElementById('page1').classList.add('hidden');
@@ -102,6 +109,8 @@ async function handleMainSignIn(e) {
 function handleLogOut() {
     currentUserName = "";
     currentCompositeUserId = "";
+    localStorage.clear();
+    sessionStorage.clear();
     document.getElementById('page2').classList.add('hidden');
     document.getElementById('page1').classList.remove('hidden');
     showToast('সফলভাবে লগআউট করা হয়েছে।');
