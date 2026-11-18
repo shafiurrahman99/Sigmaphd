@@ -69,7 +69,6 @@ async function handleMainSignIn(e) {
     const uname = document.getElementById('mainUserName').value.trim();
     const pass = document.getElementById('mainUserPassword').value.trim();
 
-    // user_name দিয়ে ব্যাকএন্ডে রিকোয়েস্ট পাঠানো হচ্ছে
     const res = await callBackendApi('authenticate_user', { user_name: uname, password: pass });
 
     if (res.success && res.user) {
@@ -77,11 +76,9 @@ async function handleMainSignIn(e) {
         currentUserName = user.user_name || uname;
         currentCompositeUserId = user.composite_user_id;
         
-        // ইউজারের মোবাইল নম্বরের শেষ ৪ ডিজিট বের করা (ডাটাবেজ থেকে অথবা ডিফল্ট)
         let buyerMobile = user.buyer_mobile || '01818589423'; 
         let lastFourDigits = buyerMobile.length >= 4 ? buyerMobile.slice(-4) : '8423';
         
-        // লোকালস্টোরেজে ডেটা সেভ করা
         localStorage.setItem('composite_user_id', user.composite_user_id);
         localStorage.setItem('user_name', user.user_name || uname);
         localStorage.setItem('buyer_email', user.buyer_email || '');
@@ -90,10 +87,7 @@ async function handleMainSignIn(e) {
 
         document.getElementById('currentLoggedInUser').innerText = currentUserName;
         document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
-        
-        // কুপন কোডটি SIGMA_ এবং মোবাইলের শেষ ৪ ডিজিট দিয়ে সেট করা হলো (যেমন: SIGMA_8423)
         document.getElementById('userCouponCode').innerText = 'SIGMA_' + lastFourDigits;
-        
         document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
         
         document.getElementById('page1').classList.add('hidden');
@@ -400,7 +394,7 @@ function renderLotInventory() {
     document.getElementById('subUserCount').innerText = activeSubs.length || 1;
 
     const listEl = document.getElementById('lotInventorySummaryList');
-    const selectEl = document.getElementById('sellLotIdSelect');
+    const selectEl = document.getElementById('sellLotIdSelect'); // বা আপনার ফর্মের সিলেক্ট আইডি
 
     if (inStockItems.length === 0) {
         if(listEl) listEl.innerHTML = '<p class="text-slate-500">No In_Stock IDs available.</p>';
@@ -415,8 +409,9 @@ function renderLotInventory() {
             `).join('');
         }
         if(selectEl) {
-            selectEl.innerHTML = inStockItems.map(item => `
-                <option value="${item.id}">${item.lot_id} - ${item.user_name || item.user_id} (In_Stock)</option>
+            // অপশনগুলোতে data-password অ্যাট্রিবিউট যুক্ত করে দেওয়া হলো যাতে সহজে পাসওয়ার্ড নেওয়া যায়
+            selectEl.innerHTML = '<option value="">-- Select Lot ID --</option>' + inStockItems.map(item => `
+                <option value="${item.id || item.lot_id}" data-password="${item.password || ''}">${item.lot_id} - ${item.user_name || item.user_id} (In_Stock)</option>
             `).join('');
         }
     }
@@ -839,25 +834,30 @@ async function submitUserPasswordChange() {
     }
 }
 
+// -------------------------------------------------------------------------
+// LOT PASSWORD AUTO-FILL (Select Lot ID to Sell)
+// -------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
-    // আপনার লট ডাটার সোর্স (যদি ডাটাবেজ বা API থেকে ফেচ করতে হয়, তবে এখানে ডেটা লোড করার ব্যবস্থা থাকবে)
-    // উদাহরণস্বরূপ: lotsData অ্যারেতে আপনার লট আইডি এবং পাসওয়ার্ডগুলো থাকবে।
-    
-    const lotIdSelectElement = document.getElementById('lotIdSelect'); // আপনার সিলেক্ট ড্রপডাউনের আইডি
+    const lotIdSelectElement = document.getElementById('sellLotIdSelect'); // আপনার সিলেক্ট ড্রপডাউনের আইডি
     const lotPasswordElement = document.getElementById('lotPassword'); // পাসওয়ার্ড দেখানোর ইনপুট ফিল্ডের আইডি
 
     if (lotIdSelectElement && lotPasswordElement) {
         lotIdSelectElement.addEventListener('change', function() {
-            const selectedLotId = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            const password = selectedOption ? selectedOption.getAttribute('data-password') : '';
             
-            // lotsData থেকে সিলেক্ট করা লট আইডি খুঁজে বের করা
-            // (উল্লেখ্য: আপনার প্রজেক্টে lotsData নামের অ্যারে বা অবজেক্ট ডিক্লেয়ার থাকতে হবে)
-            const lotInfo = typeof lotsData !== 'undefined' ? lotsData.find(item => item.lot_id === selectedLotId) : null;
-            
-            if (lotInfo && lotInfo.password) {
-                lotPasswordElement.value = lotInfo.password;
+            if (password) {
+                lotPasswordElement.value = password;
             } else {
-                lotPasswordElement.value = ''; // লট না মিললে ফিল্ড খালি রাখবে
+                // যদি data-password অ্যাট্রিবিউট থেকে না পাওয়া যায়, তবে accountsMasterRecords থেকে খুঁজে দেখবে
+                const selectedVal = this.value;
+                const foundItem = accountsMasterRecords.find(item => item.id == selectedVal || item.lot_id == selectedVal);
+                
+                if (foundItem && foundItem.password) {
+                    lotPasswordElement.value = foundItem.password;
+                } else {
+                    lotPasswordElement.value = ''; // না পেলে খালি রাখবে
+                }
             }
         });
     }
