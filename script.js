@@ -73,6 +73,13 @@ async function handleMainSignIn(e) {
         const user = res.user;
         currentUserId = user.user_id;
         currentCompositeUserId = user.composite_user_id;
+        
+        // লোকালস্টোরেজে user_name এবং buyer_email সেভ করা
+        localStorage.setItem('composite_user_id', user.composite_user_id);
+        localStorage.setItem('user_id', user.user_id);
+        localStorage.setItem('user_name', user.user_name || user.user_id); // সুপাবেজ থেকে আসা user_name
+        localStorage.setItem('buyer_email', user.buyer_email || '');
+        
         validityExpiryTime = new Date().getTime() + ((user.validity_days || 30) * 24 * 60 * 60 * 1000);
 
         document.getElementById('currentLoggedInUser').innerText = currentUserId;
