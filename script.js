@@ -733,7 +733,78 @@ function printMemoPdf() {
     window.print();
     printArea.classList.add('hidden');
 }
+function openUserPassModal() {
+    const currentCompId = localStorage.getItem('composite_user_id') || '';
+    const currentEmail = localStorage.getItem('user_email') || 'user@example.com';
+    const currentUserId = localStorage.getItem('user_id') || '';
 
+    document.getElementById('modalCompositeId').innerText = currentCompId;
+    document.getElementById('modalAutoEmail').innerText = currentEmail;
+    document.getElementById('newUsernameInput').value = currentUserId;
+
+    document.getElementById('userPassModal').style.display = 'flex';
+}
+
+function closeUserPassModal() {
+    document.getElementById('userPassModal').style.display = 'none';
+}
+
+async function submitUserPasswordChange() {
+    const newUsername = document.getElementById('newUsernameInput').value.trim();
+    const oldPassword = document.getElementById('oldPasswordInput').value.trim();
+    const newPassword = document.getElementById('newPasswordInput').value.trim();
+    const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
+    const compositeUserId = localStorage.getItem('composite_user_id');
+    const userEmail = document.getElementById('modalAutoEmail').innerText;
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+        alert('দয়া করে পুরাতন এবং নতুন পাসওয়ার্ডের ঘরগুলো পূরণ করুন।');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        alert('নতুন পাসওয়ার্ড এবং পুনরায় দেওয়া পাসওয়ার্ড মিলছে না!');
+        return;
+    }
+
+    const btn = document.getElementById('btnAcceptLoginAgain');
+    btn.innerText = 'Processing...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/root-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'user_password_change',
+                composite_user_id: compositeUserId,
+                payload: {
+                    new_username: newUsername,
+                    old_password: oldPassword,
+                    new_password: newPassword,
+                    email: userEmail
+                }
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message);
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.reload(); 
+        } else {
+            alert(result.message || 'পরিবর্তন ব্যর্থ হয়েছে!');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('সার্ভারের সাথে সংযোগ করতে সমস্যা হয়েছে।');
+    } finally {
+        btn.innerText = 'Accept & Login Again';
+        btn.disabled = false;
+    }
+}
 window.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     if(document.getElementById('incomeDate')) document.getElementById('incomeDate').value = today;
