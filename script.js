@@ -5,7 +5,7 @@
  */
 
 let GLOBAL_COMPANY_ID = "101";
-let currentUserId = "";
+let currentUserName = "";
 let currentCompositeUserId = "";
 let validityExpiryTime = new Date().getTime();
 let activeDevices = 1;
@@ -23,13 +23,15 @@ let privateMessagesMap = {};
 
 function showToast(text) {
     const toast = document.getElementById('toast');
+    if (!toast) return;
     document.getElementById('toast-text').innerText = text;
     toast.classList.remove('hidden');
     setTimeout(hideToast, 3500);
 }
 
 function hideToast() {
-    document.getElementById('toast').classList.add('hidden');
+    const toast = document.getElementById('toast');
+    if (toast) toast.classList.add('hidden');
 }
 
 function formatMoney(num) {
@@ -60,45 +62,45 @@ async function callBackendApi(action, payload) {
 }
 
 // -------------------------------------------------------------------------
-// AUTHENTICATION & LOGIN
+// AUTHENTICATION & LOGIN (Using user_name and password)
 // -------------------------------------------------------------------------
 async function handleMainSignIn(e) {
     e.preventDefault();
-    const uid = document.getElementById('mainUserId').value.trim();
+    const uname = document.getElementById('mainUserName').value.trim();
     const pass = document.getElementById('mainUserPassword').value.trim();
 
-    const res = await callBackendApi('authenticate_user', { user_id: uid, password: pass });
+    // user_name দিয়ে ব্যাকএন্ডে রিকোয়েস্ট পাঠানো হচ্ছে
+    const res = await callBackendApi('authenticate_user', { user_name: uname, password: pass });
 
     if (res.success && res.user) {
         const user = res.user;
-        currentUserId = user.user_id;
+        currentUserName = user.user_name || uname;
         currentCompositeUserId = user.composite_user_id;
         
-        // লোকালস্টোরেজে user_name এবং buyer_email সেভ করা
+        // লোকালস্টোরেজে ডেটা সেভ করা
         localStorage.setItem('composite_user_id', user.composite_user_id);
-        localStorage.setItem('user_id', user.user_id);
-        localStorage.setItem('user_name', user.user_name || user.user_id); // সুপাবেজ থেকে আসা user_name
+        localStorage.setItem('user_name', user.user_name || uname);
         localStorage.setItem('buyer_email', user.buyer_email || '');
         
         validityExpiryTime = new Date().getTime() + ((user.validity_days || 30) * 24 * 60 * 60 * 1000);
 
-        document.getElementById('currentLoggedInUser').innerText = currentUserId;
+        document.getElementById('currentLoggedInUser').innerText = currentUserName;
         document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
-        document.getElementById('userCouponCode').innerText = 'SIGMA-' + currentUserId.toUpperCase();
+        document.getElementById('userCouponCode').innerText = 'SIGMA-' + currentUserName.toUpperCase();
         document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
         
         document.getElementById('page1').classList.add('hidden');
         document.getElementById('page2').classList.remove('hidden');
         
         await loadAllDatabaseRecords();
-        showToast('স্বাগতম ' + currentUserId + '! সফলভাবে লগইন হয়েছে।');
+        showToast('স্বাগতম ' + currentUserName + '! সফলভাবে লগইন হয়েছে।');
     } else {
-        showToast(res.message || 'ভুল ইউজার আইডি অথবা পাসওয়ার্ড!');
+        showToast(res.message || 'ভুল ইউজারনেম অথবা পাসওয়ার্ড!');
     }
 }
 
 function handleLogOut() {
-    currentUserId = "";
+    currentUserName = "";
     currentCompositeUserId = "";
     document.getElementById('page2').classList.add('hidden');
     document.getElementById('page1').classList.remove('hidden');
@@ -349,7 +351,7 @@ function renderMarketExpensesTable() {
 }
 
 // -------------------------------------------------------------------------
-// LOT & LICENSE MANAGEMENT (Separate Columns for Buyer Data)
+// LOT & LICENSE MANAGEMENT
 // -------------------------------------------------------------------------
 function openBuyLotModal() {
     document.getElementById('generatedLotNumber').innerText = 'LT-' + Math.floor(1000 + Math.random() * 9000);
@@ -381,8 +383,8 @@ async function handleCashPayLot() {
         showToast(res.message || 'লট ক্রয় ব্যর্থ হয়েছে।');
     }
 }
+
 function renderLotInventory() {
-    // শুধুমাত্র বর্তমান ইউজারের কেনা এবং ইন-স্টক থাকা লটগুলো ফিল্টার করার সঠিক লজিক
     const inStockItems = accountsMasterRecords.filter(a => a.owner_id === currentCompositeUserId && a.status === 'In_Stock');
     document.getElementById('availableLotIdsCount').innerText = inStockItems.length;
     const activeSubs = accountsMasterRecords.filter(a => a.upline_id === currentCompositeUserId && a.status !== 'In_Stock');
@@ -398,21 +400,19 @@ function renderLotInventory() {
         if(listEl) {
             listEl.innerHTML = inStockItems.map(item => `
                 <div class="flex justify-between items-center bg-[#131822] px-2 py-1 rounded border border-slate-800">
-                    <span class="text-amber-400 font-mono">${item.lot_id} • ${item.user_id}</span>
+                    <span class="text-amber-400 font-mono">${item.lot_id} • ${item.user_name || item.user_id}</span>
                     <span class="text-emerald-400 font-bold">In_Stock</span>
                 </div>
             `).join('');
         }
         if(selectEl) {
             selectEl.innerHTML = inStockItems.map(item => `
-                <option value="${item.id}">${item.lot_id} - ${item.user_id} (In_Stock)</option>
+                <option value="${item.id}">${item.lot_id} - ${item.user_name || item.user_id} (In_Stock)</option>
             `).join('');
         }
     }
 }
 
-
-// মডাল ওপেন করার সময় ইউজারের কুপন কোড অটো বসিয়ে দেওয়া
 function openSellLicenseModal() {
     renderLotInventory();
     const userCoupon = document.getElementById('userCouponCode').innerText;
@@ -424,7 +424,6 @@ function closeSellLicenseModal() {
     document.getElementById('sellLicenseModal').classList.add('hidden'); 
 }
 
-// আইডি বিক্রি ও কুপন কোডসহ ডেটা সাবমিট করার ফাংশন
 async function handleSellNewIdSubmit(e) {
     e.preventDefault();
     const selectedId = document.getElementById('sellLotIdSelect').value;
@@ -445,7 +444,7 @@ async function handleSellNewIdSubmit(e) {
     if (res.success) {
         await loadAllDatabaseRecords();
         closeSellLicenseModal();
-        showToast('আইডি বিক্রি সফল হয়েছে এবং চেইন হিসাব অনুযায়ী ক্যাশব্যাক যুক্ত হয়েছে!');
+        showToast('আইডি বিক্রি সফল হয়েছে এবং ক্যাশব্যাক যুক্ত হয়েছে!');
     } else {
         showToast(res.message || 'আইডি বিক্রি সম্পন্ন করা যায়নি।');
     }
@@ -488,7 +487,6 @@ async function handleBalanceTransferSubmit(e) {
 function openBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.remove('hidden'); }
 function closeBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.add('hidden'); }
 
-// Buy New ID / License Landing: Saves buyer_name, buyer_mobile, buyer_email in separate columns
 async function handleLandingBuySubmit(e) {
     e.preventDefault();
     const name = document.getElementById('landingBuyerName').value.trim();
@@ -505,7 +503,7 @@ async function handleLandingBuySubmit(e) {
 
     if (res.success) {
         closeBuyLicenseLandingModal();
-        showToast('নতুন আইডির আবেদন ও পেমেন্ট আলাদা কলামে জমা হয়েছে!');
+        showToast('নতুন আইডির আবেদন সফলভাবে জমা হয়েছে!');
     } else {
         showToast(res.message || 'সাবমিট করতে সমস্যা হয়েছে।');
     }
@@ -538,12 +536,12 @@ function openMyChatModal() {
 
 function renderChatUsersList() {
     const container = document.getElementById('chatUsersListContainer');
-    const otherUsers = accountsMasterRecords.filter(u => u.user_id !== currentUserId);
+    const otherUsers = accountsMasterRecords.filter(u => (u.user_name || u.user_id) !== currentUserName);
     container.innerHTML = otherUsers.map(u => `
-        <button type="button" onclick="openIndividualChat('${u.user_id}')" 
+        <button type="button" onclick="openIndividualChat('${u.user_name || u.user_id}')" 
             class="shrink-0 bg-[#131822] hover:bg-indigo-950/60 border border-slate-700 hover:border-indigo-500/60 rounded-xl px-3 py-1.5 flex items-center space-x-1.5 transition-all">
             <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
-            <span class="text-xs font-bold text-slate-200">${u.user_id}</span>
+            <span class="text-xs font-bold text-slate-200">${u.user_name || u.user_id}</span>
         </button>
     `).join('');
 }
@@ -551,10 +549,11 @@ function renderChatUsersList() {
 function renderUniversalMessages() {
     const box = document.getElementById('universalChatBox');
     box.innerHTML = universalMessages.map(m => {
-        const isMe = m.user_id === currentUserId;
+        const isMe = m.user_name === currentUserName || m.user_id === currentUserName;
+        const senderLabel = m.user_name || m.user_id || 'User';
         return `
             <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You (' + m.user_id + ')' : m.user_id}</span>
+                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You (' + senderLabel + ')' : senderLabel}</span>
                 <div class="${isMe ? 'bg-emerald-600 text-slate-950 font-semibold' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">
                     ${m.message}
                 </div>
@@ -572,19 +571,19 @@ async function sendUniversalMessage(e) {
 
     const res = await callBackendApi('send_chat', { channel: 'Public_Forum', message: text });
     if (res.success) {
-        universalMessages.push({ user_id: currentUserId, message: text });
+        universalMessages.push({ user_name: currentUserName, message: text });
         input.value = '';
         renderUniversalMessages();
     }
 }
 
-function openIndividualChat(partnerId) {
-    activePrivatePartner = partnerId;
+function openIndividualChat(partnerName) {
+    activePrivatePartner = partnerName;
     document.getElementById('universalChatView').classList.add('hidden');
     document.getElementById('individualChatView').classList.remove('hidden');
     document.getElementById('chatBackBtn').classList.remove('hidden');
-    document.getElementById('chatModalTitle').innerHTML = `<i class="fa-solid fa-user-lock text-indigo-400"></i><span>${partnerId}</span>`;
-    document.getElementById('activeChatPartnerName').innerText = partnerId;
+    document.getElementById('chatModalTitle').innerHTML = `<i class="fa-solid fa-user-lock text-indigo-400"></i><span>${partnerName}</span>`;
+    document.getElementById('activeChatPartnerName').innerText = partnerName;
     renderIndividualMessages();
 }
 
@@ -601,10 +600,10 @@ function renderIndividualMessages() {
     const box = document.getElementById('individualChatBox');
     const msgs = privateMessagesMap[activePrivatePartner] || [];
     box.innerHTML = msgs.map(m => {
-        const isMe = m.user_id === currentUserId;
+        const isMe = m.user_name === currentUserName || m.user_id === currentUserName;
         return `
             <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You' : m.user_id}</span>
+                <span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You' : (m.user_name || m.user_id)}</span>
                 <div class="${isMe ? 'bg-indigo-600 text-white font-medium' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">
                     ${m.message}
                 </div>
@@ -621,11 +620,11 @@ async function sendIndividualMessage(e) {
     const text = input.value.trim();
     if (!text) return;
 
-    const channelName = 'DM_' + [currentUserId, activePrivatePartner].sort().join('_');
+    const channelName = 'DM_' + [currentUserName, activePrivatePartner].sort().join('_');
     const res = await callBackendApi('send_chat', { channel: channelName, message: text });
     if (res.success) {
         if (!privateMessagesMap[activePrivatePartner]) privateMessagesMap[activePrivatePartner] = [];
-        privateMessagesMap[activePrivatePartner].push({ user_id: currentUserId, message: text });
+        privateMessagesMap[activePrivatePartner].push({ user_name: currentUserName, message: text });
         input.value = '';
         renderIndividualMessages();
     }
@@ -669,6 +668,7 @@ function addProductToMemoCart() {
 
 function renderMemoCart() {
     const tbody = document.getElementById('memoCartTableBody');
+    if (!tbody) return;
     let grand = 0;
     tbody.innerHTML = memoCart.map((item, idx) => {
         grand += item.total;
@@ -740,28 +740,26 @@ function printMemoPdf() {
     window.print();
     printArea.classList.add('hidden');
 }
+
+// -------------------------------------------------------------------------
+// USER PASSWORD & USERNAME CHANGE LOGIC
+// -------------------------------------------------------------------------
 function openUserPassModal() {
-    const compId = localStorage.getItem('composite_user_id') || 'N/A';
+    const compId = localStorage.getItem('composite_user_id') || currentCompositeUserId || 'N/A';
     const buyerEmail = localStorage.getItem('buyer_email') || 'N/A';
-    const currentUserName = localStorage.getItem('user_name') || localStorage.getItem('user_id') || '';
+    const currentUN = localStorage.getItem('user_name') || currentUserName || '';
 
     document.getElementById('modalCompositeId').innerText = compId;
     document.getElementById('modalAutoEmail').innerText = buyerEmail;
-    document.getElementById('newUsernameInput').value = currentUserName;
+    document.getElementById('newUsernameInput').value = currentUN;
 
-    document.getElementById('userPassModal').style.display = 'flex';
-}
-    // মোডালের ফিল্ডগুলোতে ডাটা বসিয়ে দেওয়া
-    document.getElementById('modalCompositeId').innerText = compId || '101_user_4545'; // উদাহরণ বা আসল আইডি
-    document.getElementById('modalAutoEmail').innerText = buyerEmail || 'shafiurrahman99@gmail.com';
-    document.getElementById('newUsernameInput').value = localStorage.getItem('user_id') || '';
-
-    // মোডাল দৃশ্যমান করা
-    document.getElementById('userPassModal').style.display = 'flex';
+    const modal = document.getElementById('userPassModal');
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeUserPassModal() {
-    document.getElementById('userPassModal').style.display = 'none';
+    const modal = document.getElementById('userPassModal');
+    if (modal) modal.style.display = 'none';
 }
 
 async function submitUserPasswordChange() {
@@ -770,7 +768,6 @@ async function submitUserPasswordChange() {
     const newPassword = document.getElementById('newPasswordInput').value.trim();
     const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
     
-    // মোডাল থেকে ফিক্সড composite_user_id নেওয়া
     const compositeUserId = document.getElementById('modalCompositeId').innerText;
     const buyerEmail = document.getElementById('modalAutoEmail').innerText;
 
@@ -790,8 +787,10 @@ async function submitUserPasswordChange() {
     }
 
     const btn = document.getElementById('btnAcceptLoginAgain');
-    btn.innerText = 'Processing...';
-    btn.disabled = true;
+    if (btn) {
+        btn.innerText = 'Processing...';
+        btn.disabled = true;
+    }
 
     try {
         const response = await fetch('/api/root-proxy', {
@@ -799,7 +798,7 @@ async function submitUserPasswordChange() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'user_password_change',
-                composite_user_id: compositeUserId, // সঠিক কম্পোজিট আইডি পাঠানো হচ্ছে
+                composite_user_id: compositeUserId,
                 user_id: compositeUserId,
                 payload: {
                     new_username: newUsername,
@@ -824,10 +823,13 @@ async function submitUserPasswordChange() {
         console.error(err);
         alert('সার্ভারের সাথে সংযোগ করতে সমস্যা হয়েছে।');
     } finally {
-        btn.innerText = 'Accept & Login Again';
-        btn.disabled = false;
+        if (btn) {
+            btn.innerText = 'Accept & Login Again';
+            btn.disabled = false;
+        }
     }
 }
+
 window.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
     if(document.getElementById('incomeDate')) document.getElementById('incomeDate').value = today;
