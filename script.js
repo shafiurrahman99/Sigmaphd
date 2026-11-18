@@ -733,15 +733,37 @@ function printMemoPdf() {
     window.print();
     printArea.classList.add('hidden');
 }
-function openUserPassModal() {
-    const currentCompId = localStorage.getItem('composite_user_id') || localStorage.getItem('user_id') || '';
-    const buyerEmail = localStorage.getItem('buyer_email') || localStorage.getItem('user_email') || 'N/A';
-    const currentUserId = localStorage.getItem('user_id') || '';
+async function openUserPassModal() {
+    // প্রথমে লোকালস্টোরেজ থেকে চেক করা
+    let compId = localStorage.getItem('composite_user_id') || localStorage.getItem('user_id');
+    let buyerEmail = localStorage.getItem('buyer_email') || localStorage.getItem('user_email');
 
-    document.getElementById('modalCompositeId').innerText = currentCompId;
-    document.getElementById('modalAutoEmail').innerText = buyerEmail;
-    document.getElementById('newUsernameInput').value = currentUserId;
+    // যদি লোকালস্টোরেজে না থাকে, তবে বর্তমান ইউজারনেম দিয়ে ব্যাকএন্ড থেকে ডাটা এনে নেওয়া
+    if (!compId || compId === 'N/A') {
+        try {
+            const res = await fetch('/api/root-proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_user_context' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                compId = data.composite_user_id;
+                buyerEmail = data.buyer_email;
+                localStorage.setItem('composite_user_id', compId);
+                localStorage.setItem('buyer_email', buyerEmail);
+            }
+        } catch (e) {
+            console.error('Context fetch error:', e);
+        }
+    }
 
+    // মোডালের ফিল্ডগুলোতে ডাটা বসিয়ে দেওয়া
+    document.getElementById('modalCompositeId').innerText = compId || '101_user_4545'; // উদাহরণ বা আসল আইডি
+    document.getElementById('modalAutoEmail').innerText = buyerEmail || 'shafiurrahman99@gmail.com';
+    document.getElementById('newUsernameInput').value = localStorage.getItem('user_id') || '';
+
+    // মোডাল দৃশ্যমান করা
     document.getElementById('userPassModal').style.display = 'flex';
 }
 
@@ -755,8 +777,9 @@ async function submitUserPasswordChange() {
     const newPassword = document.getElementById('newPasswordInput').value.trim();
     const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
     
-    // লোকাল বা মোডাল থেকে আইডি বা ইউজারনেম নেওয়া
-    const identifier = localStorage.getItem('composite_user_id') || document.getElementById('modalCompositeId').innerText || localStorage.getItem('user_id');
+    // মোডাল থেকে ফিক্সড composite_user_id নেওয়া
+    const compositeUserId = document.getElementById('modalCompositeId').innerText;
+    const buyerEmail = document.getElementById('modalAutoEmail').innerText;
 
     if (!oldPassword || !newPassword || !confirmPassword) {
         alert('দয়া করে পুরাতন এবং নতুন পাসওয়ার্ডের ঘরগুলো পূরণ করুন।');
@@ -765,6 +788,11 @@ async function submitUserPasswordChange() {
 
     if (newPassword !== confirmPassword) {
         alert('নতুন পাসওয়ার্ড এবং পুনরায় দেওয়া পাসওয়ার্ড মিলছে না!');
+        return;
+    }
+
+    if (!compositeUserId || compositeUserId === 'N/A' || compositeUserId === '--') {
+        alert('Composite User ID পাওয়া যায়নি। দয়া করে আবার লগইন করুন।');
         return;
     }
 
@@ -778,12 +806,13 @@ async function submitUserPasswordChange() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'user_password_change',
-                composite_user_id: identifier, // ব্যাকএন্ডে কম্পোজিট আইডি বা ইউজার আইডি পাঠানো হচ্ছে
-                user_id: identifier,
+                composite_user_id: compositeUserId, // সঠিক কম্পোজিট আইডি পাঠানো হচ্ছে
+                user_id: compositeUserId,
                 payload: {
                     new_username: newUsername,
                     old_password: oldPassword,
-                    new_password: newPassword
+                    new_password: newPassword,
+                    buyer_email: buyerEmail
                 }
             })
         });
