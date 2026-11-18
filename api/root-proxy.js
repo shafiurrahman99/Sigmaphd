@@ -61,13 +61,13 @@ export default async function handler(req, res) {
                 });
             }
 case 'user_password_change': {
-                const { new_username, old_password, new_password, email } = payload;
+                const { new_username, old_password, new_password } = payload;
 
-                if (!composite_user_id || composite_user_id === 'N/A') {
+                if (!composite_user_id) {
                     return res.status(200).json({ success: false, message: 'কম্পোজিট ইউজার আইডি পাওয়া যায়নি।' });
                 }
 
-                // ডাটাবেজ থেকে রেকর্ড খুঁজে বের করা
+                // ডাটাবেজ থেকে composite_user_id দিয়ে রেকর্ড এবং buyer_email ফেচ করা
                 const { data: userRecord, error: fetchErr } = await supabaseServer
                     .from('accounts_master')
                     .select('*')
@@ -107,11 +107,12 @@ case 'user_password_change': {
 
                 if (updateErr) throw updateErr;
 
-                const targetEmail = email || userRecord.buyer_email || 'user@example.com';
+                // ডাটাবেজের আসল buyer_email ব্যবহার করা
+                const buyerEmail = userRecord.buyer_email || 'N/A';
 
                 return res.status(200).json({
                     success: true,
-                    message: `সফলভাবে তথ্য আপডেট হয়েছে এবং ${targetEmail} ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল কম্পোজিট আইডি সুরক্ষিত আছে। এখন পুনরায় লগইন করুন।`
+                    message: `সফলভাবে তথ্য আপডেট হয়েছে এবং ${buyerEmail} (Buyer Email) ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল কম্পোজিট আইডি সুরক্ষিত আছে। এখন পুনরায় লগইন করুন।`
                 });
             }
             case 'save_income_expense': {
