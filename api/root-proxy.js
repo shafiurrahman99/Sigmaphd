@@ -24,18 +24,33 @@ export default async function handler(req, res) {
 
         switch (action) {
             case 'authenticate_user': {
-                const { user_id, password } = payload;
+                const { user_name, password } = payload || {};
+                
+                if (!user_name || !password) {
+                    return res.status(200).json({ success: false, message: 'ইউজারনেম এবং পাসওয়ার্ড উভয়ই প্রদান করুন।' });
+                }
+
+                const cleanUserName = String(user_name).trim();
+                const cleanPassword = String(password).trim();
+
+                // সুপাবেজ থেকে সরাসরি user_name এবং password দিয়ে ভেরিফাই করা
                 const { data, error } = await supabaseServer
                     .from('accounts_master')
                     .select('*')
                     .eq('company_id', company_id)
-                    .eq('user_id', user_id)
-                    .eq('password', password)
+                    .eq('user_name', cleanUserName)
+                    .eq('password', cleanPassword)
                     .single();
 
                 if (error || !data) {
-                    return res.status(200).json({ success: false, message: 'ভুল ইউজার আইডি অথবা পাসওয়ার্ড!' });
+                    console.log(`[LOGIN FAILED] User Name: ${cleanUserName} | Error:`, error?.message);
+                    return res.status(200).json({ success: false, message: 'ভুল ইউজারনেম অথবা পাসওয়ার্ড!' });
                 }
+
+                if (data.status === 'Pending') {
+                    return res.status(200).json({ success: false, message: 'আপনার অ্যাকাউন্টটি এখনো পেন্ডিং রয়েছে।' });
+                }
+
                 return res.status(200).json({ success: true, user: data });
             }
 
@@ -45,7 +60,6 @@ export default async function handler(req, res) {
                     supabaseServer.from('loan_records').select('*').eq('composite_user_id', composite_user_id).eq('loan_category', 'Receivable'),
                     supabaseServer.from('loan_records').select('*').eq('composite_user_id', composite_user_id).eq('loan_category', 'Payable'),
                     supabaseServer.from('daily_expenses').select('*').eq('composite_user_id', composite_user_id).order('expense_date', { ascending: false }),
-                    // সুপাবেজ থেকে শুধুমাত্র বর্তমান ইউজারের কেনা (owner_id মিল থাকা) এবং ইন-স্টক থাকা লটগুলো ফিল্টার করার ব্যবস্থা
                     supabaseServer.from('accounts_master').select('*').eq('company_id', company_id),
                     supabaseServer.from('forum_chat').select('*').eq('company_id', company_id).eq('chat_channel', 'Public_Forum').order('created_at', { ascending: true })
                 ]);
@@ -60,15 +74,15 @@ export default async function handler(req, res) {
                     public_chats: chats.data || []
                 });
             }
-case 'user_password_change': {
-                const { new_username, old_password, new_password } = payload;
+
+            case 'user_password_change': {
+                const { new_username, old_password, new_password, user_id } = payload || {};
                 const targetKey = composite_user_id || user_id;
 
                 if (!targetKey) {
                     return res.status(200).json({ success: false, message: 'ইউজার আইডেন্টিফায়ার পাওয়া যায়নি।' });
                 }
 
-                // ডাটাবেজ থেকে composite_user_id দিয়ে রেকর্ড ফেচ করা
                 const { data: userRecord, error: fetchErr } = await supabaseServer
                     .from('accounts_master')
                     .select('*')
@@ -85,7 +99,6 @@ case 'user_password_change': {
 
                 const updatedUserName = new_username ? new_username.trim() : userRecord.user_name;
 
-                // শুধুমাত্র user_name এবং password আপডেট হবে, composite_user_id একদম সুরক্ষিত থাকবে!
                 const { error: updateErr } = await supabaseServer
                     .from('accounts_master')
                     .update({
@@ -100,14 +113,15 @@ case 'user_password_change': {
 
                 return res.status(200).json({
                     success: true,
-                    message: `সফলভাবে ইউজারনেম ও পাসওয়ার্ড আপডেট হয়েছে! ${buyerEmail} (buyer_email) ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল composite_user_id সুরক্ষিত আছে।`
+                    message: `সফলভাবে ইউজারনেম ও পাসওয়ার্ড আপডেট হয়েছে! ${buyerEmail} ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে।`
                 });
             }
+
             case 'save_income_expense': {
                 const { type, date, desc, amount } = payload;
                 const { error } = await supabaseServer.from('income_expense').insert([{
-                    company_id: company_id || composite_user_id.split('_')[0],
-                    user_id: composite_user_id.split('_')[1],
+                    company_id: company_id || composite_user_id?.split('_')[0],
+                    user_id: composite_user_id?.split('_')[1],
                     composite_user_id,
                     entry_type: type,
                     entry_date: date,
@@ -121,8 +135,8 @@ case 'user_password_change': {
             case 'save_loan': {
                 const { category, date, person_name, amount } = payload;
                 const { error } = await supabaseServer.from('loan_records').insert([{
-                    company_id: composite_user_id.split('_')[0],
-                    user_id: composite_user_id.split('_')[1],
+                    company_id: composite_user_id?.split('_')[0],
+                    user_id: composite_user_id?.split('_')[1],
                     composite_user_id,
                     loan_category: category,
                     entry_date: date,
@@ -146,8 +160,8 @@ case 'user_password_change': {
             case 'save_market_expense': {
                 const { expense_date, description, amount, status } = payload;
                 const { error } = await supabaseServer.from('daily_expenses').insert([{
-                    company_id: composite_user_id.split('_')[0],
-                    user_id: composite_user_id.split('_')[1],
+                    company_id: composite_user_id?.split('_')[0],
+                    user_id: composite_user_id?.split('_')[1],
                     composite_user_id,
                     expense_date,
                     description,
@@ -158,18 +172,18 @@ case 'user_password_change': {
                 return res.status(200).json({ success: true, message: 'Daily market expense logged.' });
             }
 
-           case 'buy_lot': {
+            case 'buy_lot': {
                 const { lot_id, quantity } = payload;
                 const compId = composite_user_id ? composite_user_id.split('_')[0] : company_id;
                 const ownerId = composite_user_id || (compId + '_admin');
                 const rowsToInsert = [];
 
                 for (let i = 1; i <= quantity; i++) {
-                    const subId = `sub_${lot_id.toLowerCase().replace('-', '')}_${String(i).padStart(2, '0')}`;
+                    const subId = `sub_${lot_id.toLowerCase().replace(/-/g, '')}_${String(i).padStart(2, '0')}`;
                     rowsToInsert.push({
                         company_id: compId,
                         user_id: subId,
-                        // composite_user_id এখানে আর পাঠানো হচ্ছে না, যাতে ডাটাবেজ কনস্ট্রেইন্ট এরর না দেয়
+                        user_name: 'user_' + Math.floor(1000 + Math.random() * 9000),
                         password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                         role: 'User',
                         status: 'In_Stock',
@@ -189,29 +203,26 @@ case 'user_password_change': {
             case 'process_id_sale_cashback': {
                 const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload;
 
-                // ১. আইডি স্ট্যাটাস আপডেট এবং বায়ারের তথ্য সেট করা
                 const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
                     status: 'Active',
-                    buyer_name: buyer_name,
-                    buyer_mobile: buyer_mobile,
-                    buyer_email: buyer_email,
-                    coupon_code: coupon_code
+                    buyer_name,
+                    buyer_mobile,
+                    buyer_email,
+                    coupon_code
                 }).eq('id', sold_item_id);
 
                 if (updateError) throw updateError;
 
-                // ২. সেলারের তথ্য এবং তার ওয়ালেট ব্যালেন্স আনা
                 const { data: sellerData } = await supabaseServer
                     .from('accounts_master')
                     .select('wallet_balance, upline_id, composite_user_id')
                     .eq('composite_user_id', seller_composite_id)
                     .single();
 
-                let directBonus = 8.00; // বিক্রেতার ফিক্সড ডিরেক্ট বোনাস
-                let chainPoolTotal = 2.00; // চেইন পুলের জন্য বরাদ্দ মোট ২ টাকা
+                let directBonus = 8.00;
+                let chainPoolTotal = 2.00;
                 let totalSellerNewBalance = (sellerData?.wallet_balance || 0) + directBonus;
 
-                // ৩. আপলাইন চেইন সংগ্রহ করা (প্রপোর্শনাল রেশিও হিসাবের জন্য)
                 let uplinesChain = [];
                 let currentUplineId = sellerData?.upline_id;
                 
@@ -231,10 +242,8 @@ case 'user_password_change': {
                 let N = uplinesChain.length;
 
                 if (N === 0) {
-                    // চেইনে কেউ না থাকলে চেইনের ২ টাকাও সেলার নিজেই পাবেন (মোট ১০ টাকা)
                     totalSellerNewBalance += chainPoolTotal;
                 } else {
-                    // প্রফেশনাল ম্যাথমেটিক্যাল ওয়েটেড রেশিও হিসাব (নিকটবর্তী আপলাইন বেশি পাবে, টপ কম পাবে)
                     let totalWeight = (N * (N + 1)) / 2; 
                     
                     for (let i = 0; i < N; i++) {
@@ -250,7 +259,6 @@ case 'user_password_change': {
                     }
                 }
 
-                // ৪. সেলারের চূড়ান্ত ওয়ালেট আপডেট
                 await supabaseServer.from('accounts_master')
                     .update({ wallet_balance: totalSellerNewBalance })
                     .eq('composite_user_id', seller_composite_id);
@@ -261,22 +269,21 @@ case 'user_password_change': {
                 });
             }
 
-           case 'register_new_license': {
-                const { name, mobile, email, trx_id } = payload;
+            case 'register_new_license': {
+                const { name, mobile, email } = payload;
                 const compId = company_id || "101";
-                const randomUserId = 'user_' + Math.floor(1000 + Math.random() * 9000);
-                
-                // রিকোয়েস্ট টাইপ সিঙ্গেল হলে ওনার আইডিতে বাই ডিফল্ট অ্যাডমিনের কম্পোজিট আইডি বসবে
+                const randomUserName = 'user_' + Math.floor(1000 + Math.random() * 9000);
                 const defaultAdminCompositeId = compId + '_admin';
 
                 const { error } = await supabaseServer.from('accounts_master').insert([{
                     company_id: compId,
-                    user_id: randomUserId,
+                    user_id: 'user_' + Math.floor(1000 + Math.random() * 9000),
+                    user_name: randomUserName,
                     password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                     role: 'User',
                     status: 'Pending',
                     request_type: 'Single',
-                    owner_id: defaultAdminCompositeId, // সিঙ্গেল রিকোয়েস্টের জন্য অ্যাডমিনের কম্পোজিট আইডি অ্যাসাইন করা হলো
+                    owner_id: defaultAdminCompositeId,
                     upline_id: defaultAdminCompositeId,
                     buyer_name: name,
                     buyer_mobile: mobile,
@@ -299,7 +306,6 @@ case 'user_password_change': {
                     return res.status(200).json({ success: false, message: 'সঠিক পরিমাণ অ্যামাউন্ট প্রদান করুন।' });
                 }
 
-                // ১. বর্তমান প্রেরক (Sender) এর বর্তমান ওয়ালেট ব্যালেন্স চেক করা
                 const { data: senderData, error: senderErr } = await supabaseServer
                     .from('accounts_master')
                     .select('wallet_balance, composite_user_id')
@@ -316,20 +322,18 @@ case 'user_password_change': {
                     return res.status(200).json({ success: false, message: 'পর্যাপ্ত ব্যালেন্স নেই!' });
                 }
 
-                // ২. প্রাপক (Recipient) এর অ্যাকাউন্ট ডাটাবেজে খুঁজে বের করা (ইউজার আইডি অথবা কম্পোজিট আইডি দিয়ে)
                 const { data: recipientData, error: recErr } = await supabaseServer
                     .from('accounts_master')
-                    .select('wallet_balance, composite_user_id, user_id')
-                    .or(`user_id.eq.${recipient_id},composite_user_id.eq.${recipient_id}`)
+                    .select('wallet_balance, composite_user_id, user_name, user_id')
+                    .or(`user_name.eq.${recipient_id},user_id.eq.${recipient_id},composite_user_id.eq.${recipient_id}`)
                     .single();
 
                 if (recErr || !recipientData) {
-                    return res.status(200).json({ success: false, message: 'প্রাপক ইউজার আইডিটি সঠিক নয় বা পাওয়া যায়নি।' });
+                    return res.status(200).json({ success: false, message: 'প্রাপক ইউজারনেম সঠিক নয় বা পাওয়া যায়নি।' });
                 }
 
                 const currentRecipientBalance = parseFloat(recipientData.wallet_balance || 0);
 
-               // ৩. প্রেরকের অ্যাকাউন্ট থেকে টাকা মাইনাস করা
                 const { error: updateSenderErr } = await supabaseServer
                     .from('accounts_master')
                     .update({ wallet_balance: currentSenderBalance - transferAmount })
@@ -337,11 +341,10 @@ case 'user_password_change': {
 
                 if (updateSenderErr) throw updateSenderErr;
 
-                // ৪. প্রাপকের অ্যাকাউন্ট আপডেট করার সময় composite_user_id অথবা user_id যেকোনো একটি দিয়ে নির্ভুলভাবে টার্গেট করা
                 const { error: updateRecipientErr } = await supabaseServer
                     .from('accounts_master')
                     .update({ wallet_balance: currentRecipientBalance + transferAmount })
-                    .or(`composite_user_id.eq.${recipientData.composite_user_id},user_id.eq.${recipientData.user_id}`);
+                    .eq('composite_user_id', recipientData.composite_user_id);
 
                 if (updateRecipientErr) throw updateRecipientErr;
 
@@ -354,8 +357,8 @@ case 'user_password_change': {
             case 'send_chat': {
                 const { channel, message } = payload;
                 const { error } = await supabaseServer.from('forum_chat').insert([{
-                    company_id: composite_user_id.split('_')[0],
-                    user_id: composite_user_id.split('_')[1],
+                    company_id: composite_user_id?.split('_')[0],
+                    user_id: composite_user_id?.split('_')[1],
                     composite_user_id,
                     sender_role: 'User',
                     chat_channel: channel,
