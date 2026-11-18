@@ -3,143 +3,762 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>সিগমা পিএইচডি | Sigma PhD™</title>
+    <title>My Develop App - Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#07090d',
+                        cardBg: '#131822',
+                        innerDark: '#080a0f',
+                        accentGreen: '#0fa968',
+                        accentOrange: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', 'Hind Siliguri', sans-serif;
+            background-color: #07090d;
+            color: #e2e8f0;
+            user-select: none;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .buy-btn-gradient {
+            background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 50%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+        .buy-btn-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 10px; }
         @media print {
             body * { visibility: hidden; }
-            #printable-memo, #printable-memo * { visibility: visible; }
-            #printable-memo { position: absolute; left: 0; top: 0; width: 100%; }
+            #a4MemoPrintArea, #a4MemoPrintArea * { visibility: visible; }
+            #a4MemoPrintArea {
+                position: fixed; left: 0; top: 0; width: 210mm; min-height: 297mm;
+                margin: 0; padding: 15mm; background: white !important; color: black !important; box-shadow: none !important; z-index: 9999;
+            }
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-950">
 
-    <!-- App Container -->
-    <div id="app" class="flex-1 flex flex-col">
-        
-        <!-- Auth / Login Section -->
-        <div id="auth-container" class="flex-1 flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold text-indigo-400">সিগমা পিএইচডি</h1>
-                    <p class="text-xs text-slate-400 mt-1">Advanced Productivity Research, Solutions & Visuality</p>
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[120] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
+        <span id="toast-text">Action successful!</span>
+        <button onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2">
+            <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+    </div>
+
+    <!-- ================= PAGE 1: LOGIN & LANDING ================= -->
+    <div id="page1" class="w-full max-w-md mx-auto space-y-4 my-auto py-4">
+        <div class="bg-[#131822] rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800/80 relative overflow-hidden">
+            <div class="flex items-start justify-between mb-5">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">My Develop App</h1>
+                    <p class="font-bengali text-emerald-400 font-semibold text-sm mt-0.5 tracking-wide">নিজের হাতে গড়া</p>
                 </div>
-                <form id="login-form" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Company ID</label>
-                        <input type="text" id="login-company-id" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500" placeholder="e.g. COMP01">
+                <div class="text-right">
+                    <span class="gradient-text font-black text-lg italic tracking-wider block">Sigma PhD™</span>
+                </div>
+            </div>
+
+            <!-- Sign In Form -->
+            <form onsubmit="handleMainSignIn(event)" class="space-y-4">
+                <div>
+                    <input type="text" id="mainUserId" required placeholder="Enter User ID (e.g., admin)" value="admin"
+                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                </div>
+                <div>
+                    <input type="password" id="mainUserPassword" required placeholder="Enter Password (e.g., 1234)" value="1234"
+                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-lg shadow-emerald-900/20 text-base mt-2">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </form>
+
+            <div class="my-4 border-t border-slate-800"></div>
+
+            <button type="button" onclick="openBuyLicenseLandingModal()" 
+                class="w-full buy-btn-gradient text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 text-base">
+                <i class="fa-solid fa-credit-card text-base text-slate-900"></i>
+                <span>Buy New ID</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= PAGE 2: DASHBOARD ================= -->
+    <div id="page2" class="hidden w-full max-w-md mx-auto space-y-4 py-2">
+        <!-- Accounts Toggle Button Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2.5 shadow-xl flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 flex items-center space-x-2">
+                <i class="fa-solid fa-user-gear text-emerald-400"></i>
+                <span>User Account & Devices</span>
+            </span>
+            <button type="button" onclick="toggleAccountsSection()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1.5 transition-all shadow">
+                <i class="fa-solid fa-chevron-down" id="accountsToggleIcon"></i>
+                <span id="accountsToggleText">Show Accounts</span>
+            </button>
+        </div>
+
+        <!-- Collapsible Accounts & Devices Section -->
+        <div id="accountsSectionContainer" class="hidden space-y-4">
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between shadow-xl">
+                <div class="flex items-center space-x-3">
+                    <div class="relative cursor-pointer" onclick="openAddDeviceModal()" title="Add New Device">
+                        <div class="w-10 h-10 bg-emerald-950/80 border border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 text-lg">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-slate-950 font-black w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">+</span>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">User ID</label>
-                        <input type="text" id="login-user-id" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500" placeholder="e.g. admin">
+                        <h2 class="text-xs font-bold text-white flex items-center space-x-1">
+                            <span id="activeDeviceCount">1</span> Device Active 
+                            <span class="text-slate-400 font-normal">(Max 2)</span>
+                        </h2>
+                        <span class="text-[10px] text-amber-400 font-mono">Composite ID: <strong id="displayCompositeId">101_admin</strong></span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-1.5">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block font-medium">Balance</span>
+                        <span id="walletBalanceText" class="text-emerald-400 font-extrabold text-xs font-mono">৳ 0.00</span>
+                    </div>
+                    <button onclick="openBalanceTransferModal()" class="w-7 h-7 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center justify-center text-xs shadow transition-all" title="Balance Transfer to User">
+                        <i class="fa-solid fa-right-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Profile Bar with Live Countdown Clock & Validity Plus Button -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-9 h-9 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 font-bold">
+                            <i class="fa-solid fa-user-check text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-white">ID: <strong id="currentLoggedInUser" class="text-emerald-400">admin</strong></h3>
+                            <p class="text-[10px] text-slate-400 font-medium mt-0.5" id="validityStatusText">Validity Countdown</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button type="button" onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
+                            <i class="fa-solid fa-gear text-xs text-amber-400"></i>
+                            <span>Settings</span>
+                        </button>
+                        <button type="button" onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                            <span>Log Out</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Validity Countdown Clock Display with Plus Button -->
+                <div class="bg-[#080a0f] border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-around text-center relative">
+                    <div>
+                        <span id="countdownDays" class="text-amber-400 font-extrabold text-base block font-mono">30</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Days</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownHours" class="text-amber-400 font-extrabold text-base block font-mono">23</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Hours</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownMins" class="text-amber-400 font-extrabold text-base block font-mono">59</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Mins</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownSecs" class="text-emerald-400 font-extrabold text-base block font-mono animate-pulse">59</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Secs</span>
+                    </div>
+                    <button type="button" onclick="openBuyValidityModal()" class="absolute -top-2.5 -right-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-lg transition-all" title="Buy Validity @ ৳ 100">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Referral / Coupon Card -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-300 font-bold flex items-center space-x-1.5">
+                        <i class="fa-solid fa-link text-emerald-400"></i>
+                        <span>Referral Chain & User Sale</span>
+                    </span>
+                    <span class="bg-indigo-900/40 text-indigo-300 border border-indigo-700/50 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                        Sub-Users: <strong class="text-emerald-400 font-extrabold text-xs" id="subUserCount">1</strong> active
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-400 text-xs">Coupon Code:</span>
+                        <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA-ADMIN</span>
+                    </div>
+                    <button onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copy</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="openBuyLotModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                        <i class="fa-solid fa-boxes-packing text-xs"></i>
+                        <span>Buy New Lot</span>
+                    </button>
+                    <button onclick="openSellLicenseModal()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>Sell New ID</span>
+                    </button>
+                </div>
+
+                <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-2">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-300 font-bold flex items-center space-x-1">
+                            <i class="fa-solid fa-layer-group text-amber-400"></i>
+                            <span>My Purchased Lots (In_Stock):</span>
+                        </span>
+                        <span class="text-emerald-400 font-extrabold">Available IDs: <span id="availableLotIdsCount">1</span></span>
+                    </div>
+                    <div id="lotInventorySummaryList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2 shadow-xl">
+            <div class="grid grid-cols-3 gap-1 text-xs">
+                <button class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-center shadow-md">Dashboard</button>
+                <button onclick="openMyChatModal()" class="bg-[#1a2130] hover:bg-slate-800 text-slate-300 font-medium py-2 rounded-xl text-center border border-slate-700/50">My Chat</button>
+                <button onclick="openCashMemoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-center shadow-md flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Cash Memo</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Monthly Financial Summary Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-line text-emerald-400 text-base"></i>
+                    <h3 class="text-xs sm:text-sm font-bold text-white">Monthly Summary (Income, Expense, Surplus)</h3>
+                </div>
+                <button onclick="openIncomeModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
+                    <span>+</span>
+                    <span>New Income/Expense</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="py-2.5 px-3">2026</th>
+                            <th class="py-2.5 px-2">Total Income (৳)</th>
+                            <th class="py-2.5 px-2">Total Expense (৳)</th>
+                            <th class="py-2.5 px-2 text-right">Net Surplus (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 font-medium">
+                        <tr class="bg-emerald-950/20 text-emerald-400 font-bold">
+                            <td class="py-3 px-3">Total All-Time</td>
+                            <td id="totalIncomeAll" class="py-3 px-2">৳ 0.00</td>
+                            <td id="totalExpenseAll" class="py-3 px-2 text-rose-400">৳ 0.00</td>
+                            <td id="totalSurplusAll" class="py-3 px-2 text-right">৳ 0.00</td>
+                        </tr>
+                    </tbody>
+                    <tbody id="monthlyRowsContainer" class="divide-y divide-slate-800/40"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loan Management Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-hand-holding-dollar text-amber-400 text-base"></i>
+                    <h3 class="text-xs sm:text-sm font-bold text-white">Loan & Credit Records</h3>
+                </div>
+                <button onclick="openLoanModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
+                    <span>+</span>
+                    <span>New Entry</span>
+                </button>
+            </div>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+                    <span class="text-amber-400 font-bold">Receivable</span>
+                    <span id="loanGivenTotalText" class="text-emerald-400 font-extrabold">Total: ৳ 0.00</span>
+                </div>
+                <div id="loanGivenList" class="space-y-2"></div>
+            </div>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
+                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+                    <span class="text-rose-400 font-bold">Payable</span>
+                    <span id="loanTakenTotalText" class="text-rose-400 font-extrabold">Total: ৳ 0.00</span>
+                </div>
+                <div id="loanTakenList" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- Daily Expenses Card -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-cart-shopping text-indigo-400 text-base"></i>
+                    <h3 class="text-xs sm:text-sm font-bold text-white">Daily Expenses Log (Auto Expense Sync)</h3>
+                </div>
+                <button onclick="openMarketModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
+                    <span>+</span>
+                    <span>New Expense Entry</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="py-2.5 px-2">Date</th>
+                            <th class="py-2.5 px-2">Description</th>
+                            <th class="py-2.5 px-2">Amount (৳)</th>
+                            <th class="py-2.5 px-2 text-right">Status & Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marketExpenseList" class="divide-y divide-slate-800/50 font-medium"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    <!-- Buy Validity Modal -->
+    <div id="buyValidityModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeBuyValidityModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Buy Validity @ ৳ 100</h3>
+            <div class="bg-amber-950/30 border border-amber-500/30 p-2.5 rounded-xl text-xs text-amber-300">
+                Online payment is currently closed. Pay manually and submit TrxID.
+            </div>
+            <form onsubmit="handleBuyValiditySubmit(event)" class="space-y-3 text-xs">
+                <input type="text" id="validityTrxId" placeholder="Enter Payment TrxID (bKash/Nagad)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <button type="submit" id="validitySubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl">Pay 100 টাকা & Extend Validity</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settle Loan Modal -->
+    <div id="settleLoanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeSettleModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Settle Loan Record</h3>
+            <form onsubmit="handleSettleLoanSubmit(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="settleLoanId">
+                <div>
+                    <label class="block text-slate-400 mb-1">Settlement Date (Paid Date)</label>
+                    <input type="date" id="settleDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Extra Amount (Added to Expense if Payable)</label>
+                    <input type="number" id="settleExtraAmount" placeholder="0.00" value="0" min="0" step="any" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400 font-bold">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Confirm Settle</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Buy New Lot Modal -->
+    <div id="buyLotModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
+            <button onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-boxes-packing text-amber-400"></i>
+                <span>Buy New Lot</span>
+            </h3>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
+                    <span class="text-slate-400">Lot Number:</span>
+                    <span id="generatedLotNumber" class="text-amber-400 font-mono font-extrabold">LT-9521</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Select Quantity:</span>
+                    <select id="lotQuantitySelect" onchange="calculateLotPrice()" class="bg-[#131822] border border-slate-700 rounded-lg px-2 py-1 text-emerald-400 font-bold">
+                        <option value="5">5 IDs</option>
+                        <option value="10" selected>10 IDs</option>
+                        <option value="20">20 IDs</option>
+                    </select>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                    <span>Sub Total:</span>
+                    <span id="lotSubTotalText" class="font-mono">৳ 1,000.00</span>
+                </div>
+                <div class="flex justify-between items-center text-emerald-400">
+                    <span>Admin Discount:</span>
+                    <span id="lotDiscountText" class="font-mono">- ৳ 200.00</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-800 pt-1.5 text-sm font-extrabold text-white">
+                    <span>Net Payable:</span>
+                    <span id="lotNetTotalText" class="font-mono">৳ 800.00</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="handleCashPayLot()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                    <span>Cash Pay</span>
+                </button>
+                <button type="button" onclick="handleCashPayLot()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Payment</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sell ID Modal -->
+    <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
+            <button onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-paper-plane text-emerald-400"></i>
+                <span>Sell New ID (From Lot)</span>
+            </h3>
+
+            <form onsubmit="handleSellNewIdSubmit(event)" class="space-y-3 text-xs">
+                <div class="bg-[#080a0f] border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">Auto Applied Referral Coupon:</span>
+                        <span id="sellAutoCouponCode" class="text-amber-400 font-mono font-extrabold text-sm">SIGMA-ADMIN</span>
+                    </div>
+                    <span class="bg-emerald-950 text-emerald-400 border border-emerald-700/50 px-2 py-1 rounded-lg text-[10px] font-bold">
+                        +৳ 8.00 Direct Bonus
+                    </span>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1">Select Lot ID to Sell (ID Price: ৳ 100)</label>
+                    <select id="sellLotIdSelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold">
+                        <option value="LT-9042">LT-9042 (In_Stock)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Assigned User ID</label>
+                        <input type="text" id="sellAssignedUserId" readonly value="sub_user_01" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-mono font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Password</label>
-                        <input type="password" id="login-password" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                        <label class="block text-slate-400 mb-1">Assigned Password</label>
+                        <input type="text" id="sellAssignedPassword" readonly value="pass8899" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-amber-400 font-mono font-bold">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg text-sm transition-all shadow-lg shadow-indigo-600/20">
-                        লগইন করুন
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Mobile Number</label>
+                    <input type="text" id="sellBuyerMobile" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Email Address</label>
+                    <input type="email" id="sellBuyerEmail" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+
+                <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 text-[11px] space-y-1">
+                    <p class="text-slate-300 font-bold border-b border-slate-800 pb-1">৳ 10 Total Cashback Distribution:</p>
+                    <div class="flex justify-between text-slate-400"><span>Company Share:</span><span class="text-white font-semibold">৳ 90.00</span></div>
+                    <div class="flex justify-between text-emerald-400"><span>Direct Referral Bonus:</span><span class="font-bold">+ ৳ 8.00</span></div>
+                    <div class="flex justify-between text-amber-400"><span>Chain Distribution (৳ 2.00):</span><span class="font-semibold">Weighted Proportional</span></div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg">Submit & Sell ID (+৳ 8.00)</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Balance Transfer Modal -->
+    <div id="balanceTransferModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Balance Transfer</h3>
+            <form onsubmit="handleBalanceTransferSubmit(event)" class="space-y-3 text-xs">
+                <input type="text" id="transferRecipientId" placeholder="Recipient ID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400">
+                <input type="number" id="transferAmount" placeholder="Amount (৳)" min="1" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">Transfer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Buy License Landing Modal -->
+    <div id="buyLicenseLandingModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeBuyLicenseLandingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Buy New ID / License</h3>
+            <form onsubmit="handleLandingBuySubmit(event)" class="space-y-3 text-xs">
+                <input type="text" id="landingBuyMobile" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="email" id="landingBuyEmail" placeholder="email@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="text" id="landingBuyPaymentId" placeholder="Payment TrxID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <button type="submit" class="w-full buy-btn-gradient text-slate-950 font-black py-3 rounded-xl">Complete Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Device Modal -->
+    <div id="addDeviceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Device</h3>
+            <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 text-xs">
+                <input type="text" id="deviceNameInput" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">Add Device</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Income / Expense Modal -->
+    <div id="incomeModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeIncomeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">New Income/Expense Entry</h3>
+            <form onsubmit="handleIncomeSubmit(event)" class="space-y-3 text-xs">
+                <select id="incomeEntryType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold">
+                    <option value="Income">Income (+ আয়)</option>
+                    <option value="Expense">Expense (- ব্যয়)</option>
+                </select>
+                <input type="date" id="incomeDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="text" id="incomeDesc" placeholder="Description" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="number" id="incomeAmount" placeholder="Amount (৳)" min="1" step="any" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold">
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Loan Modal -->
+    <div id="loanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeLoanModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Loan Record</h3>
+            <form onsubmit="handleLoanSubmit(event)" class="space-y-3 text-xs">
+                <select id="loanType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                    <option value="Receivable">Receivable (পাবো)</option>
+                    <option value="Payable">Payable (দেবো)</option>
+                </select>
+                <input type="date" id="loanDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="text" id="loanPersonName" placeholder="Person Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="number" id="loanAmount" placeholder="Amount (৳)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
+                <button type="submit" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-xl">Save Loan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Market Expense Modal -->
+    <div id="marketModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeMarketModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Daily Expense</h3>
+            <form onsubmit="handleMarketSubmit(event)" class="space-y-3 text-xs">
+                <input type="date" id="marketDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="text" id="marketDesc" placeholder="Description" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="number" id="marketAmount" placeholder="Amount (৳)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400">
+                <select id="marketStatus" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                    <option value="Paid">Paid</option>
+                    <option value="Due">Due</option>
+                </select>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl">Save Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- My Chat Modal -->
+    <div id="myChatModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-4 sm:p-5 shadow-2xl relative flex flex-col h-[500px] max-h-[88vh]">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                <div class="flex items-center space-x-2">
+                    <button id="chatBackBtn" onclick="exitIndividualChat()" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-400 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 transition-all">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Exit</span>
+                    </button>
+                    <h3 id="chatModalTitle" class="text-sm sm:text-base font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-comments text-emerald-400"></i>
+                        <span>My Chat (Universal & Users)</span>
+                    </h3>
+                </div>
+                <button onclick="document.getElementById('myChatModal').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="universalChatView" class="flex-1 flex flex-col overflow-hidden space-y-3">
+                <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-2.5">
+                    <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block mb-2">Click a User for Private Chat:</span>
+                    <div id="chatUsersListContainer" class="flex items-center space-x-2 overflow-x-auto pb-1"></div>
+                </div>
+
+                <div class="flex-1 bg-[#080a0f] border border-slate-800 rounded-2xl p-3 overflow-y-auto space-y-2.5 text-xs" id="universalChatBox"></div>
+
+                <form onsubmit="sendUniversalMessage(event)" class="flex items-center space-x-2">
+                    <input type="text" id="universalMsgInput" placeholder="Write to Universal Chat..." required
+                        class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center space-x-1 shadow">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div id="individualChatView" class="hidden flex-1 flex flex-col overflow-hidden space-y-3">
+                <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-indigo-300 font-semibold flex items-center space-x-1.5">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                        <span>Private Chat with <strong id="activeChatPartnerName" class="text-white">User</strong></span>
+                    </span>
+                    <button onclick="exitIndividualChat()" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-lg text-[11px] font-bold">
+                        Exit Chat
+                    </button>
+                </div>
+
+                <div class="flex-1 bg-[#080a0f] border border-slate-800 rounded-2xl p-3 overflow-y-auto space-y-2.5 text-xs" id="individualChatBox"></div>
+
+                <form onsubmit="sendIndividualMessage(event)" class="flex items-center space-x-2">
+                    <input type="text" id="individualMsgInput" placeholder="Write a private message..." required
+                        class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center space-x-1 shadow">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </form>
             </div>
         </div>
+    </div>
 
-        <!-- Main Dashboard Section -->
-        <div id="dashboard-container" class="hidden flex-1 flex flex-col">
-            <!-- Header -->
-            <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center">
-                <div>
-                    <h2 id="dash-company-title" class="text-lg font-bold text-indigo-400">Sigma PhD™</h2>
-                    <p class="text-xs text-slate-400" id="dash-user-info">Logged in as: --</p>
+    <!-- Cash Memo Builder Modal -->
+    <div id="cashMemoModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-lg rounded-3xl p-4 sm:p-5 shadow-2xl relative space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+            <button onclick="document.getElementById('cashMemoModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-receipt text-indigo-400"></i>
+                <span>Custom Cash Memo Builder (Cart System)</span>
+            </h3>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <div class="flex justify-between items-center">
+                    <p class="text-amber-400 font-bold text-[11px] uppercase tracking-wider">Business Setup (One-Time Header & Footer)</p>
+                    <button type="button" id="lockBusinessSetupBtn" onclick="lockBusinessSetup()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px]">Lock Setup</button>
                 </div>
-                <button id="logout-btn" class="bg-rose-600/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-xs font-medium hover:bg-rose-600/30 transition-all">
-                    লগআউট
-                </button>
-            </header>
-
-            <!-- Main Content Area -->
-            <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
-                
-                <!-- Top Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
-                        <h3 class="text-sm font-semibold text-slate-400 mb-2">ওয়ালেট ব্যালেন্স</h3>
-                        <p id="stat-wallet" class="text-3xl font-bold text-emerald-400">৳ 0.00</p>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
-                        <h3 class="text-sm font-semibold text-slate-400 mb-2">ইনভেন্টরি লট স্ট্যাটাস</h3>
-                        <p id="stat-lot" class="text-3xl font-bold text-indigo-400">0 IDs In Stock</p>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
-                        <h3 class="text-sm font-semibold text-slate-400 mb-2">অ্যাকশন প্যানেল</h3>
-                        <div class="flex gap-2">
-                            <button id="open-buy-modal" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium py-2.5 px-3 rounded-lg transition-all">
-                                Buy New ID
-                            </button>
-                            <button id="open-sell-modal" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium py-2.5 px-3 rounded-lg transition-all">
-                                Sell ID
-                            </button>
-                        </div>
-                    </div>
+                <div class="space-y-1.5">
+                    <input type="text" id="memoHeaderConfig" placeholder="Company Name & Address (Centered Header)" value="My Develop App Store | Dhaka, Bangladesh" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="memoFooterConfig" placeholder="Mobile & Web Address (Centered Footer)" value="Mobile: 01818 589423 | Web: mydevelopapp.com" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-300">
                 </div>
+            </div>
 
-                <!-- Tabs & Modules Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Cash Memo & Cart Section -->
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-                        <h3 class="text-md font-bold text-slate-200 mb-4"><i class="fa-solid fa-file-invoice text-indigo-400 mr-2"></i> ক্যাশ মেমো ও বিল্ডার</h3>
-                        <div id="cashmemo-section" class="space-y-4">
-                            <!-- Dynamic Cart Items Table -->
-                            <div class="border border-slate-800 rounded-lg overflow-hidden">
-                                <table class="w-full text-left text-xs">
-                                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                                        <tr>
-                                            <th class="p-3">আইটেম</th>
-                                            <th class="p-3">পরিমাণ</th>
-                                            <th class="p-3">মূল্য</th>
-                                            <th class="p-3 text-right">টোটাল</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="cart-items-list" class="divide-y divide-slate-800">
-                                        <tr><td colspan="4" class="p-4 text-center text-slate-500">কোনো আইটেম যোগ করা হয়নি</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <button id="print-memo-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-2 rounded-lg text-xs transition-all">
-                                A4 PDF প্রিভিউ ও প্রিন্ট
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Chat System Section -->
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl flex flex-col h-[350px]">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-md font-bold text-slate-200"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> মাই চ্যাট (ইউনিভার্সাল ও ব্যক্তিগত)</h3>
-                            <button id="exit-chat-btn" class="hidden text-xs bg-rose-600/20 text-rose-400 px-2 py-1 rounded border border-rose-500/30">Exit Chat</button>
-                        </div>
-                        <!-- Chat Box Container -->
-                        <div id="chat-messages-box" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 overflow-y-auto space-y-2 text-xs mb-3">
-                            <div class="text-slate-500 text-center py-10">চ্যাটিং লোড হচ্ছে...</div>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="chat-input-msg" placeholder="এখানে মেসেজ লিখুন..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
-                            <button id="chat-send-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-medium">প্রেরণ</button>
-                        </div>
-                    </div>
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <p class="text-emerald-400 font-bold text-[11px] uppercase tracking-wider">Customer Details (Open)</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input type="text" id="memoCustomerName" placeholder="Customer Name" value="Customer X" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="memoCustomerMobile" placeholder="Customer Mobile" value="01800000000" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
+            </div>
 
-            </main>
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <p class="text-indigo-400 font-bold text-[11px] uppercase tracking-wider">Add Product (Open)</p>
+                <div class="grid grid-cols-12 gap-1.5">
+                    <input type="text" id="memoProdDesc" placeholder="Description" value="Software License Key" class="col-span-6 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-slate-200">
+                    <input type="number" id="memoProdQty" placeholder="Qty" min="1" value="1" class="col-span-2 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2 text-center text-slate-200">
+                    <input type="number" id="memoProdRate" placeholder="Rate" min="0" value="500" class="col-span-4 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-emerald-400">
+                </div>
+                <button type="button" onclick="addProductToMemoCart()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs">Add Item to Cart</button>
+
+                <div class="overflow-x-auto border border-slate-800 rounded-xl mt-2">
+                    <table class="w-full text-left text-[11px]">
+                        <thead class="bg-[#131822] text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="py-1.5 px-2">Item</th>
+                                <th class="py-1.5 px-1 text-center">Qty</th>
+                                <th class="py-1.5 px-1 text-right">Rate</th>
+                                <th class="py-1.5 px-2 text-right">Total</th>
+                                <th class="py-1.5 px-1 text-center">×</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memoCartTableBody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between items-center pt-1 font-extrabold text-sm">
+                    <span class="text-slate-300">Grand Total:</span>
+                    <span id="memoCartGrandTotal" class="text-emerald-400 font-mono">৳ 500.00</span>
+                </div>
+            </div>
+
+            <button type="button" onclick="openA4PdfPreview()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-file-pdf"></i><span>PDF Preview (A4 Size)</span>
+            </button>
         </div>
     </div>
 
-    <!-- External Script Connection -->
+    <!-- A4 PDF Preview Modal -->
+    <div id="a4PdfPreviewModal" class="hidden fixed inset-0 z-[110] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white text-black w-full max-w-2xl rounded-2xl p-6 shadow-2xl relative space-y-4 my-auto">
+            <button onclick="document.getElementById('a4PdfPreviewModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-700 hover:text-black text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <div id="a4PdfContentBox" class="border border-slate-300 p-6 rounded-xl bg-white shadow-inner space-y-4 text-sm font-sans"></div>
+            <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-200">
+                <button type="button" onclick="saveMemoToDevice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center space-x-1.5 shadow">
+                    <i class="fa-solid fa-download"></i><span>Save in Device</span>
+                </button>
+                <button type="button" onclick="printMemoPdf()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center space-x-1.5 shadow">
+                    <i class="fa-solid fa-print"></i><span>Print</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
+            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-base font-bold text-white">Settings</h3>
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
+                <div class="flex justify-between"><span class="text-slate-400">Composite ID:</span><span id="settingsComposite" class="text-emerald-400 font-mono"></span></div>
+            </div>
+            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="w-full bg-slate-800 text-slate-200 py-2 rounded-xl">Close</button>
+        </div>
+    </div>
+
+    <!-- Hidden A4 Print Area -->
+    <div id="a4MemoPrintArea" class="hidden"></div>
+
+    <!-- External Script Inclusion -->
     <script src="script.js"></script>
 </body>
 </html>
