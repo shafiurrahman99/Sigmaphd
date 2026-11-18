@@ -734,13 +734,12 @@ function printMemoPdf() {
     printArea.classList.add('hidden');
 }
 function openUserPassModal() {
-    const currentCompId = localStorage.getItem('composite_user_id') || '';
-    // লোকালস্টোরেজে buyer_email সেভ করা থাকলে সেটি দেখাবে
+    const currentCompId = localStorage.getItem('composite_user_id') || localStorage.getItem('user_id') || '';
     const buyerEmail = localStorage.getItem('buyer_email') || localStorage.getItem('user_email') || 'N/A';
     const currentUserId = localStorage.getItem('user_id') || '';
 
     document.getElementById('modalCompositeId').innerText = currentCompId;
-    document.getElementById('modalAutoEmail').innerText = buyerEmail; // এখানে buyer_email শো করবে
+    document.getElementById('modalAutoEmail').innerText = buyerEmail;
     document.getElementById('newUsernameInput').value = currentUserId;
 
     document.getElementById('userPassModal').style.display = 'flex';
@@ -756,9 +755,8 @@ async function submitUserPasswordChange() {
     const newPassword = document.getElementById('newPasswordInput').value.trim();
     const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
     
-    // ফিক্সড কম্পোজিট আইডি বা ইউজার আইডি নেওয়া
-    const compositeUserId = document.getElementById('modalCompositeId').innerText;
-    const userEmail = document.getElementById('modalAutoEmail').innerText;
+    // লোকাল বা মোডাল থেকে আইডি বা ইউজারনেম নেওয়া
+    const identifier = localStorage.getItem('composite_user_id') || document.getElementById('modalCompositeId').innerText || localStorage.getItem('user_id');
 
     if (!oldPassword || !newPassword || !confirmPassword) {
         alert('দয়া করে পুরাতন এবং নতুন পাসওয়ার্ডের ঘরগুলো পূরণ করুন।');
@@ -780,12 +778,12 @@ async function submitUserPasswordChange() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'user_password_change',
-                composite_user_id: compositeUserId, // ফিক্সড কম্পোজিট আইডি পাঠানো হচ্ছে
+                composite_user_id: identifier, // ব্যাকএন্ডে কম্পোজিট আইডি বা ইউজার আইডি পাঠানো হচ্ছে
+                user_id: identifier,
                 payload: {
                     new_username: newUsername,
                     old_password: oldPassword,
-                    new_password: newPassword,
-                    email: userEmail
+                    new_password: newPassword
                 }
             })
         });
