@@ -62,71 +62,17 @@ export default async function handler(req, res) {
             }
 case 'user_password_change': {
                 const { new_username, old_password, new_password } = payload;
-
-                if (!composite_user_id) {
-                    return res.status(200).json({ success: false, message: 'কম্পোজিট ইউজার আইডি পাওয়া যায়নি।' });
-                }
-
-                // ডাটাবেজ থেকে composite_user_id দিয়ে রেকর্ড এবং buyer_email ফেচ করা
-                const { data: userRecord, error: fetchErr } = await supabaseServer
-                    .from('accounts_master')
-                    .select('*')
-                    .eq('composite_user_id', composite_user_id)
-                    .single();
-
-                if (fetchErr || !userRecord) {
-                    return res.status(200).json({ success: false, message: 'ডাটাবেজে ইউজার অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
-                }
-
-                if (userRecord.password !== old_password) {
-                    return res.status(200).json({ success: false, message: 'পুরাতন পাসওয়ার্ডটি ভুল দিয়েছেন!' });
-                }
-
-                const updatedUserId = new_username ? new_username.trim() : userRecord.user_id;
-
-                if (updatedUserId !== userRecord.user_id) {
-                    const { data: existingUser } = await supabaseServer
-                        .from('accounts_master')
-                        .select('user_id')
-                        .eq('user_id', updatedUserId)
-                        .single();
-
-                    if (existingUser) {
-                        return res.status(200).json({ success: false, message: 'এই ইউজারনেমটি ইতিমধ্যে ব্যবহৃত হচ্ছে, অন্য নাম দিন।' });
-                    }
-                }
-
-                // ডাটাবেজ আপডেট (composite_user_id অপরিবর্তিত থাকবে)
-                const { error: updateErr } = await supabaseServer
-                    .from('accounts_master')
-                    .update({
-                        user_id: updatedUserId,
-                        password: new_password
-                    })
-                    .eq('composite_user_id', composite_user_id);
-
-                if (updateErr) throw updateErr;
-
-                // ডাটাবেজের আসল buyer_email ব্যবহার করা
-                const buyerEmail = userRecord.buyer_email || 'N/A';
-
-                return res.status(200).json({
-                    success: true,
-                    message: `সফলভাবে তথ্য আপডেট হয়েছে এবং ${buyerEmail} (Buyer Email) ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল কম্পোজিট আইডি সুরক্ষিত আছে। এখন পুনরায় লগইন করুন।`
-                });
-            }case 'user_password_change': {
-                const { new_username, old_password, new_password } = payload;
                 const targetKey = composite_user_id || user_id;
 
-                if (!targetKey || targetKey === 'N/A' || targetKey === '--') {
-                    return res.status(200).json({ success: false, message: 'ইউজার আইডেন্টিফায়ার বা কম্পোজিট আইডি পাওয়া যায়নি।' });
+                if (!targetKey) {
+                    return res.status(200).json({ success: false, message: 'ইউজার আইডেন্টিফায়ার পাওয়া যায়নি।' });
                 }
 
-                // ডাটাবেজ (accounts_master) টেবিল থেকে composite_user_id বা user_id দিয়ে রেকর্ড ফেচ করা
+                // ডাটাবেজ থেকে composite_user_id দিয়ে রেকর্ড ফেচ করা
                 const { data: userRecord, error: fetchErr } = await supabaseServer
                     .from('accounts_master')
                     .select('*')
-                    .or(`composite_user_id.eq.${targetKey},user_id.eq.${targetKey}`)
+                    .eq('composite_user_id', targetKey)
                     .single();
 
                 if (fetchErr || !userRecord) {
@@ -137,25 +83,13 @@ case 'user_password_change': {
                     return res.status(200).json({ success: false, message: 'পুরাতন পাসওয়ার্ডটি ভুল দিয়েছেন!' });
                 }
 
-                const updatedUserId = new_username ? new_username.trim() : userRecord.user_id;
+                const updatedUserName = new_username ? new_username.trim() : userRecord.user_name;
 
-                if (updatedUserId !== userRecord.user_id) {
-                    const { data: existingUser } = await supabaseServer
-                        .from('accounts_master')
-                        .select('user_id')
-                        .eq('user_id', updatedUserId)
-                        .single();
-
-                    if (existingUser) {
-                        return res.status(200).json({ success: false, message: 'এই ইউজারনেমটি ইতিমধ্যে ব্যবহৃত হচ্ছে, অন্য নাম দিন।' });
-                    }
-                }
-
-                // ডাটাবেজে আপডেট করা (composite_user_id ফিক্সড বা অপরিবর্তিত থাকবে)
+                // শুধুমাত্র user_name এবং password আপডেট হবে, composite_user_id একদম সুরক্ষিত থাকবে!
                 const { error: updateErr } = await supabaseServer
                     .from('accounts_master')
                     .update({
-                        user_id: updatedUserId,
+                        user_name: updatedUserName,
                         password: new_password
                     })
                     .eq('composite_user_id', userRecord.composite_user_id);
@@ -166,7 +100,7 @@ case 'user_password_change': {
 
                 return res.status(200).json({
                     success: true,
-                    message: `সফলভাবে তথ্য আপডেট হয়েছে এবং ${buyerEmail} (buyer_email) ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল কম্পোজিট আইডি সুরক্ষিত আছে। এখন পুনরায় লগইন করুন।`
+                    message: `সফলভাবে ইউজারনেম ও পাসওয়ার্ড আপডেট হয়েছে! ${buyerEmail} (buyer_email) ঠিকানায় নোটিফিকেশন পাঠানো হয়েছে। আপনার মূল composite_user_id সুরক্ষিত আছে।`
                 });
             }
             case 'save_income_expense': {
