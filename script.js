@@ -733,31 +733,17 @@ function printMemoPdf() {
     window.print();
     printArea.classList.add('hidden');
 }
-async function openUserPassModal() {
-    // প্রথমে লোকালস্টোরেজ থেকে চেক করা
-    let compId = localStorage.getItem('composite_user_id') || localStorage.getItem('user_id');
-    let buyerEmail = localStorage.getItem('buyer_email') || localStorage.getItem('user_email');
+function openUserPassModal() {
+    const compId = localStorage.getItem('composite_user_id') || 'N/A';
+    const buyerEmail = localStorage.getItem('buyer_email') || 'N/A';
+    const currentUserName = localStorage.getItem('user_name') || localStorage.getItem('user_id') || '';
 
-    // যদি লোকালস্টোরেজে না থাকে, তবে বর্তমান ইউজারনেম দিয়ে ব্যাকএন্ড থেকে ডাটা এনে নেওয়া
-    if (!compId || compId === 'N/A') {
-        try {
-            const res = await fetch('/api/root-proxy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_user_context' })
-            });
-            const data = await res.json();
-            if (data.success) {
-                compId = data.composite_user_id;
-                buyerEmail = data.buyer_email;
-                localStorage.setItem('composite_user_id', compId);
-                localStorage.setItem('buyer_email', buyerEmail);
-            }
-        } catch (e) {
-            console.error('Context fetch error:', e);
-        }
-    }
+    document.getElementById('modalCompositeId').innerText = compId;
+    document.getElementById('modalAutoEmail').innerText = buyerEmail;
+    document.getElementById('newUsernameInput').value = currentUserName;
 
+    document.getElementById('userPassModal').style.display = 'flex';
+}
     // মোডালের ফিল্ডগুলোতে ডাটা বসিয়ে দেওয়া
     document.getElementById('modalCompositeId').innerText = compId || '101_user_4545'; // উদাহরণ বা আসল আইডি
     document.getElementById('modalAutoEmail').innerText = buyerEmail || 'shafiurrahman99@gmail.com';
