@@ -249,8 +249,65 @@ export default async function handler(req, res) {
             case 'buy_validity':
                 return res.status(200).json({ success: true, message: 'Validity extended successfully.' });
 
-            case 'balance_transfer':
-                return res.status(200).json({ success: true, message: 'Balance transferred securely.' });
+            case 'balance_transfer': {
+                const { recipient_id, amount } = payload;
+                const transferAmount = parseFloat(amount) || 0;
+
+                if (transferAmount <= 0) {
+                    return res.status(200).json({ success: false, message: 'সঠিক পরিমাণ অ্যামাউন্ট প্রদান করুন।' });
+                }
+
+                // ১. বর্তমান প্রেরক (Sender) এর বর্তমান ওয়ালেট ব্যালেন্স চেক করা
+                const { data: senderData, error: senderErr } = await supabaseServer
+                    .from('accounts_master')
+                    .select('wallet_balance, composite_user_id')
+                    .eq('composite_user_id', composite_user_id)
+                    .single();
+
+                if (senderErr || !senderData) {
+                    return res.status(200).json({ success: false, message: 'প্রেরকের তথ্য পাওয়া যায়নি।' });
+                }
+
+                const currentSenderBalance = parseFloat(senderData.wallet_balance || 0);
+
+                if (currentSenderBalance < transferAmount) {
+                    return res.status(200).json({ success: false, message: 'পর্যাপ্ত ব্যালেন্স নেই!' });
+                }
+
+                // ২. প্রাপক (Recipient) এর অ্যাকাউন্ট ডাটাবেজে খুঁজে বের করা (ইউজার আইডি অথবা কম্পোজিট আইডি দিয়ে)
+                const { data: recipientData, error: recErr } = await supabaseServer
+                    .from('accounts_master')
+                    .select('wallet_balance, composite_user_id, user_id')
+                    .or(`user_id.eq.${recipient_id},composite_user_id.eq.${recipient_id}`)
+                    .single();
+
+                if (recErr || !recipientData) {
+                    return res.status(200).json({ success: false, message: 'প্রাপক ইউজার আইডিটি সঠিক নয় বা পাওয়া যায়নি।' });
+                }
+
+                const currentRecipientBalance = parseFloat(recipientData.wallet_balance || 0);
+
+                // ৩. প্রেরকের অ্যাকাউন্ট থেকে টাকা মাইনাস করা
+                const { error: updateSenderErr } = await supabaseServer
+                    .from('accounts_master')
+                    .update({ wallet_balance: currentSenderBalance - transferAmount })
+                    .eq('composite_user_id', composite_user_id);
+
+                if (updateErr) throw updateSenderErr; // সুপাবেজ আপডেট এরর চেক
+
+                // ৪. প্রাপকের অ্যাকাউন্টে সমপরিমাণ টাকা প্লাস করা
+                const { error: updateRecipientErr } = await supabaseServer
+                    .from('accounts_master')
+                    .update({ wallet_balance: currentRecipientBalance + transferAmount })
+                    .eq('composite_user_id', recipientData.composite_user_id);
+
+                if (updateRecipientErr) throw updateRecipientErr;
+
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'সফলভাবে ব্যালেন্স ট্রান্সফার সম্পন্ন হয়েছে!' 
+                });
+            }
 
             case 'send_chat': {
                 const { channel, message } = payload;
