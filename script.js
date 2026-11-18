@@ -374,9 +374,9 @@ async function handleCashPayLot() {
         showToast(res.message || 'লট ক্রয় ব্যর্থ হয়েছে।');
     }
 }
-
 function renderLotInventory() {
-    const inStockItems = accountsMasterRecords.filter(a => a.status === 'In_Stock');
+    // শুধুমাত্র বর্তমান ইউজারের কেনা এবং ইন-স্টক থাকা লটগুলো ফিল্টার করার সঠিক লজিক
+    const inStockItems = accountsMasterRecords.filter(a => a.owner_id === currentCompositeUserId && a.status === 'In_Stock');
     document.getElementById('availableLotIdsCount').innerText = inStockItems.length;
     const activeSubs = accountsMasterRecords.filter(a => a.upline_id === currentCompositeUserId && a.status !== 'In_Stock');
     document.getElementById('subUserCount').innerText = activeSubs.length || 1;
