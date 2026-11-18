@@ -755,10 +755,6 @@ async function submitUserPasswordChange() {
     const newPassword = document.getElementById('newPasswordInput').value.trim();
     const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
     const compositeUserId = localStorage.getItem('composite_user_id');
-if (!compositeUserId) {
-    alert('Error: Composite User ID missing. Please login again.');
-    return;
-}
     const userEmail = document.getElementById('modalAutoEmail').innerText;
 
     if (!oldPassword || !newPassword || !confirmPassword) {
