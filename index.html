@@ -189,28 +189,31 @@
                 <!-- Validity Countdown Clock Display with Plus Button -->
                 <div class="bg-[#080a0f] border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-around text-center relative">
                     <div>
-                        <span id="countdownDays" class="text-amber-400 font-extrabold text-base block font-mono">30</span>
+                        <span id="countdownDays" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
                         <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Days</span>
                     </div>
                     <span class="text-slate-600 font-bold text-sm">:</span>
                     <div>
-                        <span id="countdownHours" class="text-amber-400 font-extrabold text-base block font-mono">23</span>
+                        <span id="countdownHours" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
                         <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Hours</span>
                     </div>
                     <span class="text-slate-600 font-bold text-sm">:</span>
                     <div>
-                        <span id="countdownMins" class="text-amber-400 font-extrabold text-base block font-mono">59</span>
+                        <span id="countdownMins" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
                         <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Mins</span>
                     </div>
                     <span class="text-slate-600 font-bold text-sm">:</span>
                     <div>
-                        <span id="countdownSecs" class="text-emerald-400 font-extrabold text-base block font-mono animate-pulse">59</span>
+                        <span id="countdownSecs" class="text-emerald-400 font-extrabold text-base block font-mono animate-pulse">00</span>
                         <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Secs</span>
                     </div>
-                    <button type="button" onclick="openBuyValidityModal()" class="absolute -top-2.5 -right-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-lg transition-all" title="Buy Validity @ ৳ 100">
+                    <button type="button" onclick="openBuyValidityModal()" class="absolute -top-2.5 -right-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-lg transition-all" title="Extend Validity">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
+
+                <!-- Admin Approval Pending Badge near Validity Countdown -->
+                <div id="validityPendingBadge" class="hidden inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-950 text-amber-400 border border-amber-600/50"></div>
             </div>
 
             <!-- Referral / Coupon Card -->
@@ -368,18 +371,75 @@
     </div>
 
     <!-- ================= MODALS ================= -->
-    <!-- Buy Validity Modal -->
+    <!-- Buy Validity Modal (Dropdown + Cart + Backend Calculation + Cash Pay) -->
     <div id="buyValidityModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeBuyValidityModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white">Buy Validity @ ৳ 100</h3>
-            <div class="bg-amber-950/30 border border-amber-500/30 p-2.5 rounded-xl text-xs text-amber-300">
-                Online payment is currently closed. Pay manually and submit TrxID.
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-5 shadow-2xl relative space-y-3.5 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-base font-bold text-white">Extend Validity</h3>
+                <button type="button" onclick="closeBuyValidityModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form onsubmit="handleBuyValiditySubmit(event)" class="space-y-3 text-xs">
-                <input type="text" id="validityTrxId" placeholder="Enter Payment TrxID (bKash/Nagad)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                <button type="submit" id="validitySubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl">Pay 100 টাকা & Extend Validity</button>
-            </form>
+
+            <!-- Plan Dropdown + Add Button -->
+            <div class="flex gap-2">
+                <select id="validityPlanDropdown" class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-emerald-500">
+                    <option value="1">1 Month (30 Days)</option>
+                    <option value="2">2 Months (60 Days)</option>
+                    <option value="3">3 Months (90 Days)</option>
+                    <option value="6">6 Months (180 Days)</option>
+                </select>
+                <button type="button" onclick="addValidityToCart()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl transition">+ Add</button>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="validityCartItems" class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-1.5 max-h-36 overflow-y-auto">
+                <p class="text-slate-500 text-center py-2">Cart is empty. Select a plan & click Add.</p>
+            </div>
+
+            <!-- Backend Summary Display -->
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Total Validity:</span>
+                    <span id="validityTotalDaysText" class="font-mono text-amber-400">0 Days</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Base Total:</span>
+                    <span id="validityBasePriceText" class="font-mono">৳ 0.00</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Discount:</span>
+                    <span id="validityDiscountText" class="font-mono text-emerald-400">- ৳ 0.00</span>
+                </div>
+                <div class="flex justify-between border-t border-slate-800 pt-1.5 text-sm font-bold">
+                    <span>Subtotal:</span>
+                    <span id="validitySubtotalText" class="font-mono text-white">৳ 0.00</span>
+                </div>
+                <div class="flex justify-between text-emerald-300">
+                    <span>Payable After Wallet:</span>
+                    <span id="validityPayableText" class="font-mono font-bold">৳ 0.00</span>
+                </div>
+            </div>
+
+            <!-- Coupon / Wallet Checkbox -->
+            <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                <input type="checkbox" id="useCouponWalletCheckbox" onchange="refreshValiditySummaryDisplay(validityCart)" class="rounded border-slate-600 bg-slate-800 text-emerald-500">
+                <span>Use Coupon & Deduct from Wallet</span>
+            </label>
+
+            <!-- Transaction ID (Above) -->
+            <div>
+                <label for="validityTrxId" class="block text-slate-400 mb-1">Transaction ID</label>
+                <input type="text" id="validityTrxId" placeholder="Enter Payment TrxID (bKash/Nagad)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <!-- Cash Pay Active (Below), Online Pay Closed -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="handleCashPayValidity()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition">
+                    Cash Pay
+                </button>
+                <button type="button" disabled title="Online payment is currently closed" class="bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2.5 rounded-xl cursor-not-allowed">
+                    Online Pay (Closed)
+                </button>
+            </div>
         </div>
     </div>
 
@@ -472,9 +532,9 @@
                     <select id="sellLotIdSelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold"></select>
                 </div>
                 <div class="form-group">
-    <label for="lotPassword">Lot Password</label>
-    <input type="text" id="lotPassword" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold" placeholder="Password will show here" readonly>
-</div>
+                    <label for="lotPassword">Lot Password</label>
+                    <input type="text" id="lotPassword" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold" placeholder="Password will show here" readonly>
+                </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Coupon Code (Auto)</label>
                     <input type="text" id="sellCouponCodeInput" readonly class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-amber-400 font-bold font-mono">
