@@ -5,6 +5,89 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+const RATE_PER_MONTH = 100; // ১ মাস (৩০ দিন) = ৳১০০
+
+// ১. ডাটাবেজ থেকে অ্যাক্টিভ ডিসকাউন্ট পার্সেন্টেজ আনা
+async function loadDiscountsFromDb(supabase) {
+    const { data, error } = await supabase
+        .from('validity_discounts')
+        .select('months, discount_pct')
+        .eq('is_active', true);
+
+    if (error) throw error;
+
+    const map = {};
+    for (const row of data || []) {
+        map[Number(row.months)] = Number(row.discount_pct || 0);
+    }
+    return map;
+}
+
+// ২. সার্ভারে কার্টের পূর্ণ হিসাবের ফর্মুলা
+function calculateValidityCart(cartItems = [], discountsMap = {}, useCouponWallet = false, walletBalance = 0) {
+    let totalDays = 0;
+    let baseTotal = 0;
+    let discountTotal = 0;
+
+    const breakdown = (Array.isArray(cartItems) ? cartItems : []).map((item) => {
+        const months = Math.max(1, parseInt(item.months, 10) || 1);
+        const qty = Math.max(1, parseInt(item.qty, 10) || 1);
+        const days = months * 30 * qty;
+
+        const discountPct = Number(discountsMap[months] ?? 0);
+        const itemBase = months * RATE_PER_MONTH * qty;
+        const itemDiscount = (itemBase * discountPct) / 100;
+        const itemSubtotal = Math.max(0, itemBase - itemDiscount);
+
+        totalDays += days;
+        baseTotal += itemBase;
+        discountTotal += itemDiscount;
+
+        return {
+            months,
+            qty,
+            days,
+            discountPct,
+            baseAmount: Number(itemBase.toFixed(2)),
+            discountAmount: Number(itemDiscount.toFixed(2)),
+            subtotal: Number(itemSubtotal.toFixed(2)),
+        };
+    });
+
+    const subtotal = Math.max(0, Number((baseTotal - discountTotal).toFixed(2)));
+    const walletDeducted = useCouponWallet
+        ? Math.min(Math.max(0, Number(walletBalance || 0)), subtotal)
+        : 0;
+    const payableAmount = Math.max(0, Number((subtotal - walletDeducted).toFixed(2)));
+
+    return {
+        items: breakdown,
+        totalDays,
+        baseTotal: Number(baseTotal.toFixed(2)),
+        discountTotal: Number(discountTotal.toFixed(2)),
+        subtotal,
+        walletDeducted: Number(walletDeducted.toFixed(2)),
+        payableAmount,
+    };
+}
+
+// ৩. ইউজারের লেটেস্ট অ্যাকাউন্ট রো লোড করা
+async function getTargetAccount(supabase, compositeUserId, fallbackCompanyId) {
+    if (!compositeUserId) return null;
+
+    const { data, error } = await supabase
+        .from('accounts_master')
+        .select('*')
+        .eq('composite_user_id', compositeUserId)
+        .single();
+
+    if (error || !data) return null;
+    if (fallbackCompanyId && String(data.company_id) !== String(fallbackCompanyId)) {
+        return data;
+    }
+    return data;
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
@@ -15,7 +98,15 @@ export default async function handler(req, res) {
         const { action, company_id = "101", composite_user_id, payload } = req.body;
 
         // লগইন ছাড়াই যে রিকোয়েস্টগুলো পাস হবে
-        const publicActions = ['authenticate_user', 'fetch_dashboard_data', 'buy_lot', 'buy_validity', 'register_new_license'];
+        const publicActions = [
+            'authenticate_user',
+            'fetch_dashboard_data',
+            'buy_lot',
+            'buy_validity',
+            'preview_validity_cart',
+            'register_new_license'
+        ];
+
         if (!composite_user_id && !publicActions.includes(action)) {
             return res.status(401).json({ success: false, message: 'Unauthorized: Missing Composite User ID context.' });
         }
@@ -25,7 +116,7 @@ export default async function handler(req, res) {
         switch (action) {
             case 'authenticate_user': {
                 const { user_name, password } = payload || {};
-                
+
                 if (!user_name || !password) {
                     return res.status(200).json({ success: false, message: 'ইউজারনেম এবং পাসওয়ার্ড উভয়ই প্রদান করুন।' });
                 }
@@ -203,7 +294,7 @@ export default async function handler(req, res) {
             case 'process_id_sale_cashback': {
                 const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload;
 
-                const { error: updateError } = await supabaseServer.from('accounts_master').update({ 
+                const { error: updateError } = await supabaseServer.from('accounts_master').update({
                     status: 'Active',
                     buyer_name,
                     buyer_mobile,
@@ -225,14 +316,14 @@ export default async function handler(req, res) {
 
                 let uplinesChain = [];
                 let currentUplineId = sellerData?.upline_id;
-                
+
                 while (currentUplineId && currentUplineId !== seller_composite_id) {
                     const { data: upData } = await supabaseServer
                         .from('accounts_master')
                         .select('composite_user_id, wallet_balance, upline_id')
                         .eq('composite_user_id', currentUplineId)
                         .single();
-                        
+
                     if (!upData) break;
                     uplinesChain.push(upData);
                     currentUplineId = upData.upline_id;
@@ -244,15 +335,15 @@ export default async function handler(req, res) {
                 if (N === 0) {
                     totalSellerNewBalance += chainPoolTotal;
                 } else {
-                    let totalWeight = (N * (N + 1)) / 2; 
-                    
+                    let totalWeight = (N * (N + 1)) / 2;
+
                     for (let i = 0; i < N; i++) {
-                        let currentWeight = N - i; 
+                        let currentWeight = N - i;
                         let shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
-                        
+
                         let targetCompositeId = uplinesChain[i].composite_user_id;
                         let targetOldBalance = uplinesChain[i].wallet_balance || 0;
-                        
+
                         await supabaseServer.from('accounts_master')
                             .update({ wallet_balance: targetOldBalance + shareAmount })
                             .eq('composite_user_id', targetCompositeId);
@@ -263,9 +354,9 @@ export default async function handler(req, res) {
                     .update({ wallet_balance: totalSellerNewBalance })
                     .eq('composite_user_id', seller_composite_id);
 
-                return res.status(200).json({ 
-                    success: true, 
-                    message: 'Proportional chain distribution and direct bonus applied successfully.' 
+                return res.status(200).json({
+                    success: true,
+                    message: 'Proportional chain distribution and direct bonus applied successfully.'
                 });
             }
 
@@ -295,8 +386,123 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true, message: 'Single license request registered with admin ownership.' });
             }
 
-            case 'buy_validity':
-                return res.status(200).json({ success: true, message: 'Validity extended successfully.' });
+            case 'preview_validity_cart': {
+                const targetCompositeId = composite_user_id || payload?.composite_user_id;
+                const accountRow = await getTargetAccount(supabaseServer, targetCompositeId, company_id);
+
+                if (!accountRow) {
+                    return res.status(200).json({ success: false, message: 'অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
+                }
+
+                const discountsMap = await loadDiscountsFromDb(supabaseServer);
+                const summary = calculateValidityCart(
+                    payload?.items || [],
+                    discountsMap,
+                    Boolean(payload?.use_coupon_wallet),
+                    accountRow.wallet_balance
+                );
+
+                return res.status(200).json({
+                    success: true,
+                    summary: {
+                        ...summary,
+                        pendingDays: Number(accountRow.pending_validity_days || 0),
+                        approvalStatus: accountRow.validity_approval_status || 'NONE',
+                    }
+                });
+            }
+
+            case 'buy_validity': {
+                const targetCompositeId = composite_user_id || payload?.composite_user_id;
+                const accountRow = await getTargetAccount(supabaseServer, targetCompositeId, company_id);
+
+                if (!accountRow) {
+                    return res.status(200).json({ success: false, message: 'অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
+                }
+
+                const trxId = String(payload?.trx_id || '').trim();
+                if (!trxId) {
+                    return res.status(200).json({ success: false, message: 'Transaction ID প্রদান করুন।' });
+                }
+
+                const discountsMap = await loadDiscountsFromDb(supabaseServer);
+                const useCouponWallet = Boolean(payload?.use_coupon_wallet);
+                const calc = calculateValidityCart(
+                    payload?.items || [],
+                    discountsMap,
+                    useCouponWallet,
+                    accountRow.wallet_balance
+                );
+
+                if (calc.totalDays <= 0) {
+                    return res.status(200).json({ success: false, message: 'কার্টে অন্তত একটি প্ল্যান যোগ করুন।' });
+                }
+
+                const { data: reqRow, error: reqErr } = await supabaseServer
+                    .from('validity_extension_requests')
+                    .insert({
+                        account_id: accountRow.id,
+                        company_id: accountRow.company_id ?? null,
+                        user_id: accountRow.user_id ?? null,
+                        composite_user_id: accountRow.composite_user_id ?? null,
+                        days_requested: calc.totalDays,
+                        base_total: calc.baseTotal,
+                        discount_total: calc.discountTotal,
+                        subtotal: calc.subtotal,
+                        wallet_deducted: calc.walletDeducted,
+                        payable_amount: calc.payableAmount,
+                        use_coupon_wallet: useCouponWallet,
+                        trx_id: trxId,
+                        payment_method: 'Cash Pay',
+                        status: 'Admin Approval',
+                    })
+                    .select()
+                    .single();
+
+                if (reqErr) throw reqErr;
+
+                const nextPendingDays = Number(accountRow.pending_validity_days || 0) + calc.totalDays;
+
+                const { error: accErr } = await supabaseServer
+                    .from('accounts_master')
+                    .update({
+                        pending_validity_days: nextPendingDays,
+                        validity_approval_status: 'Admin Approval',
+                    })
+                    .eq('id', accountRow.id);
+
+                if (accErr) throw accErr;
+
+                return res.status(200).json({
+                    success: true,
+                    message: `Cash Pay রিকোয়েস্ট (${calc.totalDays} দিন) জমা হয়েছে—Admin Approval পেন্ডিং।`,
+                    request: reqRow,
+                    summary: {
+                        ...calc,
+                        pendingDays: nextPendingDays,
+                        approvalStatus: 'Admin Approval',
+                    }
+                });
+            }
+
+            case 'approve_validity_request': {
+                const requestId = Number(payload?.request_id);
+                if (!requestId) {
+                    return res.status(200).json({ success: false, message: 'Request ID প্রয়োজন।' });
+                }
+
+                const { data, error } = await supabaseServer.rpc('approve_validity_extension', {
+                    p_request_id: requestId,
+                });
+
+                if (error) throw error;
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'Validity approved and extended successfully.',
+                    approved: Array.isArray(data) ? data[0] : data,
+                });
+            }
 
             case 'balance_transfer': {
                 const { recipient_id, amount } = payload;
@@ -348,9 +554,9 @@ export default async function handler(req, res) {
 
                 if (updateRecipientErr) throw updateRecipientErr;
 
-                return res.status(200).json({ 
-                    success: true, 
-                    message: 'সফলভাবে ব্যালেন্স ট্রান্সফার সম্পন্ন হয়েছে!' 
+                return res.status(200).json({
+                    success: true,
+                    message: 'সফলভাবে ব্যালেন্স ট্রান্সফার সম্পন্ন হয়েছে!'
                 });
             }
 
