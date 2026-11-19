@@ -379,6 +379,12 @@
                 <button type="button" onclick="closeBuyValidityModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
+            <!-- Pending Approval Notice inside Modal -->
+            <div id="validityModalPendingNotice" class="hidden bg-amber-950/60 border border-amber-500/50 rounded-2xl p-3 text-xs text-amber-300 space-y-1">
+                <div class="font-extrabold text-amber-400">Wait for Validity Approval</div>
+                <div id="validityModalPendingDetails" class="text-[11px] text-amber-200/90 font-mono"></div>
+            </div>
+
             <!-- Plan Dropdown + Add Button -->
             <div class="flex gap-2">
                 <select id="validityPlanDropdown" class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-emerald-500">
@@ -409,29 +415,36 @@
                     <span class="text-slate-400">Discount:</span>
                     <span id="validityDiscountText" class="font-mono text-emerald-400">- ৳ 0.00</span>
                 </div>
-                <div class="flex justify-between border-t border-slate-800 pt-1.5 text-sm font-bold">
-                    <span>Subtotal:</span>
+                <div class="flex justify-between border-t border-slate-800 pt-1.5 font-semibold">
+                    <span class="text-slate-300">Subtotal:</span>
                     <span id="validitySubtotalText" class="font-mono text-white">৳ 0.00</span>
                 </div>
-                <div class="flex justify-between text-emerald-300">
-                    <span>Payable After Wallet:</span>
-                    <span id="validityPayableText" class="font-mono font-bold">৳ 0.00</span>
+                <div class="flex justify-between text-amber-300">
+                    <span>Wallet Deduction:</span>
+                    <span id="validityWalletDeductText" class="font-mono">- ৳ 0.00</span>
+                </div>
+                <div class="flex justify-between border-t border-slate-800 pt-1.5 text-sm font-extrabold text-emerald-400">
+                    <span>Grand Total Payable:</span>
+                    <span id="validityPayableText" class="font-mono">৳ 0.00</span>
                 </div>
             </div>
 
-            <!-- Coupon / Wallet Checkbox -->
-            <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
-                <input type="checkbox" id="useCouponWalletCheckbox" onchange="refreshValiditySummaryDisplay(validityCart)" class="rounded border-slate-600 bg-slate-800 text-emerald-500">
-                <span>Use Coupon & Deduct from Wallet</span>
-            </label>
+            <!-- Wallet Checkbox + Available Wallet Balance -->
+            <div class="flex items-center justify-between bg-[#080a0f] border border-slate-800 rounded-xl px-3 py-2">
+                <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                    <input type="checkbox" id="useCouponWalletCheckbox" onchange="refreshValiditySummaryDisplay(validityCart)" class="rounded border-slate-600 bg-slate-800 text-emerald-500">
+                    <span>Use Wallet Balance</span>
+                </label>
+                <span class="text-emerald-400 font-mono font-bold">Balance: <span id="validityWalletBalanceText">৳ 0.00</span></span>
+            </div>
 
-            <!-- Transaction ID (Above) -->
-            <div>
+            <!-- Transaction ID -->
+            <div id="validityTrxBox">
                 <label for="validityTrxId" class="block text-slate-400 mb-1">Transaction ID</label>
                 <input type="text" id="validityTrxId" placeholder="Enter Payment TrxID (bKash/Nagad)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
             </div>
 
-            <!-- Cash Pay Active (Below), Online Pay Closed -->
+            <!-- Cash Pay Active, Online Pay Closed -->
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button type="button" onclick="handleCashPayValidity()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition">
                     Cash Pay
