@@ -71,21 +71,52 @@ function calculateValidityCart(cartItems = [], discountsMap = {}, useCouponWalle
     };
 }
 
-// ৩. ইউজারের লেটেস্ট অ্যাকাউন্ট রো লোড করা
-async function getTargetAccount(supabase, compositeUserId, fallbackCompanyId) {
-    if (!compositeUserId) return null;
-
-    const { data, error } = await supabase
-        .from('accounts_master')
-        .select('*')
-        .eq('composite_user_id', compositeUserId)
-        .single();
-
-    if (error || !data) return null;
-    if (fallbackCompanyId && String(data.company_id) !== String(fallbackCompanyId)) {
-        return data;
+// ৩. ভ্যালিডিটি এক্সপায়ারি টাইমস্ট্যাম্প বের করা
+function getValidityExpiryMs(accountRow = {}) {
+    if (accountRow.validity_expires_at) {
+        const ts = new Date(accountRow.validity_expires_at).getTime();
+        if (!Number.isNaN(ts)) return ts;
     }
-    return data;
+    if (accountRow.activated_at) {
+        const baseTs = new Date(accountRow.activated_at).getTime();
+        const days = Number(accountRow.validity_days) || 0;
+        if (!Number.isNaN(baseTs) && days > 0) {
+            return baseTs + (days * 24 * 60 * 60 * 1000);
+        }
+    }
+    return 0;
+}
+
+// ৪. ইউজারের লেটেস্ট অ্যাকাউন্ট রো লোড করা (composite_user_id অথবা payload-এর user_name/composite_user_id দিয়ে)
+async function getTargetAccount(supabase, compositeUserId, fallbackCompanyId, payload = {}) {
+    const targetCompId = compositeUserId || payload?.composite_user_id;
+
+    if (targetCompId) {
+        const { data, error } = await supabase
+            .from('accounts_master')
+            .select('*')
+            .eq('composite_user_id', targetCompId)
+            .single();
+
+        if (!error && data) return data;
+    }
+
+    const fallbackUserName = payload?.user_name ? String(payload.user_name).trim() : '';
+    if (fallbackUserName) {
+        let query = supabase
+            .from('accounts_master')
+            .select('*')
+            .eq('user_name', fallbackUserName);
+
+        if (fallbackCompanyId) {
+            query = query.eq('company_id', fallbackCompanyId);
+        }
+
+        const { data, error } = await query.limit(1).maybeSingle();
+        if (!error && data) return data;
+    }
+
+    return null;
 }
 
 export default async function handler(req, res) {
@@ -111,7 +142,7 @@ export default async function handler(req, res) {
             return res.status(401).json({ success: false, message: 'Unauthorized: Missing Composite User ID context.' });
         }
 
-        console.log(`[SECURE PROXY] Action: ${action} | User: ${composite_user_id || 'Public/System'}`);
+        console.log(`[SECURE PROXY] Action: ${action} | User: ${composite_user_id || payload?.user_name || 'Public/System'}`);
 
         switch (action) {
             case 'authenticate_user': {
@@ -142,7 +173,18 @@ export default async function handler(req, res) {
                     return res.status(200).json({ success: false, message: 'আপনার অ্যাকাউন্টটি এখনো পেন্ডিং রয়েছে।' });
                 }
 
-                return res.status(200).json({ success: true, user: data });
+                const expiryMs = getValidityExpiryMs(data);
+                const isExpired = !expiryMs || Date.now() >= expiryMs;
+
+                return res.status(200).json({
+                    success: true,
+                    user: {
+                        ...data,
+                        is_validity_expired: isExpired,
+                        pending_validity_days: Number(data.pending_validity_days || 0),
+                        validity_approval_status: data.validity_approval_status || 'NONE',
+                    }
+                });
             }
 
             case 'fetch_dashboard_data': {
@@ -387,25 +429,26 @@ export default async function handler(req, res) {
             }
 
             case 'preview_validity_cart': {
-                const targetCompositeId = composite_user_id || payload?.composite_user_id;
-                const accountRow = await getTargetAccount(supabaseServer, targetCompositeId, company_id);
+                const accountRow = await getTargetAccount(supabaseServer, composite_user_id, company_id, payload);
 
                 if (!accountRow) {
                     return res.status(200).json({ success: false, message: 'অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
                 }
 
                 const discountsMap = await loadDiscountsFromDb(supabaseServer);
+                const walletBalance = Number(accountRow.wallet_balance || 0);
                 const summary = calculateValidityCart(
                     payload?.items || [],
                     discountsMap,
                     Boolean(payload?.use_coupon_wallet),
-                    accountRow.wallet_balance
+                    walletBalance
                 );
 
                 return res.status(200).json({
                     success: true,
                     summary: {
                         ...summary,
+                        walletBalance,
                         pendingDays: Number(accountRow.pending_validity_days || 0),
                         approvalStatus: accountRow.validity_approval_status || 'NONE',
                     }
@@ -413,8 +456,7 @@ export default async function handler(req, res) {
             }
 
             case 'buy_validity': {
-                const targetCompositeId = composite_user_id || payload?.composite_user_id;
-                const accountRow = await getTargetAccount(supabaseServer, targetCompositeId, company_id);
+                const accountRow = await getTargetAccount(supabaseServer, composite_user_id, company_id, payload);
 
                 if (!accountRow) {
                     return res.status(200).json({ success: false, message: 'অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
@@ -427,11 +469,12 @@ export default async function handler(req, res) {
 
                 const discountsMap = await loadDiscountsFromDb(supabaseServer);
                 const useCouponWallet = Boolean(payload?.use_coupon_wallet);
+                const walletBalance = Number(accountRow.wallet_balance || 0);
                 const calc = calculateValidityCart(
                     payload?.items || [],
                     discountsMap,
                     useCouponWallet,
-                    accountRow.wallet_balance
+                    walletBalance
                 );
 
                 if (calc.totalDays <= 0) {
@@ -475,10 +518,11 @@ export default async function handler(req, res) {
 
                 return res.status(200).json({
                     success: true,
-                    message: `Cash Pay রিকোয়েস্ট (${calc.totalDays} দিন) জমা হয়েছে—Admin Approval পেন্ডিং।`,
+                    message: `Cash Pay রিকোয়েস্ট (${calc.totalDays} দিন) জমা হয়েছে—Wait for Validity Approval।`,
                     request: reqRow,
                     summary: {
                         ...calc,
+                        walletBalance,
                         pendingDays: nextPendingDays,
                         approvalStatus: 'Admin Approval',
                     }
