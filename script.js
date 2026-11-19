@@ -7,7 +7,9 @@
 let GLOBAL_COMPANY_ID = "101";
 let currentUserName = "";
 let currentCompositeUserId = "";
-let validityExpiryTime = new Date().getTime();
+let validityExpiryTime = 0;
+let validityCountdownTimer = null;
+let isValidityExpiredSession = false;
 let activeDevices = 1;
 
 let accountsMasterRecords = [];
@@ -36,7 +38,7 @@ function hideToast() {
 }
 
 function formatMoney(num) {
-    return '৳ ' + Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return '৳ ' + Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // -------------------------------------------------------------------------
@@ -83,13 +85,19 @@ async function handleMainSignIn(e) {
         localStorage.setItem('composite_user_id', user.composite_user_id);
         localStorage.setItem('user_name', user.user_name || uname);
         localStorage.setItem('buyer_email', user.buyer_email || '');
-        
-        applyValidityStateFromUser(user);
 
         document.getElementById('currentLoggedInUser').innerText = currentUserName;
         document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
         document.getElementById('userCouponCode').innerText = 'SIGMA_' + lastFourDigits;
         document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
+        if (document.getElementById('validityWalletBalanceText')) {
+            document.getElementById('validityWalletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
+        }
+
+        const isValidActive = applyValidityStateFromUser(user);
+        if (!isValidActive) {
+            return;
+        }
         
         document.getElementById('page1').classList.add('hidden');
         document.getElementById('page2').classList.remove('hidden');
@@ -102,6 +110,12 @@ async function handleMainSignIn(e) {
 }
 
 function handleLogOut() {
+    if (validityCountdownTimer) {
+        clearInterval(validityCountdownTimer);
+        validityCountdownTimer = null;
+    }
+    isValidityExpiredSession = false;
+    validityExpiryTime = 0;
     currentUserName = "";
     currentCompositeUserId = "";
     localStorage.clear();
@@ -126,9 +140,15 @@ async function loadAllDatabaseRecords() {
 
         const me = accountsMasterRecords.find(a => a.composite_user_id === currentCompositeUserId);
         if (me) {
-            applyValidityStateFromUser(me);
+            const isValidActive = applyValidityStateFromUser(me);
             if (document.getElementById('walletBalanceText')) {
                 document.getElementById('walletBalanceText').innerText = formatMoney(me.wallet_balance || 0);
+            }
+            if (document.getElementById('validityWalletBalanceText')) {
+                document.getElementById('validityWalletBalanceText').innerText = formatMoney(me.wallet_balance || 0);
+            }
+            if (!isValidActive) {
+                return;
             }
         }
     }
@@ -136,46 +156,148 @@ async function loadAllDatabaseRecords() {
     renderLotInventory();
 }
 
-function applyValidityStateFromUser(user = {}) {
+function getValidityExpiryTimestamp(user = {}) {
     if (user.validity_expires_at) {
-        validityExpiryTime = new Date(user.validity_expires_at).getTime();
-    } else if (user.activated_at) {
-        validityExpiryTime = new Date(user.activated_at).getTime() + ((Number(user.validity_days) || 30) * 24 * 60 * 60 * 1000);
-    } else {
-        validityExpiryTime = new Date().getTime() + ((Number(user.validity_days) || 30) * 24 * 60 * 60 * 1000);
+        const ts = new Date(user.validity_expires_at).getTime();
+        if (!Number.isNaN(ts)) return ts;
     }
-    updateValidityPendingBadge(user.pending_validity_days || 0, user.validity_approval_status || 'NONE');
+    if (user.activated_at) {
+        const baseTs = new Date(user.activated_at).getTime();
+        const days = Number(user.validity_days) || 0;
+        if (!Number.isNaN(baseTs) && days > 0) {
+            return baseTs + (days * 24 * 60 * 60 * 1000);
+        }
+    }
+    return 0;
+}
+
+function syncValidityPendingUI(pendingDays = 0, approvalStatus = 'NONE') {
+    const days = Number(pendingDays || 0);
+    const hasPending = days > 0 || approvalStatus === 'Admin Approval';
+
+    const badge = document.getElementById('validityPendingBadge');
+    if (badge) {
+        if (hasPending) {
+            badge.innerText = `Wait for Validity Approval (${days} Days Pending)`;
+            badge.classList.remove('hidden');
+        } else {
+            badge.innerText = '';
+            badge.classList.add('hidden');
+        }
+    }
+
+    const modalNotice = document.getElementById('validityModalPendingNotice');
+    const modalDetails = document.getElementById('validityModalPendingDetails');
+    if (modalNotice) {
+        if (hasPending) {
+            modalNotice.classList.remove('hidden');
+            if (modalDetails) {
+                modalDetails.innerText = `Pending Extension: ${days} Days • Status: Wait for Validity Approval`;
+            }
+        } else {
+            modalNotice.classList.add('hidden');
+            if (modalDetails) modalDetails.innerText = '';
+        }
+    }
+}
+
+function enforceExpiredValidityFlow(user = {}) {
+    const pendingDays = Number(user.pending_validity_days || 0);
+    const approvalStatus = user.validity_approval_status || 'NONE';
+    const hasPending = pendingDays > 0 || approvalStatus === 'Admin Approval';
+
+    isValidityExpiredSession = true;
+    syncValidityPendingUI(pendingDays, approvalStatus);
+
+    // All system logout/lock except Extend Validity Modal
+    currentUserName = "";
+    currentCompositeUserId = "";
+    localStorage.clear();
+    sessionStorage.clear();
+
+    const page2 = document.getElementById('page2');
+    const page1 = document.getElementById('page1');
+    if (page2) page2.classList.add('hidden');
+    if (page1) page1.classList.remove('hidden');
+
+    openBuyValidityModal();
+
+    if (hasPending) {
+        showToast('Wait for Validity Approval — আপনার ভ্যালিডিটি এক্সটেন্ড পেন্ডিং রয়েছে।');
+    } else {
+        showToast('আপনার ভ্যালিডিটি শেষ হয়ে গেছে! অনুগ্রহ করে Validity Extend করুন।');
+    }
+}
+
+function applyValidityStateFromUser(user = {}) {
+    const expiryTs = getValidityExpiryTimestamp(user);
+    const pendingDays = Number(user.pending_validity_days || 0);
+    const approvalStatus = user.validity_approval_status || 'NONE';
+
+    validityExpiryTime = expiryTs;
+    syncValidityPendingUI(pendingDays, approvalStatus);
+
+    const isExpired = !expiryTs || Date.now() >= expiryTs;
+    if (isExpired) {
+        enforceExpiredValidityFlow(user);
+        return false;
+    }
+
+    isValidityExpiredSession = false;
+    startValidityCountdown();
+    return true;
 }
 
 function updateValidityPendingBadge(pendingDays = 0, approvalStatus = 'NONE') {
-    const badge = document.getElementById('validityPendingBadge');
-    if (!badge) return;
-    const days = Number(pendingDays || 0);
-    if (days > 0 || approvalStatus === 'Admin Approval') {
-        badge.innerText = `Validity Extend ${days} Days Pending`;
-        badge.classList.remove('hidden');
-    } else {
-        badge.innerText = '';
-        badge.classList.add('hidden');
-    }
+    syncValidityPendingUI(pendingDays, approvalStatus);
 }
 
 function startValidityCountdown() {
-    setInterval(() => {
-        const now = new Date().getTime();
-        const diff = Math.max(0, validityExpiryTime - now);
+    if (validityCountdownTimer) {
+        clearInterval(validityCountdownTimer);
+        validityCountdownTimer = null;
+    }
+
+    const updateClock = () => {
+        if (!validityExpiryTime) return;
+        const now = Date.now();
+        const diff = validityExpiryTime - now;
+
+        if (diff <= 0) {
+            clearInterval(validityCountdownTimer);
+            validityCountdownTimer = null;
+            if (document.getElementById('countdownDays')) {
+                document.getElementById('countdownDays').innerText = '00';
+                document.getElementById('countdownHours').innerText = '00';
+                document.getElementById('countdownMins').innerText = '00';
+                document.getElementById('countdownSecs').innerText = '00';
+            }
+            const badgeText = document.getElementById('validityPendingBadge')?.innerText || '';
+            const pendingMatch = badgeText.match(/(\d+)\s*Days\s*Pending/i);
+            const pendingDays = pendingMatch ? Number(pendingMatch[1]) : 0;
+            const approvalStatus = badgeText ? 'Admin Approval' : 'NONE';
+            enforceExpiredValidityFlow({
+                pending_validity_days: pendingDays,
+                validity_approval_status: approvalStatus
+            });
+            return;
+        }
+
         const d = Math.floor(diff / (1000 * 60 * 60 * 24));
         const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-        if(document.getElementById('countdownDays')) {
+        if (document.getElementById('countdownDays')) {
             document.getElementById('countdownDays').innerText = String(d).padStart(2, '0');
             document.getElementById('countdownHours').innerText = String(h).padStart(2, '0');
             document.getElementById('countdownMins').innerText = String(m).padStart(2, '0');
             document.getElementById('countdownSecs').innerText = String(s).padStart(2, '0');
         }
-    }, 1000);
+    };
+
+    updateClock();
+    validityCountdownTimer = setInterval(updateClock, 1000);
 }
 
 function renderAllDashboardTables() {
@@ -496,6 +618,10 @@ function openBuyValidityModal() {
 
 function closeBuyValidityModal() {
     document.getElementById('buyValidityModal')?.classList.add('hidden');
+    if (isValidityExpiredSession) {
+        document.getElementById('page2')?.classList.add('hidden');
+        document.getElementById('page1')?.classList.remove('hidden');
+    }
 }
 
 function addValidityToCart() {
@@ -516,19 +642,12 @@ function removeValidityCartItem(idx) {
 
 async function refreshValiditySummaryDisplay(items = validityCart) {
     const box = document.getElementById('validityCartItems');
-    if (!items || !items.length) {
-        if (box) box.innerHTML = `<p class="text-slate-500 text-center py-2">Cart is empty. Select a plan & click Add.</p>`;
-        const setZero = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
-        setZero('validityTotalDaysText', '0 Days');
-        setZero('validityBasePriceText', formatMoney(0));
-        setZero('validityDiscountText', '- ' + formatMoney(0));
-        setZero('validitySubtotalText', formatMoney(0));
-        setZero('validityPayableText', formatMoney(0));
-        return;
-    }
-
     const useCouponWallet = Boolean(document.getElementById('useCouponWalletCheckbox')?.checked);
-    const res = await callBackendApi('preview_validity_cart', { items, use_coupon_wallet: useCouponWallet });
+
+    const res = await callBackendApi('preview_validity_cart', {
+        items: items || [],
+        use_coupon_wallet: useCouponWallet
+    });
 
     if (!res.success) {
         showToast(res.message || 'হিসাব লোড করা যায়নি।');
@@ -536,6 +655,23 @@ async function refreshValiditySummaryDisplay(items = validityCart) {
     }
 
     const summary = res.summary || {};
+    const availableWallet = Number(summary.walletBalance ?? 0);
+    if (document.getElementById('validityWalletBalanceText')) {
+        document.getElementById('validityWalletBalanceText').innerText = formatMoney(availableWallet);
+    }
+
+    if (!items || !items.length) {
+        if (box) box.innerHTML = `<p class="text-slate-500 text-center py-2">Cart is empty. Select a plan & click Add.</p>`;
+        const setZero = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+        setZero('validityTotalDaysText', '0 Days');
+        setZero('validityBasePriceText', formatMoney(0));
+        setZero('validityDiscountText', '- ' + formatMoney(0));
+        setZero('validitySubtotalText', formatMoney(0));
+        setZero('validityWalletDeductText', '- ' + formatMoney(0));
+        setZero('validityPayableText', formatMoney(0));
+        return;
+    }
+
     if (box && Array.isArray(summary.items)) {
         box.innerHTML = summary.items.map((it, idx) => `
             <div class="flex items-center justify-between bg-[#0f172a] border border-slate-800 rounded-lg px-2.5 py-1.5">
@@ -552,29 +688,40 @@ async function refreshValiditySummaryDisplay(items = validityCart) {
         `).join('');
     }
 
+    const subtotalVal = Number(summary.subtotal || 0);
+    const walletDeducted = useCouponWallet
+        ? Number(summary.walletDeducted ?? Math.min(availableWallet, subtotalVal))
+        : 0;
+    const grandTotalPayable = Number(summary.payableAmount ?? Math.max(0, subtotalVal - walletDeducted));
+
     const setVal = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
     setVal('validityTotalDaysText', `${summary.totalDays || 0} Days`);
     setVal('validityBasePriceText', formatMoney(summary.baseTotal || 0));
     setVal('validityDiscountText', '- ' + formatMoney(summary.discountTotal || 0));
-    setVal('validitySubtotalText', formatMoney(summary.subtotal || 0));
-    setVal('validityPayableText', formatMoney(summary.payableAmount || 0));
+    setVal('validitySubtotalText', formatMoney(subtotalVal));
+    setVal('validityWalletDeductText', '- ' + formatMoney(walletDeducted));
+    setVal('validityPayableText', formatMoney(grandTotalPayable));
 
     if (typeof summary.pendingDays !== 'undefined') {
-        updateValidityPendingBadge(summary.pendingDays, summary.approvalStatus);
+        syncValidityPendingUI(summary.pendingDays, summary.approvalStatus);
     }
 }
 
 async function handleCashPayValidity() {
+    const trxBox = document.getElementById('validityTrxBox');
     const trxInput = document.getElementById('validityTrxId');
-    const trxId = trxInput ? trxInput.value.trim() : '';
     const useCouponWallet = Boolean(document.getElementById('useCouponWalletCheckbox')?.checked);
 
     if (!validityCart.length) {
         showToast('কার্টে অন্তত একটি প্ল্যান যোগ করুন।');
         return;
     }
+
+    if (trxBox) trxBox.classList.remove('hidden');
+
+    const trxId = trxInput ? trxInput.value.trim() : '';
     if (!trxId) {
-        showToast('Cash Pay-এর জন্য Transaction ID দিন।');
+        showToast('পরবর্তী ধাপে যেতে Transaction ID দিন।');
         if (trxInput) trxInput.focus();
         return;
     }
@@ -588,15 +735,21 @@ async function handleCashPayValidity() {
 
     if (res.success) {
         const summary = res.summary || {};
-        updateValidityPendingBadge(summary.pendingDays, summary.approvalStatus || 'Admin Approval');
+        const nextPendingDays = Number(summary.pendingDays || 0);
+        const nextStatus = summary.approvalStatus || 'Admin Approval';
+
+        syncValidityPendingUI(nextPendingDays, nextStatus);
         validityCart = [];
         if (trxInput) trxInput.value = '';
         const cb = document.getElementById('useCouponWalletCheckbox');
         if (cb) cb.checked = false;
-        refreshValiditySummaryDisplay([]);
-        closeBuyValidityModal();
-        await loadAllDatabaseRecords();
-        showToast(res.message || 'Cash Pay রিকোয়েস্ট জমা হয়েছে—Admin Approval পেন্ডিং।');
+
+        await refreshValiditySummaryDisplay([]);
+
+        if (!isValidityExpiredSession && currentCompositeUserId) {
+            await loadAllDatabaseRecords();
+        }
+        showToast('Wait for Validity Approval — আপনার Cash Pay রিকোয়েস্ট পেন্ডিং রয়েছে।');
     } else {
         showToast(res.message || 'Validity extension failed.');
     }
@@ -1000,6 +1153,5 @@ window.addEventListener('DOMContentLoaded', () => {
     if(document.getElementById('loanDate')) document.getElementById('loanDate').value = today;
     if(document.getElementById('marketDate')) document.getElementById('marketDate').value = today;
     if(document.getElementById('settleDate')) document.getElementById('settleDate').value = today;
-    startValidityCountdown();
     renderMemoCart();
 });
