@@ -16,6 +16,7 @@ let loanGivenRecords = [];
 let loanTakenRecords = [];
 let marketExpenses = [];
 let memoCart = [];
+let validityCart = [];
 
 let activePrivatePartner = null;
 let universalMessages = [];
@@ -83,7 +84,7 @@ async function handleMainSignIn(e) {
         localStorage.setItem('user_name', user.user_name || uname);
         localStorage.setItem('buyer_email', user.buyer_email || '');
         
-        validityExpiryTime = new Date().getTime() + ((user.validity_days || 30) * 24 * 60 * 60 * 1000);
+        applyValidityStateFromUser(user);
 
         document.getElementById('currentLoggedInUser').innerText = currentUserName;
         document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
@@ -122,9 +123,41 @@ async function loadAllDatabaseRecords() {
         marketExpenses = res.daily_expenses || [];
         accountsMasterRecords = res.accounts || [];
         universalMessages = res.public_chats || [];
+
+        const me = accountsMasterRecords.find(a => a.composite_user_id === currentCompositeUserId);
+        if (me) {
+            applyValidityStateFromUser(me);
+            if (document.getElementById('walletBalanceText')) {
+                document.getElementById('walletBalanceText').innerText = formatMoney(me.wallet_balance || 0);
+            }
+        }
     }
     renderAllDashboardTables();
     renderLotInventory();
+}
+
+function applyValidityStateFromUser(user = {}) {
+    if (user.validity_expires_at) {
+        validityExpiryTime = new Date(user.validity_expires_at).getTime();
+    } else if (user.activated_at) {
+        validityExpiryTime = new Date(user.activated_at).getTime() + ((Number(user.validity_days) || 30) * 24 * 60 * 60 * 1000);
+    } else {
+        validityExpiryTime = new Date().getTime() + ((Number(user.validity_days) || 30) * 24 * 60 * 60 * 1000);
+    }
+    updateValidityPendingBadge(user.pending_validity_days || 0, user.validity_approval_status || 'NONE');
+}
+
+function updateValidityPendingBadge(pendingDays = 0, approvalStatus = 'NONE') {
+    const badge = document.getElementById('validityPendingBadge');
+    if (!badge) return;
+    const days = Number(pendingDays || 0);
+    if (days > 0 || approvalStatus === 'Admin Approval') {
+        badge.innerText = `Validity Extend ${days} Days Pending`;
+        badge.classList.remove('hidden');
+    } else {
+        badge.innerText = '';
+        badge.classList.add('hidden');
+    }
 }
 
 function startValidityCountdown() {
@@ -394,7 +427,7 @@ function renderLotInventory() {
     document.getElementById('subUserCount').innerText = activeSubs.length || 1;
 
     const listEl = document.getElementById('lotInventorySummaryList');
-    const selectEl = document.getElementById('sellLotIdSelect'); // বা আপনার ফর্মের সিলেক্ট আইডি
+    const selectEl = document.getElementById('sellLotIdSelect');
 
     if (inStockItems.length === 0) {
         if(listEl) listEl.innerHTML = '<p class="text-slate-500">No In_Stock IDs available.</p>';
@@ -409,7 +442,6 @@ function renderLotInventory() {
             `).join('');
         }
         if(selectEl) {
-            // অপশনগুলোতে data-password অ্যাট্রিবিউট যুক্ত করে দেওয়া হলো যাতে সহজে পাসওয়ার্ড নেওয়া যায়
             selectEl.innerHTML = '<option value="">-- Select Lot ID --</option>' + inStockItems.map(item => `
                 <option value="${item.id || item.lot_id}" data-password="${item.password || ''}">${item.lot_id} - ${item.user_name || item.user_id} (In_Stock)</option>
             `).join('');
@@ -454,17 +486,117 @@ async function handleSellNewIdSubmit(e) {
     }
 }
 
-function openBuyValidityModal() { document.getElementById('buyValidityModal').classList.remove('hidden'); }
-function closeBuyValidityModal() { document.getElementById('buyValidityModal').classList.add('hidden'); }
+// -------------------------------------------------------------------------
+// VALIDITY EXTENSION (Dropdown + Cart + Backend Calculation + Cash Pay)
+// -------------------------------------------------------------------------
+function openBuyValidityModal() {
+    document.getElementById('buyValidityModal')?.classList.remove('hidden');
+    refreshValiditySummaryDisplay(validityCart);
+}
 
-async function handleBuyValiditySubmit(e) {
-    e.preventDefault();
-    const trxId = document.getElementById('validityTrxId').value;
-    const res = await callBackendApi('buy_validity', { trx_id: trxId });
+function closeBuyValidityModal() {
+    document.getElementById('buyValidityModal')?.classList.add('hidden');
+}
+
+function addValidityToCart() {
+    const months = Math.max(1, parseInt(document.getElementById('validityPlanDropdown')?.value, 10) || 1);
+    const found = validityCart.find((i) => i.months === months);
+    if (found) {
+        found.qty += 1;
+    } else {
+        validityCart.push({ months, qty: 1 });
+    }
+    refreshValiditySummaryDisplay(validityCart);
+}
+
+function removeValidityCartItem(idx) {
+    validityCart.splice(idx, 1);
+    refreshValiditySummaryDisplay(validityCart);
+}
+
+async function refreshValiditySummaryDisplay(items = validityCart) {
+    const box = document.getElementById('validityCartItems');
+    if (!items || !items.length) {
+        if (box) box.innerHTML = `<p class="text-slate-500 text-center py-2">Cart is empty. Select a plan & click Add.</p>`;
+        const setZero = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+        setZero('validityTotalDaysText', '0 Days');
+        setZero('validityBasePriceText', formatMoney(0));
+        setZero('validityDiscountText', '- ' + formatMoney(0));
+        setZero('validitySubtotalText', formatMoney(0));
+        setZero('validityPayableText', formatMoney(0));
+        return;
+    }
+
+    const useCouponWallet = Boolean(document.getElementById('useCouponWalletCheckbox')?.checked);
+    const res = await callBackendApi('preview_validity_cart', { items, use_coupon_wallet: useCouponWallet });
+
+    if (!res.success) {
+        showToast(res.message || 'হিসাব লোড করা যায়নি।');
+        return;
+    }
+
+    const summary = res.summary || {};
+    if (box && Array.isArray(summary.items)) {
+        box.innerHTML = summary.items.map((it, idx) => `
+            <div class="flex items-center justify-between bg-[#0f172a] border border-slate-800 rounded-lg px-2.5 py-1.5">
+                <div>
+                    <span class="font-semibold text-white">${it.months} Month${it.months > 1 ? 's' : ''} (${it.days} Days)</span>
+                    <span class="text-slate-400"> × ${it.qty}</span>
+                    ${it.discountPct > 0 ? `<span class="ml-1 text-[11px] text-emerald-400">(-${it.discountPct}%)</span>` : ''}
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-mono text-slate-200">${formatMoney(it.subtotal || 0)}</span>
+                    <button type="button" onclick="removeValidityCartItem(${idx})" class="text-rose-400 hover:text-rose-300 font-bold">×</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    const setVal = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+    setVal('validityTotalDaysText', `${summary.totalDays || 0} Days`);
+    setVal('validityBasePriceText', formatMoney(summary.baseTotal || 0));
+    setVal('validityDiscountText', '- ' + formatMoney(summary.discountTotal || 0));
+    setVal('validitySubtotalText', formatMoney(summary.subtotal || 0));
+    setVal('validityPayableText', formatMoney(summary.payableAmount || 0));
+
+    if (typeof summary.pendingDays !== 'undefined') {
+        updateValidityPendingBadge(summary.pendingDays, summary.approvalStatus);
+    }
+}
+
+async function handleCashPayValidity() {
+    const trxInput = document.getElementById('validityTrxId');
+    const trxId = trxInput ? trxInput.value.trim() : '';
+    const useCouponWallet = Boolean(document.getElementById('useCouponWalletCheckbox')?.checked);
+
+    if (!validityCart.length) {
+        showToast('কার্টে অন্তত একটি প্ল্যান যোগ করুন।');
+        return;
+    }
+    if (!trxId) {
+        showToast('Cash Pay-এর জন্য Transaction ID দিন।');
+        if (trxInput) trxInput.focus();
+        return;
+    }
+
+    const res = await callBackendApi('buy_validity', {
+        items: validityCart,
+        use_coupon_wallet: useCouponWallet,
+        trx_id: trxId,
+        payment_method: 'Cash Pay'
+    });
+
     if (res.success) {
-        validityExpiryTime += (30 * 24 * 60 * 60 * 1000);
+        const summary = res.summary || {};
+        updateValidityPendingBadge(summary.pendingDays, summary.approvalStatus || 'Admin Approval');
+        validityCart = [];
+        if (trxInput) trxInput.value = '';
+        const cb = document.getElementById('useCouponWalletCheckbox');
+        if (cb) cb.checked = false;
+        refreshValiditySummaryDisplay([]);
         closeBuyValidityModal();
-        showToast('মেয়াদ সফলভাবে ৩০ দিন বাড়ানো হয়েছে!');
+        await loadAllDatabaseRecords();
+        showToast(res.message || 'Cash Pay রিকোয়েস্ট জমা হয়েছে—Admin Approval পেন্ডিং।');
     } else {
         showToast(res.message || 'Validity extension failed.');
     }
@@ -838,8 +970,8 @@ async function submitUserPasswordChange() {
 // LOT PASSWORD AUTO-FILL (Select Lot ID to Sell)
 // -------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
-    const lotIdSelectElement = document.getElementById('sellLotIdSelect'); // আপনার সিলেক্ট ড্রপডাউনের আইডি
-    const lotPasswordElement = document.getElementById('lotPassword'); // পাসওয়ার্ড দেখানোর ইনপুট ফিল্ডের আইডি
+    const lotIdSelectElement = document.getElementById('sellLotIdSelect');
+    const lotPasswordElement = document.getElementById('lotPassword');
 
     if (lotIdSelectElement && lotPasswordElement) {
         lotIdSelectElement.addEventListener('change', function() {
@@ -849,14 +981,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (password) {
                 lotPasswordElement.value = password;
             } else {
-                // যদি data-password অ্যাট্রিবিউট থেকে না পাওয়া যায়, তবে accountsMasterRecords থেকে খুঁজে দেখবে
                 const selectedVal = this.value;
                 const foundItem = accountsMasterRecords.find(item => item.id == selectedVal || item.lot_id == selectedVal);
                 
                 if (foundItem && foundItem.password) {
                     lotPasswordElement.value = foundItem.password;
                 } else {
-                    lotPasswordElement.value = ''; // না পেলে খালি রাখবে
+                    lotPasswordElement.value = '';
                 }
             }
         });
