@@ -192,58 +192,6 @@ function closeModal(modalId) {
     modal.style.display = 'none';
 }
 
-function renderAccountsListModal() {
-    const container =
-        document.getElementById('accounts-list-body') ||
-        document.getElementById('accountsListContainer') ||
-        document.getElementById('allAccountsList');
-    if (!container) return;
-
-    const list = Array.isArray(accountsMasterRecords) ? accountsMasterRecords : [];
-    if (!list.length) {
-        container.innerHTML = '<div class="py-4 text-center text-slate-400 text-xs">No accounts found.</div>';
-        return;
-    }
-
-    container.innerHTML = list.map((acc) => {
-        const uName = escapeHtml(acc.user_name || acc.user_id || '-');
-        const cId = escapeHtml(acc.composite_user_id || '-');
-        const status = escapeHtml(acc.status || 'Active');
-        const bal = formatMoney(acc.wallet_balance || 0);
-        return `
-            <div class="flex flex-wrap items-center justify-between gap-2 bg-[#131822] px-3 py-2 rounded-lg border border-slate-800 text-xs">
-                <div>
-                    <div class="font-bold text-white">${uName}</div>
-                    <div class="font-mono text-[11px] text-slate-400">${cId}</div>
-                </div>
-                <div class="text-right">
-                    <div class="font-mono font-bold text-emerald-400">${bal}</div>
-                    <div class="text-[11px] text-amber-300">${status}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-async function openAccountsModal() {
-    if (!Array.isArray(accountsMasterRecords) || accountsMasterRecords.length === 0) {
-        await loadAllDatabaseRecords();
-    }
-    renderAccountsListModal();
-
-    const modalId = ['modal-accounts', 'accountsModal', 'modal-show-accounts', 'showAccountsModal']
-        .find((id) => document.getElementById(id));
-
-    if (modalId) {
-        openModal(modalId);
-    } else {
-        showToast(`মোট ${accountsMasterRecords.length}টি অ্যাকাউন্ট লোড হয়েছে।`);
-    }
-}
-
-window.showAccounts = openAccountsModal;
-window.openAccountsModal = openAccountsModal;
-
 function openIncomeExpenseModal(type = 'income') {
     const today = new Date().toISOString().split('T')[0];
     const dateEl = document.getElementById('ie-date');
@@ -761,7 +709,6 @@ async function loadAllDatabaseRecords() {
     }
     renderAllDashboardTables();
     renderLotInventory();
-    renderAccountsListModal();
     notifyParentFrameHeight();
 }
 
