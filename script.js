@@ -1380,3 +1380,23 @@ window.addEventListener('DOMContentLoaded', () => {
     renderMemoCart();
     notifyParentFrameHeight();
 });
+
+
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('button, [role="button"]');
+    if (!btn) return;
+
+    const label = (btn.textContent || '').trim().toLowerCase();
+    const clickAttr = (btn.getAttribute('onclick') || '').toLowerCase();
+
+    if (clickAttr.includes('openincomemodal') || label.includes('new income/expense')) {
+        e.preventDefault();
+        openIncomeModal();
+    } else if (clickAttr.includes('openloanmodal') || (label.includes('new entry') && btn.closest('[id*="loan"], section, div')?.textContent?.toLowerCase().includes('loan'))) {
+        e.preventDefault();
+        openLoanModal();
+    } else if (clickAttr.includes('openmarketmodal') || label.includes('new expense entry')) {
+        e.preventDefault();
+        openMarketModal();
+    }
+});
