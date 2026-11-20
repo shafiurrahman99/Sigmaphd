@@ -215,6 +215,80 @@ function openDailyExpenseModal() {
     openModal('modal-daily-expense');
 }
 
+function ensureAccountsModalContainer() {
+    let modal = document.getElementById('modal-show-accounts') || document.getElementById('accountsListModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'modal-show-accounts';
+    modal.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4';
+    modal.innerHTML = `
+        <div class="w-full max-w-4xl rounded-2xl bg-[#0b1120] border border-slate-700 text-slate-100 shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-[#111827]">
+                <h3 class="text-sm sm:text-base font-bold text-emerald-400">Accounts Master List</h3>
+                <button type="button" onclick="closeModal('modal-show-accounts')" class="text-slate-400 hover:text-white text-lg font-bold px-2">×</button>
+            </div>
+            <div class="p-4 max-h-[70vh] overflow-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400">
+                            <th class="py-2 px-2">User Name</th>
+                            <th class="py-2 px-2">Composite ID</th>
+                            <th class="py-2 px-2">Role</th>
+                            <th class="py-2 px-2">Status</th>
+                            <th class="py-2 px-2 text-right">Wallet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accounts-master-modal-body"></tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+}
+
+async function openAccountsModal() {
+    if (!accountsMasterRecords.length) {
+        await loadAllDatabaseRecords();
+    }
+
+    const modal = ensureAccountsModalContainer();
+    const tbody = document.getElementById('accounts-master-modal-body') || document.getElementById('accountsListBody');
+    const inlineBox = document.getElementById('accountsListContainer') || document.getElementById('showAccountsList');
+
+    const rowsHtml = (accountsMasterRecords || []).length
+        ? accountsMasterRecords.map((acc) => `
+            <tr class="border-b border-slate-800/70 hover:bg-slate-900/60">
+                <td class="py-2 px-2 font-semibold text-white">${escapeHtml(acc.user_name || acc.user_id || '-')}</td>
+                <td class="py-2 px-2 font-mono text-emerald-300">${escapeHtml(acc.composite_user_id || '-')}</td>
+                <td class="py-2 px-2 text-slate-300">${escapeHtml(acc.role || 'User')}</td>
+                <td class="py-2 px-2"><span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-emerald-400">${escapeHtml(acc.status || 'Active')}</span></td>
+                <td class="py-2 px-2 text-right font-mono font-bold text-amber-300">${formatMoney(acc.wallet_balance || 0)}</td>
+            </tr>
+        `).join('')
+        : '<tr><td colspan="5" class="py-4 text-center text-slate-400">No accounts found.</td></tr>';
+
+    if (tbody) tbody.innerHTML = rowsHtml;
+    if (inlineBox) {
+        inlineBox.classList.remove('hidden');
+        inlineBox.innerHTML = `<table class="w-full text-left border-collapse text-xs"><tbody>${rowsHtml}</tbody></table>`;
+    }
+
+    openModal(modal.id);
+}
+
+function toggleAccountsModal() {
+    const modal = ensureAccountsModalContainer();
+    const isOpen = !modal.classList.contains('hidden');
+    if (isOpen) closeModal(modal.id);
+    else openAccountsModal();
+}
+
+function showAccountsList() {
+    return openAccountsModal();
+}
+
 function updateDeleteCounter(btnId, countId, selector) {
     const btn = document.getElementById(btnId);
     const cnt = document.getElementById(countId);
@@ -694,7 +768,10 @@ async function loadAllDatabaseRecords() {
             loan_records_status: normalizeStatusLabel(r.loan_records_status, r.loan_records_settled_date),
             status: normalizeStatusLabel(r.loan_records_status, r.loan_records_settled_date)
         }));
-        marketExpenses = res.daily_expenses || [];
+        marketExpenses = (res.daily_expenses || []).filter((m) => {
+            const desc = String(m.income_expense_description || m.description || '');
+            return !/\[(Loan|PayableExtra)#[^\]]+\]/i.test(desc);
+        });
         accountsMasterRecords = res.accounts || [];
         universalMessages = res.public_chats || [];
 
@@ -1179,6 +1256,14 @@ window.addEventListener('DOMContentLoaded', () => {
     ['incomeDate', 'loanDate', 'marketDate', 'settleDate', 'ie-date', 'loan-date', 'dexp-date'].forEach(id => {
         const el = document.getElementById(id);
         if (el && !el.value) el.value = today;
+    });
+
+    document.addEventListener('click', (event) => {
+        const btn = event.target.closest('#btn-show-accounts, #showAccountsBtn, [data-action="show-accounts"], [data-toggle="accounts"]');
+        if (btn) {
+            event.preventDefault();
+            openAccountsModal();
+        }
     });
 
     const initialCompId = resolveCompositeUserId();
