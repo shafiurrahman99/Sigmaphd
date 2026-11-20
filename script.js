@@ -1,8 +1,12 @@
 /**
  * =========================================================================
  * SIGMA PhD™ - PRODUCTION SCRIPT (JavaScript Logic & API Connector)
+ * Integrated with Iframe Bridge (SIGMAPHD_DASHBOARD_BRIDGE) & Dashboard Sync
  * =========================================================================
  */
+
+const BRIDGE_CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
+const PROXY_URL = '/api/root-proxy';
 
 let GLOBAL_COMPANY_ID = "101";
 let currentUserName = "";
@@ -24,12 +28,41 @@ let activePrivatePartner = null;
 let universalMessages = [];
 let privateMessagesMap = {};
 
-function showToast(text) {
+function showToast(text, variant = 'success') {
+    if (window.self !== window.top && window.parent) {
+        window.parent.postMessage({
+            channel: BRIDGE_CHANNEL,
+            type: 'TOAST',
+            compositeUserId: currentCompositeUserId || window.ACTIVE_COMPOSITE_USER_ID || '',
+            message: text,
+            variant
+        }, '*');
+    }
+
     const toast = document.getElementById('toast');
-    if (!toast) return;
-    document.getElementById('toast-text').innerText = text;
-    toast.classList.remove('hidden');
-    setTimeout(hideToast, 3500);
+    if (toast && document.getElementById('toast-text')) {
+        document.getElementById('toast-text').innerText = text;
+        toast.classList.remove('hidden');
+        clearTimeout(window.__sigmaToastTimer);
+        window.__sigmaToastTimer = setTimeout(hideToast, 3500);
+        return;
+    }
+
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const el = document.createElement('div');
+    const cls = variant === 'error'
+        ? 'bg-rose-600 text-white border-rose-400/40'
+        : variant === 'warn'
+        ? 'bg-amber-500 text-slate-950 border-amber-300/40'
+        : 'bg-emerald-500 text-slate-950 border-emerald-300/40';
+    el.className = `pointer-events-auto px-4 py-2.5 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold transition-all ${cls}`;
+    el.textContent = text;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 250);
+    }, 3000);
 }
 
 function hideToast() {
@@ -41,19 +74,77 @@ function formatMoney(num) {
     return '৳ ' + Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+/* -------------------------------------------------------------------------
+ * IFRAME BRIDGE HELPERS (Parent index.html <-> Child dashboard.html)
+ * ------------------------------------------------------------------------- */
+function getDashboardIframeEl() {
+    return document.getElementById('dashboardFrame');
+}
+
+function syncCompositeIdToIframe(compId) {
+    const cleanId = String(compId || '').trim();
+    if (!cleanId) return;
+
+    currentCompositeUserId = cleanId;
+    window.ACTIVE_COMPOSITE_USER_ID = cleanId;
+
+    const compDisplay = document.getElementById('displayCompositeId');
+    if (compDisplay) compDisplay.innerText = cleanId;
+
+    const scopeLabel = document.getElementById('active-composite-user-label');
+    if (scopeLabel) scopeLabel.innerText = cleanId;
+
+    if (typeof window.syncDashboardIframeUser === 'function') {
+        window.syncDashboardIframeUser(cleanId);
+    } else {
+        const frame = getDashboardIframeEl();
+        if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({
+                channel: BRIDGE_CHANNEL,
+                type: 'SET_USER_SCOPE',
+                compositeUserId: cleanId,
+                payload: { composite_user_id: cleanId }
+            }, '*');
+        }
+    }
+}
+
+function notifyParentFrameHeight() {
+    if (window.self !== window.top && window.parent) {
+        const shell = document.getElementById('dashboard-app-shell') || document.body;
+        const height = shell ? shell.scrollHeight + 24 : document.documentElement.scrollHeight;
+        window.parent.postMessage({
+            channel: BRIDGE_CHANNEL,
+            type: 'FRAME_HEIGHT',
+            compositeUserId: currentCompositeUserId || window.ACTIVE_COMPOSITE_USER_ID || '',
+            height
+        }, '*');
+    }
+}
+
+function isLedgerTable(val) {
+    return Array.isArray(val);
+}
+
 // -------------------------------------------------------------------------
 // DIRECT BACKEND & DATABASE COMMUNICATION (PROXY / API)
 // -------------------------------------------------------------------------
 async function callBackendApi(action, payload) {
     try {
-        const response = await fetch('/api/root-proxy', {
+        const activeCompId =
+            currentCompositeUserId ||
+            localStorage.getItem('composite_user_id') ||
+            window.ACTIVE_COMPOSITE_USER_ID ||
+            '';
+
+        const response = await fetch(PROXY_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action, 
-                company_id: GLOBAL_COMPANY_ID, 
-                composite_user_id: currentCompositeUserId, 
-                payload 
+            body: JSON.stringify({
+                action,
+                company_id: GLOBAL_COMPANY_ID,
+                composite_user_id: activeCompId,
+                payload
             })
         });
         const result = await response.json();
@@ -78,18 +169,25 @@ async function handleMainSignIn(e) {
         const user = res.user;
         currentUserName = user.user_name || uname;
         currentCompositeUserId = user.composite_user_id;
-        
-        let buyerMobile = user.buyer_mobile || '01818589423'; 
-        let lastFourDigits = buyerMobile.length >= 4 ? buyerMobile.slice(-4) : '8423';
-        
+
+        const buyerMobile = user.buyer_mobile || '01818589423';
+        const lastFourDigits = buyerMobile.length >= 4 ? buyerMobile.slice(-4) : '8423';
+
         localStorage.setItem('composite_user_id', user.composite_user_id);
         localStorage.setItem('user_name', user.user_name || uname);
         localStorage.setItem('buyer_email', user.buyer_email || '');
 
-        document.getElementById('currentLoggedInUser').innerText = currentUserName;
-        document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
-        document.getElementById('userCouponCode').innerText = 'SIGMA_' + lastFourDigits;
-        document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
+        if (document.getElementById('currentLoggedInUser')) {
+            document.getElementById('currentLoggedInUser').innerText = currentUserName;
+        }
+        syncCompositeIdToIframe(currentCompositeUserId);
+
+        if (document.getElementById('userCouponCode')) {
+            document.getElementById('userCouponCode').innerText = 'SIGMA_' + lastFourDigits;
+        }
+        if (document.getElementById('walletBalanceText')) {
+            document.getElementById('walletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
+        }
         if (document.getElementById('validityWalletBalanceText')) {
             document.getElementById('validityWalletBalanceText').innerText = formatMoney(user.wallet_balance || 0);
         }
@@ -98,14 +196,17 @@ async function handleMainSignIn(e) {
         if (!isValidActive) {
             return;
         }
-        
-        document.getElementById('page1').classList.add('hidden');
-        document.getElementById('page2').classList.remove('hidden');
-        
+
+        const page1 = document.getElementById('page1');
+        const page2 = document.getElementById('page2');
+        if (page1) page1.classList.add('hidden');
+        if (page2) page2.classList.remove('hidden');
+
         await loadAllDatabaseRecords();
+        notifyParentFrameHeight();
         showToast('স্বাগতম ' + currentUserName + '! সফলভাবে লগইন হয়েছে।');
     } else {
-        showToast(res.message || 'ভুল ইউজারনেম অথবা পাসওয়ার্ড!');
+        showToast(res.message || 'ভুল ইউজারনেম অথবা পাসওয়ার্ড!', 'error');
     }
 }
 
@@ -120,8 +221,10 @@ function handleLogOut() {
     currentCompositeUserId = "";
     localStorage.clear();
     sessionStorage.clear();
-    document.getElementById('page2').classList.add('hidden');
-    document.getElementById('page1').classList.remove('hidden');
+    const page2 = document.getElementById('page2');
+    const page1 = document.getElementById('page1');
+    if (page2) page2.classList.add('hidden');
+    if (page1) page1.classList.remove('hidden');
     showToast('সফলভাবে লগআউট করা হয়েছে।');
 }
 
@@ -154,6 +257,7 @@ async function loadAllDatabaseRecords() {
     }
     renderAllDashboardTables();
     renderLotInventory();
+    notifyParentFrameHeight();
 }
 
 function getValidityExpiryTimestamp(user = {}) {
@@ -209,7 +313,6 @@ function enforceExpiredValidityFlow(user = {}) {
     isValidityExpiredSession = true;
     syncValidityPendingUI(pendingDays, approvalStatus);
 
-    // All system logout/lock except Extend Validity Modal
     currentUserName = "";
     currentCompositeUserId = "";
     localStorage.clear();
@@ -223,9 +326,9 @@ function enforceExpiredValidityFlow(user = {}) {
     openBuyValidityModal();
 
     if (hasPending) {
-        showToast('Wait for Validity Approval — আপনার ভ্যালিডিটি এক্সটেন্ড পেন্ডিং রয়েছে।');
+        showToast('Wait for Validity Approval — আপনার ভ্যালিডিটি এক্সটেন্ড পেন্ডিং রয়েছে।', 'warn');
     } else {
-        showToast('আপনার ভ্যালিডিটি শেষ হয়ে গেছে! অনুগ্রহ করে Validity Extend করুন।');
+        showToast('আপনার ভ্যালিডিটি শেষ হয়ে গেছে! অনুগ্রহ করে Validity Extend করুন।', 'warn');
     }
 }
 
@@ -307,44 +410,51 @@ function renderAllDashboardTables() {
 }
 
 // -------------------------------------------------------------------------
-// MONTHLY SUMMARY TABLE
+// MONTHLY SUMMARY TABLE (Supports both legacy & new income_expense columns)
 // -------------------------------------------------------------------------
 function renderMonthlySummaryTable() {
+    const tbody = document.getElementById('monthlyRowsContainer');
+    if (!tbody) return;
+
     let totalInc = 0;
     let totalExp = 0;
     const monthlyMap = {};
 
     incomeExpenseRecords.forEach(item => {
-        const monthKey = item.entry_date ? item.entry_date.slice(0, 7) : '2026-11';
+        const eType = item.entry_type || (item.income_expense_type === 'expense' ? 'Expense' : 'Income');
+        const eDate = item.entry_date || item.income_expense_date || '2026-11';
+        const eAmt = Number(item.amount ?? item.income_expense_amount ?? 0) || 0;
+        const eStatus = item.status || item.income_expense_status || 'Paid';
+
+        const monthKey = String(eDate).slice(0, 7);
         if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { inc: 0, exp: 0 };
 
-        if (item.entry_type === 'Income') {
-            totalInc += Number(item.amount);
-            monthlyMap[monthKey].inc += Number(item.amount);
-        } else if (item.entry_type === 'IncomeDeduction') {
-            totalInc -= Number(item.amount);
-            monthlyMap[monthKey].inc -= Number(item.amount);
-        } else if (item.entry_type === 'Expense') {
-            totalExp += Number(item.amount);
-            monthlyMap[monthKey].exp += Number(item.amount);
+        if (eType === 'Income') {
+            totalInc += eAmt;
+            monthlyMap[monthKey].inc += eAmt;
+        } else if (eType === 'IncomeDeduction') {
+            totalInc -= eAmt;
+            monthlyMap[monthKey].inc -= eAmt;
+        } else if (eType === 'Expense' && eStatus === 'Paid') {
+            totalExp += eAmt;
+            monthlyMap[monthKey].exp += eAmt;
         }
     });
 
     marketExpenses.forEach(m => {
         if (m.status === 'Paid') {
-            const monthKey = m.expense_date ? m.expense_date.slice(0, 7) : '2026-11';
+            const monthKey = (m.expense_date || '2026-11').slice(0, 7);
             if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { inc: 0, exp: 0 };
-            totalExp += Number(m.amount);
-            monthlyMap[monthKey].exp += Number(m.amount);
+            totalExp += Number(m.amount || 0);
+            monthlyMap[monthKey].exp += Number(m.amount || 0);
         }
     });
 
     const netSurplus = totalInc - totalExp;
-    document.getElementById('totalIncomeAll').innerText = formatMoney(totalInc);
-    document.getElementById('totalExpenseAll').innerText = formatMoney(totalExp);
-    document.getElementById('totalSurplusAll').innerText = formatMoney(netSurplus);
+    if (document.getElementById('totalIncomeAll')) document.getElementById('totalIncomeAll').innerText = formatMoney(totalInc);
+    if (document.getElementById('totalExpenseAll')) document.getElementById('totalExpenseAll').innerText = formatMoney(totalExp);
+    if (document.getElementById('totalSurplusAll')) document.getElementById('totalSurplusAll').innerText = formatMoney(netSurplus);
 
-    const tbody = document.getElementById('monthlyRowsContainer');
     const months = Object.keys(monthlyMap).sort().reverse();
     tbody.innerHTML = months.map(m => {
         const rowSurplus = monthlyMap[m].inc - monthlyMap[m].exp;
@@ -359,8 +469,8 @@ function renderMonthlySummaryTable() {
     }).join('');
 }
 
-function openIncomeModal() { document.getElementById('incomeModal').classList.remove('hidden'); }
-function closeIncomeModal() { document.getElementById('incomeModal').classList.add('hidden'); }
+function openIncomeModal() { document.getElementById('incomeModal')?.classList.remove('hidden'); }
+function closeIncomeModal() { document.getElementById('incomeModal')?.classList.add('hidden'); }
 
 async function handleIncomeSubmit(e) {
     e.preventDefault();
@@ -375,12 +485,12 @@ async function handleIncomeSubmit(e) {
         closeIncomeModal();
         showToast(`${type} এন্ট্রি সফলভাবে সেভ হয়েছে!`);
     } else {
-        showToast(res.message || 'সেভ করতে সমস্যা হয়েছে।');
+        showToast(res.message || 'সেভ করতে সমস্যা হয়েছে।', 'error');
     }
 }
 
-function openLoanModal() { document.getElementById('loanModal').classList.remove('hidden'); }
-function closeLoanModal() { document.getElementById('loanModal').classList.add('hidden'); }
+function openLoanModal() { document.getElementById('loanModal')?.classList.remove('hidden'); }
+function closeLoanModal() { document.getElementById('loanModal')?.classList.add('hidden'); }
 
 async function handleLoanSubmit(e) {
     e.preventDefault();
@@ -395,55 +505,75 @@ async function handleLoanSubmit(e) {
         closeLoanModal();
         showToast('লোন রেকর্ড সংরক্ষিত হয়েছে।');
     } else {
-        showToast(res.message || 'সংরক্ষণ ব্যর্থ হয়েছে।');
+        showToast(res.message || 'সংরক্ষণ ব্যর্থ হয়েছে।', 'error');
     }
 }
 
 function renderLoanTables() {
-    let givenTotal = 0;
     const givenList = document.getElementById('loanGivenList');
-    givenList.innerHTML = loanGivenRecords.length === 0 ? '<p class="text-[11px] text-slate-500">No Receivable records.</p>' : loanGivenRecords.map(l => {
-        if (l.status !== 'Paid') givenTotal += Number(l.amount);
-        return `
-            <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
-                <div>
-                    <span class="font-bold text-slate-200">${l.person_name}</span>
-                    <span class="text-[10px] text-slate-400 block">${l.entry_date} • ${l.status === 'Paid' ? '<span class="text-emerald-400">Settled</span>' : '<span class="text-amber-400">Pending</span>'}</span>
+    const takenList = document.getElementById('loanTakenList');
+    if (!givenList || !takenList) return;
+
+    let givenTotal = 0;
+    givenList.innerHTML = loanGivenRecords.length === 0
+        ? '<p class="text-[11px] text-slate-500">No Receivable records.</p>'
+        : loanGivenRecords.map(l => {
+            const pName = l.person_name || l.loan_records_description || 'Party';
+            const eDate = l.entry_date || l.loan_records_entry_date || '';
+            const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
+            const st = l.status || l.loan_records_status || 'Due';
+            const isSettled = st === 'Paid' || st === 'Due Received';
+            if (!isSettled) givenTotal += amt;
+            return `
+                <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
+                    <div>
+                        <span class="font-bold text-slate-200">${pName}</span>
+                        <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-amber-400">Pending</span>'}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-mono font-bold text-amber-400">${formatMoney(amt)}</span>
+                        ${!isSettled ? `<button onclick="openSettleModal('${l.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
+                    </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <span class="font-mono font-bold text-amber-400">${formatMoney(l.amount)}</span>
-                    ${l.status !== 'Paid' ? `<button onclick="openSettleModal('${l.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-    document.getElementById('loanGivenTotalText').innerText = 'Total: ' + formatMoney(givenTotal);
+            `;
+        }).join('');
+    if (document.getElementById('loanGivenTotalText')) {
+        document.getElementById('loanGivenTotalText').innerText = 'Total: ' + formatMoney(givenTotal);
+    }
 
     let takenTotal = 0;
-    const takenList = document.getElementById('loanTakenList');
-    takenList.innerHTML = loanTakenRecords.length === 0 ? '<p class="text-[11px] text-slate-500">No Payable records.</p>' : loanTakenRecords.map(l => {
-        if (l.status !== 'Paid') takenTotal += Number(l.amount);
-        return `
-            <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
-                <div>
-                    <span class="font-bold text-slate-200">${l.person_name}</span>
-                    <span class="text-[10px] text-slate-400 block">${l.entry_date} • ${l.status === 'Paid' ? '<span class="text-emerald-400">Paid</span>' : '<span class="text-rose-400">Due</span>'}</span>
+    takenList.innerHTML = loanTakenRecords.length === 0
+        ? '<p class="text-[11px] text-slate-500">No Payable records.</p>'
+        : loanTakenRecords.map(l => {
+            const pName = l.person_name || l.loan_records_description || 'Party';
+            const eDate = l.entry_date || l.loan_records_entry_date || '';
+            const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
+            const st = l.status || l.loan_records_status || 'Due';
+            const isSettled = st === 'Paid' || st === 'Due Received';
+            if (!isSettled) takenTotal += amt;
+            return `
+                <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
+                    <div>
+                        <span class="font-bold text-slate-200">${pName}</span>
+                        <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-rose-400">Due</span>'}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-mono font-bold text-rose-400">${formatMoney(amt)}</span>
+                        ${!isSettled ? `<button onclick="openSettleModal('${l.id}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
+                    </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <span class="font-mono font-bold text-rose-400">${formatMoney(l.amount)}</span>
-                    ${l.status !== 'Paid' ? `<button onclick="openSettleModal('${l.id}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-    document.getElementById('loanTakenTotalText').innerText = 'Total: ' + formatMoney(takenTotal);
+            `;
+        }).join('');
+    if (document.getElementById('loanTakenTotalText')) {
+        document.getElementById('loanTakenTotalText').innerText = 'Total: ' + formatMoney(takenTotal);
+    }
 }
 
 function openSettleModal(id) {
     document.getElementById('settleLoanId').value = id;
-    document.getElementById('settleLoanModal').classList.remove('hidden');
+    document.getElementById('settleLoanModal')?.classList.remove('hidden');
 }
-function closeSettleModal() { document.getElementById('settleLoanModal').classList.add('hidden'); }
+function closeSettleModal() { document.getElementById('settleLoanModal')?.classList.add('hidden'); }
 
 async function handleSettleLoanSubmit(e) {
     e.preventDefault();
@@ -457,12 +587,12 @@ async function handleSettleLoanSubmit(e) {
         closeSettleModal();
         showToast('লোন সেটেল করা হয়েছে!');
     } else {
-        showToast(res.message || 'সেটেলমেন্ট ব্যর্থ হয়েছে।');
+        showToast(res.message || 'সেটেলমেন্ট ব্যর্থ হয়েছে।', 'error');
     }
 }
 
-function openMarketModal() { document.getElementById('marketModal').classList.remove('hidden'); }
-function closeMarketModal() { document.getElementById('marketModal').classList.add('hidden'); }
+function openMarketModal() { document.getElementById('marketModal')?.classList.remove('hidden'); }
+function closeMarketModal() { document.getElementById('marketModal')?.classList.add('hidden'); }
 
 async function handleMarketSubmit(e) {
     e.preventDefault();
@@ -477,7 +607,7 @@ async function handleMarketSubmit(e) {
         closeMarketModal();
         showToast('দৈনিক খরচ যুক্ত হয়েছে!');
     } else {
-        showToast(res.message || 'খরচ যুক্ত করতে সমস্যা হয়েছে।');
+        showToast(res.message || 'খরচ যুক্ত করতে সমস্যা হয়েছে।', 'error');
     }
 }
 
@@ -490,72 +620,85 @@ async function toggleMarketStatus(id) {
 
 function renderMarketExpensesTable() {
     const tbody = document.getElementById('marketExpenseList');
+    if (!tbody) return;
     if (marketExpenses.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-slate-500">No daily expenses recorded.</td></tr>';
         return;
     }
-    tbody.innerHTML = marketExpenses.map(m => `
-        <tr class="text-slate-300">
-            <td class="py-2 px-2 font-mono text-[11px]">${m.expense_date}</td>
-            <td class="py-2 px-2">${m.description}</td>
-            <td class="py-2 px-2 font-mono text-rose-400 font-bold">${formatMoney(m.amount)}</td>
-            <td class="py-2 px-2 text-right">
-                <button onclick="toggleMarketStatus('${m.id}')" class="${m.status === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[10px] font-bold">
-                    ${m.status}
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = marketExpenses.map(m => {
+        const mDate = m.expense_date || m.income_expense_date || '';
+        const mDesc = m.description || m.income_expense_description || '';
+        const mAmt = Number(m.amount ?? m.income_expense_amount ?? 0) || 0;
+        const mStatus = m.status || m.income_expense_status || 'Paid';
+        return `
+            <tr class="text-slate-300">
+                <td class="py-2 px-2 font-mono text-[11px]">${mDate}</td>
+                <td class="py-2 px-2">${mDesc}</td>
+                <td class="py-2 px-2 font-mono text-rose-400 font-bold">${formatMoney(mAmt)}</td>
+                <td class="py-2 px-2 text-right">
+                    <button onclick="toggleMarketStatus('${m.id}')" class="${mStatus === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[10px] font-bold">
+                        ${mStatus}
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // -------------------------------------------------------------------------
 // LOT & LICENSE MANAGEMENT
 // -------------------------------------------------------------------------
 function openBuyLotModal() {
-    document.getElementById('generatedLotNumber').innerText = 'LT-' + Math.floor(1000 + Math.random() * 9000);
+    if (document.getElementById('generatedLotNumber')) {
+        document.getElementById('generatedLotNumber').innerText = 'LT-' + Math.floor(1000 + Math.random() * 9000);
+    }
     calculateLotPrice();
-    document.getElementById('buyLotModal').classList.remove('hidden');
+    document.getElementById('buyLotModal')?.classList.remove('hidden');
 }
-function closeBuyLotModal() { document.getElementById('buyLotModal').classList.add('hidden'); }
+function closeBuyLotModal() { document.getElementById('buyLotModal')?.classList.add('hidden'); }
 
 function calculateLotPrice() {
-    const qty = parseInt(document.getElementById('lotQuantitySelect').value) || 10;
+    const qty = parseInt(document.getElementById('lotQuantitySelect')?.value) || 10;
     const sub = qty * 100;
     const disc = sub * 0.20;
     const net = sub - disc;
-    document.getElementById('lotSubTotalText').innerText = formatMoney(sub);
-    document.getElementById('lotDiscountText').innerText = '- ' + formatMoney(disc);
-    document.getElementById('lotNetTotalText').innerText = formatMoney(net);
+    if (document.getElementById('lotSubTotalText')) document.getElementById('lotSubTotalText').innerText = formatMoney(sub);
+    if (document.getElementById('lotDiscountText')) document.getElementById('lotDiscountText').innerText = '- ' + formatMoney(disc);
+    if (document.getElementById('lotNetTotalText')) document.getElementById('lotNetTotalText').innerText = formatMoney(net);
 }
 
 async function handleCashPayLot() {
     const lotNo = document.getElementById('generatedLotNumber').innerText;
     const qty = parseInt(document.getElementById('lotQuantitySelect').value) || 10;
-    
+
     const res = await callBackendApi('buy_lot', { lot_id: lotNo, quantity: qty });
     if (res.success) {
         await loadAllDatabaseRecords();
         closeBuyLotModal();
         showToast(`${lotNo} লটের ${qty}টি আইডি ইনভেন্টরিতে যুক্ত হয়েছে!`);
     } else {
-        showToast(res.message || 'লট ক্রয় ব্যর্থ হয়েছে।');
+        showToast(res.message || 'লট ক্রয় ব্যর্থ হয়েছে।', 'error');
     }
 }
 
 function renderLotInventory() {
     const inStockItems = accountsMasterRecords.filter(a => a.owner_id === currentCompositeUserId && a.status === 'In_Stock');
-    document.getElementById('availableLotIdsCount').innerText = inStockItems.length;
+    if (document.getElementById('availableLotIdsCount')) {
+        document.getElementById('availableLotIdsCount').innerText = inStockItems.length;
+    }
     const activeSubs = accountsMasterRecords.filter(a => a.upline_id === currentCompositeUserId && a.status !== 'In_Stock');
-    document.getElementById('subUserCount').innerText = activeSubs.length || 1;
+    if (document.getElementById('subUserCount')) {
+        document.getElementById('subUserCount').innerText = activeSubs.length || 1;
+    }
 
     const listEl = document.getElementById('lotInventorySummaryList');
     const selectEl = document.getElementById('sellLotIdSelect');
 
     if (inStockItems.length === 0) {
-        if(listEl) listEl.innerHTML = '<p class="text-slate-500">No In_Stock IDs available.</p>';
-        if(selectEl) selectEl.innerHTML = '<option value="">No Stock Available</option>';
+        if (listEl) listEl.innerHTML = '<p class="text-slate-500">No In_Stock IDs available.</p>';
+        if (selectEl) selectEl.innerHTML = '<option value="">No Stock Available</option>';
     } else {
-        if(listEl) {
+        if (listEl) {
             listEl.innerHTML = inStockItems.map(item => `
                 <div class="flex justify-between items-center bg-[#131822] px-2 py-1 rounded border border-slate-800">
                     <span class="text-amber-400 font-mono">${item.lot_id} • ${item.user_name || item.user_id}</span>
@@ -563,7 +706,7 @@ function renderLotInventory() {
                 </div>
             `).join('');
         }
-        if(selectEl) {
+        if (selectEl) {
             selectEl.innerHTML = '<option value="">-- Select Lot ID --</option>' + inStockItems.map(item => `
                 <option value="${item.id || item.lot_id}" data-password="${item.password || ''}">${item.lot_id} - ${item.user_name || item.user_id} (In_Stock)</option>
             `).join('');
@@ -573,13 +716,15 @@ function renderLotInventory() {
 
 function openSellLicenseModal() {
     renderLotInventory();
-    const userCoupon = document.getElementById('userCouponCode').innerText;
-    document.getElementById('sellCouponCodeInput').value = userCoupon;
-    document.getElementById('sellLicenseModal').classList.remove('hidden');
+    const userCoupon = document.getElementById('userCouponCode')?.innerText || '';
+    if (document.getElementById('sellCouponCodeInput')) {
+        document.getElementById('sellCouponCodeInput').value = userCoupon;
+    }
+    document.getElementById('sellLicenseModal')?.classList.remove('hidden');
 }
 
-function closeSellLicenseModal() { 
-    document.getElementById('sellLicenseModal').classList.add('hidden'); 
+function closeSellLicenseModal() {
+    document.getElementById('sellLicenseModal')?.classList.add('hidden');
 }
 
 async function handleSellNewIdSubmit(e) {
@@ -590,8 +735,8 @@ async function handleSellNewIdSubmit(e) {
     const mobile = document.getElementById('sellBuyerMobile').value.trim();
     const email = document.getElementById('sellBuyerEmail').value.trim();
 
-    const res = await callBackendApi('process_id_sale_cashback', { 
-        seller_composite_id: currentCompositeUserId, 
+    const res = await callBackendApi('process_id_sale_cashback', {
+        seller_composite_id: currentCompositeUserId,
         sold_item_id: selectedId,
         coupon_code: couponCode,
         buyer_name: name,
@@ -604,7 +749,7 @@ async function handleSellNewIdSubmit(e) {
         closeSellLicenseModal();
         showToast('আইডি বিক্রি সফল হয়েছে এবং ক্যাশব্যাক যুক্ত হয়েছে!');
     } else {
-        showToast(res.message || 'আইডি বিক্রি সম্পন্ন করা যায়নি।');
+        showToast(res.message || 'আইডি বিক্রি সম্পন্ন করা যায়নি।', 'error');
     }
 }
 
@@ -650,7 +795,7 @@ async function refreshValiditySummaryDisplay(items = validityCart) {
     });
 
     if (!res.success) {
-        showToast(res.message || 'হিসাব লোড করা যায়নি।');
+        showToast(res.message || 'হিসাব লোড করা যায়নি।', 'error');
         return;
     }
 
@@ -713,7 +858,7 @@ async function handleCashPayValidity() {
     const useCouponWallet = Boolean(document.getElementById('useCouponWalletCheckbox')?.checked);
 
     if (!validityCart.length) {
-        showToast('কার্টে অন্তত একটি প্ল্যান যোগ করুন।');
+        showToast('কার্টে অন্তত একটি প্ল্যান যোগ করুন।', 'warn');
         return;
     }
 
@@ -721,7 +866,7 @@ async function handleCashPayValidity() {
 
     const trxId = trxInput ? trxInput.value.trim() : '';
     if (!trxId) {
-        showToast('পরবর্তী ধাপে যেতে Transaction ID দিন।');
+        showToast('পরবর্তী ধাপে যেতে Transaction ID দিন।', 'warn');
         if (trxInput) trxInput.focus();
         return;
     }
@@ -749,14 +894,14 @@ async function handleCashPayValidity() {
         if (!isValidityExpiredSession && currentCompositeUserId) {
             await loadAllDatabaseRecords();
         }
-        showToast('Wait for Validity Approval — আপনার Cash Pay রিকোয়েস্ট পেন্ডিং রয়েছে।');
+        showToast('Wait for Validity Approval — আপনার Cash Pay রিকোয়েস্ট পেন্ডিং রয়েছে।', 'warn');
     } else {
-        showToast(res.message || 'Validity extension failed.');
+        showToast(res.message || 'Validity extension failed.', 'error');
     }
 }
 
-function openBalanceTransferModal() { document.getElementById('balanceTransferModal').classList.remove('hidden'); }
-function closeBalanceTransferModal() { document.getElementById('balanceTransferModal').classList.add('hidden'); }
+function openBalanceTransferModal() { document.getElementById('balanceTransferModal')?.classList.remove('hidden'); }
+function closeBalanceTransferModal() { document.getElementById('balanceTransferModal')?.classList.add('hidden'); }
 
 async function handleBalanceTransferSubmit(e) {
     e.preventDefault();
@@ -769,12 +914,12 @@ async function handleBalanceTransferSubmit(e) {
         closeBalanceTransferModal();
         showToast('ব্যালেন্স ট্রান্সফার সফল হয়েছে!');
     } else {
-        showToast(res.message || 'ব্যালেন্স ট্রান্সফার ব্যর্থ হয়েছে।');
+        showToast(res.message || 'ব্যালেন্স ট্রান্সফার ব্যর্থ হয়েছে।', 'error');
     }
 }
 
-function openBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.remove('hidden'); }
-function closeBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal').classList.add('hidden'); }
+function openBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal')?.classList.remove('hidden'); }
+function closeBuyLicenseLandingModal() { document.getElementById('buyLicenseLandingModal')?.classList.add('hidden'); }
 
 async function handleLandingBuySubmit(e) {
     e.preventDefault();
@@ -794,22 +939,24 @@ async function handleLandingBuySubmit(e) {
         closeBuyLicenseLandingModal();
         showToast('নতুন আইডির আবেদন সফলভাবে জমা হয়েছে!');
     } else {
-        showToast(res.message || 'সাবমিট করতে সমস্যা হয়েছে।');
+        showToast(res.message || 'সাবমিট করতে সমস্যা হয়েছে।', 'error');
     }
 }
 
-function openAddDeviceModal() { document.getElementById('addDeviceModal').classList.remove('hidden'); }
-function closeAddDeviceModal() { document.getElementById('addDeviceModal').classList.add('hidden'); }
+function openAddDeviceModal() { document.getElementById('addDeviceModal')?.classList.remove('hidden'); }
+function closeAddDeviceModal() { document.getElementById('addDeviceModal')?.classList.add('hidden'); }
 
 async function handleAddDeviceSubmit(e) {
     e.preventDefault();
     if (activeDevices < 2) {
         activeDevices++;
-        document.getElementById('activeDeviceCount').innerText = activeDevices;
+        if (document.getElementById('activeDeviceCount')) {
+            document.getElementById('activeDeviceCount').innerText = activeDevices;
+        }
         closeAddDeviceModal();
         showToast('নতুন ডিভাইস যুক্ত হয়েছে!');
     } else {
-        showToast('সর্বোচ্চ ২টি ডিভাইস যুক্ত করা যাবে!');
+        showToast('সর্বোচ্চ ২টি ডিভাইস যুক্ত করা যাবে!', 'warn');
     }
 }
 
@@ -820,11 +967,12 @@ function openMyChatModal() {
     exitIndividualChat();
     renderChatUsersList();
     renderUniversalMessages();
-    document.getElementById('myChatModal').classList.remove('hidden');
+    document.getElementById('myChatModal')?.classList.remove('hidden');
 }
 
 function renderChatUsersList() {
     const container = document.getElementById('chatUsersListContainer');
+    if (!container) return;
     const otherUsers = accountsMasterRecords.filter(u => (u.user_name || u.user_id) !== currentUserName);
     container.innerHTML = otherUsers.map(u => `
         <button type="button" onclick="openIndividualChat('${u.user_name || u.user_id}')" 
@@ -837,6 +985,7 @@ function renderChatUsersList() {
 
 function renderUniversalMessages() {
     const box = document.getElementById('universalChatBox');
+    if (!box) return;
     box.innerHTML = universalMessages.map(m => {
         const isMe = m.user_name === currentUserName || m.user_id === currentUserName;
         const senderLabel = m.user_name || m.user_id || 'User';
@@ -868,25 +1017,32 @@ async function sendUniversalMessage(e) {
 
 function openIndividualChat(partnerName) {
     activePrivatePartner = partnerName;
-    document.getElementById('universalChatView').classList.add('hidden');
-    document.getElementById('individualChatView').classList.remove('hidden');
-    document.getElementById('chatBackBtn').classList.remove('hidden');
-    document.getElementById('chatModalTitle').innerHTML = `<i class="fa-solid fa-user-lock text-indigo-400"></i><span>${partnerName}</span>`;
-    document.getElementById('activeChatPartnerName').innerText = partnerName;
+    document.getElementById('universalChatView')?.classList.add('hidden');
+    document.getElementById('individualChatView')?.classList.remove('hidden');
+    document.getElementById('chatBackBtn')?.classList.remove('hidden');
+    if (document.getElementById('chatModalTitle')) {
+        document.getElementById('chatModalTitle').innerHTML = `<i class="fa-solid fa-user-lock text-indigo-400"></i><span>${partnerName}</span>`;
+    }
+    if (document.getElementById('activeChatPartnerName')) {
+        document.getElementById('activeChatPartnerName').innerText = partnerName;
+    }
     renderIndividualMessages();
 }
 
 function exitIndividualChat() {
     activePrivatePartner = null;
-    document.getElementById('individualChatView').classList.add('hidden');
-    document.getElementById('universalChatView').classList.remove('hidden');
-    document.getElementById('chatBackBtn').classList.add('hidden');
-    document.getElementById('chatModalTitle').innerHTML = `<i class="fa-solid fa-comments text-emerald-400"></i><span>My Chat (Universal & Users)</span>`;
+    document.getElementById('individualChatView')?.classList.add('hidden');
+    document.getElementById('universalChatView')?.classList.remove('hidden');
+    document.getElementById('chatBackBtn')?.classList.add('hidden');
+    if (document.getElementById('chatModalTitle')) {
+        document.getElementById('chatModalTitle').innerHTML = `<i class="fa-solid fa-comments text-emerald-400"></i><span>My Chat (Universal & Users)</span>`;
+    }
 }
 
 function renderIndividualMessages() {
     if (!activePrivatePartner) return;
     const box = document.getElementById('individualChatBox');
+    if (!box) return;
     const msgs = privateMessagesMap[activePrivatePartner] || [];
     box.innerHTML = msgs.map(m => {
         const isMe = m.user_name === currentUserName || m.user_id === currentUserName;
@@ -919,30 +1075,39 @@ async function sendIndividualMessage(e) {
     }
 }
 
-function openCashMemoModal() { document.getElementById('cashMemoModal').classList.remove('hidden'); }
+function openCashMemoModal() { document.getElementById('cashMemoModal')?.classList.remove('hidden'); }
 function openSettingsModal() {
-    document.getElementById('settingsComposite').innerText = currentCompositeUserId;
-    document.getElementById('settingsModal').classList.remove('hidden');
+    if (document.getElementById('settingsComposite')) {
+        document.getElementById('settingsComposite').innerText = currentCompositeUserId;
+    }
+    document.getElementById('settingsModal')?.classList.remove('hidden');
 }
 function toggleAccountsSection() {
     const container = document.getElementById('accountsSectionContainer');
     const toggleText = document.getElementById('accountsToggleText');
     const toggleIcon = document.getElementById('accountsToggleIcon');
+    if (!container) return;
     container.classList.toggle('hidden');
-    toggleText.innerText = container.classList.contains('hidden') ? 'Show Accounts' : 'Hide Accounts';
-    toggleIcon.className = container.classList.contains('hidden') ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+    if (toggleText) toggleText.innerText = container.classList.contains('hidden') ? 'Show Accounts' : 'Hide Accounts';
+    if (toggleIcon) toggleIcon.className = container.classList.contains('hidden') ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+    notifyParentFrameHeight();
 }
 function copyCouponCode() {
-    navigator.clipboard.writeText(document.getElementById('userCouponCode').innerText);
+    const code = document.getElementById('userCouponCode')?.innerText || '';
+    if (code && navigator.clipboard) {
+        navigator.clipboard.writeText(code);
+    }
     showToast('Coupon Copied!');
 }
 
 function lockBusinessSetup() {
-    document.getElementById('memoHeaderConfig').setAttribute('readonly', true);
-    document.getElementById('memoFooterConfig').setAttribute('readonly', true);
+    document.getElementById('memoHeaderConfig')?.setAttribute('readonly', true);
+    document.getElementById('memoFooterConfig')?.setAttribute('readonly', true);
     const btn = document.getElementById('lockBusinessSetupBtn');
-    btn.innerText = 'Locked (Saved)';
-    btn.classList.replace('bg-amber-600', 'bg-slate-700');
+    if (btn) {
+        btn.innerText = 'Locked (Saved)';
+        btn.classList.replace('bg-amber-600', 'bg-slate-700');
+    }
     showToast('বিজনেস সেটআপ লক করা হয়েছে!');
 }
 
@@ -969,7 +1134,9 @@ function renderMemoCart() {
             <td class="py-1.5 px-1 text-center text-rose-400 cursor-pointer" onclick="memoCart.splice(${idx},1); renderMemoCart();">×</td>
         </tr>`;
     }).join('');
-    document.getElementById('memoCartGrandTotal').innerText = formatMoney(grand);
+    if (document.getElementById('memoCartGrandTotal')) {
+        document.getElementById('memoCartGrandTotal').innerText = formatMoney(grand);
+    }
 }
 
 function openA4PdfPreview() {
@@ -977,57 +1144,61 @@ function openA4PdfPreview() {
     const footerText = document.getElementById('memoFooterConfig').value;
     const custName = document.getElementById('memoCustomerName').value;
     const custMob = document.getElementById('memoCustomerMobile').value;
-    let grand = memoCart.reduce((acc, i) => acc + i.total, 0);
+    const grand = memoCart.reduce((acc, i) => acc + i.total, 0);
 
     const contentBox = document.getElementById('a4PdfContentBox');
-    contentBox.innerHTML = `
-        <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-            <h2 style="margin: 0; font-size: 20px; color: #111; font-weight: bold;">${headerText}</h2>
-            <h3 style="margin: 8px 0 0 0; font-size: 15px; background: #eee; display: inline-block; padding: 2px 20px; border-radius: 4px; font-weight: bold;">CASH MEMO</h3>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 15px; color: #333;">
-            <div><strong>Customer Name:</strong> ${custName}<br><strong>Mobile:</strong> ${custMob}</div>
-            <div style="text-align: right;"><strong>Date:</strong> ${new Date().toISOString().split('T')[0]}<br><strong>Memo No:</strong> #MEMO-${Math.floor(Math.random()*90000+10000)}</div>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px;">
-            <thead>
-                <tr style="background: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
-                    <th style="padding: 8px; text-align: left;">Item Description</th>
-                    <th style="padding: 8px; text-align: center;">Qty</th>
-                    <th style="padding: 8px; text-align: right;">Rate</th>
-                    <th style="padding: 8px; text-align: right;">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${memoCart.map(i => `
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 8px;">${i.desc}</td>
-                        <td style="padding: 8px; text-align: center;">${i.qty}</td>
-                        <td style="padding: 8px; text-align: right;">৳ ${i.rate}</td>
-                        <td style="padding: 8px; text-align: right; font-weight: bold;">৳ ${i.total}</td>
+    if (contentBox) {
+        contentBox.innerHTML = `
+            <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 20px; color: #111; font-weight: bold;">${headerText}</h2>
+                <h3 style="margin: 8px 0 0 0; font-size: 15px; background: #eee; display: inline-block; padding: 2px 20px; border-radius: 4px; font-weight: bold;">CASH MEMO</h3>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 15px; color: #333;">
+                <div><strong>Customer Name:</strong> ${custName}<br><strong>Mobile:</strong> ${custMob}</div>
+                <div style="text-align: right;"><strong>Date:</strong> ${new Date().toISOString().split('T')[0]}<br><strong>Memo No:</strong> #MEMO-${Math.floor(Math.random()*90000+10000)}</div>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+                        <th style="padding: 8px; text-align: left;">Item Description</th>
+                        <th style="padding: 8px; text-align: center;">Qty</th>
+                        <th style="padding: 8px; text-align: right;">Rate</th>
+                        <th style="padding: 8px; text-align: right;">Total</th>
                     </tr>
-                `).join('')}
-            </tbody>
-        </table>
-        <div style="text-align: right; font-size: 15px; font-weight: bold; margin-bottom: 40px;">Grand Total: ৳ ${grand.toFixed(2)}</div>
-        <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 8px;">${footerText}</div>
-    `;
-    document.getElementById('cashMemoModal').classList.add('hidden');
-    document.getElementById('a4PdfPreviewModal').classList.remove('hidden');
+                </thead>
+                <tbody>
+                    ${memoCart.map(i => `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 8px;">${i.desc}</td>
+                            <td style="padding: 8px; text-align: center;">${i.qty}</td>
+                            <td style="padding: 8px; text-align: right;">৳ ${i.rate}</td>
+                            <td style="padding: 8px; text-align: right; font-weight: bold;">৳ ${i.total}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div style="text-align: right; font-size: 15px; font-weight: bold; margin-bottom: 40px;">Grand Total: ৳ ${grand.toFixed(2)}</div>
+            <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 8px;">${footerText}</div>
+        `;
+    }
+    document.getElementById('cashMemoModal')?.classList.add('hidden');
+    document.getElementById('a4PdfPreviewModal')?.classList.remove('hidden');
 }
 
 function saveMemoToDevice() {
     showToast('ক্যাশ মেমো সেভ হয়েছে!');
-    document.getElementById('a4PdfPreviewModal').classList.add('hidden');
+    document.getElementById('a4PdfPreviewModal')?.classList.add('hidden');
 }
 
 function printMemoPdf() {
     const printArea = document.getElementById('a4MemoPrintArea');
-    printArea.innerHTML = document.getElementById('a4PdfContentBox').innerHTML;
-    printArea.classList.remove('hidden');
-    document.getElementById('a4PdfPreviewModal').classList.add('hidden');
+    if (printArea && document.getElementById('a4PdfContentBox')) {
+        printArea.innerHTML = document.getElementById('a4PdfContentBox').innerHTML;
+        printArea.classList.remove('hidden');
+    }
+    document.getElementById('a4PdfPreviewModal')?.classList.add('hidden');
     window.print();
-    printArea.classList.add('hidden');
+    if (printArea) printArea.classList.add('hidden');
 }
 
 // -------------------------------------------------------------------------
@@ -1038,9 +1209,9 @@ function openUserPassModal() {
     const buyerEmail = localStorage.getItem('buyer_email') || 'N/A';
     const currentUN = localStorage.getItem('user_name') || currentUserName || '';
 
-    document.getElementById('modalCompositeId').innerText = compId;
-    document.getElementById('modalAutoEmail').innerText = buyerEmail;
-    document.getElementById('newUsernameInput').value = currentUN;
+    if (document.getElementById('modalCompositeId')) document.getElementById('modalCompositeId').innerText = compId;
+    if (document.getElementById('modalAutoEmail')) document.getElementById('modalAutoEmail').innerText = buyerEmail;
+    if (document.getElementById('newUsernameInput')) document.getElementById('newUsernameInput').value = currentUN;
 
     const modal = document.getElementById('userPassModal');
     if (modal) modal.style.display = 'flex';
@@ -1056,7 +1227,7 @@ async function submitUserPasswordChange() {
     const oldPassword = document.getElementById('oldPasswordInput').value.trim();
     const newPassword = document.getElementById('newPasswordInput').value.trim();
     const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
-    
+
     const compositeUserId = document.getElementById('modalCompositeId').innerText;
     const buyerEmail = document.getElementById('modalAutoEmail').innerText;
 
@@ -1082,7 +1253,7 @@ async function submitUserPasswordChange() {
     }
 
     try {
-        const response = await fetch('/api/root-proxy', {
+        const response = await fetch(PROXY_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1104,7 +1275,7 @@ async function submitUserPasswordChange() {
             alert(result.message);
             localStorage.clear();
             sessionStorage.clear();
-            window.location.reload(); 
+            window.location.reload();
         } else {
             alert(result.message || 'পরিবর্তন ব্যর্থ হয়েছে!');
         }
@@ -1120,7 +1291,44 @@ async function submitUserPasswordChange() {
 }
 
 // -------------------------------------------------------------------------
-// LOT PASSWORD AUTO-FILL (Select Lot ID to Sell)
+// IFRAME BRIDGE LISTENER (Handles messages between index.html & dashboard.html)
+// -------------------------------------------------------------------------
+window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (!data || data.channel !== BRIDGE_CHANNEL) return;
+
+    if (data.type === 'SET_USER_SCOPE') {
+        const nextCompId = (data.payload && data.payload.composite_user_id) || data.compositeUserId;
+        if (nextCompId && nextCompId !== currentCompositeUserId) {
+            currentCompositeUserId = String(nextCompId).trim();
+            window.ACTIVE_COMPOSITE_USER_ID = currentCompositeUserId;
+            if (document.getElementById('active-composite-user-label')) {
+                document.getElementById('active-composite-user-label').innerText = currentCompositeUserId;
+            }
+            if (document.getElementById('displayCompositeId')) {
+                document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
+            }
+            if (document.getElementById('monthlyRowsContainer')) {
+                loadAllDatabaseRecords();
+            }
+        }
+    } else if (data.type === 'REQUEST_USER_SCOPE') {
+        const activeId = currentCompositeUserId || localStorage.getItem('composite_user_id') || '101_admin';
+        syncCompositeIdToIframe(activeId);
+    } else if (data.type === 'TOAST' && data.message) {
+        const singleToast = document.getElementById('toast');
+        const singleText = document.getElementById('toast-text');
+        if (singleToast && singleText) {
+            singleText.innerText = data.message;
+            singleToast.classList.remove('hidden');
+            clearTimeout(window.__sigmaToastTimer);
+            window.__sigmaToastTimer = setTimeout(hideToast, 3200);
+        }
+    }
+});
+
+// -------------------------------------------------------------------------
+// LOT PASSWORD AUTO-FILL & INITIALIZATION
 // -------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
     const lotIdSelectElement = document.getElementById('sellLotIdSelect');
@@ -1130,13 +1338,13 @@ document.addEventListener('DOMContentLoaded', function() {
         lotIdSelectElement.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const password = selectedOption ? selectedOption.getAttribute('data-password') : '';
-            
+
             if (password) {
                 lotPasswordElement.value = password;
             } else {
                 const selectedVal = this.value;
                 const foundItem = accountsMasterRecords.find(item => item.id == selectedVal || item.lot_id == selectedVal);
-                
+
                 if (foundItem && foundItem.password) {
                     lotPasswordElement.value = foundItem.password;
                 } else {
@@ -1149,9 +1357,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 window.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
-    if(document.getElementById('incomeDate')) document.getElementById('incomeDate').value = today;
-    if(document.getElementById('loanDate')) document.getElementById('loanDate').value = today;
-    if(document.getElementById('marketDate')) document.getElementById('marketDate').value = today;
-    if(document.getElementById('settleDate')) document.getElementById('settleDate').value = today;
+    if (document.getElementById('incomeDate')) document.getElementById('incomeDate').value = today;
+    if (document.getElementById('loanDate')) document.getElementById('loanDate').value = today;
+    if (document.getElementById('marketDate')) document.getElementById('marketDate').value = today;
+    if (document.getElementById('settleDate')) document.getElementById('settleDate').value = today;
+
+    const urlCompId = new URLSearchParams(window.location.search).get('composite_user_id');
+    const savedCompId = localStorage.getItem('composite_user_id');
+    const initialCompId = urlCompId || savedCompId || window.ACTIVE_COMPOSITE_USER_ID || '';
+
+    if (initialCompId) {
+        currentCompositeUserId = initialCompId;
+        window.ACTIVE_COMPOSITE_USER_ID = initialCompId;
+        if (document.getElementById('active-composite-user-label')) {
+            document.getElementById('active-composite-user-label').innerText = initialCompId;
+        }
+        if (document.getElementById('displayCompositeId')) {
+            document.getElementById('displayCompositeId').innerText = initialCompId;
+        }
+    }
+
     renderMemoCart();
+    notifyParentFrameHeight();
 });
