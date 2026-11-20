@@ -718,34 +718,34 @@
     <!-- Hidden A4 Print Area -->
     <div id="a4MemoPrintArea" class="hidden"></div>
 
-    <!-- Iframe User Scope Bridge -->
-    <script>
-        function syncDashboardIframeScope() {
-            const iframe = document.getElementById("dashboardIframe");
-            const compIdEl = document.getElementById("displayCompositeId");
-            const userId = (compIdEl && compIdEl.textContent.trim()) || "101_admin";
-            if (iframe && iframe.contentWindow) {
-                iframe.contentWindow.postMessage(
-                    { type: "SET_COMPOSITE_USER_ID", compositeUserId: userId },
-                    "*"
-                );
-            }
+   <!-- Iframe User Scope Bridge -->
+<script>
+    function syncDashboardIframeScope() {
+        const iframe = document.getElementById("dashboardIframe");
+        const compIdEl = document.getElementById("displayCompositeId");
+        const userId = compIdEl ? compIdEl.textContent.trim() : "";
+        if (iframe && iframe.contentWindow && userId) {
+            iframe.contentWindow.postMessage(
+                { type: "SET_COMPOSITE_USER_ID", compositeUserId: userId },
+                "*"
+            );
         }
-        window.addEventListener("load", () => {
-            const iframe = document.getElementById("dashboardIframe");
-            if (iframe) {
-                iframe.addEventListener("load", syncDashboardIframeScope);
-            }
-            const compIdEl = document.getElementById("displayCompositeId");
-            if (compIdEl) {
-                new MutationObserver(syncDashboardIframeScope).observe(compIdEl, {
-                    childList: true,
-                    characterData: true,
-                    subtree: true,
-                });
-            }
-        });
-    </script>
+    }
+    window.addEventListener("load", () => {
+        const iframe = document.getElementById("dashboardIframe");
+        if (iframe) {
+            iframe.addEventListener("load", syncDashboardIframeScope);
+        }
+        const compIdEl = document.getElementById("displayCompositeId");
+        if (compIdEl) {
+            new MutationObserver(syncDashboardIframeScope).observe(compIdEl, {
+                childList: true,
+                characterData: true,
+                subtree: true,
+            });
+        }
+    });
+</script>
     
     <!-- External Script Integration -->
     <script src="script.js"></script>
