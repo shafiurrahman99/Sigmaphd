@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -85,7 +86,9 @@
     .section-fullscreen .row-select-cb {
       display: table-cell !important;
     }
-    /* When embedded inside index.html iframe, hide duplicate top nav bar */
+    [data-expandable-section] .row-select-cb {
+      display: table-cell !important;
+    }
     body.in-iframe #iframe-top-header {
       display: none !important;
     }
@@ -102,7 +105,7 @@
   <!-- Main Application Shell -->
   <div id="dashboard-app-shell" class="w-full max-w-3xl mx-auto px-3 sm:px-5 py-4 space-y-4">
 
-    <!-- Top Navigation & Active User Scope Bar (Standalone mode) -->
+    <!-- Top Navigation & Active User Scope Bar -->
     <header id="iframe-top-header" class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-2.5 shadow-xl space-y-2">
       <nav class="grid grid-cols-3 gap-2" aria-label="Primary Navigation">
         <button id="tab-btn-dashboard" type="button" onclick="switchTopTab('dashboard')"
@@ -127,9 +130,12 @@
           <span id="active-composite-user-label" class="font-mono font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-md">
             101_admin
           </span>
+          <span class="hidden sm:inline text-[10px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md">
+            Interactive Preview Mode
+          </span>
         </div>
         <div class="flex items-center gap-2">
-          <span id="sync-status-badge" class="text-slate-400">Bridge Ready</span>
+          <span id="sync-status-badge" class="text-emerald-400/90">Synced</span>
           <button type="button" onclick="syncLedgerWithRemote()"
             class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-navy-850 hover:bg-navy-800 text-slate-200 border border-slate-700 cursor-pointer transition-colors">
             ↻ Sync
@@ -155,13 +161,17 @@
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
+            <button id="btn-delete-summary" type="button" onclick="deleteSelectedSummary()"
+              class="hidden px-2.5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
+              Delete (<span id="count-del-summary">0</span>)
+            </button>
             <button type="button" onclick="openIncomeExpenseModal('income')"
               class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
               + New Income/Expense
             </button>
-            <button type="button" onclick="exitFullscreenSection(false)"
-              class="fs-exit-btn hidden px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 cursor-pointer">
-              ↙ Exit
+            <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen" title="Close Fullscreen"
+              class="fs-exit-btn hidden px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 cursor-pointer transition-colors">
+              ✕
             </button>
           </div>
         </div>
@@ -170,6 +180,7 @@
           <table class="w-full text-left border-collapse">
             <thead class="sticky top-0 z-10 bg-navy-850">
               <tr class="border-b border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-400">
+                <th class="py-2.5 pl-3 pr-1 w-7 row-select-cb"></th>
                 <th class="py-2.5 pl-3 pr-2">Period</th>
                 <th class="py-2.5 px-2.5">
                   <button type="button" onclick="openIncomeListModal()"
@@ -228,9 +239,9 @@
                 Delete (<span id="count-del-receivable">0</span>)
               </button>
               <span id="receivable-total-display" class="text-xs sm:text-sm font-bold text-emerald-400">Total Due: ৳ 0.00</span>
-              <button type="button" onclick="exitFullscreenSection(false)"
-                class="fs-exit-btn hidden px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 cursor-pointer">
-                ↙ Exit
+              <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen" title="Close Fullscreen"
+                class="fs-exit-btn hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 cursor-pointer transition-colors">
+                ✕
               </button>
             </div>
           </div>
@@ -267,9 +278,9 @@
                 Delete (<span id="count-del-payable">0</span>)
               </button>
               <span id="payable-total-display" class="text-xs sm:text-sm font-bold text-rose-400">Total Due: ৳ 0.00</span>
-              <button type="button" onclick="exitFullscreenSection(false)"
-                class="fs-exit-btn hidden px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 cursor-pointer">
-                ↙ Exit
+              <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen" title="Close Fullscreen"
+                class="fs-exit-btn hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 cursor-pointer transition-colors">
+                ✕
               </button>
             </div>
           </div>
@@ -315,9 +326,9 @@
               class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/20 transition-all cursor-pointer">
               + New Expense Entry
             </button>
-            <button type="button" onclick="exitFullscreenSection(false)"
-              class="fs-exit-btn hidden px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 cursor-pointer">
-              ↙ Exit
+            <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen" title="Close Fullscreen"
+              class="fs-exit-btn hidden px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 cursor-pointer transition-colors">
+              ✕
             </button>
           </div>
         </div>
@@ -386,6 +397,15 @@
         </div>
       </div>
     </section>
+
+    <!-- Preview Content Correction Helper Bar -->
+    <footer class="bg-navy-900/80 border border-slate-800/80 rounded-2xl p-3 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-2">
+      <span>Previewing <strong class="text-slate-200">dashboard.html</strong> — tell me which labels, columns, or modals you want corrected.</span>
+      <button type="button" onclick="copyPreviewHtml()"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-navy-850 hover:bg-navy-800 text-emerald-400 border border-slate-700 cursor-pointer transition-colors">
+        Copy HTML
+      </button>
+    </footer>
 
   </div>
 
@@ -786,8 +806,719 @@
     })();
   </script>
 
-  <!-- Load Root Proxy & Application Controller -->
-  <script src="./root-proxy.js"></script>
-  <script src="./script.js"></script>
+  <!-- Interactive Preview Controller & Sample Ledger State -->
+  <script>
+    const STORAGE_KEY = 'sigmaphd_preview_ledger_v1';
+    let currentIEModalType = 'income';
+    let ledgerState = null;
+
+    function getDefaultLedgerState() {
+      const today = new Date().toISOString().split('T')[0];
+      const monthPrefix = today.slice(0, 7);
+      return {
+        entries: [
+          { id: 'inc-1', entry_type: 'Income', entry_date: `${monthPrefix}-05`, description: 'Client Retainer Payment', amount: 45000, status: 'Paid' },
+          { id: 'inc-2', entry_type: 'Income', entry_date: `${monthPrefix}-14`, description: 'Consulting & Setup Fee', amount: 18500, status: 'Paid' },
+          { id: 'exp-1', entry_type: 'Expense', entry_date: `${monthPrefix}-10`, description: 'Office Internet & Utility', amount: 4200, status: 'Paid' }
+        ],
+        receivables: [
+          { id: 'rec-1', person_name: 'Nizam Enterprise', amount: 15000, entry_date: `${monthPrefix}-08`, settled_date: '', extra_amount: 0, status: 'Due' },
+          { id: 'rec-2', person_name: 'Dhaka Traders', amount: 9500, entry_date: `${monthPrefix}-03`, settled_date: `${monthPrefix}-12`, extra_amount: 500, status: 'Due Received' }
+        ],
+        payables: [
+          { id: 'pay-1', person_name: 'Apex Supply House', amount: 12000, entry_date: `${monthPrefix}-06`, settled_date: '', extra_amount: 0, status: 'Due' }
+        ],
+        dailyExpenses: [
+          { id: 'dexp-1', date: `${monthPrefix}-18`, description: 'Market & Refreshment', amount: 1850, status: 'Paid' },
+          { id: 'dexp-2', date: `${monthPrefix}-20`, description: 'Local Courier & Transport', amount: 640, status: 'Due' }
+        ],
+        notes: [
+          { id: 'n-1', text: 'Verify Receivable settle date & Extra (৳) sync with loan_records.', time: 'Today' }
+        ]
+      };
+    }
+
+    function loadLedgerState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.entries)) {
+            ledgerState = parsed;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Preview storage read fallback:', err);
+      }
+      ledgerState = getDefaultLedgerState();
+      saveLedgerState();
+    }
+
+    function saveLedgerState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ledgerState));
+      } catch (err) {
+        console.warn('Preview storage write warning:', err);
+      }
+    }
+
+    function formatMoney(num) {
+      return '৳ ' + Number(num || 0).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function showToast(message, variant = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const el = document.createElement('div');
+      const palette = variant === 'error'
+        ? 'bg-rose-600 text-white border-rose-400/40'
+        : variant === 'warn'
+        ? 'bg-amber-400 text-slate-950 border-amber-200/50'
+        : 'bg-emerald-500 text-slate-950 border-emerald-300/50';
+      el.className = `pointer-events-auto px-4 py-2.5 rounded-xl border shadow-2xl text-xs sm:text-sm font-bold transition-all ${palette}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 220);
+      }, 2800);
+    }
+
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function setIEModalType(type) {
+      currentIEModalType = type === 'expense' ? 'expense' : 'income';
+      const btnInc = document.getElementById('btn-type-income');
+      const btnExp = document.getElementById('btn-type-expense');
+      if (!btnInc || !btnExp) return;
+      if (currentIEModalType === 'income') {
+        btnInc.className = 'py-2 rounded-lg text-xs sm:text-sm font-bold bg-emerald-500 text-slate-950 cursor-pointer transition-all';
+        btnExp.className = 'py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white cursor-pointer transition-all';
+      } else {
+        btnExp.className = 'py-2 rounded-lg text-xs sm:text-sm font-bold bg-rose-500 text-white cursor-pointer transition-all';
+        btnInc.className = 'py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white cursor-pointer transition-all';
+      }
+    }
+
+    function openIncomeExpenseModal(type = 'income') {
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('ie-date');
+      if (dateInput && !dateInput.value) dateInput.value = today;
+      setIEModalType(type);
+      openModal('modal-income-expense');
+    }
+
+    function openLoanEntryModal() {
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('loan-date');
+      if (dateInput && !dateInput.value) dateInput.value = today;
+      updateLoanEntryHint();
+      openModal('modal-loan-entry');
+    }
+
+    function updateLoanEntryHint() {
+      const dir = document.getElementById('loan-direction')?.value || 'receivable';
+      const label = document.getElementById('loan-date-label');
+      if (label) {
+        label.textContent = dir === 'payable' ? 'Payable Date' : 'Receivable Date';
+      }
+    }
+
+    function openDailyExpenseModal() {
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('dexp-date');
+      if (dateInput && !dateInput.value) dateInput.value = today;
+      openModal('modal-daily-expense');
+    }
+
+    function openIncomeListModal() {
+      const tbody = document.getElementById('income-list-modal-body');
+      if (!tbody) return;
+      const incomes = ledgerState.entries.filter((e) => String(e.entry_type).toLowerCase() === 'income');
+      if (!incomes.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-400">No income entries found.</td></tr>';
+      } else {
+        tbody.innerHTML = incomes.map((row) => `
+          <tr>
+            <td class="py-2 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-incomes', 'count-del-incomes', '.income-row-cb')" class="income-row-cb accent-emerald-500" value="${row.id}" /></td>
+            <td class="py-2 px-2.5 font-mono text-xs">${row.entry_date}</td>
+            <td class="py-2 px-2.5">${row.description}</td>
+            <td class="py-2 pl-2.5 pr-3 text-right font-bold text-emerald-400">${formatMoney(row.amount)}</td>
+          </tr>
+        `).join('');
+      }
+      updateDeleteCounter('btn-delete-incomes', 'count-del-incomes', '.income-row-cb');
+      openModal('modal-income-list');
+    }
+
+    function updateDeleteCounter(btnId, countId, selector) {
+      const btn = document.getElementById(btnId);
+      const cnt = document.getElementById(countId);
+      const total = document.querySelectorAll(`${selector}:checked`).length;
+      if (cnt) cnt.textContent = String(total);
+      if (btn) btn.classList.toggle('hidden', total === 0);
+    }
+
+    function openReceivableSettleModalById(id) {
+      const item = ledgerState.receivables.find((r) => String(r.id) === String(id));
+      if (!item) return;
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('rec-settle-id').value = item.id;
+      document.getElementById('rec-settle-desc').textContent = item.person_name;
+      document.getElementById('rec-settle-principal').textContent = formatMoney(item.amount);
+      document.getElementById('rec-settle-date').value = item.settled_date || today;
+      document.getElementById('rec-settle-extra').value = String(item.extra_amount || 0);
+      openModal('modal-receivable-settle');
+    }
+
+    function openPayableSettleModalById(id) {
+      const item = ledgerState.payables.find((p) => String(p.id) === String(id));
+      if (!item) return;
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('pay-settle-id').value = item.id;
+      document.getElementById('pay-settle-desc').textContent = item.person_name;
+      document.getElementById('pay-settle-principal').textContent = formatMoney(item.amount);
+      document.getElementById('pay-settle-source').textContent = 'Ledger';
+      document.getElementById('pay-settle-date').value = item.settled_date || today;
+      document.getElementById('pay-settle-extra').value = String(item.extra_amount || 0);
+      openModal('modal-payable-settle');
+    }
+
+    function handleIncomeExpenseSubmit(e) {
+      e.preventDefault();
+      const date = document.getElementById('ie-date').value;
+      const amount = parseFloat(document.getElementById('ie-amount').value) || 0;
+      const description = document.getElementById('ie-description').value.trim();
+      if (!description || amount <= 0) {
+        showToast('Please enter valid amount and description.', 'warn');
+        return;
+      }
+      const entryType = currentIEModalType === 'expense' ? 'Expense' : 'Income';
+      ledgerState.entries.push({
+        id: 'ie-' + Date.now(),
+        entry_type: entryType,
+        entry_date: date,
+        description,
+        amount,
+        status: 'Paid'
+      });
+      saveLedgerState();
+      document.getElementById('form-income-expense').reset();
+      closeModal('modal-income-expense');
+      renderAll();
+      showToast(`${entryType} entry added to preview.`);
+    }
+
+    function handleLoanEntrySubmit(e) {
+      e.preventDefault();
+      const direction = document.getElementById('loan-direction').value;
+      const status = document.getElementById('loan-status').value;
+      const personName = document.getElementById('loan-description').value.trim();
+      const amount = parseFloat(document.getElementById('loan-amount').value) || 0;
+      const entryDate = document.getElementById('loan-date').value;
+      if (!personName || amount <= 0) {
+        showToast('Please enter party name and amount.', 'warn');
+        return;
+      }
+      const record = {
+        id: 'ln-' + Date.now(),
+        person_name: personName,
+        amount,
+        entry_date: entryDate,
+        settled_date: status === 'Paid' ? entryDate : '',
+        extra_amount: 0,
+        status
+      };
+      if (direction === 'payable') {
+        ledgerState.payables.push(record);
+      } else {
+        ledgerState.receivables.push(record);
+      }
+      saveLedgerState();
+      document.getElementById('form-loan-entry').reset();
+      closeModal('modal-loan-entry');
+      renderAll();
+      showToast(`${direction === 'payable' ? 'Payable' : 'Receivable'} record added.`);
+    }
+
+    function handleReceivableSettleSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('rec-settle-id').value;
+      const settleDate = document.getElementById('rec-settle-date').value;
+      const extra = parseFloat(document.getElementById('rec-settle-extra').value) || 0;
+      const item = ledgerState.receivables.find((r) => String(r.id) === String(id));
+      if (!item) return;
+      item.settled_date = settleDate;
+      item.extra_amount = extra;
+      item.status = 'Due Received';
+      saveLedgerState();
+      closeModal('modal-receivable-settle');
+      renderAll();
+      showToast('Receivable settled & Received Date / Extra synced.');
+    }
+
+    function handlePayableSettleSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('pay-settle-id').value;
+      const settleDate = document.getElementById('pay-settle-date').value;
+      const extra = parseFloat(document.getElementById('pay-settle-extra').value) || 0;
+      const item = ledgerState.payables.find((p) => String(p.id) === String(id));
+      if (!item) return;
+      item.settled_date = settleDate;
+      item.extra_amount = extra;
+      item.status = 'Paid';
+      saveLedgerState();
+      closeModal('modal-payable-settle');
+      renderAll();
+      showToast('Payable settled & Paid Date / Extra synced.');
+    }
+
+    function handleDailyExpenseSubmit(e) {
+      e.preventDefault();
+      const date = document.getElementById('dexp-date').value;
+      const amount = parseFloat(document.getElementById('dexp-amount').value) || 0;
+      const description = document.getElementById('dexp-description').value.trim();
+      const status = document.getElementById('dexp-status').value;
+      if (!description || amount <= 0) {
+        showToast('Please enter valid expense details.', 'warn');
+        return;
+      }
+      ledgerState.dailyExpenses.push({
+        id: 'dexp-' + Date.now(),
+        date,
+        description,
+        amount,
+        status
+      });
+      saveLedgerState();
+      document.getElementById('form-daily-expense').reset();
+      closeModal('modal-daily-expense');
+      renderAll();
+      showToast('Daily expense saved & synced.');
+    }
+
+    function toggleMarketStatus(id) {
+      const item = ledgerState.dailyExpenses.find((m) => String(m.id) === String(id));
+      if (!item) return;
+      item.status = item.status === 'Paid' ? 'Due' : 'Paid';
+      saveLedgerState();
+      renderAll();
+      showToast(`Expense marked as ${item.status}.`);
+    }
+
+    function deleteSelectedIncomes() {
+      const ids = Array.from(document.querySelectorAll('.income-row-cb:checked')).map((cb) => cb.value);
+      if (!ids.length) return;
+      ledgerState.entries = ledgerState.entries.filter((e) => !ids.includes(String(e.id)));
+      saveLedgerState();
+      renderAll();
+      openIncomeListModal();
+      showToast('Selected income rows removed.');
+    }
+
+    function deleteSelectedLoans(category) {
+      const ids = Array.from(document.querySelectorAll(`.loan-row-cb[data-cat="${category}"]:checked`)).map((cb) => cb.value);
+      if (!ids.length) return;
+      if (category === 'payable') {
+        ledgerState.payables = ledgerState.payables.filter((p) => !ids.includes(String(p.id)));
+      } else {
+        ledgerState.receivables = ledgerState.receivables.filter((r) => !ids.includes(String(r.id)));
+      }
+      saveLedgerState();
+      renderAll();
+      showToast(`Selected ${category} rows removed.`);
+    }
+
+    function deleteSelectedExpenses() {
+      const ids = Array.from(document.querySelectorAll('.expense-row-cb:checked')).map((cb) => cb.value);
+      if (!ids.length) return;
+      ledgerState.dailyExpenses = ledgerState.dailyExpenses.filter((m) => !ids.includes(String(m.id)));
+      saveLedgerState();
+      renderAll();
+      showToast('Selected expense rows removed.');
+    }
+
+    function renderMonthlySummary() {
+      const tbody = document.getElementById('monthly-summary-body');
+      if (!tbody) return;
+      const monthMap = {};
+      let grandInc = 0;
+      let grandExp = 0;
+
+      ledgerState.entries.forEach((item) => {
+        const key = String(item.entry_date || '2026-11').slice(0, 7);
+        if (!monthMap[key]) monthMap[key] = { inc: 0, exp: 0 };
+        const amt = Number(item.amount) || 0;
+        if (String(item.entry_type).toLowerCase() === 'income') {
+          monthMap[key].inc += amt;
+          grandInc += amt;
+        } else if (String(item.status).toLowerCase() === 'paid') {
+          monthMap[key].exp += amt;
+          grandExp += amt;
+        }
+      });
+
+      ledgerState.dailyExpenses.forEach((d) => {
+        if (String(d.status).toLowerCase() === 'paid') {
+          const key = String(d.date || '2026-11').slice(0, 7);
+          if (!monthMap[key]) monthMap[key] = { inc: 0, exp: 0 };
+          const amt = Number(d.amount) || 0;
+          monthMap[key].exp += amt;
+          grandExp += amt;
+        }
+      });
+
+      const periods = Object.keys(monthMap).sort().reverse();
+      if (!periods.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400 text-xs">No summary records found yet.</td></tr>';
+      } else {
+        tbody.innerHTML = periods.map((p) => {
+          const surplus = monthMap[p].inc - monthMap[p].exp;
+          return `
+            <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+              <td class="py-2.5 pl-3 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-summary', 'count-del-summary', '.summary-row-cb')" class="summary-row-cb accent-rose-500" value="${p}" /></td>
+              <td class="py-2.5 pl-3 pr-2 font-mono text-xs sm:text-sm">${p}</td>
+              <td class="py-2.5 px-2.5 font-semibold text-emerald-400">${formatMoney(monthMap[p].inc)}</td>
+              <td class="py-2.5 px-2.5 font-semibold text-rose-400">${formatMoney(monthMap[p].exp)}</td>
+              <td class="py-2.5 px-3 text-right font-bold ${surplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(surplus)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+      updateDeleteCounter('btn-delete-summary', 'count-del-summary', '.summary-row-cb');
+      const memoInc = document.getElementById('memo-total-income');
+      const memoExp = document.getElementById('memo-total-expense');
+      const memoSurplus = document.getElementById('memo-net-surplus');
+      if (memoInc) memoInc.textContent = formatMoney(grandInc);
+      if (memoExp) memoExp.textContent = formatMoney(grandExp);
+      if (memoSurplus) memoSurplus.textContent = formatMoney(grandInc - grandExp);
+    }
+
+    function renderLoans() {
+      const recBody = document.getElementById('receivable-list-body');
+      const payBody = document.getElementById('payable-list-body');
+
+      let recDueTotal = 0;
+      let recDueCount = 0;
+      if (recBody) {
+        if (!ledgerState.receivables.length) {
+          recBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-400 text-xs">No Receivable records found.</td></tr>';
+        } else {
+          recBody.innerHTML = ledgerState.receivables.map((r) => {
+            const isSettled = Boolean(r.settled_date) || r.status === 'Due Received' || r.status === 'Paid';
+            if (!isSettled) {
+              recDueTotal += Number(r.amount) || 0;
+              recDueCount += 1;
+            }
+            const settledText = r.settled_date || '-';
+            const extraVal = Number(r.extra_amount) || 0;
+            return `
+              <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+                <td class="py-2 pl-2.5 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-receivable', 'count-del-receivable', '.loan-row-cb[data-cat=\\'receivable\\']')" class="loan-row-cb accent-rose-500" data-cat="receivable" value="${r.id}" /></td>
+                <td class="py-2 px-2 font-semibold">${r.person_name}</td>
+                <td class="py-2 px-2 font-mono font-bold text-emerald-400">${formatMoney(r.amount)}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${r.entry_date}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${settledText !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${settledText}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${extraVal > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extraVal)}</td>
+                <td class="py-2 pl-2 pr-2.5 text-right">
+                  ${!isSettled
+                    ? `<button type="button" onclick="openReceivableSettleModalById('${r.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">Receive</button>`
+                    : `<span class="text-emerald-400 font-semibold text-[11px]">${r.status || 'Due Received'}</span>`}
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+      document.getElementById('receivable-total-display').textContent = 'Total Due: ' + formatMoney(recDueTotal);
+      document.getElementById('receivable-due-count-badge').textContent = `${recDueCount} Due`;
+
+      let payDueTotal = 0;
+      let payDueCount = 0;
+      if (payBody) {
+        if (!ledgerState.payables.length) {
+          payBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-400 text-xs">No Payable records found.</td></tr>';
+        } else {
+          payBody.innerHTML = ledgerState.payables.map((p) => {
+            const isSettled = Boolean(p.settled_date) || p.status === 'Paid';
+            if (!isSettled) {
+              payDueTotal += Number(p.amount) || 0;
+              payDueCount += 1;
+            }
+            const settledText = p.settled_date || '-';
+            const extraVal = Number(p.extra_amount) || 0;
+            return `
+              <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+                <td class="py-2 pl-2.5 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-payable', 'count-del-payable', '.loan-row-cb[data-cat=\\'payable\\']')" class="loan-row-cb accent-rose-500" data-cat="payable" value="${p.id}" /></td>
+                <td class="py-2 px-2 font-semibold">${p.person_name}</td>
+                <td class="py-2 px-2 font-mono font-bold text-rose-400">${formatMoney(p.amount)}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${p.entry_date}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${settledText !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${settledText}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${extraVal > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extraVal)}</td>
+                <td class="py-2 pl-2 pr-2.5 text-right">
+                  ${!isSettled
+                    ? `<button type="button" onclick="openPayableSettleModalById('${p.id}')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">Pay</button>`
+                    : `<span class="text-emerald-400 font-semibold text-[11px]">${p.status || 'Paid'}</span>`}
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+      document.getElementById('payable-total-display').textContent = 'Total Due: ' + formatMoney(payDueTotal);
+      document.getElementById('payable-due-count-badge').textContent = `${payDueCount} Due`;
+    }
+
+    function renderDailyExpenses() {
+      const tbody = document.getElementById('daily-expenses-body');
+      if (!tbody) return;
+      if (!ledgerState.dailyExpenses.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400 text-xs">No daily expenses recorded.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = ledgerState.dailyExpenses.map((m) => {
+        const isPaid = String(m.status).toLowerCase() === 'paid';
+        return `
+          <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+            <td class="py-2.5 pl-3 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb')" class="expense-row-cb accent-rose-500" value="${m.id}" /></td>
+            <td class="py-2.5 px-2.5 font-mono text-xs text-slate-400">${m.date}</td>
+            <td class="py-2.5 px-2.5 font-semibold">${m.description}</td>
+            <td class="py-2.5 px-2.5 font-mono text-rose-400 font-bold">${formatMoney(m.amount)}</td>
+            <td class="py-2.5 pl-2.5 pr-3 text-right">
+              <button type="button" onclick="toggleMarketStatus('${m.id}')" class="${isPaid ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2.5 py-0.5 rounded text-[11px] font-bold cursor-pointer">
+                ${m.status}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderNotes() {
+      const list = document.getElementById('chat-messages-list');
+      if (!list) return;
+      list.innerHTML = ledgerState.notes.map((n) => `
+        <div class="bg-navy-950/80 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2 text-xs sm:text-sm">
+          <span class="text-slate-200">${n.text}</span>
+          <span class="text-[11px] text-slate-500 shrink-0">${n.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-note-input');
+      const text = input.value.trim();
+      if (!text) return;
+      ledgerState.notes.push({
+        id: 'n-' + Date.now(),
+        text,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      saveLedgerState();
+      input.value = '';
+      renderNotes();
+      showToast('Note saved.');
+    }
+
+    function switchTopTab(tab) {
+      const views = {
+        dashboard: document.getElementById('view-dashboard'),
+        chat: document.getElementById('view-chat'),
+        memo: document.getElementById('view-memo')
+      };
+      const buttons = {
+        dashboard: document.getElementById('tab-btn-dashboard'),
+        chat: document.getElementById('tab-btn-chat'),
+        memo: document.getElementById('tab-btn-memo')
+      };
+      Object.keys(views).forEach((key) => {
+        if (views[key]) {
+          views[key].classList.toggle('hidden', key !== tab);
+        }
+        if (buttons[key]) {
+          buttons[key].className = key === tab
+            ? 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 text-slate-950 shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5'
+            : 'py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold bg-navy-850 hover:bg-navy-800 text-slate-200 border border-slate-800/70 cursor-pointer transition-all flex items-center justify-center gap-1.5';
+        }
+      });
+    }
+
+    function scrollToSection(sectionId) {
+      switchTopTab('dashboard');
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function syncLedgerWithRemote() {
+      const badge = document.getElementById('sync-status-badge');
+      if (badge) badge.textContent = 'Syncing...';
+      renderAll();
+      setTimeout(() => {
+        if (badge) badge.textContent = 'Synced';
+        showToast('Preview ledger synchronized.');
+      }, 250);
+    }
+
+    function resetSampleData() {
+      ledgerState = getDefaultLedgerState();
+      saveLedgerState();
+      renderAll();
+      showToast('Sample data restored.', 'warn');
+    }
+
+    function exitFullscreenSection() {
+      switchTopTab('dashboard');
+      document.querySelectorAll('.section-fullscreen').forEach((sec) => {
+        sec.classList.remove('section-fullscreen');
+        sec.querySelectorAll('.fs-exit-btn').forEach((btn) => btn.classList.add('hidden'));
+        const scrollRegion = sec.querySelector('.scroll-region');
+        if (scrollRegion) {
+          scrollRegion.classList.remove('flex-1', 'max-h-none');
+          scrollRegion.classList.add('max-h-[168px]');
+        }
+      });
+      if (typeof notifyParentFrameHeight === 'function') {
+        notifyParentFrameHeight();
+      }
+    }
+
+    function enterFullscreenSection(sectionEl) {
+      if (!sectionEl) return;
+      switchTopTab('dashboard');
+      exitFullscreenSection();
+      sectionEl.classList.add('section-fullscreen');
+      sectionEl.querySelectorAll('.fs-exit-btn').forEach((btn) => btn.classList.remove('hidden'));
+      const scrollRegion = sectionEl.querySelector('.scroll-region');
+      if (scrollRegion) {
+        scrollRegion.classList.remove('max-h-[168px]', 'max-h-[164px]');
+        scrollRegion.classList.add('flex-1', 'max-h-none');
+      }
+    }
+
+    function bindExpandableDoubleClick() {
+      document.querySelectorAll('[data-expandable-section]').forEach((sec) => {
+        if (sec.dataset.dblclickBound === '1') return;
+        sec.dataset.dblclickBound = '1';
+        sec.addEventListener('dblclick', (e) => {
+          if (e.target.closest('button, input, select, textarea, a, label')) return;
+          if (sec.classList.contains('section-fullscreen')) {
+            exitFullscreenSection();
+          } else {
+            enterFullscreenSection(sec);
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-expandable-section] .scroll-region, [data-expandable-section] tbody').forEach((dataEl) => {
+        if (dataEl.dataset.dataDblclickBound === '1') return;
+        dataEl.dataset.dataDblclickBound = '1';
+        dataEl.addEventListener('dblclick', (e) => {
+          if (e.target.closest('button, input, select, textarea, a, label')) return;
+          e.stopPropagation();
+          const sec = dataEl.closest('[data-expandable-section]');
+          if (!sec) return;
+          if (sec.classList.contains('section-fullscreen')) {
+            exitFullscreenSection();
+          } else {
+            enterFullscreenSection(sec);
+          }
+        });
+      });
+    }
+
+    async function deleteSelectedSummary() {
+      const periods = Array.from(document.querySelectorAll('.summary-row-cb:checked')).map((cb) => cb.value);
+      if (!periods.length) return;
+      ledgerState.entries = ledgerState.entries.filter((item) => !periods.includes(String(item.entry_date || '').slice(0, 7)));
+      ledgerState.dailyExpenses = ledgerState.dailyExpenses.filter((d) => !periods.includes(String(d.date || '').slice(0, 7)));
+      saveLedgerState();
+      if (typeof window.callBackendApi === 'function') {
+        try {
+          await window.callBackendApi('delete_monthly_summary', { periods });
+        } catch (err) {
+          console.warn('Backend summary delete sync warning:', err);
+        }
+      }
+      renderAll();
+      showToast('Selected period entries deleted.');
+    }
+
+    const _origDeleteSelectedLoans = deleteSelectedLoans;
+    deleteSelectedLoans = async function (category) {
+      const ids = Array.from(document.querySelectorAll(`.loan-row-cb[data-cat="${category}"]:checked`)).map((cb) => cb.value);
+      if (!ids.length) return;
+      _origDeleteSelectedLoans(category);
+      if (typeof window.callBackendApi === 'function') {
+        try {
+          await window.callBackendApi('delete_loan_entries', { category, ids });
+        } catch (err) {
+          console.warn('Backend loan delete sync warning:', err);
+        }
+      }
+    };
+
+    const _origDeleteSelectedExpenses = deleteSelectedExpenses;
+    deleteSelectedExpenses = async function () {
+      const ids = Array.from(document.querySelectorAll('.expense-row-cb:checked')).map((cb) => cb.value);
+      if (!ids.length) return;
+      _origDeleteSelectedExpenses();
+      if (typeof window.callBackendApi === 'function') {
+        try {
+          await window.callBackendApi('delete_market_expenses', { ids });
+        } catch (err) {
+          console.warn('Backend expense delete sync warning:', err);
+        }
+      }
+    };
+
+    function renderAll() {
+      renderMonthlySummary();
+      renderLoans();
+      renderDailyExpenses();
+      renderNotes();
+      bindExpandableDoubleClick();
+    }
+
+    function copyPreviewHtml() {
+      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const ta = document.createElement('textarea');
+      ta.value = htmlContent;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('dashboard.html copied to clipboard.');
+      } catch (err) {
+        showToast('Copy failed in this environment.', 'warn');
+      } finally {
+        document.body.removeChild(ta);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLedgerState();
+      renderAll();
+    });
+  </script>
 </body>
 </html>
