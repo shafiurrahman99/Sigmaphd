@@ -29,6 +29,36 @@ let universalMessages = [];
 let privateMessagesMap = {};
 
 /* =========================================================================
+ * COMPOSITE USER ID RESOLVER (All Modals & API Calls)
+ * ========================================================================= */
+function resolveCompositeUserId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromUrl = (urlParams.get('composite_user_id') || '').trim();
+    const fromWindow = String(window.ACTIVE_COMPOSITE_USER_ID || '').trim();
+    const fromState = String(currentCompositeUserId || '').trim();
+    const fromStorage = String(localStorage.getItem('composite_user_id') || '').trim();
+    const fromLabel = String(document.getElementById('active-composite-user-label')?.textContent || '').trim();
+    const fromDisplay = String(document.getElementById('displayCompositeId')?.textContent || '').trim();
+
+    const cleanLabel = (fromLabel && fromLabel !== '--' && fromLabel !== 'N/A') ? fromLabel : '';
+    const cleanDisplay = (fromDisplay && fromDisplay !== '--' && fromDisplay !== 'N/A') ? fromDisplay : '';
+
+    const resolved = fromState || fromWindow || fromUrl || fromStorage || cleanLabel || cleanDisplay || '';
+    if (resolved) {
+        currentCompositeUserId = resolved;
+        window.ACTIVE_COMPOSITE_USER_ID = resolved;
+        try {
+            localStorage.setItem('composite_user_id', resolved);
+        } catch (_) {}
+        const lbl = document.getElementById('active-composite-user-label');
+        if (lbl && lbl.textContent.trim() !== resolved) lbl.textContent = resolved;
+        const disp = document.getElementById('displayCompositeId');
+        if (disp && disp.textContent.trim() !== resolved) disp.textContent = resolved;
+    }
+    return resolved;
+}
+
+/* =========================================================================
  * DASHBOARD ENTRY MODALS (Matches dashboard.html Modal IDs & Handlers)
  * ========================================================================= */
 function setIEModalType(type = 'income') {
@@ -62,6 +92,7 @@ function updateLoanEntryHint() {
 }
 
 function openModal(modalId) {
+    resolveCompositeUserId();
     const modal = document.getElementById(modalId);
     if (!modal) return;
     modal.classList.remove('hidden');
@@ -130,12 +161,233 @@ function openIncomeListModal() {
     openModal('modal-income-list');
 }
 
+/* =========================================================================
+ * ALL DASHBOARD FORM SUBMIT & DELETE HANDLERS (With Composite User ID)
+ * ========================================================================= */
+async function handleIncomeExpenseSubmit(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const compId = resolveCompositeUserId();
+    if (!compId) {
+        showToast('Composite User ID পাওয়া যায়নি! আগে লগইন বা User Scope সেট করুন।', 'error');
+        return;
+    }
+
+    const type = window.__currentIEModalType === 'expense' ? 'Expense' : 'Income';
+    const date = document.getElementById('ie-date')?.value || new Date().toISOString().split('T')[0];
+    const amount = parseFloat(document.getElementById('ie-amount')?.value) || 0;
+    const desc = (document.getElementById('ie-description')?.value || '').trim();
+
+    if (!desc || amount <= 0) {
+        showToast('সঠিক Amount এবং Description দিন।', 'warn');
+        return;
+    }
+
+    const res = await callBackendApi('save_income_expense', {
+        composite_user_id: compId,
+        type,
+        entry_type: type,
+        date,
+        entry_date: date,
+        desc,
+        description: desc,
+        amount,
+        status: 'Paid'
+    });
+
+    if (res && res.success) {
+        document.getElementById('form-income-expense')?.reset();
+        closeModal('modal-income-expense');
+        await loadAllDatabaseRecords();
+        showToast(`${type} এন্ট্রি ডাটাবেজে সংরক্ষিত হয়েছে!`);
+    } else {
+        showToast((res && res.message) || 'এন্ট্রি সংরক্ষণ ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
+async function handleLoanEntrySubmit(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const compId = resolveCompositeUserId();
+    if (!compId) {
+        showToast('Composite User ID পাওয়া যায়নি! আগে লগইন বা User Scope সেট করুন।', 'error');
+        return;
+    }
+
+    const direction = (document.getElementById('loan-direction')?.value || 'receivable').toLowerCase();
+    const status = document.getElementById('loan-status')?.value || 'Due';
+    const personName = (document.getElementById('loan-description')?.value || '').trim();
+    const amount = parseFloat(document.getElementById('loan-amount')?.value) || 0;
+    const entryDate = document.getElementById('loan-date')?.value || new Date().toISOString().split('T')[0];
+
+    if (!personName || amount <= 0) {
+        showToast('Description এবং সঠিক Amount দিন।', 'warn');
+        return;
+    }
+
+    const res = await callBackendApi('save_loan', {
+        composite_user_id: compId,
+        category: direction,
+        loan_type: direction,
+        direction,
+        status,
+        person_name: personName,
+        description: personName,
+        amount,
+        entry_date: entryDate,
+        date: entryDate
+    });
+
+    if (res && res.success) {
+        document.getElementById('form-loan-entry')?.reset();
+        closeModal('modal-loan-entry');
+        await loadAllDatabaseRecords();
+        showToast('লোন রেকর্ড ডাটাবেজে সংরক্ষিত হয়েছে!');
+    } else {
+        showToast((res && res.message) || 'লোন এন্ট্রি সংরক্ষণ ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
+async function handleDailyExpenseSubmit(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const compId = resolveCompositeUserId();
+    if (!compId) {
+        showToast('Composite User ID পাওয়া যায়নি! আগে লগইন বা User Scope সেট করুন।', 'error');
+        return;
+    }
+
+    const date = document.getElementById('dexp-date')?.value || new Date().toISOString().split('T')[0];
+    const amount = parseFloat(document.getElementById('dexp-amount')?.value) || 0;
+    const desc = (document.getElementById('dexp-description')?.value || '').trim();
+    const status = document.getElementById('dexp-status')?.value || 'Paid';
+
+    if (!desc || amount <= 0) {
+        showToast('সঠিক Amount এবং Description দিন।', 'warn');
+        return;
+    }
+
+    const res = await callBackendApi('save_market_expense', {
+        composite_user_id: compId,
+        expense_date: date,
+        date,
+        description: desc,
+        desc,
+        amount,
+        status
+    });
+
+    if (res && res.success) {
+        document.getElementById('form-daily-expense')?.reset();
+        closeModal('modal-daily-expense');
+        await loadAllDatabaseRecords();
+        showToast('দৈনিক খরচ ডাটাবেজে সংরক্ষিত হয়েছে!');
+    } else {
+        showToast((res && res.message) || 'খরচ সংরক্ষণ ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
+async function handleReceivableSettleSubmit(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const compId = resolveCompositeUserId();
+    if (!compId) {
+        showToast('Composite User ID পাওয়া যায়নি!', 'error');
+        return;
+    }
+
+    const id = document.getElementById('rec-settle-id')?.value || '';
+    const settleDate = document.getElementById('rec-settle-date')?.value || new Date().toISOString().split('T')[0];
+    const extraAmount = parseFloat(document.getElementById('rec-settle-extra')?.value) || 0;
+
+    const res = await callBackendApi('settle_loan', {
+        composite_user_id: compId,
+        id,
+        category: 'receivable',
+        settle_date: settleDate,
+        extra_amount: extraAmount
+    });
+
+    if (res && res.success) {
+        closeModal('modal-receivable-settle');
+        await loadAllDatabaseRecords();
+        showToast('Receivable সেটেল সম্পন্ন হয়েছে!');
+    } else {
+        showToast((res && res.message) || 'সেটেলমেন্ট ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
+async function handlePayableSettleSubmit(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const compId = resolveCompositeUserId();
+    if (!compId) {
+        showToast('Composite User ID পাওয়া যায়নি!', 'error');
+        return;
+    }
+
+    const id = document.getElementById('pay-settle-id')?.value || '';
+    const settleDate = document.getElementById('pay-settle-date')?.value || new Date().toISOString().split('T')[0];
+    const extraAmount = parseFloat(document.getElementById('pay-settle-extra')?.value) || 0;
+
+    const res = await callBackendApi('settle_loan', {
+        composite_user_id: compId,
+        id,
+        category: 'payable',
+        settle_date: settleDate,
+        extra_amount: extraAmount
+    });
+
+    if (res && res.success) {
+        closeModal('modal-payable-settle');
+        await loadAllDatabaseRecords();
+        showToast('Payable সেটেল সম্পন্ন হয়েছে!');
+    } else {
+        showToast((res && res.message) || 'সেটেলমেন্ট ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
+async function deleteSelectedIncomes() {
+    const compId = resolveCompositeUserId();
+    const ids = Array.from(document.querySelectorAll('.income-row-cb:checked')).map((cb) => cb.value).filter(Boolean);
+    if (!ids.length) return;
+    const res = await callBackendApi('delete_income_entries', { composite_user_id: compId, ids });
+    if (res && res.success) {
+        await loadAllDatabaseRecords();
+        openIncomeListModal();
+        showToast('নির্বাচিত Income এন্ট্রি মুছে ফেলা হয়েছে।');
+    } else {
+        showToast((res && res.message) || 'ডিলিট ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
+async function deleteSelectedLoans(category) {
+    const compId = resolveCompositeUserId();
+    const ids = Array.from(document.querySelectorAll(`.loan-row-cb[data-cat="${category}"]:checked`)).map((cb) => cb.value).filter(Boolean);
+    if (!ids.length) return;
+    const res = await callBackendApi('delete_loan_entries', { composite_user_id: compId, category, ids });
+    if (res && res.success) {
+        await loadAllDatabaseRecords();
+        showToast('নির্বাচিত Loan এন্ট্রি মুছে ফেলা হয়েছে।');
+    } else {
+        showToast((res && res.message) || 'ডিলিট ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
+async function deleteSelectedExpenses() {
+    const compId = resolveCompositeUserId();
+    const ids = Array.from(document.querySelectorAll('.expense-row-cb:checked')).map((cb) => cb.value).filter(Boolean);
+    if (!ids.length) return;
+    const res = await callBackendApi('delete_market_expenses', { composite_user_id: compId, ids });
+    if (res && res.success) {
+        await loadAllDatabaseRecords();
+        showToast('নির্বাচিত Expense এন্ট্রি মুছে ফেলা হয়েছে।');
+    } else {
+        showToast((res && res.message) || 'ডিলিট ব্যর্থ হয়েছে।', 'error');
+    }
+}
+
 function showToast(text, variant = 'success') {
     if (window.self !== window.top && window.parent) {
         window.parent.postMessage({
             channel: BRIDGE_CHANNEL,
             type: 'TOAST',
-            compositeUserId: currentCompositeUserId || window.ACTIVE_COMPOSITE_USER_ID || '',
+            compositeUserId: resolveCompositeUserId(),
             message: text,
             variant
         }, '*');
@@ -189,6 +441,9 @@ function syncCompositeIdToIframe(compId) {
 
     currentCompositeUserId = cleanId;
     window.ACTIVE_COMPOSITE_USER_ID = cleanId;
+    try {
+        localStorage.setItem('composite_user_id', cleanId);
+    } catch (_) {}
 
     const compDisplay = document.getElementById('displayCompositeId');
     if (compDisplay) compDisplay.innerText = cleanId;
@@ -218,7 +473,7 @@ function notifyParentFrameHeight() {
         window.parent.postMessage({
             channel: BRIDGE_CHANNEL,
             type: 'FRAME_HEIGHT',
-            compositeUserId: currentCompositeUserId || window.ACTIVE_COMPOSITE_USER_ID || '',
+            compositeUserId: resolveCompositeUserId(),
             height
         }, '*');
     }
@@ -231,13 +486,13 @@ function isLedgerTable(val) {
 // -------------------------------------------------------------------------
 // DIRECT BACKEND & DATABASE COMMUNICATION (PROXY / API)
 // -------------------------------------------------------------------------
-async function callBackendApi(action, payload) {
+async function callBackendApi(action, payload = {}) {
     try {
-        const activeCompId =
-            currentCompositeUserId ||
-            localStorage.getItem('composite_user_id') ||
-            window.ACTIVE_COMPOSITE_USER_ID ||
-            '';
+        const activeCompId = resolveCompositeUserId() || (payload && payload.composite_user_id) || '';
+        const mergedPayload = {
+            ...(payload || {}),
+            ...(activeCompId ? { composite_user_id: activeCompId } : {})
+        };
 
         const response = await fetch(PROXY_URL, {
             method: 'POST',
@@ -246,7 +501,7 @@ async function callBackendApi(action, payload) {
                 action,
                 company_id: GLOBAL_COMPANY_ID,
                 composite_user_id: activeCompId,
-                payload
+                payload: mergedPayload
             })
         });
         const result = await response.json();
@@ -351,7 +606,8 @@ function handleLogOut() {
 // LOAD ALL TABLES DATA FROM DATABASE
 // -------------------------------------------------------------------------
 async function loadAllDatabaseRecords() {
-    const res = await callBackendApi('fetch_dashboard_data', {});
+    const activeCompId = resolveCompositeUserId();
+    const res = await callBackendApi('fetch_dashboard_data', { composite_user_id: activeCompId });
     if (res && res.success) {
         incomeExpenseRecords = res.income_expenses || [];
         loanGivenRecords = res.loans_receivable || [];
@@ -360,7 +616,7 @@ async function loadAllDatabaseRecords() {
         accountsMasterRecords = res.accounts || [];
         universalMessages = res.public_chats || [];
 
-        const me = accountsMasterRecords.find(a => a.composite_user_id === currentCompositeUserId);
+        const me = accountsMasterRecords.find(a => a.composite_user_id === activeCompId);
         if (me) {
             if (document.getElementById('walletBalanceText')) {
                 document.getElementById('walletBalanceText').innerText = formatMoney(me.wallet_balance || 0);
@@ -594,42 +850,14 @@ function openIncomeModal() { openIncomeExpenseModal('income'); }
 function closeIncomeModal() { closeModal('modal-income-expense'); }
 
 async function handleIncomeSubmit(e) {
-    e.preventDefault();
-    const type =
-        document.getElementById('incomeEntryType')?.value ||
-        (window.__currentIEModalType === 'expense' ? 'Expense' : 'Income');
-    const date = document.getElementById('ie-date')?.value || document.getElementById('incomeDate')?.value;
-    const desc = (document.getElementById('ie-description')?.value || document.getElementById('incomeDesc')?.value || '').trim();
-    const amount = parseFloat(document.getElementById('ie-amount')?.value ?? document.getElementById('incomeAmount')?.value) || 0;
-
-    const res = await callBackendApi('save_income_expense', { type, date, desc, amount });
-    if (res.success) {
-        await loadAllDatabaseRecords();
-        closeIncomeModal();
-        showToast(`${type} এন্ট্রি সফলভাবে সেভ হয়েছে!`);
-    } else {
-        showToast(res.message || 'সেভ করতে সমস্যা হয়েছে।', 'error');
-    }
+    return handleIncomeExpenseSubmit(e);
 }
 
 function openLoanModal() { openLoanEntryModal(); }
 function closeLoanModal() { closeModal('modal-loan-entry'); }
 
 async function handleLoanSubmit(e) {
-    e.preventDefault();
-    const type = document.getElementById('loan-direction')?.value || document.getElementById('loanType')?.value || 'receivable';
-    const date = document.getElementById('loan-date')?.value || document.getElementById('loanDate')?.value;
-    const person = (document.getElementById('loan-description')?.value || document.getElementById('loanPersonName')?.value || '').trim();
-    const amount = parseFloat(document.getElementById('loan-amount')?.value ?? document.getElementById('loanAmount')?.value) || 0;
-
-    const res = await callBackendApi('save_loan', { category: type, date, person_name: person, amount });
-    if (res.success) {
-        await loadAllDatabaseRecords();
-        closeLoanModal();
-        showToast('লোন রেকর্ড সংরক্ষিত হয়েছে।');
-    } else {
-        showToast(res.message || 'সংরক্ষণ ব্যর্থ হয়েছে।', 'error');
-    }
+    return handleLoanEntrySubmit(e);
 }
 
 function renderLoanTables() {
@@ -700,11 +928,12 @@ function closeSettleModal() { closeModal('settleLoanModal'); }
 
 async function handleSettleLoanSubmit(e) {
     e.preventDefault();
+    const compId = resolveCompositeUserId();
     const id = document.getElementById('settleLoanId').value;
     const date = document.getElementById('settleDate').value;
     const extra = parseFloat(document.getElementById('settleExtraAmount').value) || 0;
 
-    const res = await callBackendApi('settle_loan', { id, settle_date: date, extra_amount: extra });
+    const res = await callBackendApi('settle_loan', { composite_user_id: compId, id, settle_date: date, extra_amount: extra });
     if (res.success) {
         await loadAllDatabaseRecords();
         closeSettleModal();
@@ -718,24 +947,12 @@ function openMarketModal() { openDailyExpenseModal(); }
 function closeMarketModal() { closeModal('modal-daily-expense'); }
 
 async function handleMarketSubmit(e) {
-    e.preventDefault();
-    const date = document.getElementById('dexp-date')?.value || document.getElementById('marketDate')?.value;
-    const desc = (document.getElementById('dexp-description')?.value || document.getElementById('marketDesc')?.value || '').trim();
-    const amount = parseFloat(document.getElementById('dexp-amount')?.value ?? document.getElementById('marketAmount')?.value) || 0;
-    const status = document.getElementById('dexp-status')?.value || document.getElementById('marketStatus')?.value || 'Paid';
-
-    const res = await callBackendApi('save_market_expense', { expense_date: date, description: desc, amount, status });
-    if (res.success) {
-        await loadAllDatabaseRecords();
-        closeMarketModal();
-        showToast('দৈনিক খরচ যুক্ত হয়েছে!');
-    } else {
-        showToast(res.message || 'খরচ যুক্ত করতে সমস্যা হয়েছে।', 'error');
-    }
+    return handleDailyExpenseSubmit(e);
 }
 
 async function toggleMarketStatus(id) {
-    const res = await callBackendApi('toggle_market_expense_status', { id });
+    const compId = resolveCompositeUserId();
+    const res = await callBackendApi('toggle_market_expense_status', { composite_user_id: compId, id });
     if (res.success) {
         await loadAllDatabaseRecords();
     }
@@ -791,10 +1008,11 @@ function calculateLotPrice() {
 }
 
 async function handleCashPayLot() {
+    const compId = resolveCompositeUserId();
     const lotNo = document.getElementById('generatedLotNumber').innerText;
     const qty = parseInt(document.getElementById('lotQuantitySelect').value) || 10;
 
-    const res = await callBackendApi('buy_lot', { lot_id: lotNo, quantity: qty });
+    const res = await callBackendApi('buy_lot', { composite_user_id: compId, lot_id: lotNo, quantity: qty });
     if (res.success) {
         await loadAllDatabaseRecords();
         closeBuyLotModal();
@@ -805,11 +1023,12 @@ async function handleCashPayLot() {
 }
 
 function renderLotInventory() {
-    const inStockItems = accountsMasterRecords.filter(a => a.owner_id === currentCompositeUserId && a.status === 'In_Stock');
+    const compId = resolveCompositeUserId();
+    const inStockItems = accountsMasterRecords.filter(a => a.owner_id === compId && a.status === 'In_Stock');
     if (document.getElementById('availableLotIdsCount')) {
         document.getElementById('availableLotIdsCount').innerText = inStockItems.length;
     }
-    const activeSubs = accountsMasterRecords.filter(a => a.upline_id === currentCompositeUserId && a.status !== 'In_Stock');
+    const activeSubs = accountsMasterRecords.filter(a => a.upline_id === compId && a.status !== 'In_Stock');
     if (document.getElementById('subUserCount')) {
         document.getElementById('subUserCount').innerText = activeSubs.length || 1;
     }
@@ -852,6 +1071,7 @@ function closeSellLicenseModal() {
 
 async function handleSellNewIdSubmit(e) {
     e.preventDefault();
+    const compId = resolveCompositeUserId();
     const selectedId = document.getElementById('sellLotIdSelect').value;
     const couponCode = document.getElementById('sellCouponCodeInput').value;
     const name = document.getElementById('sellBuyerName').value.trim();
@@ -859,7 +1079,8 @@ async function handleSellNewIdSubmit(e) {
     const email = document.getElementById('sellBuyerEmail').value.trim();
 
     const res = await callBackendApi('process_id_sale_cashback', {
-        seller_composite_id: currentCompositeUserId,
+        composite_user_id: compId,
+        seller_composite_id: compId,
         sold_item_id: selectedId,
         coupon_code: couponCode,
         buyer_name: name,
@@ -909,10 +1130,12 @@ function removeValidityCartItem(idx) {
 }
 
 async function refreshValiditySummaryDisplay(items = validityCart) {
+    const compId = resolveCompositeUserId();
     const box = document.getElementById('validityCartItems');
     const useCouponWallet = Boolean(document.getElementById('useCouponWalletCheckbox')?.checked);
 
     const res = await callBackendApi('preview_validity_cart', {
+        composite_user_id: compId,
         items: items || [],
         use_coupon_wallet: useCouponWallet
     });
@@ -976,6 +1199,7 @@ async function refreshValiditySummaryDisplay(items = validityCart) {
 }
 
 async function handleCashPayValidity() {
+    const compId = resolveCompositeUserId();
     const trxBox = document.getElementById('validityTrxBox');
     const trxInput = document.getElementById('validityTrxId');
     const useCouponWallet = Boolean(document.getElementById('useCouponWalletCheckbox')?.checked);
@@ -995,6 +1219,7 @@ async function handleCashPayValidity() {
     }
 
     const res = await callBackendApi('buy_validity', {
+        composite_user_id: compId,
         items: validityCart,
         use_coupon_wallet: useCouponWallet,
         trx_id: trxId,
@@ -1014,7 +1239,7 @@ async function handleCashPayValidity() {
 
         await refreshValiditySummaryDisplay([]);
 
-        if (!isValidityExpiredSession && currentCompositeUserId) {
+        if (!isValidityExpiredSession && compId) {
             await loadAllDatabaseRecords();
         }
         showToast('Wait for Validity Approval — আপনার Cash Pay রিকোয়েস্ট পেন্ডিং রয়েছে।', 'warn');
@@ -1028,10 +1253,11 @@ function closeBalanceTransferModal() { closeModal('balanceTransferModal'); }
 
 async function handleBalanceTransferSubmit(e) {
     e.preventDefault();
+    const compId = resolveCompositeUserId();
     const recipient = document.getElementById('transferRecipientId').value;
     const amount = parseFloat(document.getElementById('transferAmount').value) || 0;
 
-    const res = await callBackendApi('balance_transfer', { recipient_id: recipient, amount });
+    const res = await callBackendApi('balance_transfer', { composite_user_id: compId, recipient_id: recipient, amount });
     if (res.success) {
         await loadAllDatabaseRecords();
         closeBalanceTransferModal();
@@ -1126,11 +1352,12 @@ function renderUniversalMessages() {
 
 async function sendUniversalMessage(e) {
     e.preventDefault();
+    const compId = resolveCompositeUserId();
     const input = document.getElementById('universalMsgInput');
     const text = input.value.trim();
     if (!text) return;
 
-    const res = await callBackendApi('send_chat', { channel: 'Public_Forum', message: text });
+    const res = await callBackendApi('send_chat', { composite_user_id: compId, channel: 'Public_Forum', message: text });
     if (res.success) {
         universalMessages.push({ user_name: currentUserName, message: text });
         input.value = '';
@@ -1184,12 +1411,13 @@ function renderIndividualMessages() {
 async function sendIndividualMessage(e) {
     e.preventDefault();
     if (!activePrivatePartner) return;
+    const compId = resolveCompositeUserId();
     const input = document.getElementById('individualMsgInput');
     const text = input.value.trim();
     if (!text) return;
 
     const channelName = 'DM_' + [currentUserName, activePrivatePartner].sort().join('_');
-    const res = await callBackendApi('send_chat', { channel: channelName, message: text });
+    const res = await callBackendApi('send_chat', { composite_user_id: compId, channel: channelName, message: text });
     if (res.success) {
         if (!privateMessagesMap[activePrivatePartner]) privateMessagesMap[activePrivatePartner] = [];
         privateMessagesMap[activePrivatePartner].push({ user_name: currentUserName, message: text });
@@ -1201,7 +1429,7 @@ async function sendIndividualMessage(e) {
 function openCashMemoModal() { openModal('cashMemoModal'); }
 function openSettingsModal() {
     if (document.getElementById('settingsComposite')) {
-        document.getElementById('settingsComposite').innerText = currentCompositeUserId;
+        document.getElementById('settingsComposite').innerText = resolveCompositeUserId();
     }
     openModal('settingsModal');
 }
@@ -1328,7 +1556,7 @@ function printMemoPdf() {
 // USER PASSWORD & USERNAME CHANGE LOGIC
 // -------------------------------------------------------------------------
 function openUserPassModal() {
-    const compId = localStorage.getItem('composite_user_id') || currentCompositeUserId || 'N/A';
+    const compId = resolveCompositeUserId() || 'N/A';
     const buyerEmail = localStorage.getItem('buyer_email') || 'N/A';
     const currentUN = localStorage.getItem('user_name') || currentUserName || '';
 
@@ -1423,20 +1651,13 @@ window.addEventListener('message', (event) => {
     if (data.type === 'SET_USER_SCOPE') {
         const nextCompId = (data.payload && data.payload.composite_user_id) || data.compositeUserId;
         if (nextCompId && nextCompId !== currentCompositeUserId) {
-            currentCompositeUserId = String(nextCompId).trim();
-            window.ACTIVE_COMPOSITE_USER_ID = currentCompositeUserId;
-            if (document.getElementById('active-composite-user-label')) {
-                document.getElementById('active-composite-user-label').innerText = currentCompositeUserId;
-            }
-            if (document.getElementById('displayCompositeId')) {
-                document.getElementById('displayCompositeId').innerText = currentCompositeUserId;
-            }
+            syncCompositeIdToIframe(nextCompId);
             if (document.getElementById('monthlyRowsContainer')) {
                 loadAllDatabaseRecords();
             }
         }
     } else if (data.type === 'REQUEST_USER_SCOPE') {
-        const activeId = currentCompositeUserId || localStorage.getItem('composite_user_id') || '101_admin';
+        const activeId = resolveCompositeUserId() || '101_admin';
         syncCompositeIdToIframe(activeId);
     } else if (data.type === 'TOAST' && data.message) {
         const singleToast = document.getElementById('toast');
@@ -1488,19 +1709,9 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('loan-date')) document.getElementById('loan-date').value = today;
     if (document.getElementById('dexp-date')) document.getElementById('dexp-date').value = today;
 
-    const urlCompId = new URLSearchParams(window.location.search).get('composite_user_id');
-    const savedCompId = localStorage.getItem('composite_user_id');
-    const initialCompId = urlCompId || savedCompId || window.ACTIVE_COMPOSITE_USER_ID || '';
-
+    const initialCompId = resolveCompositeUserId();
     if (initialCompId) {
-        currentCompositeUserId = initialCompId;
-        window.ACTIVE_COMPOSITE_USER_ID = initialCompId;
-        if (document.getElementById('active-composite-user-label')) {
-            document.getElementById('active-composite-user-label').innerText = initialCompId;
-        }
-        if (document.getElementById('displayCompositeId')) {
-            document.getElementById('displayCompositeId').innerText = initialCompId;
-        }
+        syncCompositeIdToIframe(initialCompId);
     }
 
     renderMemoCart();
