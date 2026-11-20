@@ -1495,30 +1495,6 @@
       renderNotes();
       bindExpandableDoubleClick();
     }
-
-    function copyPreviewHtml() {
-      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-      const ta = document.createElement('textarea');
-      ta.value = htmlContent;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'absolute';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast('dashboard.html copied to clipboard.');
-      } catch (err) {
-        showToast('Copy failed in this environment.', 'warn');
-      } finally {
-        document.body.removeChild(ta);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      loadLedgerState();
-      renderAll();
-    });
   </script>
 </body>
 </html>
