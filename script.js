@@ -48,7 +48,10 @@ function escapeHtml(val) {
 function getSessionToken() {
     if (currentSessionToken) return currentSessionToken;
     try {
-        currentSessionToken = sessionStorage.getItem('sigma_session_token') || localStorage.getItem('sigma_session_token') || '';
+        currentSessionToken =
+            sessionStorage.getItem('sigma_session_token') ||
+            localStorage.getItem('sigma_session_token') ||
+            '';
     } catch (_) {}
     return currentSessionToken;
 }
@@ -134,8 +137,10 @@ function resolveCompositeUserId() {
         try {
             localStorage.setItem('composite_user_id', resolved);
         } catch (_) {}
+
         const lbl = document.getElementById('active-composite-user-label');
         if (lbl && lbl.textContent.trim() !== resolved) lbl.textContent = resolved;
+
         const disp = document.getElementById('displayCompositeId');
         if (disp && disp.textContent.trim() !== resolved) disp.textContent = resolved;
     }
