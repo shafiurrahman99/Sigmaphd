@@ -28,6 +28,14 @@ let activePrivatePartner = null;
 let universalMessages = [];
 let privateMessagesMap = {};
 
+function normalizeStatusLabel(rawStatus, settledDate = null) {
+    const clean = String(rawStatus ?? '').trim().toLowerCase();
+    if (clean === 'paid' || clean === 'settled' || clean === 'completed') return 'Paid';
+    if (clean === 'due received' || clean === 'received') return 'Due Received';
+    if (settledDate && String(settledDate).trim() !== '' && clean !== 'due') return 'Paid';
+    return 'Due';
+}
+
 /* =========================================================================
  * COMPOSITE USER ID RESOLVER (All Modals & API Calls)
  * ========================================================================= */
@@ -192,7 +200,7 @@ function openPayableSettleModalById(id) {
     if (document.getElementById('pay-settle-id')) document.getElementById('pay-settle-id').value = item.id;
     if (document.getElementById('pay-settle-desc')) document.getElementById('pay-settle-desc').textContent = item.person_name || item.description || item.loan_records_description || 'Party';
     if (document.getElementById('pay-settle-principal')) document.getElementById('pay-settle-principal').textContent = formatMoney(item.amount ?? item.loan_records_amount ?? 0);
-    if (document.getElementById('pay-settle-source')) document.getElementById('pay-settle-source').textContent = item.source || 'Ledger';
+    if (document.getElementById('pay-settle-source')) document.getElementById('pay-settle-source').textContent = item.source || item.loan_records_source || 'Ledger';
     if (document.getElementById('pay-settle-date')) document.getElementById('pay-settle-date').value = today;
     if (document.getElementById('pay-settle-extra')) document.getElementById('pay-settle-extra').value = '0';
     openModal('modal-payable-settle');
@@ -294,7 +302,7 @@ async function handleDailyExpenseSubmit(e) {
     const date = document.getElementById('dexp-date')?.value || new Date().toISOString().split('T')[0];
     const amount = parseFloat(document.getElementById('dexp-amount')?.value) || 0;
     const desc = (document.getElementById('dexp-description')?.value || '').trim();
-    const status = document.getElementById('dexp-status')?.value || 'Paid';
+    const status = normalizeStatusLabel(document.getElementById('dexp-status')?.value || 'Paid');
 
     if (!desc || amount <= 0) {
         showToast('সঠিক Amount এবং Description দিন।', 'warn');
@@ -315,7 +323,9 @@ async function handleDailyExpenseSubmit(e) {
         document.getElementById('form-daily-expense')?.reset();
         closeModal('modal-daily-expense');
         await loadAllDatabaseRecords();
-        showToast('দৈনিক খরচ ডাটাবেজে সংরক্ষিত হয়েছে!');
+        showToast(status === 'Due'
+            ? 'Due expense Payable লিস্টে যুক্ত হয়েছে (Paid না হওয়া পর্যন্ত Expense-এ যোগ হবে না)।'
+            : 'দৈনিক খরচ ডাটাবেজে সংরক্ষিত হয়েছে!');
     } else {
         showToast((res && res.message) || 'খরচ সংরক্ষণ ব্যর্থ হয়েছে।', 'error');
     }
@@ -337,14 +347,16 @@ async function handleReceivableSettleSubmit(e) {
         composite_user_id: compId,
         id,
         category: 'receivable',
+        status: 'Paid',
         settle_date: settleDate,
+        settled_date: settleDate,
         extra_amount: extraAmount
     });
 
     if (res && res.success) {
         closeModal('modal-receivable-settle');
         await loadAllDatabaseRecords();
-        showToast('Receivable সেটেল সম্পন্ন হয়েছে!');
+        showToast('Receivable Paid/সেটেল সম্পন্ন হয়েছে!');
     } else {
         showToast((res && res.message) || 'সেটেলমেন্ট ব্যর্থ হয়েছে।', 'error');
     }
@@ -366,14 +378,16 @@ async function handlePayableSettleSubmit(e) {
         composite_user_id: compId,
         id,
         category: 'payable',
+        status: 'Paid',
         settle_date: settleDate,
+        settled_date: settleDate,
         extra_amount: extraAmount
     });
 
     if (res && res.success) {
         closeModal('modal-payable-settle');
         await loadAllDatabaseRecords();
-        showToast('Payable সেটেল সম্পন্ন হয়েছে!');
+        showToast('Payable Paid/সেটেল সম্পন্ন হয়েছে এবং এক্সপেন্স সিঙ্ক হয়েছে!');
     } else {
         showToast((res && res.message) || 'সেটেলমেন্ট ব্যর্থ হয়েছে।', 'error');
     }
@@ -648,8 +662,16 @@ async function loadAllDatabaseRecords() {
     if (res && res.success) {
         incomeExpenseRecords = res.income_expenses || res.incomeExpenseRecords || [];
         const allLoans = res.loans || [];
-        loanGivenRecords = res.loans_receivable || allLoans.filter(x => String(x.category || x.loan_type || x.direction || '').toLowerCase() === 'receivable');
-        loanTakenRecords = res.loans_payable || allLoans.filter(x => String(x.category || x.loan_type || x.direction || '').toLowerCase() === 'payable');
+        loanGivenRecords = (res.loans_receivable || allLoans.filter(x => String(x.category || x.loan_type || x.direction || '').toLowerCase() === 'receivable')).map(r => ({
+            ...r,
+            loan_records_status: normalizeStatusLabel(r.loan_records_status ?? r.status, r.loan_records_settled_date ?? r.settled_date ?? r.settle_date),
+            status: normalizeStatusLabel(r.loan_records_status ?? r.status, r.loan_records_settled_date ?? r.settled_date ?? r.settle_date)
+        }));
+        loanTakenRecords = (res.loans_payable || allLoans.filter(x => String(x.category || x.loan_type || x.direction || '').toLowerCase() === 'payable')).map(r => ({
+            ...r,
+            loan_records_status: normalizeStatusLabel(r.loan_records_status ?? r.status, r.loan_records_settled_date ?? r.settled_date ?? r.settle_date),
+            status: normalizeStatusLabel(r.loan_records_status ?? r.status, r.loan_records_settled_date ?? r.settled_date ?? r.settle_date)
+        }));
         marketExpenses = res.daily_expenses || res.marketExpenses || [];
         accountsMasterRecords = res.accounts || [];
         universalMessages = res.public_chats || [];
@@ -825,7 +847,7 @@ function renderAllDashboardTables() {
 }
 
 // -------------------------------------------------------------------------
-// MONTHLY SUMMARY TABLE (Matches dashboard.html & legacy IDs)
+// MONTHLY SUMMARY TABLE (Due expenses excluded until Paid)
 // -------------------------------------------------------------------------
 function renderMonthlySummaryTable() {
     const tbody = document.getElementById('monthly-summary-body') || document.getElementById('monthlyRowsContainer');
@@ -834,6 +856,7 @@ function renderMonthlySummaryTable() {
     let totalInc = 0;
     let totalExp = 0;
     const monthlyMap = {};
+    const seenExpenseIds = new Set();
 
     (Array.isArray(incomeExpenseRecords) ? incomeExpenseRecords : []).forEach(item => {
         const eType = String(item.entry_type || item.income_expense_type || 'Income').toLowerCase();
@@ -851,12 +874,14 @@ function renderMonthlySummaryTable() {
             totalInc -= eAmt;
             monthlyMap[monthKey].inc -= eAmt;
         } else if (eType === 'expense' && eStatus === 'paid') {
+            if (item.id !== undefined && item.id !== null) seenExpenseIds.add(String(item.id));
             totalExp += eAmt;
             monthlyMap[monthKey].exp += eAmt;
         }
     });
 
     (Array.isArray(marketExpenses) ? marketExpenses : []).forEach(m => {
+        if (m.id !== undefined && m.id !== null && seenExpenseIds.has(String(m.id))) return;
         const mStatus = String(m.status || m.income_expense_status || 'Paid').toLowerCase();
         if (mStatus === 'paid') {
             const monthKey = String(m.expense_date || m.income_expense_date || '2026-11').slice(0, 7);
@@ -910,7 +935,7 @@ async function handleLoanSubmit(e) {
 }
 
 // -------------------------------------------------------------------------
-// LOAN TABLES (Matches receivable-list-body, payable-list-body & legacy IDs)
+// LOAN TABLES (Shows Paid / Due Received when settled)
 // -------------------------------------------------------------------------
 function renderLoanTables() {
     const recBody = document.getElementById('receivable-list-body');
@@ -934,8 +959,8 @@ function renderLoanTables() {
         const settledDate = l.loan_records_settled_date || l.settle_date || l.received_date || l.paid_date || '-';
         const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
         const extra = resolveLoanExtra(l, amt);
-        const st = l.status || l.loan_records_status || 'Due';
-        const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
+        const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate !== '-' ? settledDate : null);
+        const isSettled = st === 'Paid' || st === 'Due Received';
         if (!isSettled) {
             givenTotal += amt;
             givenDueCount += 1;
@@ -978,8 +1003,8 @@ function renderLoanTables() {
         const settledDate = l.loan_records_settled_date || l.settle_date || l.paid_date || l.received_date || '-';
         const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
         const extra = resolveLoanExtra(l, amt);
-        const st = l.status || l.loan_records_status || 'Due';
-        const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
+        const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate !== '-' ? settledDate : null);
+        const isSettled = st === 'Paid' || st === 'Due Received';
         if (!isSettled) {
             takenTotal += amt;
             takenDueCount += 1;
@@ -1023,14 +1048,15 @@ function renderLoanTables() {
             : loanGivenRecords.map(l => {
                 const pName = l.person_name || l.description || l.loan_records_description || 'Party';
                 const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+                const settledDate = l.loan_records_settled_date || l.settle_date || l.received_date || l.paid_date || null;
                 const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
-                const st = l.status || l.loan_records_status || 'Due';
-                const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
+                const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate);
+                const isSettled = st === 'Paid' || st === 'Due Received';
                 return `
                     <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
                         <div>
                             <span class="font-bold text-slate-200">${pName}</span>
-                            <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-amber-400">Pending</span>'}</span>
+                            <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-amber-400">Due</span>'}</span>
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="font-mono font-bold text-amber-400">${formatMoney(amt)}</span>
@@ -1050,9 +1076,10 @@ function renderLoanTables() {
             : loanTakenRecords.map(l => {
                 const pName = l.person_name || l.description || l.loan_records_description || 'Party';
                 const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+                const settledDate = l.loan_records_settled_date || l.settle_date || l.paid_date || l.received_date || null;
                 const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
-                const st = l.status || l.loan_records_status || 'Due';
-                const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
+                const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate);
+                const isSettled = st === 'Paid' || st === 'Due Received';
                 return `
                     <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
                         <div>
@@ -1085,7 +1112,7 @@ async function handleSettleLoanSubmit(e) {
     const date = document.getElementById('settleDate').value;
     const extra = parseFloat(document.getElementById('settleExtraAmount').value) || 0;
 
-    const res = await callBackendApi('settle_loan', { composite_user_id: compId, id, settle_date: date, extra_amount: extra });
+    const res = await callBackendApi('settle_loan', { composite_user_id: compId, id, status: 'Paid', settle_date: date, settled_date: date, extra_amount: extra });
     if (res.success) {
         await loadAllDatabaseRecords();
         closeSettleModal();
@@ -1104,9 +1131,20 @@ async function handleMarketSubmit(e) {
 
 async function toggleMarketStatus(id) {
     const compId = resolveCompositeUserId();
-    const res = await callBackendApi('toggle_market_expense_status', { composite_user_id: compId, id });
-    if (res.success) {
+    const currentItem = (marketExpenses || []).find(m => String(m.id) === String(id));
+    const currentStatus = normalizeStatusLabel(currentItem?.status ?? currentItem?.income_expense_status ?? 'Due');
+    const nextStatus = currentStatus === 'Paid' ? 'Due' : 'Paid';
+
+    const res = await callBackendApi('update_income_expense_status', {
+        composite_user_id: compId,
+        id,
+        status: nextStatus
+    });
+    if (res && res.success) {
         await loadAllDatabaseRecords();
+        showToast(`স্ট্যাটাস ${nextStatus} হিসেবে আপডেট হয়েছে!`);
+    } else {
+        showToast((res && res.message) || 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে।', 'error');
     }
 }
 
@@ -1125,7 +1163,7 @@ function renderMarketExpensesTable() {
         const mDate = m.expense_date || m.date || m.income_expense_date || '';
         const mDesc = m.description || m.desc || m.income_expense_description || '';
         const mAmt = Number(m.amount ?? m.income_expense_amount ?? 0) || 0;
-        const mStatus = m.status || m.income_expense_status || 'Paid';
+        const mStatus = normalizeStatusLabel(m.status ?? m.income_expense_status ?? 'Paid');
         return `
             <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
                 <td class="py-2.5 pl-3 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb')" class="expense-row-cb accent-rose-500" value="${m.id || ''}" /></td>
