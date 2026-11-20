@@ -153,6 +153,38 @@ function mapLoanPayload(record, compositeUserId) {
     };
 }
 
+function extractDeleteIds(parsedBody, payload) {
+    const rawIds =
+        (Array.isArray(parsedBody?.ids) && parsedBody.ids) ||
+        (Array.isArray(payload?.ids) && payload.ids) ||
+        (parsedBody?.id !== undefined && parsedBody?.id !== null ? [parsedBody.id] : null) ||
+        (payload?.id !== undefined && payload?.id !== null ? [payload.id] : null) ||
+        [];
+
+    return rawIds
+        .map((val) => (typeof val === 'object' && val !== null ? (val.id ?? val.row_id ?? val.entry_id) : val))
+        .filter((val) => val !== undefined && val !== null && String(val).trim() !== '');
+}
+
+async function deleteIncomeExpenseRows(ids, compositeUserId, extraFilter = null) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return { error: { message: 'ids array is required.' }, invalidInput: true };
+    }
+
+    let query = supabaseServer
+        .from('income_expense')
+        .delete()
+        .in('id', ids)
+        .eq('composite_user_id', compositeUserId);
+
+    if (extraFilter?.column && extraFilter?.value !== undefined) {
+        query = query.eq(extraFilter.column, extraFilter.value);
+    }
+
+    const { data, error } = await query.select('id');
+    return { data, error };
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
@@ -377,21 +409,66 @@ export default async function handler(req, res) {
                 return res.status(200).json({ ok: true, success: true, data: updated });
             }
 
-            case 'delete_income_expense': {
-                const ids = Array.isArray(parsedBody.ids)
-                    ? parsedBody.ids
-                    : (Array.isArray(payload?.ids) ? payload.ids : []);
+            case 'delete_income_expense':
+            case 'delete_income_entries': {
+                const ids = extractDeleteIds(parsedBody, payload);
                 if (ids.length === 0) {
                     return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
                 }
 
-                const { error } = await supabaseServer
-                    .from('income_expense')
-                    .delete()
-                    .in('id', ids)
-                    .eq('composite_user_id', composite_user_id);
+                const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id);
                 if (error) throw error;
-                return res.status(200).json({ ok: true, success: true, deleted: ids.length });
+                return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
+            }
+
+            case 'delete_market_expenses': {
+                const ids = extractDeleteIds(parsedBody, payload);
+                if (ids.length === 0) {
+                    return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
+                }
+
+                const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id, {
+                    column: 'income_expense_type',
+                    value: 'expense'
+                });
+                if (error) throw error;
+                return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
+            }
+
+            case 'delete_monthly_summary': {
+                const ids = extractDeleteIds(parsedBody, payload);
+                const months = Array.isArray(parsedBody?.months)
+                    ? parsedBody.months
+                    : (Array.isArray(payload?.months) ? payload.months : []);
+
+                if (ids.length > 0) {
+                    const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id);
+                    if (error) throw error;
+                    return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
+                }
+
+                if (months.length > 0) {
+                    const { data: rows, error: fetchErr } = await supabaseServer
+                        .from('income_expense')
+                        .select('id, income_expense_date')
+                        .eq('composite_user_id', composite_user_id);
+                    if (fetchErr) throw fetchErr;
+
+                    const monthSet = new Set(months.map((m) => String(m).slice(0, 7)));
+                    const matchedIds = (rows || [])
+                        .filter((r) => monthSet.has(String(r.income_expense_date || '').slice(0, 7)))
+                        .map((r) => r.id);
+
+                    if (matchedIds.length === 0) {
+                        return res.status(200).json({ ok: true, success: true, deleted: 0, ids: [] });
+                    }
+
+                    const { data, error } = await deleteIncomeExpenseRows(matchedIds, composite_user_id);
+                    if (error) throw error;
+                    return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids: matchedIds });
+                }
+
+                return res.status(400).json({ ok: false, success: false, message: 'ids or months is required.' });
             }
 
             case 'save_loan':
@@ -445,21 +522,22 @@ export default async function handler(req, res) {
                 });
             }
 
-            case 'delete_loan_records': {
-                const ids = Array.isArray(parsedBody.ids)
-                    ? parsedBody.ids
-                    : (Array.isArray(payload?.ids) ? payload.ids : []);
+            case 'delete_loan_records':
+            case 'delete_loan_entries':
+            case 'delete_loans': {
+                const ids = extractDeleteIds(parsedBody, payload);
                 if (ids.length === 0) {
                     return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
                 }
 
-                const { error } = await supabaseServer
+                const { data, error } = await supabaseServer
                     .from('loan_records')
                     .delete()
                     .in('id', ids)
-                    .eq('composite_user_id', composite_user_id);
+                    .eq('composite_user_id', composite_user_id)
+                    .select('id');
                 if (error) throw error;
-                return res.status(200).json({ ok: true, success: true, deleted: ids.length });
+                return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
             }
 
             case 'save_market_expense': {
