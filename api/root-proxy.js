@@ -119,11 +119,20 @@ async function getTargetAccount(supabase, compositeUserId, fallbackCompanyId, pa
     return null;
 }
 
+function normalizeLoanStatus(rawStatus, settledDate = null) {
+    const clean = String(rawStatus ?? '').trim().toLowerCase();
+    if (clean === 'paid' || clean === 'settled' || clean === 'completed') return 'Paid';
+    if (clean === 'due received' || clean === 'received') return 'Due Received';
+    if (settledDate && String(settledDate).trim() !== '' && clean !== 'due') return 'Paid';
+    return 'Due';
+}
+
 function mapIncomeExpensePayload(record, compositeUserId, companyId) {
     const type = (record.type || record.income_expense_type || 'income').toString().toLowerCase() === 'expense'
         ? 'expense'
         : 'income';
-    const status = (record.status || record.income_expense_status || 'Paid') === 'Due' ? 'Due' : 'Paid';
+    const rawStatus = String(record.status || record.income_expense_status || 'Paid').trim().toLowerCase();
+    const status = rawStatus === 'due' ? 'Due' : 'Paid';
     return {
         composite_user_id: compositeUserId,
         income_expense_type: type,
@@ -137,8 +146,8 @@ function mapIncomeExpensePayload(record, compositeUserId, companyId) {
 function mapLoanPayload(record, compositeUserId) {
     const rawDir = String(record.direction || record.loan_category || record.loan_records_direction || 'receivable').toLowerCase();
     const direction = rawDir === 'payable' ? 'payable' : 'receivable';
-    const rawStatus = String(record.status || record.loan_records_status || 'Due');
-    const status = rawStatus === 'Paid' || rawStatus === 'Due Received' ? rawStatus : 'Due';
+    const settledDate = record.settled_date || record.settle_date || record.loan_records_settled_date || null;
+    const status = normalizeLoanStatus(record.status ?? record.loan_records_status ?? 'Due', settledDate);
 
     return {
         composite_user_id: compositeUserId,
@@ -146,7 +155,7 @@ function mapLoanPayload(record, compositeUserId) {
         loan_records_description: String(record.description ?? record.person_name ?? record.loan_records_description ?? '').trim(),
         loan_records_amount: Number(record.amount ?? record.loan_records_amount ?? 0) || 0,
         loan_records_entry_date: record.entry_date || record.date || record.loan_records_entry_date,
-        loan_records_settled_date: record.settled_date || record.settle_date || record.loan_records_settled_date || null,
+        loan_records_settled_date: settledDate,
         loan_records_extra_amount: Number(record.extra_amount ?? record.loan_records_extra_amount ?? 0) || 0,
         loan_records_status: status,
         loan_records_source: String(record.source ?? record.loan_records_source ?? 'Ledger').trim()
@@ -290,11 +299,20 @@ export default async function handler(req, res) {
                         .order('created_at', { ascending: true })
                 ]);
 
+                const normalizedLoansRec = (loansRec.data || []).map((r) => ({
+                    ...r,
+                    loan_records_status: normalizeLoanStatus(r.loan_records_status, r.loan_records_settled_date)
+                }));
+                const normalizedLoansPay = (loansPay.data || []).map((r) => ({
+                    ...r,
+                    loan_records_status: normalizeLoanStatus(r.loan_records_status, r.loan_records_settled_date)
+                }));
+
                 return res.status(200).json({
                     success: true,
                     income_expenses: incExp.data || [],
-                    loans_receivable: loansRec.data || [],
-                    loans_payable: loansPay.data || [],
+                    loans_receivable: normalizedLoansRec,
+                    loans_payable: normalizedLoansPay,
                     daily_expenses: marketExp.data || [],
                     accounts: accounts.data || [],
                     public_chats: chats.data || []
@@ -322,12 +340,17 @@ export default async function handler(req, res) {
                 if (ieRows.error) throw ieRows.error;
                 if (loanRows.error) throw loanRows.error;
 
+                const normalizedLoans = (loanRows.data || []).map((r) => ({
+                    ...r,
+                    loan_records_status: normalizeLoanStatus(r.loan_records_status, r.loan_records_settled_date)
+                }));
+
                 return res.status(200).json({
                     ok: true,
                     success: true,
                     composite_user_id,
                     income_expense: ieRows.data || [],
-                    loan_records: loanRows.data || []
+                    loan_records: normalizedLoans
                 });
             }
 
@@ -393,7 +416,8 @@ export default async function handler(req, res) {
 
             case 'update_income_expense_status': {
                 const id = parsedBody.id ?? payload?.id;
-                const status = (parsedBody.status ?? payload?.status) === 'Due' ? 'Due' : 'Paid';
+                const rawStatus = String(parsedBody.status ?? payload?.status ?? 'Paid').trim().toLowerCase();
+                const status = rawStatus === 'due' ? 'Due' : 'Paid';
                 if (!id) {
                     return res.status(400).json({ ok: false, success: false, message: 'id is required.' });
                 }
@@ -406,6 +430,21 @@ export default async function handler(req, res) {
                     .select()
                     .single();
                 if (error) throw error;
+
+                // Daily Expense Due থেকে Paid হলে সংশ্লিষ্ট Payable এন্ট্রিও Paid করে দেয়া
+                if (updated && status === 'Paid') {
+                    const payableTag = `[ExpDue#${updated.id}]`;
+                    const settledDate = new Date().toISOString().slice(0, 10);
+                    await supabaseServer
+                        .from('loan_records')
+                        .update({
+                            loan_records_status: 'Paid',
+                            loan_records_settled_date: settledDate
+                        })
+                        .eq('composite_user_id', composite_user_id)
+                        .ilike('loan_records_description', `%${payableTag}%`);
+                }
+
                 return res.status(200).json({ ok: true, success: true, data: updated });
             }
 
@@ -481,6 +520,24 @@ export default async function handler(req, res) {
                     .select()
                     .single();
                 if (error) throw error;
+
+                // Receivable নতুন এন্ট্রি হলে Total Income থেকে মূল অ্যামাউন্ট মাইনাস করতে expense রো যুক্ত করা
+                if (inserted.loan_records_direction === 'receivable' && Number(inserted.loan_records_amount || 0) > 0) {
+                    const baseAmt = Number(inserted.loan_records_amount);
+                    const entryDate = inserted.loan_records_entry_date || new Date().toISOString().slice(0, 10);
+                    const descText = `Receivable Out (${inserted.loan_records_description || 'Entry'}) [Loan#${inserted.id}]`;
+
+                    await supabaseServer.from('income_expense').insert([{
+                        composite_user_id,
+                        income_expense_type: 'expense',
+                        income_expense_date: entryDate,
+                        income_expense_description: descText,
+                        income_expense_amount: baseAmt,
+                        income_expense_status: 'Paid'
+                    }]);
+                }
+
+                // Payable নতুন এন্ট্রি শুধু loan_records-এ থাকবে; Income/Expense-এ কোনো যোগ-বিয়োগ হবে না
                 return res.status(200).json({
                     ok: true,
                     success: true,
@@ -497,10 +554,18 @@ export default async function handler(req, res) {
                     return res.status(400).json({ ok: false, success: false, message: 'id is required.' });
                 }
 
-                const mapped = mapLoanPayload(rec, composite_user_id);
-                const nextStatus = rec.loan_records_status || rec.status || mapped.loan_records_status || 'Paid';
-                const nextSettledDate = rec.loan_records_settled_date || rec.settled_date || rec.settle_date || null;
-                const nextExtraAmount = Number(rec.loan_records_extra_amount ?? rec.extra_amount ?? 0) || 0;
+                const { data: existingLoan, error: fetchLoanErr } = await supabaseServer
+                    .from('loan_records')
+                    .select('*')
+                    .eq('id', id)
+                    .eq('composite_user_id', composite_user_id)
+                    .single();
+                if (fetchLoanErr || !existingLoan) throw fetchLoanErr || new Error('Loan record not found.');
+
+                const rawNextStatus = rec.loan_records_status ?? rec.status ?? 'Paid';
+                const nextSettledDate = rec.loan_records_settled_date || rec.settled_date || rec.settle_date || new Date().toISOString().slice(0, 10);
+                const nextStatus = normalizeLoanStatus(rawNextStatus, nextSettledDate);
+                const nextExtraAmount = Number(rec.loan_records_extra_amount ?? rec.extra_amount ?? existingLoan.loan_records_extra_amount ?? 0) || 0;
 
                 const { data: updated, error } = await supabaseServer
                     .from('loan_records')
@@ -514,6 +579,74 @@ export default async function handler(req, res) {
                     .select()
                     .single();
                 if (error) throw error;
+
+                const isSettledNow = ['Paid', 'Due Received'].includes(String(nextStatus));
+                const principalAmount = Number(updated.loan_records_amount || 0);
+
+                // ১. Receivable Paid/Due Received হলে: মূল অ্যামাউন্ট + অতিরিক্ত অ্যামাউন্ট Income-এ যুক্ত হবে
+                if (updated.loan_records_direction === 'receivable' && isSettledNow) {
+                    const totalReceivedIncome = principalAmount + nextExtraAmount;
+                    if (totalReceivedIncome > 0) {
+                        const tag = `[LoanSettle#${updated.id}]`;
+                        const { data: existingInc } = await supabaseServer
+                            .from('income_expense')
+                            .select('id')
+                            .eq('composite_user_id', composite_user_id)
+                            .ilike('income_expense_description', `%${tag}%`);
+
+                        if (!existingInc || existingInc.length === 0) {
+                            await supabaseServer.from('income_expense').insert([{
+                                composite_user_id,
+                                income_expense_type: 'income',
+                                income_expense_date: nextSettledDate,
+                                income_expense_description: `Receivable Settled (${updated.loan_records_description || 'Loan'}) - Principal + Extra ${tag}`,
+                                income_expense_amount: totalReceivedIncome,
+                                income_expense_status: 'Paid'
+                            }]);
+                        }
+                    }
+                }
+
+                // ২. Payable Paid/Due Received হলে:
+                // - যদি এটি কোনো Due Expense থেকে আসা Payable হয় [ExpDue#<expId>], তবে সেই Expense রো-টিকে Paid করে মূল অ্যামাউন্ট + এক্সট্রা অ্যামাউন্ট Expense হিসেবে সক্রিয় করা
+                // - সাধারণ Payable হলে অতিরিক্ত অ্যামাউন্ট (০-এর বেশি হলে) Daily Expense-এ যুক্ত হবে
+                if (updated.loan_records_direction === 'payable' && isSettledNow) {
+                    const descStr = String(updated.loan_records_description || '');
+                    const expDueMatch = descStr.match(/\[ExpDue#([^\]]+)\]/);
+
+                    if (expDueMatch && expDueMatch[1]) {
+                        const linkedExpId = expDueMatch[1];
+                        const totalExpenseAmt = principalAmount + nextExtraAmount;
+                        await supabaseServer
+                            .from('income_expense')
+                            .update({
+                                income_expense_status: 'Paid',
+                                income_expense_date: nextSettledDate,
+                                income_expense_amount: totalExpenseAmt > 0 ? totalExpenseAmt : principalAmount
+                            })
+                            .eq('id', linkedExpId)
+                            .eq('composite_user_id', composite_user_id);
+                    } else if (nextExtraAmount > 0) {
+                        const tag = `[PayableExtra#${updated.id}]`;
+                        const { data: existingExp } = await supabaseServer
+                            .from('income_expense')
+                            .select('id')
+                            .eq('composite_user_id', composite_user_id)
+                            .ilike('income_expense_description', `%${tag}%`);
+
+                        if (!existingExp || existingExp.length === 0) {
+                            await supabaseServer.from('income_expense').insert([{
+                                composite_user_id,
+                                income_expense_type: 'expense',
+                                income_expense_date: nextSettledDate,
+                                income_expense_description: `Payable Extra Expense (${updated.loan_records_description || 'Payable'}) ${tag}`,
+                                income_expense_amount: nextExtraAmount,
+                                income_expense_status: 'Paid'
+                            }]);
+                        }
+                    }
+                }
+
                 return res.status(200).json({
                     ok: true,
                     success: true,
@@ -542,20 +675,50 @@ export default async function handler(req, res) {
 
             case 'save_market_expense': {
                 const { expense_date, description, amount, status } = payload || {};
+                const cleanStatus = String(status || 'Paid').trim().toLowerCase() === 'due' ? 'Due' : 'Paid';
                 const rowToInsert = mapIncomeExpensePayload(
                     {
                         type: 'expense',
                         date: expense_date,
                         desc: description,
                         amount,
-                        status: status === 'Due' ? 'Due' : 'Paid'
+                        status: cleanStatus
                     },
                     composite_user_id,
                     company_id
                 );
-                const { error } = await supabaseServer.from('income_expense').insert([rowToInsert]);
+
+                const { data: insertedExp, error } = await supabaseServer
+                    .from('income_expense')
+                    .insert([rowToInsert])
+                    .select()
+                    .single();
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Daily market expense logged.' });
+
+                // নতুন এক্সপেন্স এন্ট্রি Due হলে: Payable লিস্টে পুরো অ্যামাউন্ট শো করবে এবং Paid না হওয়া পর্যন্ত Expense-এ যোগ হবে না
+                if (cleanStatus === 'Due' && Number(insertedExp.income_expense_amount || 0) > 0) {
+                    const expTag = `[ExpDue#${insertedExp.id}]`;
+                    const cleanDesc = String(insertedExp.income_expense_description || 'Due Expense').trim();
+                    await supabaseServer.from('loan_records').insert([{
+                        composite_user_id,
+                        loan_records_direction: 'payable',
+                        loan_records_description: `${cleanDesc} ${expTag}`,
+                        loan_records_amount: Number(insertedExp.income_expense_amount),
+                        loan_records_entry_date: insertedExp.income_expense_date || new Date().toISOString().slice(0, 10),
+                        loan_records_settled_date: null,
+                        loan_records_extra_amount: 0,
+                        loan_records_status: 'Due',
+                        loan_records_source: 'Daily Expense'
+                    }]);
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    data: insertedExp,
+                    message: cleanStatus === 'Due'
+                        ? 'Due expense added to Payable until Paid.'
+                        : 'Daily market expense logged.'
+                });
             }
 
             case 'buy_lot': {
