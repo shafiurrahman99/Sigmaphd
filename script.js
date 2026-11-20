@@ -2056,3 +2056,4 @@ document.addEventListener('click', function (e) {
         openIncomeListModal();
     }
 });
+
