@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -70,10 +70,31 @@
       background-color: #0c1322 !important;
       padding: 0.75rem !important;
     }
-    @media (orientation: landscape) and (max-height: 600px) {
-      .section-fullscreen {
-        padding: 0.5rem 0.85rem !important;
-      }
+    .section-fullscreen .scroll-region {
+      flex: 1 1 auto !important;
+      max-height: none !important;
+      width: 100% !important;
+      overflow: auto !important;
+    }
+    .section-fullscreen table {
+      width: 100% !important;
+      min-width: 100% !important;
+      table-layout: fixed !important;
+    }
+    .section-fullscreen th,
+    .section-fullscreen td {
+      white-space: nowrap !important;
+      vertical-align: middle !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .section-fullscreen th.row-select-cb,
+    .section-fullscreen td.row-select-cb {
+      width: 2.25rem !important;
+    }
+    .section-fullscreen th.text-right,
+    .section-fullscreen td.text-right {
+      text-align: right !important;
     }
     @media (orientation: portrait) {
       .section-fullscreen {
