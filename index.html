@@ -56,6 +56,14 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #0d1117; }
         ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 10px; }
+        #dashboardFrame {
+            width: 100%;
+            min-height: 780px;
+            border: 0;
+            border-radius: 1.25rem;
+            background: transparent;
+            display: block;
+        }
         @media print {
             body * { visibility: hidden; }
             #a4MemoPrintArea, #a4MemoPrintArea * { visibility: visible; }
@@ -118,7 +126,7 @@
     </div>
 
     <!-- ================= PAGE 2: DASHBOARD ================= -->
-    <div id="page2" class="hidden w-full max-w-md mx-auto space-y-4 py-2">
+    <div id="page2" class="hidden w-full max-w-3xl mx-auto space-y-4 py-2">
         <!-- Accounts Toggle Button Bar -->
         <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2.5 shadow-xl flex items-center justify-between">
             <span class="text-xs font-bold text-slate-200 flex items-center space-x-2">
@@ -266,107 +274,22 @@
         <!-- Navigation Tabs Bar -->
         <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2 shadow-xl">
             <div class="grid grid-cols-3 gap-1 text-xs">
-                <button class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-center shadow-md">Dashboard</button>
-                <button onclick="openMyChatModal()" class="bg-[#1a2130] hover:bg-slate-800 text-slate-300 font-medium py-2 rounded-xl text-center border border-slate-700/50">My Chat</button>
-                <button onclick="openCashMemoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-center shadow-md flex items-center justify-center space-x-1">
+                <button type="button" onclick="setDashboardFrameTab('dashboard')" class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-center shadow-md">Dashboard</button>
+                <button type="button" onclick="openMyChatModal()" class="bg-[#1a2130] hover:bg-slate-800 text-slate-300 font-medium py-2 rounded-xl text-center border border-slate-700/50">My Chat</button>
+                <button type="button" onclick="openCashMemoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-center shadow-md flex items-center justify-center space-x-1">
                     <i class="fa-solid fa-receipt"></i>
                     <span>Cash Memo</span>
                 </button>
             </div>
         </div>
 
-        <!-- Monthly Financial Summary Card -->
-        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-chart-line text-emerald-400 text-base"></i>
-                    <h3 class="text-xs sm:text-sm font-bold text-white">Monthly Summary (Income, Expense, Surplus)</h3>
-                </div>
-                <button onclick="openIncomeModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
-                    <span>+</span>
-                    <span>New Income/Expense</span>
-                </button>
-            </div>
-
-            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
-                        <tr>
-                            <th class="py-2.5 px-3">2026</th>
-                            <th class="py-2.5 px-2">Total Income (৳)</th>
-                            <th class="py-2.5 px-2">Total Expense (৳)</th>
-                            <th class="py-2.5 px-2 text-right">Net Surplus (৳)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-800/60 font-medium">
-                        <tr class="bg-emerald-950/20 text-emerald-400 font-bold">
-                            <td class="py-3 px-3">Total All-Time</td>
-                            <td id="totalIncomeAll" class="py-3 px-2">৳ 0.00</td>
-                            <td id="totalExpenseAll" class="py-3 px-2 text-rose-400">৳ 0.00</td>
-                            <td id="totalSurplusAll" class="py-3 px-2 text-right">৳ 0.00</td>
-                        </tr>
-                    </tbody>
-                    <tbody id="monthlyRowsContainer" class="divide-y divide-slate-800/40"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Loan Management Card -->
-        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-hand-holding-dollar text-amber-400 text-base"></i>
-                    <h3 class="text-xs sm:text-sm font-bold text-white">Loan & Credit Records</h3>
-                </div>
-                <button onclick="openLoanModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
-                    <span>+</span>
-                    <span>New Entry</span>
-                </button>
-            </div>
-
-            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
-                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
-                    <span class="text-amber-400 font-bold">Receivable</span>
-                    <span id="loanGivenTotalText" class="text-emerald-400 font-extrabold">Total: ৳ 0.00</span>
-                </div>
-                <div id="loanGivenList" class="space-y-2"></div>
-            </div>
-
-            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-2">
-                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
-                    <span class="text-rose-400 font-bold">Payable</span>
-                    <span id="loanTakenTotalText" class="text-rose-400 font-extrabold">Total: ৳ 0.00</span>
-                </div>
-                <div id="loanTakenList" class="space-y-2"></div>
-            </div>
-        </div>
-
-        <!-- Daily Expenses Card -->
-        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 shadow-xl space-y-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-cart-shopping text-indigo-400 text-base"></i>
-                    <h3 class="text-xs sm:text-sm font-bold text-white">Daily Expenses Log (Auto Expense Sync)</h3>
-                </div>
-                <button onclick="openMarketModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow transition-all shrink-0">
-                    <span>+</span>
-                    <span>New Expense Entry</span>
-                </button>
-            </div>
-
-            <div class="overflow-x-auto border border-slate-800/80 rounded-xl">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-[#080a0f] text-slate-400 border-b border-slate-800">
-                        <tr>
-                            <th class="py-2.5 px-2">Date</th>
-                            <th class="py-2.5 px-2">Description</th>
-                            <th class="py-2.5 px-2">Amount (৳)</th>
-                            <th class="py-2.5 px-2 text-right">Status & Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="marketExpenseList" class="divide-y divide-slate-800/50 font-medium"></tbody>
-                </table>
-            </div>
+        <!-- Embedded Dashboard Section via Iframe Bridge -->
+        <div id="dashboardIframeSection" class="bg-[#131822]/70 border border-slate-800/80 rounded-3xl p-1.5 sm:p-2 shadow-2xl overflow-hidden">
+            <iframe
+                id="dashboardFrame"
+                src="dashboard.html?composite_user_id=101_admin"
+                title="Financial Dashboard & Ledger"
+                loading="eager"></iframe>
         </div>
     </div>
 
@@ -622,60 +545,6 @@
         </div>
     </div>
 
-    <!-- Income / Expense Modal -->
-    <div id="incomeModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeIncomeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white">New Income/Expense Entry</h3>
-            <form onsubmit="handleIncomeSubmit(event)" class="space-y-3 text-xs">
-                <select id="incomeEntryType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold">
-                    <option value="Income">Income (+ আয়)</option>
-                    <option value="Expense">Expense (- ব্যয়)</option>
-                </select>
-                <input type="date" id="incomeDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                <input type="text" id="incomeDesc" placeholder="Description" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                <input type="number" id="incomeAmount" placeholder="Amount (৳)" min="1" step="any" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400 font-bold">
-                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">Save</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Loan Modal -->
-    <div id="loanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeLoanModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white">Add Loan Record</h3>
-            <form onsubmit="handleLoanSubmit(event)" class="space-y-3 text-xs">
-                <select id="loanType" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                    <option value="Receivable">Receivable (পাবো)</option>
-                    <option value="Payable">Payable (দেবো)</option>
-                </select>
-                <input type="date" id="loanDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                <input type="text" id="loanPersonName" placeholder="Person Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                <input type="number" id="loanAmount" placeholder="Amount (৳)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
-                <button type="submit" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-xl">Save Loan</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Market Expense Modal -->
-    <div id="marketModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeMarketModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white">Add Daily Expense</h3>
-            <form onsubmit="handleMarketSubmit(event)" class="space-y-3 text-xs">
-                <input type="date" id="marketDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                <input type="text" id="marketDesc" placeholder="Description" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                <input type="number" id="marketAmount" placeholder="Amount (৳)" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400">
-                <select id="marketStatus" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                    <option value="Paid">Paid</option>
-                    <option value="Due">Due</option>
-                </select>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl">Save Expense</button>
-            </form>
-        </div>
-    </div>
-
     <!-- My Chat Modal -->
     <div id="myChatModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-4 sm:p-5 shadow-2xl relative flex flex-col h-[500px] max-h-[88vh]">
@@ -826,7 +695,6 @@
                 <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
             </div>
 
-            <!-- ডাটাবেজ ফিল্ড অনুযায়ী কম্পোজিট আইডি ও বায়ার ইমেইল প্রদর্শন বক্স -->
             <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                     <span style="color: #94a3b8;">composite_user_id:</span>
@@ -841,7 +709,6 @@
                 </div>
             </div>
 
-            <!-- ইনপুট ফর্ম -->
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
@@ -864,7 +731,6 @@
                 </div>
             </div>
 
-            <!-- Accept & Login Again বাটন -->
             <button id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
                 Accept & Login Again
             </button>
@@ -874,9 +740,82 @@
 
     <!-- Hidden A4 Print Area -->
     <div id="a4MemoPrintArea" class="hidden"></div>
+
+    <!-- Iframe Bridge Controller (Parent <-> dashboard.html) -->
+    <script>
+        (function initParentIframeBridge() {
+            const CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
+            const frame = document.getElementById('dashboardFrame');
+
+            function getCurrentCompositeUserId() {
+                const el = document.getElementById('displayCompositeId');
+                const text = el && el.textContent ? el.textContent.trim() : '';
+                return text || '101_admin';
+            }
+
+            function postToFrame(type, payload = {}) {
+                if (!frame || !frame.contentWindow) return;
+                frame.contentWindow.postMessage({
+                    channel: CHANNEL,
+                    type,
+                    compositeUserId: getCurrentCompositeUserId(),
+                    payload
+                }, '*');
+            }
+
+            window.syncDashboardIframeUser = function syncDashboardIframeUser(compositeUserId) {
+                const targetId = (compositeUserId || getCurrentCompositeUserId()).trim();
+                const labelEl = document.getElementById('displayCompositeId');
+                if (labelEl && compositeUserId) {
+                    labelEl.textContent = targetId;
+                }
+                if (frame) {
+                    const desiredSrc = `dashboard.html?composite_user_id=${encodeURIComponent(targetId)}`;
+                    if (!frame.getAttribute('src') || !frame.getAttribute('src').includes(`composite_user_id=${encodeURIComponent(targetId)}`)) {
+                        frame.setAttribute('src', desiredSrc);
+                    }
+                    postToFrame('SET_USER_SCOPE', { composite_user_id: targetId });
+                }
+            };
+
+            window.setDashboardFrameTab = function setDashboardFrameTab(tabName) {
+                postToFrame('SWITCH_TAB', { tab: tabName });
+            };
+
+            if (frame) {
+                frame.addEventListener('load', () => {
+                    postToFrame('SET_USER_SCOPE', { composite_user_id: getCurrentCompositeUserId() });
+                    postToFrame('REQUEST_HEIGHT');
+                });
+            }
+
+            window.addEventListener('message', (event) => {
+                const data = event.data;
+                if (!data || data.channel !== CHANNEL) return;
+
+                if (data.type === 'FRAME_HEIGHT' && frame && typeof data.height === 'number') {
+                    frame.style.height = `${Math.max(520, Math.ceil(data.height) + 16)}px`;
+                } else if (data.type === 'TOAST' && typeof window.showToast === 'function') {
+                    window.showToast(data.message || 'Updated', data.variant || 'success');
+                } else if (data.type === 'OPEN_MODAL') {
+                    if (data.modal === 'chat' && typeof window.openMyChatModal === 'function') window.openMyChatModal();
+                    if (data.modal === 'memo' && typeof window.openCashMemoModal === 'function') window.openCashMemoModal();
+                } else if (data.type === 'REQUEST_USER_SCOPE') {
+                    postToFrame('SET_USER_SCOPE', { composite_user_id: getCurrentCompositeUserId() });
+                }
+            });
+
+            // Observe composite ID changes so iframe stays in sync even before script.js loads
+            const compEl = document.getElementById('displayCompositeId');
+            if (compEl && typeof MutationObserver !== 'undefined') {
+                new MutationObserver(() => {
+                    postToFrame('SET_USER_SCOPE', { composite_user_id: getCurrentCompositeUserId() });
+                }).observe(compEl, { childList: true, characterData: true, subtree: true });
+            }
+        })();
+    </script>
     
     <!-- External Script Integration -->
     <script src="script.js"></script>
 </body>
 </html>
- 
