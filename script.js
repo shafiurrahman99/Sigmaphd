@@ -28,6 +28,55 @@ let activePrivatePartner = null;
 let universalMessages = [];
 let privateMessagesMap = {};
 
+// বছর অনুযায়ী Expand/Collapse স্টেট (default: expanded = true)
+const expandedSummaryYears = {};
+
+const MONTH_SHORT_NAMES = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+function formatDisplayDate(rawDate) {
+    if (!rawDate) return '-';
+    const str = String(rawDate).trim();
+    if (!str || str === '-') return '-';
+
+    const isoMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (isoMatch) {
+        const yearFull = isoMatch[1];
+        const monthIdx = Math.max(0, Math.min(11, parseInt(isoMatch[2], 10) - 1));
+        const dayStr = String(parseInt(isoMatch[3], 10)).padStart(2, '0');
+        const yearTwo = yearFull.slice(-2);
+        return `${dayStr} ${MONTH_SHORT_NAMES[monthIdx]} ${yearTwo}`;
+    }
+
+    const parsed = new Date(str);
+    if (!Number.isNaN(parsed.getTime())) {
+        const dayStr = String(parsed.getUTCDate()).padStart(2, '0');
+        const monStr = MONTH_SHORT_NAMES[parsed.getUTCMonth()];
+        const yearTwo = String(parsed.getUTCFullYear()).slice(-2);
+        return `${dayStr} ${monStr} ${yearTwo}`;
+    }
+
+    return str;
+}
+
+function formatMonthPeriodLabel(yearStr, monthNumStr) {
+    const mIdx = Math.max(0, Math.min(11, parseInt(monthNumStr, 10) - 1));
+    const yrTwo = String(yearStr || '').slice(-2);
+    return `${MONTH_SHORT_NAMES[mIdx]} ${yrTwo}`;
+}
+
+function toggleSummaryYearGroup(yearKey) {
+    const key = String(yearKey);
+    const current = expandedSummaryYears[key] !== false;
+    expandedSummaryYears[key] = !current;
+    renderMonthlySummaryTable();
+    if (typeof notifyParentFrameHeight === 'function') {
+        notifyParentFrameHeight();
+    }
+}
+
 function normalizeStatusLabel(rawStatus, settledDate = null) {
     const clean = String(rawStatus ?? '').trim().toLowerCase();
     if (clean === 'paid' || clean === 'settled' || clean === 'completed') return 'Paid';
@@ -163,7 +212,7 @@ function openIncomeListModal() {
             tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-400">No income entries found.</td></tr>';
         } else {
             tbody.innerHTML = incomes.map((r) => {
-                const d = r.entry_date || r.income_expense_date || '';
+                const d = formatDisplayDate(r.entry_date || r.income_expense_date || '');
                 const desc = r.description || r.income_expense_description || '';
                 const amt = Number(r.amount ?? r.income_expense_amount ?? 0) || 0;
                 return `
@@ -847,7 +896,7 @@ function renderAllDashboardTables() {
 }
 
 // -------------------------------------------------------------------------
-// MONTHLY SUMMARY TABLE (Due expenses excluded until Paid)
+// MONTHLY SUMMARY TABLE (Year Group + +/- Expand/Collapse + Descending Months)
 // -------------------------------------------------------------------------
 function renderMonthlySummaryTable() {
     const tbody = document.getElementById('monthly-summary-body') || document.getElementById('monthlyRowsContainer');
@@ -855,28 +904,63 @@ function renderMonthlySummaryTable() {
 
     let totalInc = 0;
     let totalExp = 0;
-    const monthlyMap = {};
+    const yearGroups = {};
     const seenExpenseIds = new Set();
+
+    const ensureBucket = (yearKey, monthKey) => {
+        if (!yearGroups[yearKey]) {
+            yearGroups[yearKey] = {
+                year: yearKey,
+                inc: 0,
+                exp: 0,
+                months: {}
+            };
+        }
+        if (!yearGroups[yearKey].months[monthKey]) {
+            yearGroups[yearKey].months[monthKey] = {
+                monthKey,
+                inc: 0,
+                exp: 0
+            };
+        }
+    };
+
+    const parseYearMonth = (rawDate) => {
+        const str = String(rawDate || '2026-11').trim();
+        const isoMatch = str.match(/^(\d{4})[-/](\d{1,2})/);
+        if (isoMatch) {
+            return {
+                year: isoMatch[1],
+                month: String(parseInt(isoMatch[2], 10)).padStart(2, '0'),
+                monthKey: `${isoMatch[1]}-${String(parseInt(isoMatch[2], 10)).padStart(2, '0')}`
+            };
+        }
+        return { year: '2026', month: '11', monthKey: '2026-11' };
+    };
 
     (Array.isArray(incomeExpenseRecords) ? incomeExpenseRecords : []).forEach(item => {
         const eType = String(item.entry_type || item.income_expense_type || 'Income').toLowerCase();
-        const eDate = String(item.entry_date || item.income_expense_date || '2026-11');
+        const eDate = item.entry_date || item.income_expense_date || '2026-11-01';
         const eAmt = Number(item.amount ?? item.income_expense_amount ?? 0) || 0;
         const eStatus = String(item.status || item.income_expense_status || 'Paid').toLowerCase();
-
-        const monthKey = eDate.slice(0, 7);
-        if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { inc: 0, exp: 0 };
+        const { year, month, monthKey } = parseYearMonth(eDate);
 
         if (eType === 'income') {
+            ensureBucket(year, month);
             totalInc += eAmt;
-            monthlyMap[monthKey].inc += eAmt;
+            yearGroups[year].inc += eAmt;
+            yearGroups[year].months[month].inc += eAmt;
         } else if (eType === 'incomededuction') {
+            ensureBucket(year, month);
             totalInc -= eAmt;
-            monthlyMap[monthKey].inc -= eAmt;
+            yearGroups[year].inc -= eAmt;
+            yearGroups[year].months[month].inc -= eAmt;
         } else if (eType === 'expense' && eStatus === 'paid') {
+            ensureBucket(year, month);
             if (item.id !== undefined && item.id !== null) seenExpenseIds.add(String(item.id));
             totalExp += eAmt;
-            monthlyMap[monthKey].exp += eAmt;
+            yearGroups[year].exp += eAmt;
+            yearGroups[year].months[month].exp += eAmt;
         }
     });
 
@@ -884,11 +968,13 @@ function renderMonthlySummaryTable() {
         if (m.id !== undefined && m.id !== null && seenExpenseIds.has(String(m.id))) return;
         const mStatus = String(m.status || m.income_expense_status || 'Paid').toLowerCase();
         if (mStatus === 'paid') {
-            const monthKey = String(m.expense_date || m.income_expense_date || '2026-11').slice(0, 7);
-            if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { inc: 0, exp: 0 };
+            const mDate = m.expense_date || m.income_expense_date || '2026-11-01';
+            const { year, month } = parseYearMonth(mDate);
+            ensureBucket(year, month);
             const mAmt = Number(m.amount ?? m.income_expense_amount ?? 0) || 0;
             totalExp += mAmt;
-            monthlyMap[monthKey].exp += mAmt;
+            yearGroups[year].exp += mAmt;
+            yearGroups[year].months[month].exp += mAmt;
         }
     });
 
@@ -901,23 +987,51 @@ function renderMonthlySummaryTable() {
     if (document.getElementById('memo-total-expense')) document.getElementById('memo-total-expense').innerText = formatMoney(totalExp);
     if (document.getElementById('memo-net-surplus')) document.getElementById('memo-net-surplus').innerText = formatMoney(netSurplus);
 
-    const months = Object.keys(monthlyMap).sort().reverse();
-    if (months.length === 0) {
+    const yearsSorted = Object.keys(yearGroups).sort((a, b) => Number(b) - Number(a));
+    if (yearsSorted.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No summary records found yet.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = months.map(m => {
-        const rowSurplus = monthlyMap[m].inc - monthlyMap[m].exp;
-        return `
-            <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
-                <td class="py-2.5 pl-3 pr-2 font-mono text-xs sm:text-sm">${m}</td>
-                <td class="py-2.5 px-2.5 font-semibold text-emerald-400">${formatMoney(monthlyMap[m].inc)}</td>
-                <td class="py-2.5 px-2.5 font-semibold text-rose-400">${formatMoney(monthlyMap[m].exp)}</td>
-                <td class="py-2.5 px-3 text-right font-bold ${rowSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(rowSurplus)}</td>
+    const htmlRows = [];
+    yearsSorted.forEach((yrKey) => {
+        const grp = yearGroups[yrKey];
+        const isExpanded = expandedSummaryYears[yrKey] !== false;
+        const yrSurplus = grp.inc - grp.exp;
+        const toggleSymbol = isExpanded ? '−' : '+';
+
+        htmlRows.push(`
+            <tr class="bg-navy-850/90 text-white border-y border-slate-700/70">
+                <td class="py-2.5 pl-3 pr-2 font-mono text-xs sm:text-sm font-bold">
+                    <button type="button" onclick="toggleSummaryYearGroup('${yrKey}')" title="${isExpanded ? 'Collapse' : 'Expand'}" class="inline-flex items-center justify-center w-5 h-5 mr-2 rounded bg-slate-700 hover:bg-emerald-500 hover:text-slate-950 text-white font-bold text-xs leading-none cursor-pointer transition-colors">${toggleSymbol}</button>
+                    <span>${yrKey}</span>
+                </td>
+                <td class="py-2.5 px-2.5 font-bold text-emerald-400">${formatMoney(grp.inc)}</td>
+                <td class="py-2.5 px-2.5 font-bold text-rose-400">${formatMoney(grp.exp)}</td>
+                <td class="py-2.5 px-3 text-right font-extrabold ${yrSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(yrSurplus)}</td>
             </tr>
-        `;
-    }).join('');
+        `);
+
+        if (isExpanded) {
+            const monthsSorted = Object.keys(grp.months).sort((a, b) => Number(b) - Number(a));
+            monthsSorted.forEach((mNum) => {
+                const mItem = grp.months[mNum];
+                const rowSurplus = mItem.inc - mItem.exp;
+                const periodText = formatMonthPeriodLabel(yrKey, mNum);
+
+                htmlRows.push(`
+                    <tr class="text-slate-200 hover:bg-navy-850/50 transition-colors">
+                        <td class="py-2 pl-9 pr-2 font-mono text-xs sm:text-sm text-slate-300">${periodText}</td>
+                        <td class="py-2 px-2.5 font-semibold text-emerald-400">${formatMoney(mItem.inc)}</td>
+                        <td class="py-2 px-2.5 font-semibold text-rose-400">${formatMoney(mItem.exp)}</td>
+                        <td class="py-2 px-3 text-right font-bold ${rowSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(rowSurplus)}</td>
+                    </tr>
+                `);
+            });
+        }
+    });
+
+    tbody.innerHTML = htmlRows.join('');
 }
 
 function openIncomeModal() { openIncomeExpenseModal('income'); }
@@ -935,7 +1049,7 @@ async function handleLoanSubmit(e) {
 }
 
 // -------------------------------------------------------------------------
-// LOAN TABLES (Shows Paid / Due Received when settled)
+// LOAN TABLES (Shows Paid / Due Received & DD MMM YY Dates)
 // -------------------------------------------------------------------------
 function renderLoanTables() {
     const recBody = document.getElementById('receivable-list-body');
@@ -955,11 +1069,13 @@ function renderLoanTables() {
     let givenDueCount = 0;
     const recRows = (Array.isArray(loanGivenRecords) ? loanGivenRecords : []).map(l => {
         const pName = l.person_name || l.description || l.loan_records_description || 'Party';
-        const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
-        const settledDate = l.loan_records_settled_date || l.settle_date || l.received_date || l.paid_date || '-';
+        const rawEntryDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+        const rawSettledDate = l.loan_records_settled_date || l.settle_date || l.received_date || l.paid_date || null;
+        const eDate = formatDisplayDate(rawEntryDate);
+        const settledDate = rawSettledDate ? formatDisplayDate(rawSettledDate) : '-';
         const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
         const extra = resolveLoanExtra(l, amt);
-        const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate !== '-' ? settledDate : null);
+        const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', rawSettledDate);
         const isSettled = st === 'Paid' || st === 'Due Received';
         if (!isSettled) {
             givenTotal += amt;
@@ -999,11 +1115,13 @@ function renderLoanTables() {
     let takenDueCount = 0;
     const payRows = (Array.isArray(loanTakenRecords) ? loanTakenRecords : []).map(l => {
         const pName = l.person_name || l.description || l.loan_records_description || 'Party';
-        const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
-        const settledDate = l.loan_records_settled_date || l.settle_date || l.paid_date || l.received_date || '-';
+        const rawEntryDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+        const rawSettledDate = l.loan_records_settled_date || l.settle_date || l.paid_date || l.received_date || null;
+        const eDate = formatDisplayDate(rawEntryDate);
+        const settledDate = rawSettledDate ? formatDisplayDate(rawSettledDate) : '-';
         const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
         const extra = resolveLoanExtra(l, amt);
-        const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate !== '-' ? settledDate : null);
+        const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', rawSettledDate);
         const isSettled = st === 'Paid' || st === 'Due Received';
         if (!isSettled) {
             takenTotal += amt;
@@ -1047,7 +1165,7 @@ function renderLoanTables() {
             ? '<p class="text-[11px] text-slate-500">No Receivable records.</p>'
             : loanGivenRecords.map(l => {
                 const pName = l.person_name || l.description || l.loan_records_description || 'Party';
-                const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+                const eDate = formatDisplayDate(l.entry_date || l.date || l.loan_records_entry_date || '');
                 const settledDate = l.loan_records_settled_date || l.settle_date || l.received_date || l.paid_date || null;
                 const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
                 const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate);
@@ -1075,7 +1193,7 @@ function renderLoanTables() {
             ? '<p class="text-[11px] text-slate-500">No Payable records.</p>'
             : loanTakenRecords.map(l => {
                 const pName = l.person_name || l.description || l.loan_records_description || 'Party';
-                const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+                const eDate = formatDisplayDate(l.entry_date || l.date || l.loan_records_entry_date || '');
                 const settledDate = l.loan_records_settled_date || l.settle_date || l.paid_date || l.received_date || null;
                 const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
                 const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', settledDate);
@@ -1149,7 +1267,7 @@ async function toggleMarketStatus(id) {
 }
 
 // -------------------------------------------------------------------------
-// DAILY EXPENSES TABLE (Matches daily-expenses-body & marketExpenseList)
+// DAILY EXPENSES TABLE (DD MMM YY Date Format)
 // -------------------------------------------------------------------------
 function renderMarketExpensesTable() {
     const tbody = document.getElementById('daily-expenses-body') || document.getElementById('marketExpenseList');
@@ -1160,7 +1278,7 @@ function renderMarketExpensesTable() {
         return;
     }
     tbody.innerHTML = marketExpenses.map(m => {
-        const mDate = m.expense_date || m.date || m.income_expense_date || '';
+        const mDate = formatDisplayDate(m.expense_date || m.date || m.income_expense_date || '');
         const mDesc = m.description || m.desc || m.income_expense_description || '';
         const mAmt = Number(m.amount ?? m.income_expense_amount ?? 0) || 0;
         const mStatus = normalizeStatusLabel(m.status ?? m.income_expense_status ?? 'Paid');
@@ -1702,7 +1820,7 @@ function openA4PdfPreview() {
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 15px; color: #333;">
                 <div><strong>Customer Name:</strong> ${custName}<br><strong>Mobile:</strong> ${custMob}</div>
-                <div style="text-align: right;"><strong>Date:</strong> ${new Date().toISOString().split('T')[0]}<br><strong>Memo No:</strong> #MEMO-${Math.floor(Math.random()*90000+10000)}</div>
+                <div style="text-align: right;"><strong>Date:</strong> ${formatDisplayDate(new Date().toISOString().split('T')[0])}<br><strong>Memo No:</strong> #MEMO-${Math.floor(Math.random()*90000+10000)}</div>
             </div>
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px;">
                 <thead>
