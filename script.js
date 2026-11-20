@@ -134,11 +134,22 @@ function openDailyExpenseModal() {
     openModal('modal-daily-expense');
 }
 
+function updateDeleteCounter(btnId, countId, selector) {
+    const btn = document.getElementById(btnId);
+    const cnt = document.getElementById(countId);
+    const checkedCount = document.querySelectorAll(`${selector}:checked`).length;
+    if (cnt) cnt.textContent = String(checkedCount);
+    if (btn) {
+        if (checkedCount > 0) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+    }
+}
+
 function openIncomeListModal() {
     const tbody = document.getElementById('income-list-modal-body');
     if (tbody && Array.isArray(incomeExpenseRecords)) {
         const incomes = incomeExpenseRecords.filter(
-            (r) => (r.entry_type || r.income_expense_type) === 'Income'
+            (r) => String(r.entry_type || r.income_expense_type || 'Income').toLowerCase() === 'income'
         );
         if (incomes.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-400">No income entries found.</td></tr>';
@@ -149,7 +160,7 @@ function openIncomeListModal() {
                 const amt = Number(r.amount ?? r.income_expense_amount ?? 0) || 0;
                 return `
                     <tr>
-                        <td class="py-2 pl-3 pr-1"><input type="checkbox" class="income-row-cb accent-emerald-500" value="${r.id || ''}" /></td>
+                        <td class="py-2 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-incomes', 'count-del-incomes', '.income-row-cb')" class="income-row-cb accent-emerald-500" value="${r.id || ''}" /></td>
                         <td class="py-2 px-2.5 font-mono text-xs">${d}</td>
                         <td class="py-2 px-2.5">${desc}</td>
                         <td class="py-2 pl-2.5 pr-3 text-right font-bold text-emerald-400">${formatMoney(amt)}</td>
@@ -158,7 +169,33 @@ function openIncomeListModal() {
             }).join('');
         }
     }
+    updateDeleteCounter('btn-delete-incomes', 'count-del-incomes', '.income-row-cb');
     openModal('modal-income-list');
+}
+
+function openReceivableSettleModalById(id) {
+    const item = (loanGivenRecords || []).find((x) => String(x.id) === String(id));
+    if (!item) return;
+    const today = new Date().toISOString().split('T')[0];
+    if (document.getElementById('rec-settle-id')) document.getElementById('rec-settle-id').value = item.id;
+    if (document.getElementById('rec-settle-desc')) document.getElementById('rec-settle-desc').textContent = item.person_name || item.description || item.loan_records_description || 'Party';
+    if (document.getElementById('rec-settle-principal')) document.getElementById('rec-settle-principal').textContent = formatMoney(item.amount ?? item.loan_records_amount ?? 0);
+    if (document.getElementById('rec-settle-date')) document.getElementById('rec-settle-date').value = today;
+    if (document.getElementById('rec-settle-extra')) document.getElementById('rec-settle-extra').value = '0';
+    openModal('modal-receivable-settle');
+}
+
+function openPayableSettleModalById(id) {
+    const item = (loanTakenRecords || []).find((x) => String(x.id) === String(id));
+    if (!item) return;
+    const today = new Date().toISOString().split('T')[0];
+    if (document.getElementById('pay-settle-id')) document.getElementById('pay-settle-id').value = item.id;
+    if (document.getElementById('pay-settle-desc')) document.getElementById('pay-settle-desc').textContent = item.person_name || item.description || item.loan_records_description || 'Party';
+    if (document.getElementById('pay-settle-principal')) document.getElementById('pay-settle-principal').textContent = formatMoney(item.amount ?? item.loan_records_amount ?? 0);
+    if (document.getElementById('pay-settle-source')) document.getElementById('pay-settle-source').textContent = item.source || 'Ledger';
+    if (document.getElementById('pay-settle-date')) document.getElementById('pay-settle-date').value = today;
+    if (document.getElementById('pay-settle-extra')) document.getElementById('pay-settle-extra').value = '0';
+    openModal('modal-payable-settle');
 }
 
 /* =========================================================================
@@ -609,10 +646,11 @@ async function loadAllDatabaseRecords() {
     const activeCompId = resolveCompositeUserId();
     const res = await callBackendApi('fetch_dashboard_data', { composite_user_id: activeCompId });
     if (res && res.success) {
-        incomeExpenseRecords = res.income_expenses || [];
-        loanGivenRecords = res.loans_receivable || [];
-        loanTakenRecords = res.loans_payable || [];
-        marketExpenses = res.daily_expenses || [];
+        incomeExpenseRecords = res.income_expenses || res.incomeExpenseRecords || [];
+        const allLoans = res.loans || [];
+        loanGivenRecords = res.loans_receivable || allLoans.filter(x => String(x.category || x.loan_type || x.direction || '').toLowerCase() === 'receivable');
+        loanTakenRecords = res.loans_payable || allLoans.filter(x => String(x.category || x.loan_type || x.direction || '').toLowerCase() === 'payable');
+        marketExpenses = res.daily_expenses || res.marketExpenses || [];
         accountsMasterRecords = res.accounts || [];
         universalMessages = res.public_chats || [];
 
@@ -787,43 +825,45 @@ function renderAllDashboardTables() {
 }
 
 // -------------------------------------------------------------------------
-// MONTHLY SUMMARY TABLE (Supports both legacy & new income_expense columns)
+// MONTHLY SUMMARY TABLE (Matches dashboard.html & legacy IDs)
 // -------------------------------------------------------------------------
 function renderMonthlySummaryTable() {
-    const tbody = document.getElementById('monthlyRowsContainer');
+    const tbody = document.getElementById('monthly-summary-body') || document.getElementById('monthlyRowsContainer');
     if (!tbody) return;
 
     let totalInc = 0;
     let totalExp = 0;
     const monthlyMap = {};
 
-    incomeExpenseRecords.forEach(item => {
-        const eType = item.entry_type || (item.income_expense_type === 'expense' ? 'Expense' : 'Income');
-        const eDate = item.entry_date || item.income_expense_date || '2026-11';
+    (Array.isArray(incomeExpenseRecords) ? incomeExpenseRecords : []).forEach(item => {
+        const eType = String(item.entry_type || item.income_expense_type || 'Income').toLowerCase();
+        const eDate = String(item.entry_date || item.income_expense_date || '2026-11');
         const eAmt = Number(item.amount ?? item.income_expense_amount ?? 0) || 0;
-        const eStatus = item.status || item.income_expense_status || 'Paid';
+        const eStatus = String(item.status || item.income_expense_status || 'Paid').toLowerCase();
 
-        const monthKey = String(eDate).slice(0, 7);
+        const monthKey = eDate.slice(0, 7);
         if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { inc: 0, exp: 0 };
 
-        if (eType === 'Income') {
+        if (eType === 'income') {
             totalInc += eAmt;
             monthlyMap[monthKey].inc += eAmt;
-        } else if (eType === 'IncomeDeduction') {
+        } else if (eType === 'incomededuction') {
             totalInc -= eAmt;
             monthlyMap[monthKey].inc -= eAmt;
-        } else if (eType === 'Expense' && eStatus === 'Paid') {
+        } else if (eType === 'expense' && eStatus === 'paid') {
             totalExp += eAmt;
             monthlyMap[monthKey].exp += eAmt;
         }
     });
 
-    marketExpenses.forEach(m => {
-        if (m.status === 'Paid') {
-            const monthKey = (m.expense_date || '2026-11').slice(0, 7);
+    (Array.isArray(marketExpenses) ? marketExpenses : []).forEach(m => {
+        const mStatus = String(m.status || m.income_expense_status || 'Paid').toLowerCase();
+        if (mStatus === 'paid') {
+            const monthKey = String(m.expense_date || m.income_expense_date || '2026-11').slice(0, 7);
             if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { inc: 0, exp: 0 };
-            totalExp += Number(m.amount || 0);
-            monthlyMap[monthKey].exp += Number(m.amount || 0);
+            const mAmt = Number(m.amount ?? m.income_expense_amount ?? 0) || 0;
+            totalExp += mAmt;
+            monthlyMap[monthKey].exp += mAmt;
         }
     });
 
@@ -832,15 +872,24 @@ function renderMonthlySummaryTable() {
     if (document.getElementById('totalExpenseAll')) document.getElementById('totalExpenseAll').innerText = formatMoney(totalExp);
     if (document.getElementById('totalSurplusAll')) document.getElementById('totalSurplusAll').innerText = formatMoney(netSurplus);
 
+    if (document.getElementById('memo-total-income')) document.getElementById('memo-total-income').innerText = formatMoney(totalInc);
+    if (document.getElementById('memo-total-expense')) document.getElementById('memo-total-expense').innerText = formatMoney(totalExp);
+    if (document.getElementById('memo-net-surplus')) document.getElementById('memo-net-surplus').innerText = formatMoney(netSurplus);
+
     const months = Object.keys(monthlyMap).sort().reverse();
+    if (months.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">No summary records found yet.</td></tr>';
+        return;
+    }
+
     tbody.innerHTML = months.map(m => {
         const rowSurplus = monthlyMap[m].inc - monthlyMap[m].exp;
         return `
-            <tr class="text-slate-300">
-                <td class="py-2.5 px-3 font-mono">${m}</td>
-                <td class="py-2.5 px-2 text-emerald-400">${formatMoney(monthlyMap[m].inc)}</td>
-                <td class="py-2.5 px-2 text-rose-400">${formatMoney(monthlyMap[m].exp)}</td>
-                <td class="py-2.5 px-2 text-right font-bold ${rowSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(rowSurplus)}</td>
+            <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+                <td class="py-2.5 pl-3 pr-2 font-mono text-xs sm:text-sm">${m}</td>
+                <td class="py-2.5 px-2.5 font-semibold text-emerald-400">${formatMoney(monthlyMap[m].inc)}</td>
+                <td class="py-2.5 px-2.5 font-semibold text-rose-400">${formatMoney(monthlyMap[m].exp)}</td>
+                <td class="py-2.5 px-3 text-right font-bold ${rowSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(rowSurplus)}</td>
             </tr>
         `;
     }).join('');
@@ -860,63 +909,156 @@ async function handleLoanSubmit(e) {
     return handleLoanEntrySubmit(e);
 }
 
+// -------------------------------------------------------------------------
+// LOAN TABLES (Matches receivable-list-body, payable-list-body & legacy IDs)
+// -------------------------------------------------------------------------
 function renderLoanTables() {
-    const givenList = document.getElementById('loanGivenList');
-    const takenList = document.getElementById('loanTakenList');
-    if (!givenList || !takenList) return;
+    const recBody = document.getElementById('receivable-list-body');
+    const payBody = document.getElementById('payable-list-body');
 
     let givenTotal = 0;
-    givenList.innerHTML = loanGivenRecords.length === 0
-        ? '<p class="text-[11px] text-slate-500">No Receivable records.</p>'
-        : loanGivenRecords.map(l => {
-            const pName = l.person_name || l.loan_records_description || 'Party';
-            const eDate = l.entry_date || l.loan_records_entry_date || '';
-            const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
-            const st = l.status || l.loan_records_status || 'Due';
-            const isSettled = st === 'Paid' || st === 'Due Received';
-            if (!isSettled) givenTotal += amt;
-            return `
-                <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
-                    <div>
-                        <span class="font-bold text-slate-200">${pName}</span>
-                        <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-amber-400">Pending</span>'}</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-mono font-bold text-amber-400">${formatMoney(amt)}</span>
-                        ${!isSettled ? `<button onclick="openSettleModal('${l.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
-                    </div>
-                </div>
-            `;
-        }).join('');
-    if (document.getElementById('loanGivenTotalText')) {
-        document.getElementById('loanGivenTotalText').innerText = 'Total: ' + formatMoney(givenTotal);
+    let givenDueCount = 0;
+    const recRows = (Array.isArray(loanGivenRecords) ? loanGivenRecords : []).map(l => {
+        const pName = l.person_name || l.description || l.loan_records_description || 'Party';
+        const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+        const settledDate = l.settle_date || l.received_date || l.paid_date || '-';
+        const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
+        const extra = Number(l.extra_amount ?? l.extra ?? 0) || 0;
+        const st = l.status || l.loan_records_status || 'Due';
+        const isSettled = st === 'Paid' || st === 'Due Received';
+        if (!isSettled) {
+            givenTotal += amt;
+            givenDueCount += 1;
+        }
+        return `
+            <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+                <td class="py-2 pl-2.5 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-receivable', 'count-del-receivable', '.loan-row-cb[data-cat=\\'receivable\\']')" class="loan-row-cb accent-rose-500" data-cat="receivable" value="${l.id || ''}" /></td>
+                <td class="py-2 px-2 font-semibold">${pName}</td>
+                <td class="py-2 px-2 font-mono font-bold text-emerald-400">${formatMoney(amt)}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${eDate}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${settledDate}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-300">${formatMoney(extra)}</td>
+                <td class="py-2 pl-2 pr-2.5 text-right">
+                    ${!isSettled
+                        ? `<button type="button" onclick="openReceivableSettleModalById('${l.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">Receive</button>`
+                        : `<span class="text-emerald-400 font-semibold text-[11px]">${st}</span>`}
+                </td>
+            </tr>
+        `;
+    });
+
+    if (recBody) {
+        recBody.innerHTML = recRows.length
+            ? recRows.join('')
+            : '<tr><td colspan="7" class="py-4 text-center text-slate-400 text-xs">No Receivable records found.</td></tr>';
     }
+    if (document.getElementById('receivable-total-display')) {
+        document.getElementById('receivable-total-display').textContent = 'Total Due: ' + formatMoney(givenTotal);
+    }
+    if (document.getElementById('receivable-due-count-badge')) {
+        document.getElementById('receivable-due-count-badge').textContent = `${givenDueCount} Due`;
+    }
+    updateDeleteCounter('btn-delete-receivable', 'count-del-receivable', ".loan-row-cb[data-cat='receivable']");
 
     let takenTotal = 0;
-    takenList.innerHTML = loanTakenRecords.length === 0
-        ? '<p class="text-[11px] text-slate-500">No Payable records.</p>'
-        : loanTakenRecords.map(l => {
-            const pName = l.person_name || l.loan_records_description || 'Party';
-            const eDate = l.entry_date || l.loan_records_entry_date || '';
-            const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
-            const st = l.status || l.loan_records_status || 'Due';
-            const isSettled = st === 'Paid' || st === 'Due Received';
-            if (!isSettled) takenTotal += amt;
-            return `
-                <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
-                    <div>
-                        <span class="font-bold text-slate-200">${pName}</span>
-                        <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-rose-400">Due</span>'}</span>
+    let takenDueCount = 0;
+    const payRows = (Array.isArray(loanTakenRecords) ? loanTakenRecords : []).map(l => {
+        const pName = l.person_name || l.description || l.loan_records_description || 'Party';
+        const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+        const settledDate = l.settle_date || l.paid_date || l.received_date || '-';
+        const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
+        const extra = Number(l.extra_amount ?? l.extra ?? 0) || 0;
+        const st = l.status || l.loan_records_status || 'Due';
+        const isSettled = st === 'Paid' || st === 'Due Received';
+        if (!isSettled) {
+            takenTotal += amt;
+            takenDueCount += 1;
+        }
+        return `
+            <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+                <td class="py-2 pl-2.5 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-payable', 'count-del-payable', '.loan-row-cb[data-cat=\\'payable\\']')" class="loan-row-cb accent-rose-500" data-cat="payable" value="${l.id || ''}" /></td>
+                <td class="py-2 px-2 font-semibold">${pName}</td>
+                <td class="py-2 px-2 font-mono font-bold text-rose-400">${formatMoney(amt)}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${eDate}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${settledDate}</td>
+                <td class="py-2 px-2 font-mono text-[11px] text-slate-300">${formatMoney(extra)}</td>
+                <td class="py-2 pl-2 pr-2.5 text-right">
+                    ${!isSettled
+                        ? `<button type="button" onclick="openPayableSettleModalById('${l.id}')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">Pay</button>`
+                        : `<span class="text-emerald-400 font-semibold text-[11px]">${st}</span>`}
+                </td>
+            </tr>
+        `;
+    });
+
+    if (payBody) {
+        payBody.innerHTML = payRows.length
+            ? payRows.join('')
+            : '<tr><td colspan="7" class="py-4 text-center text-slate-400 text-xs">No Payable records found.</td></tr>';
+    }
+    if (document.getElementById('payable-total-display')) {
+        document.getElementById('payable-total-display').textContent = 'Total Due: ' + formatMoney(takenTotal);
+    }
+    if (document.getElementById('payable-due-count-badge')) {
+        document.getElementById('payable-due-count-badge').textContent = `${takenDueCount} Due`;
+    }
+    updateDeleteCounter('btn-delete-payable', 'count-del-payable', ".loan-row-cb[data-cat='payable']");
+
+    // Legacy containers fallback
+    const givenList = document.getElementById('loanGivenList');
+    const takenList = document.getElementById('loanTakenList');
+    if (givenList) {
+        givenList.innerHTML = loanGivenRecords.length === 0
+            ? '<p class="text-[11px] text-slate-500">No Receivable records.</p>'
+            : loanGivenRecords.map(l => {
+                const pName = l.person_name || l.description || l.loan_records_description || 'Party';
+                const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+                const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
+                const st = l.status || l.loan_records_status || 'Due';
+                const isSettled = st === 'Paid' || st === 'Due Received';
+                return `
+                    <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
+                        <div>
+                            <span class="font-bold text-slate-200">${pName}</span>
+                            <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-amber-400">Pending</span>'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-mono font-bold text-amber-400">${formatMoney(amt)}</span>
+                            ${!isSettled ? `<button onclick="openReceivableSettleModalById('${l.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-mono font-bold text-rose-400">${formatMoney(amt)}</span>
-                        ${!isSettled ? `<button onclick="openSettleModal('${l.id}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
+                `;
+            }).join('');
+        if (document.getElementById('loanGivenTotalText')) {
+            document.getElementById('loanGivenTotalText').innerText = 'Total: ' + formatMoney(givenTotal);
+        }
+    }
+
+    if (takenList) {
+        takenList.innerHTML = loanTakenRecords.length === 0
+            ? '<p class="text-[11px] text-slate-500">No Payable records.</p>'
+            : loanTakenRecords.map(l => {
+                const pName = l.person_name || l.description || l.loan_records_description || 'Party';
+                const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
+                const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
+                const st = l.status || l.loan_records_status || 'Due';
+                const isSettled = st === 'Paid' || st === 'Due Received';
+                return `
+                    <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
+                        <div>
+                            <span class="font-bold text-slate-200">${pName}</span>
+                            <span class="text-[10px] text-slate-400 block">${eDate} • ${isSettled ? '<span class="text-emerald-400">' + st + '</span>' : '<span class="text-rose-400">Due</span>'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-mono font-bold text-rose-400">${formatMoney(amt)}</span>
+                            ${!isSettled ? `<button onclick="openPayableSettleModalById('${l.id}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded text-[10px]">Settle</button>` : ''}
+                        </div>
                     </div>
-                </div>
-            `;
-        }).join('');
-    if (document.getElementById('loanTakenTotalText')) {
-        document.getElementById('loanTakenTotalText').innerText = 'Total: ' + formatMoney(takenTotal);
+                `;
+            }).join('');
+        if (document.getElementById('loanTakenTotalText')) {
+            document.getElementById('loanTakenTotalText').innerText = 'Total: ' + formatMoney(takenTotal);
+        }
     }
 }
 
@@ -958,31 +1100,37 @@ async function toggleMarketStatus(id) {
     }
 }
 
+// -------------------------------------------------------------------------
+// DAILY EXPENSES TABLE (Matches daily-expenses-body & marketExpenseList)
+// -------------------------------------------------------------------------
 function renderMarketExpensesTable() {
-    const tbody = document.getElementById('marketExpenseList');
+    const tbody = document.getElementById('daily-expenses-body') || document.getElementById('marketExpenseList');
     if (!tbody) return;
-    if (marketExpenses.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-slate-500">No daily expenses recorded.</td></tr>';
+    if (!Array.isArray(marketExpenses) || marketExpenses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400 text-xs">No daily expenses recorded.</td></tr>';
+        updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb');
         return;
     }
     tbody.innerHTML = marketExpenses.map(m => {
-        const mDate = m.expense_date || m.income_expense_date || '';
-        const mDesc = m.description || m.income_expense_description || '';
+        const mDate = m.expense_date || m.date || m.income_expense_date || '';
+        const mDesc = m.description || m.desc || m.income_expense_description || '';
         const mAmt = Number(m.amount ?? m.income_expense_amount ?? 0) || 0;
         const mStatus = m.status || m.income_expense_status || 'Paid';
         return `
-            <tr class="text-slate-300">
-                <td class="py-2 px-2 font-mono text-[11px]">${mDate}</td>
-                <td class="py-2 px-2">${mDesc}</td>
-                <td class="py-2 px-2 font-mono text-rose-400 font-bold">${formatMoney(mAmt)}</td>
-                <td class="py-2 px-2 text-right">
-                    <button onclick="toggleMarketStatus('${m.id}')" class="${mStatus === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[10px] font-bold">
+            <tr class="text-slate-200 hover:bg-navy-850/60 transition-colors">
+                <td class="py-2.5 pl-3 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb')" class="expense-row-cb accent-rose-500" value="${m.id || ''}" /></td>
+                <td class="py-2.5 px-2.5 font-mono text-xs text-slate-400">${mDate}</td>
+                <td class="py-2.5 px-2.5 font-semibold">${mDesc}</td>
+                <td class="py-2.5 px-2.5 font-mono text-rose-400 font-bold">${formatMoney(mAmt)}</td>
+                <td class="py-2.5 pl-2.5 pr-3 text-right">
+                    <button type="button" onclick="toggleMarketStatus('${m.id}')" class="${mStatus === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[11px] font-bold cursor-pointer">
                         ${mStatus}
                     </button>
                 </td>
             </tr>
         `;
     }).join('');
+    updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb');
 }
 
 // -------------------------------------------------------------------------
@@ -1652,7 +1800,7 @@ window.addEventListener('message', (event) => {
         const nextCompId = (data.payload && data.payload.composite_user_id) || data.compositeUserId;
         if (nextCompId && nextCompId !== currentCompositeUserId) {
             syncCompositeIdToIframe(nextCompId);
-            if (document.getElementById('monthlyRowsContainer')) {
+            if (document.getElementById('monthly-summary-body') || document.getElementById('monthlyRowsContainer')) {
                 loadAllDatabaseRecords();
             }
         }
@@ -1712,6 +1860,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const initialCompId = resolveCompositeUserId();
     if (initialCompId) {
         syncCompositeIdToIframe(initialCompId);
+        if (document.getElementById('monthly-summary-body') || document.getElementById('receivable-list-body') || document.getElementById('daily-expenses-body')) {
+            loadAllDatabaseRecords();
+        }
     }
 
     renderMemoCart();
