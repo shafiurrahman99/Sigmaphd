@@ -916,16 +916,26 @@ function renderLoanTables() {
     const recBody = document.getElementById('receivable-list-body');
     const payBody = document.getElementById('payable-list-body');
 
+    const resolveLoanExtra = (l, amt) => {
+        const directExtra = Number(l.loan_records_extra_amount ?? l.extra_amount ?? l.extra);
+        if (!Number.isNaN(directExtra) && directExtra > 0) return directExtra;
+        const settledAmt = Number(l.loan_records_settled_amount ?? l.settled_amount ?? NaN);
+        if (!Number.isNaN(settledAmt) && settledAmt > 0) {
+            return settledAmt > amt ? (settledAmt - amt) : settledAmt;
+        }
+        return 0;
+    };
+
     let givenTotal = 0;
     let givenDueCount = 0;
     const recRows = (Array.isArray(loanGivenRecords) ? loanGivenRecords : []).map(l => {
         const pName = l.person_name || l.description || l.loan_records_description || 'Party';
         const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
-        const settledDate = l.settle_date || l.received_date || l.paid_date || '-';
+        const settledDate = l.loan_records_settled_date || l.settle_date || l.received_date || l.paid_date || '-';
         const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
-        const extra = Number(l.extra_amount ?? l.extra ?? 0) || 0;
+        const extra = resolveLoanExtra(l, amt);
         const st = l.status || l.loan_records_status || 'Due';
-        const isSettled = st === 'Paid' || st === 'Due Received';
+        const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
         if (!isSettled) {
             givenTotal += amt;
             givenDueCount += 1;
@@ -936,8 +946,8 @@ function renderLoanTables() {
                 <td class="py-2 px-2 font-semibold">${pName}</td>
                 <td class="py-2 px-2 font-mono font-bold text-emerald-400">${formatMoney(amt)}</td>
                 <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${eDate}</td>
-                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${settledDate}</td>
-                <td class="py-2 px-2 font-mono text-[11px] text-slate-300">${formatMoney(extra)}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${settledDate !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${settledDate}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${extra > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extra)}</td>
                 <td class="py-2 pl-2 pr-2.5 text-right">
                     ${!isSettled
                         ? `<button type="button" onclick="openReceivableSettleModalById('${l.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">Receive</button>`
@@ -965,11 +975,11 @@ function renderLoanTables() {
     const payRows = (Array.isArray(loanTakenRecords) ? loanTakenRecords : []).map(l => {
         const pName = l.person_name || l.description || l.loan_records_description || 'Party';
         const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
-        const settledDate = l.settle_date || l.paid_date || l.received_date || '-';
+        const settledDate = l.loan_records_settled_date || l.settle_date || l.paid_date || l.received_date || '-';
         const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
-        const extra = Number(l.extra_amount ?? l.extra ?? 0) || 0;
+        const extra = resolveLoanExtra(l, amt);
         const st = l.status || l.loan_records_status || 'Due';
-        const isSettled = st === 'Paid' || st === 'Due Received';
+        const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
         if (!isSettled) {
             takenTotal += amt;
             takenDueCount += 1;
@@ -980,8 +990,8 @@ function renderLoanTables() {
                 <td class="py-2 px-2 font-semibold">${pName}</td>
                 <td class="py-2 px-2 font-mono font-bold text-rose-400">${formatMoney(amt)}</td>
                 <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${eDate}</td>
-                <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${settledDate}</td>
-                <td class="py-2 px-2 font-mono text-[11px] text-slate-300">${formatMoney(extra)}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${settledDate !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${settledDate}</td>
+                <td class="py-2 px-2 font-mono text-[11px] ${extra > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extra)}</td>
                 <td class="py-2 pl-2 pr-2.5 text-right">
                     ${!isSettled
                         ? `<button type="button" onclick="openPayableSettleModalById('${l.id}')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">Pay</button>`
@@ -1015,7 +1025,7 @@ function renderLoanTables() {
                 const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
                 const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
                 const st = l.status || l.loan_records_status || 'Due';
-                const isSettled = st === 'Paid' || st === 'Due Received';
+                const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
                 return `
                     <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
                         <div>
@@ -1042,7 +1052,7 @@ function renderLoanTables() {
                 const eDate = l.entry_date || l.date || l.loan_records_entry_date || '';
                 const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
                 const st = l.status || l.loan_records_status || 'Due';
-                const isSettled = st === 'Paid' || st === 'Due Received';
+                const isSettled = st === 'Paid' || st === 'Due Received' || Boolean(l.loan_records_settled_date);
                 return `
                     <div class="flex items-center justify-between bg-[#131822] border border-slate-800 rounded-lg p-2 text-xs">
                         <div>
