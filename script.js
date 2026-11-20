@@ -709,6 +709,7 @@ async function loadAllDatabaseRecords() {
     }
     renderAllDashboardTables();
     renderLotInventory();
+    renderUniversalMessages();
     notifyParentFrameHeight();
 }
 
