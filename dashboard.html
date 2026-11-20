@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -901,9 +901,14 @@
       const periods = Array.from(document.querySelectorAll('.summary-row-cb:checked')).map((cb) => cb.value);
       if (!periods.length || typeof window.callBackendApi !== 'function') return;
       try {
-        const res = await window.callBackendApi('delete_monthly_summary', { periods });
+        const res = await window.callBackendApi('delete_monthly_summary', {
+          periods,
+          action_aliases: ['delete_monthly_summary', 'delete_summary', 'delete_income_expense']
+        });
         if (res && res.success && typeof window.loadAllDatabaseRecords === 'function') {
           await window.loadAllDatabaseRecords();
+        } else if (res && res.message) {
+          showToast(res.message, 'error');
         }
       } catch (err) {
         console.warn('Summary delete warning:', err);
