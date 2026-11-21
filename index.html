@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>My Develop App - Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -79,7 +81,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[120] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
         <span id="toast-text">Action successful!</span>
-        <button onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2">
+        <button type="button" onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2">
             <i class="fa-solid fa-xmark text-base"></i>
         </button>
     </div>
@@ -97,14 +99,14 @@
                 </div>
             </div>
 
-            <!-- Sign In Form (user_name & password) -->
-            <form onsubmit="handleMainSignIn(event)" class="space-y-4">
+            <!-- Sign In Form -->
+            <form onsubmit="handleMainSignIn(event)" class="space-y-4" autocomplete="off">
                 <div>
-                    <input type="text" id="mainUserName" required placeholder="Enter Username (e.g., admin)" value="admin"
+                    <input type="text" id="mainUserName" required autocomplete="username" placeholder="Enter Username (e.g., admin)" value="admin"
                         class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
                 </div>
                 <div>
-                    <input type="password" id="mainUserPassword" required placeholder="Enter Password (e.g., 1234)" value="1234"
+                    <input type="password" id="mainUserPassword" required autocomplete="current-password" placeholder="Enter Password (e.g., 1234)" value="1234"
                         class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm">
                 </div>
 
@@ -154,7 +156,6 @@
                             <span id="activeDeviceCount">1</span> Device Active 
                             <span class="text-slate-400 font-normal">(Max 2)</span>
                         </h2>
-                        <span class="text-[10px] text-amber-400 font-mono">Composite ID: <strong id="displayCompositeId">101_admin</strong></span>
                     </div>
                 </div>
 
@@ -163,7 +164,7 @@
                         <span class="text-[10px] text-slate-400 block font-medium">Balance</span>
                         <span id="walletBalanceText" class="text-emerald-400 font-extrabold text-xs font-mono">৳ 0.00</span>
                     </div>
-                    <button onclick="openBalanceTransferModal()" class="w-7 h-7 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center justify-center text-xs shadow transition-all" title="Balance Transfer to User">
+                    <button type="button" onclick="openBalanceTransferModal()" class="w-7 h-7 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center justify-center text-xs shadow transition-all" title="Balance Transfer to User">
                         <i class="fa-solid fa-right-left"></i>
                     </button>
                 </div>
@@ -183,7 +184,7 @@
                     </div>
 
                     <div class="flex items-center space-x-2">
-                        <button onclick="openUserPassModal()" class="bg-blue-600 hover:bg-blue-500 text-white border-none py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer shadow">
+                        <button type="button" onclick="openUserPassModal()" class="bg-blue-600 hover:bg-blue-500 text-white border-none py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer shadow">
                             ⚙️ Password Change
                         </button>
 
@@ -241,18 +242,18 @@
                         <span class="text-slate-400 text-xs">Coupon Code:</span>
                         <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA-ADMIN</span>
                     </div>
-                    <button onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all">
+                    <button type="button" onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all">
                         <i class="fa-regular fa-copy"></i>
                         <span>Copy</span>
                     </button>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="openBuyLotModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                    <button type="button" onclick="openBuyLotModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
                         <i class="fa-solid fa-boxes-packing text-xs"></i>
                         <span>Buy New Lot</span>
                     </button>
-                    <button onclick="openSellLicenseModal()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                    <button type="button" onclick="openSellLicenseModal()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
                         <i class="fa-solid fa-paper-plane text-xs"></i>
                         <span>Sell New ID</span>
                     </button>
@@ -287,14 +288,15 @@
         <div id="dashboardIframeSection" class="bg-[#131822]/70 border border-slate-800/80 rounded-3xl p-1.5 sm:p-2 shadow-2xl overflow-hidden">
             <iframe
                 id="dashboardFrame"
-                src="dashboard.html?composite_user_id=101_admin"
+                src="dashboard.html"
                 title="Financial Dashboard & Ledger"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                 loading="eager"></iframe>
         </div>
     </div>
 
     <!-- ================= MODALS ================= -->
-    <!-- Buy Validity Modal (Dropdown + Cart + Backend Calculation + Cash Pay) -->
+    <!-- Buy Validity Modal -->
     <div id="buyValidityModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-5 shadow-2xl relative space-y-3.5 text-xs">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
@@ -302,13 +304,11 @@
                 <button type="button" onclick="closeBuyValidityModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- Pending Approval Notice inside Modal -->
             <div id="validityModalPendingNotice" class="hidden bg-amber-950/60 border border-amber-500/50 rounded-2xl p-3 text-xs text-amber-300 space-y-1">
                 <div class="font-extrabold text-amber-400">Wait for Validity Approval</div>
                 <div id="validityModalPendingDetails" class="text-[11px] text-amber-200/90 font-mono"></div>
             </div>
 
-            <!-- Plan Dropdown + Add Button -->
             <div class="flex gap-2">
                 <select id="validityPlanDropdown" class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-emerald-500">
                     <option value="1">1 Month (30 Days)</option>
@@ -319,12 +319,10 @@
                 <button type="button" onclick="addValidityToCart()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl transition">+ Add</button>
             </div>
 
-            <!-- Cart Items List -->
             <div id="validityCartItems" class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-1.5 max-h-36 overflow-y-auto">
                 <p class="text-slate-500 text-center py-2">Cart is empty. Select a plan & click Add.</p>
             </div>
 
-            <!-- Backend Summary Display -->
             <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-1.5">
                 <div class="flex justify-between">
                     <span class="text-slate-400">Total Validity:</span>
@@ -352,7 +350,6 @@
                 </div>
             </div>
 
-            <!-- Wallet Checkbox + Available Wallet Balance -->
             <div class="flex items-center justify-between bg-[#080a0f] border border-slate-800 rounded-xl px-3 py-2">
                 <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
                     <input type="checkbox" id="useCouponWalletCheckbox" onchange="refreshValiditySummaryDisplay(validityCart)" class="rounded border-slate-600 bg-slate-800 text-emerald-500">
@@ -361,13 +358,11 @@
                 <span class="text-emerald-400 font-mono font-bold">Balance: <span id="validityWalletBalanceText">৳ 0.00</span></span>
             </div>
 
-            <!-- Transaction ID -->
             <div id="validityTrxBox">
                 <label for="validityTrxId" class="block text-slate-400 mb-1">Transaction ID</label>
                 <input type="text" id="validityTrxId" placeholder="Enter Payment TrxID (bKash/Nagad)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
             </div>
 
-            <!-- Cash Pay Active, Online Pay Closed -->
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button type="button" onclick="handleCashPayValidity()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition">
                     Cash Pay
@@ -382,7 +377,7 @@
     <!-- Settle Loan Modal -->
     <div id="settleLoanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeSettleModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button type="button" onclick="closeSettleModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-lg font-bold text-white">Settle Loan Record</h3>
             <form onsubmit="handleSettleLoanSubmit(event)" class="space-y-3 text-xs">
                 <input type="hidden" id="settleLoanId">
@@ -402,7 +397,7 @@
     <!-- Buy New Lot Modal -->
     <div id="buyLotModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
-            <button onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button type="button" onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-base font-bold text-white flex items-center space-x-2">
                 <i class="fa-solid fa-boxes-packing text-amber-400"></i>
                 <span>Buy New Lot</span>
@@ -445,7 +440,7 @@
     <!-- Sell ID Modal -->
     <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
-            <button onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button type="button" onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-base font-bold text-white flex items-center space-x-2">
                 <i class="fa-solid fa-paper-plane text-emerald-400"></i>
                 <span>Sell New ID (From Lot)</span>
@@ -495,7 +490,7 @@
     <!-- Balance Transfer Modal -->
     <div id="balanceTransferModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button type="button" onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-lg font-bold text-white">Balance Transfer</h3>
             <form onsubmit="handleBalanceTransferSubmit(event)" class="space-y-3 text-xs">
                 <input type="text" id="transferRecipientId" placeholder="Recipient ID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400">
@@ -505,10 +500,10 @@
         </div>
     </div>
 
-    <!-- Buy License Landing Modal (Buy New ID) -->
+    <!-- Buy License Landing Modal -->
     <div id="buyLicenseLandingModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
-            <button onclick="closeBuyLicenseLandingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button type="button" onclick="closeBuyLicenseLandingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-base font-bold text-white">Buy New ID / License</h3>
             
             <form onsubmit="handleLandingBuySubmit(event)" class="space-y-2.5">
@@ -536,7 +531,7 @@
     <!-- Add Device Modal -->
     <div id="addDeviceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-            <button onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button type="button" onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-lg font-bold text-white">Add Device</h3>
             <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 text-xs">
                 <input type="text" id="deviceNameInput" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
@@ -550,7 +545,7 @@
         <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-4 sm:p-5 shadow-2xl relative flex flex-col h-[500px] max-h-[88vh]">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
                 <div class="flex items-center space-x-2">
-                    <button id="chatBackBtn" onclick="exitIndividualChat()" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-400 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 transition-all">
+                    <button type="button" id="chatBackBtn" onclick="exitIndividualChat()" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-400 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 transition-all">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Exit</span>
                     </button>
@@ -559,7 +554,7 @@
                         <span>My Chat (Universal & Users)</span>
                     </h3>
                 </div>
-                <button onclick="document.getElementById('myChatModal').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">
+                <button type="button" onclick="document.getElementById('myChatModal').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
@@ -588,7 +583,7 @@
                         <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
                         <span>Private Chat with <strong id="activeChatPartnerName" class="text-white">User</strong></span>
                     </span>
-                    <button onclick="exitIndividualChat()" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-lg text-[11px] font-bold">
+                    <button type="button" onclick="exitIndividualChat()" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-lg text-[11px] font-bold">
                         Exit Chat
                     </button>
                 </div>
@@ -610,7 +605,7 @@
     <!-- Cash Memo Builder Modal -->
     <div id="cashMemoModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
         <div class="bg-[#131822] border border-slate-700 w-full max-w-lg rounded-3xl p-4 sm:p-5 shadow-2xl relative space-y-3 my-auto max-h-[92vh] overflow-y-auto">
-            <button onclick="document.getElementById('cashMemoModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button type="button" onclick="document.getElementById('cashMemoModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-base font-bold text-white flex items-center space-x-2">
                 <i class="fa-solid fa-receipt text-indigo-400"></i>
                 <span>Custom Cash Memo Builder (Cart System)</span>
@@ -673,7 +668,7 @@
     <!-- A4 PDF Preview Modal -->
     <div id="a4PdfPreviewModal" class="hidden fixed inset-0 z-[110] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4 overflow-y-auto">
         <div class="bg-white text-black w-full max-w-2xl rounded-2xl p-6 shadow-2xl relative space-y-4 my-auto">
-            <button onclick="document.getElementById('a4PdfPreviewModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-700 hover:text-black text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" onclick="document.getElementById('a4PdfPreviewModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-700 hover:text-black text-xl"><i class="fa-solid fa-xmark"></i></button>
             <div id="a4PdfContentBox" class="border border-slate-300 p-6 rounded-xl bg-white shadow-inner space-y-4 text-sm font-sans"></div>
             <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-200">
                 <button type="button" onclick="saveMemoToDevice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center space-x-1.5 shadow">
@@ -691,17 +686,13 @@
         <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 420px; padding: 24px; color: #f8fafc; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #334155; padding-bottom: 10px;">
-                <h3 style="margin: 0; font-size: 18px; color: #38bdf8;">user_password_change</h3>
+                <h3 style="margin: 0; font-size: 18px; color: #38bdf8;">Account & Password</h3>
                 <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
             </div>
 
             <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="color: #94a3b8;">composite_user_id:</span>
-                    <span id="modalCompositeId" style="color: #34d399; font-weight: bold;">--</span>
-                </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #94a3b8;">buyer_email:</span>
+                    <span style="color: #94a3b8;">Account Email:</span>
                     <span id="modalAutoEmail" style="color: #fbbf24; font-weight: 500;">--</span>
                 </div>
                 <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
@@ -712,26 +703,26 @@
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
-                    <input type="text" id="newUsernameInput" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="text" id="newUsernameInput" autocomplete="off" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
 
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুরাতন পাসওয়ার্ড (Old Password) *</label>
-                    <input type="password" id="oldPasswordInput" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="password" id="oldPasswordInput" autocomplete="current-password" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
 
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন পাসওয়ার্ড (New Password) *</label>
-                    <input type="password" id="newPasswordInput" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="password" id="newPasswordInput" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
 
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুনরায় নতুন পাসওয়ার্ড (Confirm New Password) *</label>
-                    <input type="password" id="confirmPasswordInput" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="password" id="confirmPasswordInput" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
             </div>
 
-            <button id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+            <button type="button" id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
                 Accept & Login Again
             </button>
 
@@ -741,16 +732,25 @@
     <!-- Hidden A4 Print Area -->
     <div id="a4MemoPrintArea" class="hidden"></div>
 
-    <!-- Iframe Bridge Controller (Parent <-> dashboard.html) -->
+    <!-- Secure Iframe Bridge Controller (Parent <-> dashboard.html) -->
     <script>
         (function initParentIframeBridge() {
             const CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
             const frame = document.getElementById('dashboardFrame');
+            let activeScopeKey = '101_admin';
 
-            function getCurrentCompositeUserId() {
-                const el = document.getElementById('displayCompositeId');
-                const text = el && el.textContent ? el.textContent.trim() : '';
-                return text || '101_admin';
+            function sanitizeIdentifier(raw) {
+                if (typeof raw !== 'string') return '';
+                return raw.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+            }
+
+            function getActiveScopeKey() {
+                const userEl = document.getElementById('currentLoggedInUser');
+                const cleanUser = sanitizeIdentifier(userEl && userEl.textContent ? userEl.textContent.trim() : '');
+                if (activeScopeKey && activeScopeKey !== '101_admin') {
+                    return activeScopeKey;
+                }
+                return cleanUser ? `101_${cleanUser}` : '101_admin';
             }
 
             function postToFrame(type, payload = {}) {
@@ -758,59 +758,73 @@
                 frame.contentWindow.postMessage({
                     channel: CHANNEL,
                     type,
-                    compositeUserId: getCurrentCompositeUserId(),
+                    scopeKey: getActiveScopeKey(),
                     payload
-                }, '*');
+                }, window.location.origin);
             }
 
-            window.syncDashboardIframeUser = function syncDashboardIframeUser(compositeUserId) {
-                const targetId = (compositeUserId || getCurrentCompositeUserId()).trim();
-                const labelEl = document.getElementById('displayCompositeId');
-                if (labelEl && compositeUserId) {
-                    labelEl.textContent = targetId;
+            window.syncDashboardIframeUser = function syncDashboardIframeUser(scopeKey) {
+                const cleanKey = sanitizeIdentifier(scopeKey);
+                if (cleanKey) {
+                    activeScopeKey = cleanKey;
                 }
                 if (frame) {
-                    const desiredSrc = `dashboard.html?composite_user_id=${encodeURIComponent(targetId)}`;
-                    if (!frame.getAttribute('src') || !frame.getAttribute('src').includes(`composite_user_id=${encodeURIComponent(targetId)}`)) {
-                        frame.setAttribute('src', desiredSrc);
+                    const currentSrc = frame.getAttribute('src') || '';
+                    if (!currentSrc.startsWith('dashboard.html')) {
+                        frame.setAttribute('src', 'dashboard.html');
                     }
-                    postToFrame('SET_USER_SCOPE', { composite_user_id: targetId });
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
                 }
             };
 
             window.setDashboardFrameTab = function setDashboardFrameTab(tabName) {
-                postToFrame('SWITCH_TAB', { tab: tabName });
+                const allowedTabs = ['dashboard', 'ledger', 'reports', 'loans'];
+                const safeTab = allowedTabs.includes(tabName) ? tabName : 'dashboard';
+                postToFrame('SWITCH_TAB', { tab: safeTab });
             };
 
             if (frame) {
                 frame.addEventListener('load', () => {
-                    postToFrame('SET_USER_SCOPE', { composite_user_id: getCurrentCompositeUserId() });
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
                     postToFrame('REQUEST_HEIGHT');
                 });
             }
 
             window.addEventListener('message', (event) => {
+                if (event.origin && event.origin !== 'null' && event.origin !== window.location.origin) {
+                    return;
+                }
+                if (frame && frame.contentWindow && event.source !== frame.contentWindow) {
+                    return;
+                }
+
                 const data = event.data;
                 if (!data || data.channel !== CHANNEL) return;
 
-                if (data.type === 'FRAME_HEIGHT' && frame && typeof data.height === 'number') {
-                    frame.style.height = `${Math.max(520, Math.ceil(data.height) + 16)}px`;
+                if (data.type === 'FRAME_HEIGHT' && frame && typeof data.height === 'number' && Number.isFinite(data.height)) {
+                    const safeHeight = Math.min(4000, Math.max(520, Math.ceil(data.height) + 16));
+                    frame.style.height = `${safeHeight}px`;
                 } else if (data.type === 'TOAST' && typeof window.showToast === 'function') {
-                    window.showToast(data.message || 'Updated', data.variant || 'success');
+                    const safeMsg = typeof data.message === 'string' ? data.message.slice(0, 200) : 'Updated';
+                    const allowedVariants = ['success', 'error', 'warning', 'info'];
+                    const safeVariant = allowedVariants.includes(data.variant) ? data.variant : 'success';
+                    window.showToast(safeMsg, safeVariant);
                 } else if (data.type === 'OPEN_MODAL') {
                     if (data.modal === 'chat' && typeof window.openMyChatModal === 'function') window.openMyChatModal();
                     if (data.modal === 'memo' && typeof window.openCashMemoModal === 'function') window.openCashMemoModal();
                 } else if (data.type === 'REQUEST_USER_SCOPE') {
-                    postToFrame('SET_USER_SCOPE', { composite_user_id: getCurrentCompositeUserId() });
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
                 }
             });
 
-            // Observe composite ID changes so iframe stays in sync even before script.js loads
-            const compEl = document.getElementById('displayCompositeId');
-            if (compEl && typeof MutationObserver !== 'undefined') {
+            // Sync when logged-in username changes
+            const userEl = document.getElementById('currentLoggedInUser');
+            if (userEl && typeof MutationObserver !== 'undefined') {
                 new MutationObserver(() => {
-                    postToFrame('SET_USER_SCOPE', { composite_user_id: getCurrentCompositeUserId() });
-                }).observe(compEl, { childList: true, characterData: true, subtree: true });
+                    const cleanUser = sanitizeIdentifier(userEl.textContent ? userEl.textContent.trim() : '');
+                    activeScopeKey = cleanUser ? `101_${cleanUser}` : '101_admin';
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
+                }).observe(userEl, { childList: true, characterData: true, subtree: true });
             }
         })();
     </script>
