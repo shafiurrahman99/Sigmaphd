@@ -6,6 +6,7 @@
 
 const BRIDGE_CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
 const PROXY_URL = '/api/root-proxy';
+const TRUSTED_ORIGIN = window.location.origin;
 
 let GLOBAL_COMPANY_ID = "101";
 let currentUserName = "";
@@ -30,15 +31,24 @@ let privateMessagesMap = {};
 const expandedSummaryYears = {};
 const MONTH_SHORT_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+function escapeHtml(val) {
+    return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function getSessionToken() {
-    return window.__SIGMA_SESSION_TOKEN || localStorage.getItem('sigma_session_token') || '';
+    return window.__SIGMA_SESSION_TOKEN || sessionStorage.getItem('sigma_session_token') || '';
 }
 
 function setSessionToken(token) {
     window.__SIGMA_SESSION_TOKEN = token || '';
     try {
-        if (token) localStorage.setItem('sigma_session_token', token);
-        else localStorage.removeItem('sigma_session_token');
+        if (token) sessionStorage.setItem('sigma_session_token', token);
+        else sessionStorage.removeItem('sigma_session_token');
     } catch (_) {}
 }
 
@@ -88,29 +98,23 @@ function formatMoney(num) {
 }
 
 /* =========================================================================
- * COMPOSITE USER ID & IFRAME BRIDGE
+ * COMPOSITE USER ID (Hidden from DOM, Kept in Memory/Session) & BRIDGE
  * ========================================================================= */
 function resolveCompositeUserId() {
     const urlParams = new URLSearchParams(window.location.search);
     const fromUrl = (urlParams.get('composite_user_id') || '').trim();
     const fromWindow = String(window.ACTIVE_COMPOSITE_USER_ID || '').trim();
     const fromState = String(currentCompositeUserId || '').trim();
-    const fromStorage = String(localStorage.getItem('composite_user_id') || '').trim();
-    const fromLabel = String(document.getElementById('active-composite-user-label')?.textContent || '').trim();
-    const fromDisplay = String(document.getElementById('displayCompositeId')?.textContent || '').trim();
+    let fromStorage = '';
+    try {
+        fromStorage = String(sessionStorage.getItem('composite_user_id') || '').trim();
+    } catch (_) {}
 
-    const cleanLabel = (fromLabel && fromLabel !== '--' && fromLabel !== 'N/A') ? fromLabel : '';
-    const cleanDisplay = (fromDisplay && fromDisplay !== '--' && fromDisplay !== 'N/A') ? fromDisplay : '';
-    const resolved = fromState || fromWindow || fromUrl || fromStorage || cleanLabel || cleanDisplay || '';
-
+    const resolved = fromState || fromWindow || fromUrl || fromStorage || '';
     if (resolved) {
         currentCompositeUserId = resolved;
         window.ACTIVE_COMPOSITE_USER_ID = resolved;
-        try { localStorage.setItem('composite_user_id', resolved); } catch (_) {}
-        const lbl = document.getElementById('active-composite-user-label');
-        if (lbl && lbl.textContent.trim() !== resolved) lbl.textContent = resolved;
-        const disp = document.getElementById('displayCompositeId');
-        if (disp && disp.textContent.trim() !== resolved) disp.textContent = resolved;
+        try { sessionStorage.setItem('composite_user_id', resolved); } catch (_) {}
     }
     return resolved;
 }
@@ -120,10 +124,7 @@ function syncCompositeIdToIframe(compId) {
     if (!cleanId) return;
     currentCompositeUserId = cleanId;
     window.ACTIVE_COMPOSITE_USER_ID = cleanId;
-    try { localStorage.setItem('composite_user_id', cleanId); } catch (_) {}
-
-    if (document.getElementById('displayCompositeId')) document.getElementById('displayCompositeId').innerText = cleanId;
-    if (document.getElementById('active-composite-user-label')) document.getElementById('active-composite-user-label').innerText = cleanId;
+    try { sessionStorage.setItem('composite_user_id', cleanId); } catch (_) {}
 
     if (typeof window.syncDashboardIframeUser === 'function') {
         window.syncDashboardIframeUser(cleanId);
@@ -134,7 +135,7 @@ function syncCompositeIdToIframe(compId) {
             type: 'SET_USER_SCOPE',
             compositeUserId: cleanId,
             payload: { composite_user_id: cleanId }
-        }, '*');
+        }, TRUSTED_ORIGIN);
     }
 }
 
@@ -147,12 +148,12 @@ function notifyParentFrameHeight() {
             type: 'FRAME_HEIGHT',
             compositeUserId: resolveCompositeUserId(),
             height
-        }, '*');
+        }, TRUSTED_ORIGIN);
     }
 }
 
 /* =========================================================================
- * API CONNECTOR (Attaches Session Token Automatically)
+ * API CONNECTOR (Attaches Session Token & Hidden Composite User ID)
  * ========================================================================= */
 async function callBackendApi(action, payload = {}) {
     try {
@@ -191,7 +192,7 @@ function showToast(text, variant = 'success') {
             compositeUserId: resolveCompositeUserId(),
             message: text,
             variant
-        }, '*');
+        }, TRUSTED_ORIGIN);
     }
 
     const toast = document.getElementById('toast');
@@ -314,9 +315,11 @@ async function handleMainSignIn(e) {
         const mobile = user.buyer_mobile || '01818589423';
         const last4 = mobile.length >= 4 ? mobile.slice(-4) : '8423';
 
-        if (currentCompositeUserId) localStorage.setItem('composite_user_id', currentCompositeUserId);
-        localStorage.setItem('user_name', currentUserName);
-        localStorage.setItem('buyer_email', user.buyer_email || '');
+        try {
+            if (currentCompositeUserId) sessionStorage.setItem('composite_user_id', currentCompositeUserId);
+            sessionStorage.setItem('user_name', currentUserName);
+            sessionStorage.setItem('buyer_email', user.buyer_email || '');
+        } catch (_) {}
 
         if (document.getElementById('currentLoggedInUser')) document.getElementById('currentLoggedInUser').innerText = currentUserName;
         if (currentCompositeUserId) syncCompositeIdToIframe(currentCompositeUserId);
@@ -345,9 +348,13 @@ function handleLogOut() {
     validityExpiryTime = 0;
     currentUserName = '';
     currentCompositeUserId = '';
+    window.ACTIVE_COMPOSITE_USER_ID = '';
     setSessionToken('');
-    localStorage.clear();
-    sessionStorage.clear();
+    try {
+        localStorage.removeItem('sigma_session_token');
+        localStorage.removeItem('composite_user_id');
+        sessionStorage.clear();
+    } catch (_) {}
     document.getElementById('page2')?.classList.add('hidden');
     document.getElementById('page1')?.classList.remove('hidden');
     showToast('সফলভাবে লগআউট করা হয়েছে।');
@@ -389,8 +396,7 @@ function enforceExpiredValidityFlow(user = {}) {
     syncValidityPendingUI(pendingDays, approvalStatus);
 
     currentUserName = '';
-    currentCompositeUserId = '';
-    localStorage.removeItem('user_name');
+    try { sessionStorage.removeItem('user_name'); } catch (_) {}
     document.getElementById('page2')?.classList.add('hidden');
     document.getElementById('page1')?.classList.remove('hidden');
     openBuyValidityModal();
@@ -549,8 +555,8 @@ function renderMonthlySummaryTable() {
         rows.push(`
             <tr class="bg-navy-850/90 text-white border-y border-slate-700/70">
                 <td class="py-2.5 pl-3 pr-2 font-mono text-xs sm:text-sm font-bold">
-                    <button type="button" onclick="toggleSummaryYearGroup('${yr}')" class="inline-flex items-center justify-center w-5 h-5 mr-2 rounded bg-slate-700 hover:bg-emerald-500 hover:text-slate-950 text-white font-bold text-xs cursor-pointer">${expanded ? '−' : '+'}</button>
-                    <span>${yr}</span>
+                    <button type="button" onclick="toggleSummaryYearGroup('${escapeHtml(yr)}')" class="inline-flex items-center justify-center w-5 h-5 mr-2 rounded bg-slate-700 hover:bg-emerald-500 hover:text-slate-950 text-white font-bold text-xs cursor-pointer">${expanded ? '−' : '+'}</button>
+                    <span>${escapeHtml(yr)}</span>
                 </td>
                 <td class="py-2.5 px-2.5 font-bold text-emerald-400">${formatMoney(grp.inc)}</td>
                 <td class="py-2.5 px-2.5 font-bold text-rose-400">${formatMoney(grp.exp)}</td>
@@ -563,7 +569,7 @@ function renderMonthlySummaryTable() {
                 const mSurplus = mItem.inc - mItem.exp;
                 rows.push(`
                     <tr class="text-slate-200 hover:bg-navy-850/50">
-                        <td class="py-2 pl-9 pr-2 font-mono text-xs sm:text-sm text-slate-300">${formatMonthPeriodLabel(yr, m)}</td>
+                        <td class="py-2 pl-9 pr-2 font-mono text-xs sm:text-sm text-slate-300">${escapeHtml(formatMonthPeriodLabel(yr, m))}</td>
                         <td class="py-2 px-2.5 font-semibold text-emerald-400">${formatMoney(mItem.inc)}</td>
                         <td class="py-2 px-2.5 font-semibold text-rose-400">${formatMoney(mItem.exp)}</td>
                         <td class="py-2 px-3 text-right font-bold ${mSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(mSurplus)}</td>
@@ -588,10 +594,11 @@ function renderLoanTables() {
     const buildRows = (list, cat, amtColor, btnClass, btnLabel, settleFn) => {
         let dueSum = 0, dueCnt = 0;
         const html = (list || []).map((l) => {
-            const name = l.person_name || l.description || l.loan_records_description || 'Party';
+            const name = escapeHtml(l.person_name || l.description || l.loan_records_description || 'Party');
             const rawSettled = l.loan_records_settled_date || l.settle_date || null;
-            const eDate = formatDisplayDate(l.entry_date || l.date || l.loan_records_entry_date);
-            const sDate = rawSettled ? formatDisplayDate(rawSettled) : '-';
+            const eDate = escapeHtml(formatDisplayDate(l.entry_date || l.date || l.loan_records_entry_date));
+            const sDateRaw = rawSettled ? formatDisplayDate(rawSettled) : '-';
+            const sDate = escapeHtml(sDateRaw);
             const amt = Number(l.amount ?? l.loan_records_amount ?? 0) || 0;
             const extra = extraOf(l, amt);
             const st = normalizeStatusLabel(l.status ?? l.loan_records_status ?? 'Due', rawSettled);
@@ -599,14 +606,14 @@ function renderLoanTables() {
             if (!settled) { dueSum += amt; dueCnt += 1; }
             return `
                 <tr class="text-slate-200 hover:bg-navy-850/60">
-                    <td class="py-2 pl-2.5 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-${cat}', 'count-del-${cat}', '.loan-row-cb[data-cat=\\'${cat}\\']')" class="loan-row-cb accent-rose-500" data-cat="${cat}" value="${l.id || ''}" /></td>
+                    <td class="py-2 pl-2.5 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-${cat}', 'count-del-${cat}', '.loan-row-cb[data-cat=\\'${cat}\\']')" class="loan-row-cb accent-rose-500" data-cat="${cat}" value="${escapeHtml(l.id || '')}" /></td>
                     <td class="py-2 px-2 font-semibold">${name}</td>
                     <td class="py-2 px-2 font-mono font-bold ${amtColor}">${formatMoney(amt)}</td>
-                    <td class="py-2 px-2 font-mono text-[11px] text-slate-400">${eDate}</td>
-                    <td class="py-2 px-2 font-mono text-[11px] ${sDate !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${sDate}</td>
-                    <td class="py-2 px-2 font-mono text-[11px] ${extra > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extra)}</td>
+                    <td class="py-2 px-2 font-mono text-[11px] text-slate-400 hidden sm:table-cell">${eDate}</td>
+                    <td class="py-2 px-2 font-mono text-[11px] hidden sm:table-cell ${sDateRaw !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${sDate}</td>
+                    <td class="py-2 px-2 font-mono text-[11px] hidden sm:table-cell ${extra > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extra)}</td>
                     <td class="py-2 pl-2 pr-2.5 text-right">
-                        ${!settled ? `<button type="button" onclick="${settleFn}('${l.id}')" class="${btnClass} font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">${btnLabel}</button>` : `<span class="text-emerald-400 font-semibold text-[11px]">${st}</span>`}
+                        ${!settled ? `<button type="button" onclick="${settleFn}('${escapeHtml(l.id)}')" class="${btnClass} font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">${btnLabel}</button>` : `<span class="text-emerald-400 font-semibold text-[11px]">${escapeHtml(st)}</span>`}
                     </td>
                 </tr>
             `;
@@ -637,18 +644,18 @@ function renderMarketExpensesTable() {
         return;
     }
     tbody.innerHTML = marketExpenses.map((m) => {
-        const d = formatDisplayDate(m.expense_date || m.date || m.income_expense_date);
-        const desc = m.description || m.desc || m.income_expense_description || '';
+        const d = escapeHtml(formatDisplayDate(m.expense_date || m.date || m.income_expense_date));
+        const desc = escapeHtml(m.description || m.desc || m.income_expense_description || '');
         const amt = Number(m.amount ?? m.income_expense_amount ?? 0) || 0;
         const st = normalizeStatusLabel(m.status ?? m.income_expense_status ?? 'Paid');
         return `
             <tr class="text-slate-200 hover:bg-navy-850/60">
-                <td class="py-2.5 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb')" class="expense-row-cb accent-rose-500" value="${m.id || ''}" /></td>
-                <td class="py-2.5 px-2.5 font-mono text-xs text-slate-400">${d}</td>
+                <td class="py-2.5 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb')" class="expense-row-cb accent-rose-500" value="${escapeHtml(m.id || '')}" /></td>
+                <td class="py-2.5 px-2.5 font-mono text-xs text-slate-400 hidden sm:table-cell">${d}</td>
                 <td class="py-2.5 px-2.5 font-semibold">${desc}</td>
                 <td class="py-2.5 px-2.5 font-mono text-rose-400 font-bold">${formatMoney(amt)}</td>
                 <td class="py-2.5 pl-2.5 pr-3 text-right">
-                    <button type="button" onclick="toggleMarketStatus('${m.id}')" class="${st === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[11px] font-bold cursor-pointer">${st}</button>
+                    <button type="button" onclick="toggleMarketStatus('${escapeHtml(m.id)}')" class="${st === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[11px] font-bold cursor-pointer">${escapeHtml(st)}</button>
                 </td>
             </tr>
         `;
@@ -795,9 +802,9 @@ function openIncomeListModal() {
             ? '<tr><td colspan="4" class="py-4 text-center text-slate-400">No income entries found.</td></tr>'
             : incomes.map((r) => `
                 <tr>
-                    <td class="py-2 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-incomes', 'count-del-incomes', '.income-row-cb')" class="income-row-cb accent-emerald-500" value="${r.id || ''}" /></td>
-                    <td class="py-2 px-2.5 font-mono text-xs">${formatDisplayDate(r.entry_date || r.income_expense_date)}</td>
-                    <td class="py-2 px-2.5">${r.description || r.income_expense_description || ''}</td>
+                    <td class="py-2 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-incomes', 'count-del-incomes', '.income-row-cb')" class="income-row-cb accent-emerald-500" value="${escapeHtml(r.id || '')}" /></td>
+                    <td class="py-2 px-2.5 font-mono text-xs">${escapeHtml(formatDisplayDate(r.entry_date || r.income_expense_date))}</td>
+                    <td class="py-2 px-2.5">${escapeHtml(r.description || r.income_expense_description || '')}</td>
                     <td class="py-2 pl-2.5 pr-3 text-right font-bold text-emerald-400">${formatMoney(r.amount ?? r.income_expense_amount ?? 0)}</td>
                 </tr>
             `).join('');
@@ -844,8 +851,8 @@ function renderLotInventory() {
         if (selectEl) selectEl.innerHTML = '<option value="">No Stock Available</option>';
         return;
     }
-    if (listEl) listEl.innerHTML = inStock.map((i) => `<div class="flex justify-between items-center bg-[#131822] px-2 py-1 rounded border border-slate-800"><span class="text-amber-400 font-mono">${i.lot_id} • ${i.user_name || i.user_id}</span><span class="text-emerald-400 font-bold">In_Stock</span></div>`).join('');
-    if (selectEl) selectEl.innerHTML = '<option value="">-- Select Lot ID --</option>' + inStock.map((i) => `<option value="${i.id}" data-password="${i.password || ''}">${i.lot_id} - ${i.user_name || i.user_id}</option>`).join('');
+    if (listEl) listEl.innerHTML = inStock.map((i) => `<div class="flex justify-between items-center bg-[#131822] px-2 py-1 rounded border border-slate-800"><span class="text-amber-400 font-mono">${escapeHtml(i.lot_id)} • ${escapeHtml(i.user_name || i.user_id)}</span><span class="text-emerald-400 font-bold">In_Stock</span></div>`).join('');
+    if (selectEl) selectEl.innerHTML = '<option value="">-- Select Lot ID --</option>' + inStock.map((i) => `<option value="${escapeHtml(i.id)}" data-password="${escapeHtml(i.password || '')}">${escapeHtml(i.lot_id)} - ${escapeHtml(i.user_name || i.user_id)}</option>`).join('');
 }
 
 function openSellLicenseModal() {
@@ -908,7 +915,7 @@ async function refreshValiditySummaryDisplay(items = validityCart) {
     if (box && Array.isArray(s.items)) {
         box.innerHTML = s.items.map((it, idx) => `
             <div class="flex items-center justify-between bg-[#0f172a] border border-slate-800 rounded-lg px-2.5 py-1.5">
-                <div><span class="font-semibold text-white">${it.months} Month${it.months > 1 ? 's' : ''} (${it.days} Days)</span><span class="text-slate-400"> × ${it.qty}</span>${it.discountPct > 0 ? `<span class="ml-1 text-[11px] text-emerald-400">(-${it.discountPct}%)</span>` : ''}</div>
+                <div><span class="font-semibold text-white">${escapeHtml(it.months)} Month${it.months > 1 ? 's' : ''} (${escapeHtml(it.days)} Days)</span><span class="text-slate-400"> × ${escapeHtml(it.qty)}</span>${it.discountPct > 0 ? `<span class="ml-1 text-[11px] text-emerald-400">(-${escapeHtml(it.discountPct)}%)</span>` : ''}</div>
                 <div class="flex items-center gap-2"><span class="font-mono text-slate-200">${formatMoney(it.subtotal)}</span><button type="button" onclick="removeValidityCartItem(${idx})" class="text-rose-400 font-bold">×</button></div>
             </div>
         `).join('');
@@ -995,12 +1002,15 @@ function renderChatUsersList() {
     const container = document.getElementById('chatUsersListContainer');
     if (!container) return;
     const others = accountsMasterRecords.filter((u) => (u.user_name || u.user_id) !== currentUserName);
-    container.innerHTML = others.map((u) => `
-        <button type="button" onclick="openIndividualChat('${u.user_name || u.user_id}')" class="shrink-0 bg-[#131822] hover:bg-indigo-950/60 border border-slate-700 rounded-xl px-3 py-1.5 flex items-center space-x-1.5">
-            <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
-            <span class="text-xs font-bold text-slate-200">${u.user_name || u.user_id}</span>
-        </button>
-    `).join('');
+    container.innerHTML = others.map((u) => {
+        const partner = escapeHtml(u.user_name || u.user_id);
+        return `
+            <button type="button" onclick="openIndividualChat('${partner}')" class="shrink-0 bg-[#131822] hover:bg-indigo-950/60 border border-slate-700 rounded-xl px-3 py-1.5 flex items-center space-x-1.5">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                <span class="text-xs font-bold text-slate-200">${partner}</span>
+            </button>
+        `;
+    }).join('');
 }
 
 function renderUniversalMessages() {
@@ -1008,8 +1018,9 @@ function renderUniversalMessages() {
     if (!box) return;
     box.innerHTML = universalMessages.map((m) => {
         const isMe = m.user_name === currentUserName || m.user_id === currentUserName;
-        const sender = m.user_name || m.user_id || 'User';
-        return `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}"><span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You (' + sender + ')' : sender}</span><div class="${isMe ? 'bg-emerald-600 text-slate-950 font-semibold' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">${m.message}</div></div>`;
+        const sender = escapeHtml(m.user_name || m.user_id || 'User');
+        const msg = escapeHtml(m.message);
+        return `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}"><span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You (' + sender + ')' : sender}</span><div class="${isMe ? 'bg-emerald-600 text-slate-950 font-semibold' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">${msg}</div></div>`;
     }).join('');
     box.scrollTop = box.scrollHeight;
 }
@@ -1046,7 +1057,9 @@ function renderIndividualMessages() {
     const msgs = privateMessagesMap[activePrivatePartner] || [];
     box.innerHTML = msgs.map((m) => {
         const isMe = m.user_name === currentUserName || m.user_id === currentUserName;
-        return `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}"><span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You' : (m.user_name || m.user_id)}</span><div class="${isMe ? 'bg-indigo-600 text-white font-medium' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">${m.message}</div></div>`;
+        const sender = escapeHtml(m.user_name || m.user_id);
+        const msg = escapeHtml(m.message);
+        return `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}"><span class="text-[10px] text-slate-400 mb-0.5 font-semibold">${isMe ? 'You' : sender}</span><div class="${isMe ? 'bg-indigo-600 text-white font-medium' : 'bg-[#131822] text-slate-200 border border-slate-800'} px-3 py-2 rounded-2xl max-w-[82%] break-words">${msg}</div></div>`;
     }).join('');
     box.scrollTop = box.scrollHeight;
 }
@@ -1068,10 +1081,7 @@ async function sendIndividualMessage(e) {
 }
 
 function openCashMemoModal() { openModal('cashMemoModal'); }
-function openSettingsModal() {
-    if (document.getElementById('settingsComposite')) document.getElementById('settingsComposite').innerText = resolveCompositeUserId();
-    openModal('settingsModal');
-}
+function openSettingsModal() { openModal('settingsModal'); }
 function toggleAccountsSection() {
     const c = document.getElementById('accountsSectionContainer');
     if (!c) return;
@@ -1103,22 +1113,22 @@ function renderMemoCart() {
     let grand = 0;
     tbody.innerHTML = memoCart.map((item, idx) => {
         grand += item.total;
-        return `<tr><td class="py-1.5 px-2 text-slate-300">${item.desc}</td><td class="py-1.5 px-1 text-center">${item.qty}</td><td class="py-1.5 px-1 text-right">৳ ${item.rate}</td><td class="py-1.5 px-2 text-right text-emerald-400 font-bold">৳ ${item.total}</td><td class="py-1.5 px-1 text-center text-rose-400 cursor-pointer" onclick="memoCart.splice(${idx},1); renderMemoCart();">×</td></tr>`;
+        return `<tr><td class="py-1.5 px-2 text-slate-300">${escapeHtml(item.desc)}</td><td class="py-1.5 px-1 text-center">${escapeHtml(item.qty)}</td><td class="py-1.5 px-1 text-right">৳ ${escapeHtml(item.rate)}</td><td class="py-1.5 px-2 text-right text-emerald-400 font-bold">৳ ${escapeHtml(item.total)}</td><td class="py-1.5 px-1 text-center text-rose-400 cursor-pointer" onclick="memoCart.splice(${idx},1); renderMemoCart();">×</td></tr>`;
     }).join('');
     if (document.getElementById('memoCartGrandTotal')) document.getElementById('memoCartGrandTotal').innerText = formatMoney(grand);
 }
 function openA4PdfPreview() {
-    const header = document.getElementById('memoHeaderConfig')?.value || '';
-    const footer = document.getElementById('memoFooterConfig')?.value || '';
-    const custName = document.getElementById('memoCustomerName')?.value || '';
-    const custMob = document.getElementById('memoCustomerMobile')?.value || '';
+    const header = escapeHtml(document.getElementById('memoHeaderConfig')?.value || '');
+    const footer = escapeHtml(document.getElementById('memoFooterConfig')?.value || '');
+    const custName = escapeHtml(document.getElementById('memoCustomerName')?.value || '');
+    const custMob = escapeHtml(document.getElementById('memoCustomerMobile')?.value || '');
     const grand = memoCart.reduce((acc, i) => acc + i.total, 0);
     const box = document.getElementById('a4PdfContentBox');
     if (box) {
         box.innerHTML = `
             <div style="text-align:center;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:15px;"><h2 style="margin:0;font-size:20px;font-weight:bold;">${header}</h2><h3 style="margin:8px 0 0;font-size:14px;background:#eee;display:inline-block;padding:2px 20px;border-radius:4px;">CASH MEMO</h3></div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:15px;"><div><strong>Customer:</strong> ${custName}<br><strong>Mobile:</strong> ${custMob}</div><div style="text-align:right;"><strong>Date:</strong> ${formatDisplayDate(new Date().toISOString().split('T')[0])}</div></div>
-            <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;"><thead><tr style="background:#f1f5f9;border-bottom:1px solid #cbd5e1;"><th style="padding:8px;text-align:left;">Item</th><th style="padding:8px;text-align:center;">Qty</th><th style="padding:8px;text-align:right;">Rate</th><th style="padding:8px;text-align:right;">Total</th></tr></thead><tbody>${memoCart.map((i) => `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;">${i.desc}</td><td style="padding:8px;text-align:center;">${i.qty}</td><td style="padding:8px;text-align:right;">৳ ${i.rate}</td><td style="padding:8px;text-align:right;font-weight:bold;">৳ ${i.total}</td></tr>`).join('')}</tbody></table>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:15px;"><div><strong>Customer:</strong> ${custName}<br><strong>Mobile:</strong> ${custMob}</div><div style="text-align:right;"><strong>Date:</strong> ${escapeHtml(formatDisplayDate(new Date().toISOString().split('T')[0]))}</div></div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;"><thead><tr style="background:#f1f5f9;border-bottom:1px solid #cbd5e1;"><th style="padding:8px;text-align:left;">Item</th><th style="padding:8px;text-align:center;">Qty</th><th style="padding:8px;text-align:right;">Rate</th><th style="padding:8px;text-align:right;">Total</th></tr></thead><tbody>${memoCart.map((i) => `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;">${escapeHtml(i.desc)}</td><td style="padding:8px;text-align:center;">${escapeHtml(i.qty)}</td><td style="padding:8px;text-align:right;">৳ ${escapeHtml(i.rate)}</td><td style="padding:8px;text-align:right;font-weight:bold;">৳ ${escapeHtml(i.total)}</td></tr>`).join('')}</tbody></table>
             <div style="text-align:right;font-size:15px;font-weight:bold;margin-bottom:30px;">Grand Total: ৳ ${grand.toFixed(2)}</div>
             <div style="text-align:center;font-size:11px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:8px;">${footer}</div>
         `;
@@ -1140,9 +1150,8 @@ function printMemoPdf() {
  * PASSWORD CHANGE & LISTENERS
  * ========================================================================= */
 function openUserPassModal() {
-    if (document.getElementById('modalCompositeId')) document.getElementById('modalCompositeId').innerText = resolveCompositeUserId() || 'N/A';
-    if (document.getElementById('modalAutoEmail')) document.getElementById('modalAutoEmail').innerText = localStorage.getItem('buyer_email') || 'N/A';
-    if (document.getElementById('newUsernameInput')) document.getElementById('newUsernameInput').value = localStorage.getItem('user_name') || currentUserName || '';
+    if (document.getElementById('modalAutoEmail')) document.getElementById('modalAutoEmail').innerText = sessionStorage.getItem('buyer_email') || 'N/A';
+    if (document.getElementById('newUsernameInput')) document.getElementById('newUsernameInput').value = sessionStorage.getItem('user_name') || currentUserName || '';
     if (document.getElementById('userPassModal')) document.getElementById('userPassModal').style.display = 'flex';
 }
 function closeUserPassModal() {
@@ -1161,6 +1170,7 @@ async function submitUserPasswordChange() {
 }
 
 window.addEventListener('message', (event) => {
+    if (event.origin !== TRUSTED_ORIGIN) return;
     const data = event.data;
     if (!data || data.channel !== BRIDGE_CHANNEL) return;
     if (data.type === 'SET_USER_SCOPE') {
