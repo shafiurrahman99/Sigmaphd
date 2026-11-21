@@ -1335,13 +1335,23 @@ window.addEventListener('message', (event) => {
     if (!data || data.channel !== BRIDGE_CHANNEL) return;
     if (data.type === 'SET_USER_SCOPE') {
         const nextId = sanitizeSafeId(data.payload?.composite_user_id || data.compositeUserId || '');
-        if (nextId && nextId !== currentCompositeUserId) {
+        if (nextId) {
             syncCompositeIdToIframe(nextId);
-            if (document.getElementById('monthly-summary-body') || document.getElementById('monthlyRowsContainer')) loadAllDatabaseRecords();
+            if (
+                document.getElementById('monthly-summary-body') ||
+                document.getElementById('monthlyRowsContainer') ||
+                document.getElementById('receivable-list-body') ||
+                document.getElementById('daily-expenses-body')
+            ) {
+                loadAllDatabaseRecords();
+            }
         }
     } else if (data.type === 'REQUEST_USER_SCOPE') {
-        syncCompositeIdToIframe(resolveCompositeUserId() || '101_admin');
-    } else if (data.type === 'TOAST' && data.message) showToast(data.message, data.variant || 'success');
+        const activeId = resolveCompositeUserId();
+        if (activeId) syncCompositeIdToIframe(activeId);
+    } else if (data.type === 'TOAST' && data.message) {
+        showToast(data.message, data.variant || 'success');
+    }
 });
 
 window.addEventListener('DOMContentLoaded', () => {
