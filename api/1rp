@@ -119,6 +119,81 @@ async function getTargetAccount(supabase, compositeUserId, fallbackCompanyId, pa
     return null;
 }
 
+function normalizeLoanStatus(rawStatus, settledDate = null) {
+    const clean = String(rawStatus ?? '').trim().toLowerCase();
+    if (clean === 'paid' || clean === 'settled' || clean === 'completed') return 'Paid';
+    if (clean === 'due received' || clean === 'received') return 'Due Received';
+    if (settledDate && String(settledDate).trim() !== '' && clean !== 'due') return 'Paid';
+    return 'Due';
+}
+
+function mapIncomeExpensePayload(record, compositeUserId, companyId) {
+    const type = (record.type || record.income_expense_type || 'income').toString().toLowerCase() === 'expense'
+        ? 'expense'
+        : 'income';
+    const rawStatus = String(record.status || record.income_expense_status || 'Paid').trim().toLowerCase();
+    const status = rawStatus === 'due' ? 'Due' : 'Paid';
+    return {
+        composite_user_id: compositeUserId,
+        income_expense_type: type,
+        income_expense_date: record.date || record.income_expense_date,
+        income_expense_description: String(record.desc ?? record.description ?? record.income_expense_description ?? '').trim(),
+        income_expense_amount: Number(record.amount ?? record.income_expense_amount ?? 0) || 0,
+        income_expense_status: status
+    };
+}
+
+function mapLoanPayload(record, compositeUserId) {
+    const rawDir = String(record.direction || record.loan_category || record.loan_records_direction || 'receivable').toLowerCase();
+    const direction = rawDir === 'payable' ? 'payable' : 'receivable';
+    const settledDate = record.settled_date || record.settle_date || record.loan_records_settled_date || null;
+    const status = normalizeLoanStatus(record.status ?? record.loan_records_status ?? 'Due', settledDate);
+
+    return {
+        composite_user_id: compositeUserId,
+        loan_records_direction: direction,
+        loan_records_description: String(record.description ?? record.person_name ?? record.loan_records_description ?? '').trim(),
+        loan_records_amount: Number(record.amount ?? record.loan_records_amount ?? 0) || 0,
+        loan_records_entry_date: record.entry_date || record.date || record.loan_records_entry_date,
+        loan_records_settled_date: settledDate,
+        loan_records_extra_amount: Number(record.extra_amount ?? record.loan_records_extra_amount ?? 0) || 0,
+        loan_records_status: status,
+        loan_records_source: String(record.source ?? record.loan_records_source ?? 'Ledger').trim()
+    };
+}
+
+function extractDeleteIds(parsedBody, payload) {
+    const rawIds =
+        (Array.isArray(parsedBody?.ids) && parsedBody.ids) ||
+        (Array.isArray(payload?.ids) && payload.ids) ||
+        (parsedBody?.id !== undefined && parsedBody?.id !== null ? [parsedBody.id] : null) ||
+        (payload?.id !== undefined && payload?.id !== null ? [payload.id] : null) ||
+        [];
+
+    return rawIds
+        .map((val) => (typeof val === 'object' && val !== null ? (val.id ?? val.row_id ?? val.entry_id) : val))
+        .filter((val) => val !== undefined && val !== null && String(val).trim() !== '');
+}
+
+async function deleteIncomeExpenseRows(ids, compositeUserId, extraFilter = null) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return { error: { message: 'ids array is required.' }, invalidInput: true };
+    }
+
+    let query = supabaseServer
+        .from('income_expense')
+        .delete()
+        .in('id', ids)
+        .eq('composite_user_id', compositeUserId);
+
+    if (extraFilter?.column && extraFilter?.value !== undefined) {
+        query = query.eq(extraFilter.column, extraFilter.value);
+    }
+
+    const { data, error } = await query.select('id');
+    return { data, error };
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
@@ -126,7 +201,8 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { action, company_id = "101", composite_user_id, payload } = req.body;
+        const parsedBody = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+        const { action, company_id = '101', composite_user_id, payload } = parsedBody;
 
         // লগইন ছাড়াই যে রিকোয়েস্টগুলো পাস হবে
         const publicActions = [
@@ -189,22 +265,92 @@ export default async function handler(req, res) {
 
             case 'fetch_dashboard_data': {
                 const [incExp, loansRec, loansPay, marketExp, accounts, chats] = await Promise.all([
-                    supabaseServer.from('income_expense').select('*').eq('composite_user_id', composite_user_id).order('entry_date', { ascending: false }),
-                    supabaseServer.from('loan_records').select('*').eq('composite_user_id', composite_user_id).eq('loan_category', 'Receivable'),
-                    supabaseServer.from('loan_records').select('*').eq('composite_user_id', composite_user_id).eq('loan_category', 'Payable'),
-                    supabaseServer.from('daily_expenses').select('*').eq('composite_user_id', composite_user_id).order('expense_date', { ascending: false }),
+                    supabaseServer
+                        .from('income_expense')
+                        .select('*')
+                        .eq('composite_user_id', composite_user_id)
+                        .order('income_expense_date', { ascending: false })
+                        .order('created_at', { ascending: false }),
+                    supabaseServer
+                        .from('loan_records')
+                        .select('*')
+                        .eq('composite_user_id', composite_user_id)
+                        .eq('loan_records_direction', 'receivable')
+                        .order('loan_records_entry_date', { ascending: false }),
+                    supabaseServer
+                        .from('loan_records')
+                        .select('*')
+                        .eq('composite_user_id', composite_user_id)
+                        .eq('loan_records_direction', 'payable')
+                        .order('loan_records_entry_date', { ascending: false }),
+                    supabaseServer
+                        .from('income_expense')
+                        .select('*')
+                        .eq('composite_user_id', composite_user_id)
+                        .eq('income_expense_type', 'expense')
+                        .order('income_expense_date', { ascending: false })
+                        .order('created_at', { ascending: false }),
                     supabaseServer.from('accounts_master').select('*').eq('company_id', company_id),
-                    supabaseServer.from('forum_chat').select('*').eq('company_id', company_id).eq('chat_channel', 'Public_Forum').order('created_at', { ascending: true })
+                    supabaseServer
+                        .from('forum_chat')
+                        .select('*')
+                        .eq('company_id', company_id)
+                        .eq('chat_channel', 'Public_Forum')
+                        .order('created_at', { ascending: true })
                 ]);
+
+                const normalizedLoansRec = (loansRec.data || []).map((r) => ({
+                    ...r,
+                    loan_records_status: normalizeLoanStatus(r.loan_records_status, r.loan_records_settled_date)
+                }));
+                const normalizedLoansPay = (loansPay.data || []).map((r) => ({
+                    ...r,
+                    loan_records_status: normalizeLoanStatus(r.loan_records_status, r.loan_records_settled_date)
+                }));
 
                 return res.status(200).json({
                     success: true,
                     income_expenses: incExp.data || [],
-                    loans_receivable: loansRec.data || [],
-                    loans_payable: loansPay.data || [],
+                    loans_receivable: normalizedLoansRec,
+                    loans_payable: normalizedLoansPay,
                     daily_expenses: marketExp.data || [],
                     accounts: accounts.data || [],
                     public_chats: chats.data || []
+                });
+            }
+
+            case 'fetch_ledger': {
+                const [ieRows, loanRows] = await Promise.all([
+                    supabaseServer
+                        .from('income_expense')
+                        .select('*')
+                        .eq('composite_user_id', composite_user_id)
+                        .order('income_expense_date', { ascending: false })
+                        .order('created_at', { ascending: false })
+                        .order('id', { ascending: false }),
+                    supabaseServer
+                        .from('loan_records')
+                        .select('*')
+                        .eq('composite_user_id', composite_user_id)
+                        .order('loan_records_entry_date', { ascending: false })
+                        .order('created_at', { ascending: false })
+                        .order('id', { ascending: false })
+                ]);
+
+                if (ieRows.error) throw ieRows.error;
+                if (loanRows.error) throw loanRows.error;
+
+                const normalizedLoans = (loanRows.data || []).map((r) => ({
+                    ...r,
+                    loan_records_status: normalizeLoanStatus(r.loan_records_status, r.loan_records_settled_date)
+                }));
+
+                return res.status(200).json({
+                    ok: true,
+                    success: true,
+                    composite_user_id,
+                    income_expense: ieRows.data || [],
+                    loan_records: normalizedLoans
                 });
             }
 
@@ -250,63 +396,333 @@ export default async function handler(req, res) {
                 });
             }
 
-            case 'save_income_expense': {
-                const { type, date, desc, amount } = payload;
-                const { error } = await supabaseServer.from('income_expense').insert([{
-                    company_id: company_id || composite_user_id?.split('_')[0],
-                    user_id: composite_user_id?.split('_')[1],
-                    composite_user_id,
-                    entry_type: type,
-                    entry_date: date,
-                    description: desc,
-                    amount
-                }]);
+            case 'save_income_expense':
+            case 'insert_income_expense': {
+                const srcRecord = payload?.record || payload || {};
+                const rowToInsert = mapIncomeExpensePayload(srcRecord, composite_user_id, company_id);
+                const { data: inserted, error } = await supabaseServer
+                    .from('income_expense')
+                    .insert([rowToInsert])
+                    .select()
+                    .single();
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Income/Expense recorded securely.' });
+                return res.status(200).json({
+                    ok: true,
+                    success: true,
+                    data: inserted,
+                    message: 'Income/Expense recorded securely.'
+                });
             }
 
-            case 'save_loan': {
-                const { category, date, person_name, amount } = payload;
-                const { error } = await supabaseServer.from('loan_records').insert([{
-                    company_id: composite_user_id?.split('_')[0],
-                    user_id: composite_user_id?.split('_')[1],
-                    composite_user_id,
-                    loan_category: category,
-                    entry_date: date,
-                    person_name,
-                    amount,
-                    status: 'Due'
-                }]);
+            case 'update_income_expense_status': {
+                const id = parsedBody.id ?? payload?.id;
+                const rawStatus = String(parsedBody.status ?? payload?.status ?? 'Paid').trim().toLowerCase();
+                const status = rawStatus === 'due' ? 'Due' : 'Paid';
+                if (!id) {
+                    return res.status(400).json({ ok: false, success: false, message: 'id is required.' });
+                }
+
+                const { data: updated, error } = await supabaseServer
+                    .from('income_expense')
+                    .update({ income_expense_status: status })
+                    .eq('id', id)
+                    .eq('composite_user_id', composite_user_id)
+                    .select()
+                    .single();
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Loan record synchronized.' });
+
+                // Daily Expense Due থেকে Paid হলে সংশ্লিষ্ট Payable এন্ট্রিও Paid করে দেয়া
+                if (updated && status === 'Paid') {
+                    const payableTag = `[ExpDue#${updated.id}]`;
+                    const settledDate = new Date().toISOString().slice(0, 10);
+                    await supabaseServer
+                        .from('loan_records')
+                        .update({
+                            loan_records_status: 'Paid',
+                            loan_records_settled_date: settledDate
+                        })
+                        .eq('composite_user_id', composite_user_id)
+                        .ilike('loan_records_description', `%${payableTag}%`);
+                }
+
+                return res.status(200).json({ ok: true, success: true, data: updated });
             }
 
-            case 'settle_loan': {
-                const { id, settle_date, extra_amount } = payload;
-                const { error } = await supabaseServer.from('loan_records')
-                    .update({ status: 'Paid', settle_date, extra_amount })
-                    .eq('id', id);
+            case 'delete_income_expense':
+            case 'delete_income_entries': {
+                const ids = extractDeleteIds(parsedBody, payload);
+                if (ids.length === 0) {
+                    return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
+                }
+
+                const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id);
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Loan settlement processed.' });
+                return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
+            }
+
+            case 'delete_market_expenses': {
+                const ids = extractDeleteIds(parsedBody, payload);
+                if (ids.length === 0) {
+                    return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
+                }
+
+                const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id, {
+                    column: 'income_expense_type',
+                    value: 'expense'
+                });
+                if (error) throw error;
+                return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
+            }
+
+            case 'delete_monthly_summary': {
+                const ids = extractDeleteIds(parsedBody, payload);
+                const months = Array.isArray(parsedBody?.months)
+                    ? parsedBody.months
+                    : (Array.isArray(payload?.months) ? payload.months : []);
+
+                if (ids.length > 0) {
+                    const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id);
+                    if (error) throw error;
+                    return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
+                }
+
+                if (months.length > 0) {
+                    const { data: rows, error: fetchErr } = await supabaseServer
+                        .from('income_expense')
+                        .select('id, income_expense_date')
+                        .eq('composite_user_id', composite_user_id);
+                    if (fetchErr) throw fetchErr;
+
+                    const monthSet = new Set(months.map((m) => String(m).slice(0, 7)));
+                    const matchedIds = (rows || [])
+                        .filter((r) => monthSet.has(String(r.income_expense_date || '').slice(0, 7)))
+                        .map((r) => r.id);
+
+                    if (matchedIds.length === 0) {
+                        return res.status(200).json({ ok: true, success: true, deleted: 0, ids: [] });
+                    }
+
+                    const { data, error } = await deleteIncomeExpenseRows(matchedIds, composite_user_id);
+                    if (error) throw error;
+                    return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids: matchedIds });
+                }
+
+                return res.status(400).json({ ok: false, success: false, message: 'ids or months is required.' });
+            }
+
+            case 'save_loan':
+            case 'insert_loan_record': {
+                const srcRecord = payload?.record || payload || {};
+                const rowToInsert = mapLoanPayload(srcRecord, composite_user_id);
+                const { data: inserted, error } = await supabaseServer
+                    .from('loan_records')
+                    .insert([rowToInsert])
+                    .select()
+                    .single();
+                if (error) throw error;
+
+                // Receivable নতুন এন্ট্রি হলে Total Income থেকে মূল অ্যামাউন্ট মাইনাস করতে expense রো যুক্ত করা
+                if (inserted.loan_records_direction === 'receivable' && Number(inserted.loan_records_amount || 0) > 0) {
+                    const baseAmt = Number(inserted.loan_records_amount);
+                    const entryDate = inserted.loan_records_entry_date || new Date().toISOString().slice(0, 10);
+                    const descText = `Receivable Out (${inserted.loan_records_description || 'Entry'}) [Loan#${inserted.id}]`;
+
+                    await supabaseServer.from('income_expense').insert([{
+                        composite_user_id,
+                        income_expense_type: 'expense',
+                        income_expense_date: entryDate,
+                        income_expense_description: descText,
+                        income_expense_amount: baseAmt,
+                        income_expense_status: 'Paid'
+                    }]);
+                }
+
+                // Payable নতুন এন্ট্রি শুধু loan_records-এ থাকবে; Income/Expense-এ কোনো যোগ-বিয়োগ হবে না
+                return res.status(200).json({
+                    ok: true,
+                    success: true,
+                    data: inserted,
+                    message: 'Loan record synchronized.'
+                });
+            }
+
+            case 'settle_loan':
+            case 'settle_loan_record': {
+                const rec = payload?.record || payload || {};
+                const id = rec.id;
+                if (!id) {
+                    return res.status(400).json({ ok: false, success: false, message: 'id is required.' });
+                }
+
+                const { data: existingLoan, error: fetchLoanErr } = await supabaseServer
+                    .from('loan_records')
+                    .select('*')
+                    .eq('id', id)
+                    .eq('composite_user_id', composite_user_id)
+                    .single();
+                if (fetchLoanErr || !existingLoan) throw fetchLoanErr || new Error('Loan record not found.');
+
+                const rawNextStatus = rec.loan_records_status ?? rec.status ?? 'Paid';
+                const nextSettledDate = rec.loan_records_settled_date || rec.settled_date || rec.settle_date || new Date().toISOString().slice(0, 10);
+                const nextStatus = normalizeLoanStatus(rawNextStatus, nextSettledDate);
+                const nextExtraAmount = Number(rec.loan_records_extra_amount ?? rec.extra_amount ?? existingLoan.loan_records_extra_amount ?? 0) || 0;
+
+                const { data: updated, error } = await supabaseServer
+                    .from('loan_records')
+                    .update({
+                        loan_records_status: nextStatus,
+                        loan_records_settled_date: nextSettledDate,
+                        loan_records_extra_amount: nextExtraAmount
+                    })
+                    .eq('id', id)
+                    .eq('composite_user_id', composite_user_id)
+                    .select()
+                    .single();
+                if (error) throw error;
+
+                const isSettledNow = ['Paid', 'Due Received'].includes(String(nextStatus));
+                const principalAmount = Number(updated.loan_records_amount || 0);
+
+                // ১. Receivable Paid/Due Received হলে: মূল অ্যামাউন্ট + অতিরিক্ত অ্যামাউন্ট Income-এ যুক্ত হবে
+                if (updated.loan_records_direction === 'receivable' && isSettledNow) {
+                    const totalReceivedIncome = principalAmount + nextExtraAmount;
+                    if (totalReceivedIncome > 0) {
+                        const tag = `[LoanSettle#${updated.id}]`;
+                        const { data: existingInc } = await supabaseServer
+                            .from('income_expense')
+                            .select('id')
+                            .eq('composite_user_id', composite_user_id)
+                            .ilike('income_expense_description', `%${tag}%`);
+
+                        if (!existingInc || existingInc.length === 0) {
+                            await supabaseServer.from('income_expense').insert([{
+                                composite_user_id,
+                                income_expense_type: 'income',
+                                income_expense_date: nextSettledDate,
+                                income_expense_description: `Receivable Settled (${updated.loan_records_description || 'Loan'}) - Principal + Extra ${tag}`,
+                                income_expense_amount: totalReceivedIncome,
+                                income_expense_status: 'Paid'
+                            }]);
+                        }
+                    }
+                }
+
+                // ২. Payable Paid/Due Received হলে:
+                // - যদি এটি কোনো Due Expense থেকে আসা Payable হয় [ExpDue#<expId>], তবে সেই Expense রো-টিকে Paid করে মূল অ্যামাউন্ট + এক্সট্রা অ্যামাউন্ট Expense হিসেবে সক্রিয় করা
+                // - সাধারণ Payable হলে অতিরিক্ত অ্যামাউন্ট (০-এর বেশি হলে) Daily Expense-এ যুক্ত হবে
+                if (updated.loan_records_direction === 'payable' && isSettledNow) {
+                    const descStr = String(updated.loan_records_description || '');
+                    const expDueMatch = descStr.match(/\[ExpDue#([^\]]+)\]/);
+
+                    if (expDueMatch && expDueMatch[1]) {
+                        const linkedExpId = expDueMatch[1];
+                        const totalExpenseAmt = principalAmount + nextExtraAmount;
+                        await supabaseServer
+                            .from('income_expense')
+                            .update({
+                                income_expense_status: 'Paid',
+                                income_expense_date: nextSettledDate,
+                                income_expense_amount: totalExpenseAmt > 0 ? totalExpenseAmt : principalAmount
+                            })
+                            .eq('id', linkedExpId)
+                            .eq('composite_user_id', composite_user_id);
+                    } else if (nextExtraAmount > 0) {
+                        const tag = `[PayableExtra#${updated.id}]`;
+                        const { data: existingExp } = await supabaseServer
+                            .from('income_expense')
+                            .select('id')
+                            .eq('composite_user_id', composite_user_id)
+                            .ilike('income_expense_description', `%${tag}%`);
+
+                        if (!existingExp || existingExp.length === 0) {
+                            await supabaseServer.from('income_expense').insert([{
+                                composite_user_id,
+                                income_expense_type: 'expense',
+                                income_expense_date: nextSettledDate,
+                                income_expense_description: `Payable Extra Expense (${updated.loan_records_description || 'Payable'}) ${tag}`,
+                                income_expense_amount: nextExtraAmount,
+                                income_expense_status: 'Paid'
+                            }]);
+                        }
+                    }
+                }
+
+                return res.status(200).json({
+                    ok: true,
+                    success: true,
+                    data: updated,
+                    message: 'Loan settlement processed.'
+                });
+            }
+
+            case 'delete_loan_records':
+            case 'delete_loan_entries':
+            case 'delete_loans': {
+                const ids = extractDeleteIds(parsedBody, payload);
+                if (ids.length === 0) {
+                    return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
+                }
+
+                const { data, error } = await supabaseServer
+                    .from('loan_records')
+                    .delete()
+                    .in('id', ids)
+                    .eq('composite_user_id', composite_user_id)
+                    .select('id');
+                if (error) throw error;
+                return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
             }
 
             case 'save_market_expense': {
-                const { expense_date, description, amount, status } = payload;
-                const { error } = await supabaseServer.from('daily_expenses').insert([{
-                    company_id: composite_user_id?.split('_')[0],
-                    user_id: composite_user_id?.split('_')[1],
+                const { expense_date, description, amount, status } = payload || {};
+                const cleanStatus = String(status || 'Paid').trim().toLowerCase() === 'due' ? 'Due' : 'Paid';
+                const rowToInsert = mapIncomeExpensePayload(
+                    {
+                        type: 'expense',
+                        date: expense_date,
+                        desc: description,
+                        amount,
+                        status: cleanStatus
+                    },
                     composite_user_id,
-                    expense_date,
-                    description,
-                    amount,
-                    status
-                }]);
+                    company_id
+                );
+
+                const { data: insertedExp, error } = await supabaseServer
+                    .from('income_expense')
+                    .insert([rowToInsert])
+                    .select()
+                    .single();
                 if (error) throw error;
-                return res.status(200).json({ success: true, message: 'Daily market expense logged.' });
+
+                // নতুন এক্সপেন্স এন্ট্রি Due হলে: Payable লিস্টে পুরো অ্যামাউন্ট শো করবে এবং Paid না হওয়া পর্যন্ত Expense-এ যোগ হবে না
+                if (cleanStatus === 'Due' && Number(insertedExp.income_expense_amount || 0) > 0) {
+                    const expTag = `[ExpDue#${insertedExp.id}]`;
+                    const cleanDesc = String(insertedExp.income_expense_description || 'Due Expense').trim();
+                    await supabaseServer.from('loan_records').insert([{
+                        composite_user_id,
+                        loan_records_direction: 'payable',
+                        loan_records_description: `${cleanDesc} ${expTag}`,
+                        loan_records_amount: Number(insertedExp.income_expense_amount),
+                        loan_records_entry_date: insertedExp.income_expense_date || new Date().toISOString().slice(0, 10),
+                        loan_records_settled_date: null,
+                        loan_records_extra_amount: 0,
+                        loan_records_status: 'Due',
+                        loan_records_source: 'Daily Expense'
+                    }]);
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    data: insertedExp,
+                    message: cleanStatus === 'Due'
+                        ? 'Due expense added to Payable until Paid.'
+                        : 'Daily market expense logged.'
+                });
             }
 
             case 'buy_lot': {
-                const { lot_id, quantity } = payload;
+                const { lot_id, quantity } = payload || {};
                 const compId = composite_user_id ? composite_user_id.split('_')[0] : company_id;
                 const ownerId = composite_user_id || (compId + '_admin');
                 const rowsToInsert = [];
@@ -334,7 +750,7 @@ export default async function handler(req, res) {
             }
 
             case 'process_id_sale_cashback': {
-                const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload;
+                const { seller_composite_id, sold_item_id, buyer_name, buyer_mobile, buyer_email, coupon_code } = payload || {};
 
                 const { error: updateError } = await supabaseServer.from('accounts_master').update({
                     status: 'Active',
@@ -352,11 +768,11 @@ export default async function handler(req, res) {
                     .eq('composite_user_id', seller_composite_id)
                     .single();
 
-                let directBonus = 8.00;
-                let chainPoolTotal = 2.00;
+                const directBonus = 8.00;
+                const chainPoolTotal = 2.00;
                 let totalSellerNewBalance = (sellerData?.wallet_balance || 0) + directBonus;
 
-                let uplinesChain = [];
+                const uplinesChain = [];
                 let currentUplineId = sellerData?.upline_id;
 
                 while (currentUplineId && currentUplineId !== seller_composite_id) {
@@ -372,19 +788,19 @@ export default async function handler(req, res) {
                     if (uplinesChain.length > 1000) break;
                 }
 
-                let N = uplinesChain.length;
+                const N = uplinesChain.length;
 
                 if (N === 0) {
                     totalSellerNewBalance += chainPoolTotal;
                 } else {
-                    let totalWeight = (N * (N + 1)) / 2;
+                    const totalWeight = (N * (N + 1)) / 2;
 
                     for (let i = 0; i < N; i++) {
-                        let currentWeight = N - i;
-                        let shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
+                        const currentWeight = N - i;
+                        const shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
 
-                        let targetCompositeId = uplinesChain[i].composite_user_id;
-                        let targetOldBalance = uplinesChain[i].wallet_balance || 0;
+                        const targetCompositeId = uplinesChain[i].composite_user_id;
+                        const targetOldBalance = uplinesChain[i].wallet_balance || 0;
 
                         await supabaseServer.from('accounts_master')
                             .update({ wallet_balance: targetOldBalance + shareAmount })
@@ -403,8 +819,8 @@ export default async function handler(req, res) {
             }
 
             case 'register_new_license': {
-                const { name, mobile, email } = payload;
-                const compId = company_id || "101";
+                const { name, mobile, email } = payload || {};
+                const compId = company_id || '101';
                 const randomUserName = 'user_' + Math.floor(1000 + Math.random() * 9000);
                 const defaultAdminCompositeId = compId + '_admin';
 
@@ -549,7 +965,7 @@ export default async function handler(req, res) {
             }
 
             case 'balance_transfer': {
-                const { recipient_id, amount } = payload;
+                const { recipient_id, amount } = payload || {};
                 const transferAmount = parseFloat(amount) || 0;
 
                 if (transferAmount <= 0) {
@@ -605,7 +1021,7 @@ export default async function handler(req, res) {
             }
 
             case 'send_chat': {
-                const { channel, message } = payload;
+                const { channel, message } = payload || {};
                 const { error } = await supabaseServer.from('forum_chat').insert([{
                     company_id: composite_user_id?.split('_')[0],
                     user_id: composite_user_id?.split('_')[1],
