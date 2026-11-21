@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; frame-src 'self'; object-src 'none'; base-uri 'self';">
     <title>My Develop App - Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -99,14 +100,14 @@
                 </div>
             </div>
 
-            <!-- Sign In Form -->
+            <!-- Sign In Form (No hardcoded default credentials) -->
             <form onsubmit="handleMainSignIn(event)" class="space-y-4" autocomplete="off">
                 <div>
-                    <input type="text" id="mainUserName" required autocomplete="username" placeholder="Enter Username (e.g., admin)" value="admin"
+                    <input type="text" id="mainUserName" required maxlength="64" pattern="[A-Za-z0-9_@.-]+" autocomplete="username" placeholder="Enter Username"
                         class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
                 </div>
                 <div>
-                    <input type="password" id="mainUserPassword" required autocomplete="current-password" placeholder="Enter Password (e.g., 1234)" value="1234"
+                    <input type="password" id="mainUserPassword" required minlength="4" maxlength="128" autocomplete="current-password" placeholder="Enter Password"
                         class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm">
                 </div>
 
@@ -178,7 +179,7 @@
                             <i class="fa-solid fa-user-check text-sm"></i>
                         </div>
                         <div>
-                            <h3 class="text-xs font-bold text-white">User: <strong id="currentLoggedInUser" class="text-emerald-400">admin</strong></h3>
+                            <h3 class="text-xs font-bold text-white">User: <strong id="currentLoggedInUser" class="text-emerald-400"></strong></h3>
                             <p class="text-[10px] text-slate-400 font-medium mt-0.5" id="validityStatusText">Validity Countdown</p>
                         </div>
                     </div>
@@ -240,7 +241,7 @@
                 <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
                     <div class="flex items-center space-x-2">
                         <span class="text-slate-400 text-xs">Coupon Code:</span>
-                        <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA-ADMIN</span>
+                        <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA_0000</span>
                     </div>
                     <button type="button" onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all">
                         <i class="fa-regular fa-copy"></i>
@@ -265,7 +266,7 @@
                             <i class="fa-solid fa-layer-group text-amber-400"></i>
                             <span>My Purchased Lots (In_Stock):</span>
                         </span>
-                        <span class="text-emerald-400 font-extrabold">Available IDs: <span id="availableLotIdsCount">1</span></span>
+                        <span class="text-emerald-400 font-extrabold">Available IDs: <span id="availableLotIdsCount">0</span></span>
                     </div>
                     <div id="lotInventorySummaryList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
                 </div>
@@ -290,7 +291,7 @@
                 id="dashboardFrame"
                 src="dashboard.html"
                 title="Financial Dashboard & Ledger"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                sandbox="allow-scripts allow-same-origin allow-forms"
                 loading="eager"></iframe>
         </div>
     </div>
@@ -360,7 +361,7 @@
 
             <div id="validityTrxBox">
                 <label for="validityTrxId" class="block text-slate-400 mb-1">Transaction ID</label>
-                <input type="text" id="validityTrxId" placeholder="Enter Payment TrxID (bKash/Nagad)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
+                <input type="text" id="validityTrxId" required maxlength="64" pattern="[A-Za-z0-9_-]+" placeholder="Enter Payment TrxID (bKash/Nagad)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-1">
@@ -387,7 +388,7 @@
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Extra Amount (Added to Expense if Payable)</label>
-                    <input type="number" id="settleExtraAmount" placeholder="0.00" value="0" min="0" step="any" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400 font-bold">
+                    <input type="number" id="settleExtraAmount" placeholder="0.00" value="0" min="0" max="100000000" step="0.01" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400 font-bold">
                 </div>
                 <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Confirm Settle</button>
             </form>
@@ -472,15 +473,15 @@
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Buyer Name</label>
-                    <input type="text" id="sellBuyerName" placeholder="Buyer Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="sellBuyerName" maxlength="100" placeholder="Buyer Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Buyer Mobile Number</label>
-                    <input type="text" id="sellBuyerMobile" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="tel" id="sellBuyerMobile" maxlength="20" pattern="[0-9+\-\s]{7,20}" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Buyer Email Address</label>
-                    <input type="email" id="sellBuyerEmail" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="email" id="sellBuyerEmail" maxlength="120" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg mt-1">Submit & Sell ID (৳8 + ৳2 Chain)</button>
             </form>
@@ -493,8 +494,8 @@
             <button type="button" onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-lg font-bold text-white">Balance Transfer</h3>
             <form onsubmit="handleBalanceTransferSubmit(event)" class="space-y-3 text-xs">
-                <input type="text" id="transferRecipientId" placeholder="Recipient ID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400">
-                <input type="number" id="transferAmount" placeholder="Amount (৳)" min="1" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
+                <input type="text" id="transferRecipientId" maxlength="64" pattern="[A-Za-z0-9_@.-]+" placeholder="Recipient ID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400">
+                <input type="number" id="transferAmount" placeholder="Amount (৳)" min="1" max="10000000" step="0.01" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
                 <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">Transfer</button>
             </form>
         </div>
@@ -509,19 +510,19 @@
             <form onsubmit="handleLandingBuySubmit(event)" class="space-y-2.5">
                 <div>
                     <label class="block text-slate-400 mb-1">Buyer Name</label>
-                    <input type="text" id="landingBuyerName" placeholder="Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="landingBuyerName" maxlength="100" placeholder="Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Mobile Number</label>
-                    <input type="text" id="landingBuyMobile" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="tel" id="landingBuyMobile" maxlength="20" pattern="[0-9+\-\s]{7,20}" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Email Address</label>
-                    <input type="email" id="landingBuyEmail" placeholder="email@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="email" id="landingBuyEmail" maxlength="120" placeholder="email@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Payment TrxID</label>
-                    <input type="text" id="landingBuyPaymentId" placeholder="TrxID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="landingBuyPaymentId" maxlength="64" pattern="[A-Za-z0-9_-]+" placeholder="TrxID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
                 <button type="submit" class="w-full buy-btn-gradient text-slate-950 font-black py-3 rounded-xl mt-2">Complete Payment</button>
             </form>
@@ -534,7 +535,7 @@
             <button type="button" onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h3 class="text-lg font-bold text-white">Add Device</h3>
             <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 text-xs">
-                <input type="text" id="deviceNameInput" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <input type="text" id="deviceNameInput" maxlength="80" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
                 <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">Add Device</button>
             </form>
         </div>
@@ -568,7 +569,7 @@
                 <div class="flex-1 bg-[#080a0f] border border-slate-800 rounded-2xl p-3 overflow-y-auto space-y-2.5 text-xs" id="universalChatBox"></div>
 
                 <form onsubmit="sendUniversalMessage(event)" class="flex items-center space-x-2">
-                    <input type="text" id="universalMsgInput" placeholder="Write to Universal Chat..." required
+                    <input type="text" id="universalMsgInput" maxlength="500" placeholder="Write to Universal Chat..." required
                         class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
                     <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center space-x-1 shadow">
                         <span>Send</span>
@@ -591,7 +592,7 @@
                 <div class="flex-1 bg-[#080a0f] border border-slate-800 rounded-2xl p-3 overflow-y-auto space-y-2.5 text-xs" id="individualChatBox"></div>
 
                 <form onsubmit="sendIndividualMessage(event)" class="flex items-center space-x-2">
-                    <input type="text" id="individualMsgInput" placeholder="Write a private message..." required
+                    <input type="text" id="individualMsgInput" maxlength="500" placeholder="Write a private message..." required
                         class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
                     <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center space-x-1 shadow">
                         <span>Send</span>
@@ -617,25 +618,25 @@
                     <button type="button" id="lockBusinessSetupBtn" onclick="lockBusinessSetup()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px]">Lock Setup</button>
                 </div>
                 <div class="space-y-1.5">
-                    <input type="text" id="memoHeaderConfig" placeholder="Company Name & Address (Centered Header)" value="My Develop App Store | Dhaka, Bangladesh" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-                    <input type="text" id="memoFooterConfig" placeholder="Mobile & Web Address (Centered Footer)" value="Mobile: 01818 589423 | Web: mydevelopapp.com" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-300">
+                    <input type="text" id="memoHeaderConfig" maxlength="160" placeholder="Company Name & Address (Centered Header)" value="My Develop App Store | Dhaka, Bangladesh" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="memoFooterConfig" maxlength="160" placeholder="Mobile & Web Address (Centered Footer)" value="Mobile: 01818 589423 | Web: mydevelopapp.com" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-300">
                 </div>
             </div>
 
             <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
                 <p class="text-emerald-400 font-bold text-[11px] uppercase tracking-wider">Customer Details (Open)</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input type="text" id="memoCustomerName" placeholder="Customer Name" value="Customer X" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
-                    <input type="text" id="memoCustomerMobile" placeholder="Customer Mobile" value="01800000000" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="memoCustomerName" maxlength="100" placeholder="Customer Name" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="tel" id="memoCustomerMobile" maxlength="20" pattern="[0-9+\-\s]{7,20}" placeholder="Customer Mobile" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                 </div>
             </div>
 
             <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
                 <p class="text-indigo-400 font-bold text-[11px] uppercase tracking-wider">Add Product (Open)</p>
                 <div class="grid grid-cols-12 gap-1.5">
-                    <input type="text" id="memoProdDesc" placeholder="Description" value="Software License Key" class="col-span-6 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-slate-200">
-                    <input type="number" id="memoProdQty" placeholder="Qty" min="1" value="1" class="col-span-2 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2 text-center text-slate-200">
-                    <input type="number" id="memoProdRate" placeholder="Rate" min="0" value="500" class="col-span-4 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-emerald-400">
+                    <input type="text" id="memoProdDesc" maxlength="140" placeholder="Description" class="col-span-6 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-slate-200">
+                    <input type="number" id="memoProdQty" placeholder="Qty" min="1" max="100000" value="1" class="col-span-2 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2 text-center text-slate-200">
+                    <input type="number" id="memoProdRate" placeholder="Rate" min="0" max="100000000" step="0.01" class="col-span-4 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-emerald-400">
                 </div>
                 <button type="button" onclick="addProductToMemoCart()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs">Add Item to Cart</button>
 
@@ -655,7 +656,7 @@
                 </div>
                 <div class="flex justify-between items-center pt-1 font-extrabold text-sm">
                     <span class="text-slate-300">Grand Total:</span>
-                    <span id="memoCartGrandTotal" class="text-emerald-400 font-mono">৳ 500.00</span>
+                    <span id="memoCartGrandTotal" class="text-emerald-400 font-mono">৳ 0.00</span>
                 </div>
             </div>
 
@@ -703,22 +704,22 @@
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
-                    <input type="text" id="newUsernameInput" autocomplete="off" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="text" id="newUsernameInput" maxlength="64" pattern="[A-Za-z0-9_@.-]+" autocomplete="off" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
 
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুরাতন পাসওয়ার্ড (Old Password) *</label>
-                    <input type="password" id="oldPasswordInput" autocomplete="current-password" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="password" id="oldPasswordInput" minlength="4" maxlength="128" autocomplete="current-password" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
 
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন পাসওয়ার্ড (New Password) *</label>
-                    <input type="password" id="newPasswordInput" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="password" id="newPasswordInput" minlength="4" maxlength="128" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
 
                 <div>
                     <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুনরায় নতুন পাসওয়ার্ড (Confirm New Password) *</label>
-                    <input type="password" id="confirmPasswordInput" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    <input type="password" id="confirmPasswordInput" minlength="4" maxlength="128" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
                 </div>
             </div>
 
@@ -791,7 +792,7 @@
             }
 
             window.addEventListener('message', (event) => {
-                if (event.origin && event.origin !== 'null' && event.origin !== window.location.origin) {
+                if (!event.origin || event.origin !== window.location.origin) {
                     return;
                 }
                 if (frame && frame.contentWindow && event.source !== frame.contentWindow) {
@@ -806,7 +807,7 @@
                     frame.style.height = `${safeHeight}px`;
                 } else if (data.type === 'TOAST' && typeof window.showToast === 'function') {
                     const safeMsg = typeof data.message === 'string' ? data.message.slice(0, 200) : 'Updated';
-                    const allowedVariants = ['success', 'error', 'warning', 'info'];
+                    const allowedVariants = ['success', 'error', 'warning', 'info', 'warn'];
                     const safeVariant = allowedVariants.includes(data.variant) ? data.variant : 'success';
                     window.showToast(safeMsg, safeVariant);
                 } else if (data.type === 'OPEN_MODAL') {
