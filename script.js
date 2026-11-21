@@ -215,6 +215,176 @@ function openDailyExpenseModal() {
     openModal('modal-daily-expense');
 }
 
+/**
+ * Navigation & Section / Tab / Modal Switcher
+ * Supports Dashboard, My Chat, Cash Memo, Show Accounts, Show Settings, My Set
+ */
+function showSectionByIds(targetIds = []) {
+    const allSections = document.querySelectorAll(
+        '[data-section], [data-tab-panel], .tab-panel, .page-section, #dashboardSection, #dashboardView, #dashboardContent, #chatSection, #myChatSection, #chatView, #cashMemoSection, #memoSection, #cashMemoView, #settingsSection, #showSettingsSection, #mySetSection, #userSetSection'
+    );
+    const targetSet = new Set(targetIds.filter(Boolean));
+    let matchedAny = false;
+
+    allSections.forEach((el) => {
+        const idMatch = el.id && targetSet.has(el.id);
+        const dataMatch =
+            targetSet.has(el.dataset.section) ||
+            targetSet.has(el.dataset.tabPanel) ||
+            targetSet.has(el.dataset.view);
+        if (idMatch || dataMatch) {
+            el.classList.remove('hidden');
+            if (el.style.display === 'none') el.style.display = '';
+            matchedAny = true;
+        } else if (targetSet.size > 0) {
+            el.classList.add('hidden');
+        }
+    });
+
+    if (window.self !== window.top && window.parent) {
+        window.parent.postMessage({
+            channel: BRIDGE_CHANNEL,
+            type: 'NAVIGATE',
+            compositeUserId: resolveCompositeUserId(),
+            targets: Array.from(targetSet)
+        }, '*');
+    }
+
+    notifyParentFrameHeight();
+    return matchedAny;
+}
+
+function setActiveNavButton(activeKey) {
+    const navButtons = document.querySelectorAll('nav button, nav a, [role="tab"], .nav-tab, .tab-btn');
+    navButtons.forEach((btn) => {
+        const key = (btn.dataset.tab || btn.dataset.target || btn.dataset.section || btn.id || btn.textContent || '')
+            .trim()
+            .toLowerCase();
+        const isMatch = activeKey && key.includes(activeKey.toLowerCase());
+        btn.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+        btn.classList.toggle('active', isMatch);
+    });
+}
+
+function switchToDashboard() {
+    setActiveNavButton('dashboard');
+    showSectionByIds(['dashboardSection', 'dashboardView', 'dashboardContent', 'dashboard-main', 'dashboard']);
+    renderAllDashboardTables();
+}
+
+function switchToMyChat() {
+    setActiveNavButton('chat');
+    const found = showSectionByIds(['chatSection', 'myChatSection', 'chatView', 'myChatView', 'chatModal', 'myChatModal']);
+    if (!found) {
+        const modal = document.getElementById('modal-chat') || document.getElementById('myChatModal') || document.getElementById('chatModal');
+        if (modal) openModal(modal.id);
+    }
+    renderUniversalMessages();
+}
+
+function switchToCashMemo() {
+    setActiveNavButton('memo');
+    const found = showSectionByIds(['cashMemoSection', 'memoSection', 'cashMemoView', 'memoView', 'cashMemoModal', 'memoModal']);
+    if (!found) {
+        const modal = document.getElementById('modal-cash-memo') || document.getElementById('cashMemoModal') || document.getElementById('memoModal');
+        if (modal) openModal(modal.id);
+    }
+}
+
+function openShowSettingsModal() {
+    const existingModal =
+        document.getElementById('modal-show-settings') ||
+        document.getElementById('settingsModal') ||
+        document.getElementById('showSettingsModal') ||
+        document.getElementById('modal-settings');
+    if (existingModal) {
+        openModal(existingModal.id);
+        return;
+    }
+
+    const foundSection = showSectionByIds(['settingsSection', 'showSettingsSection', 'settingsView', 'showSettingsView']);
+    if (foundSection) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'modal-show-settings';
+    modal.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4';
+    modal.innerHTML = `
+        <div class="w-full max-w-lg rounded-2xl bg-[#0b1120] border border-slate-700 text-slate-100 shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-[#111827]">
+                <h3 class="text-sm sm:text-base font-bold text-emerald-400">Settings</h3>
+                <button type="button" onclick="closeModal('modal-show-settings')" class="text-slate-400 hover:text-white text-lg font-bold px-2">×</button>
+            </div>
+            <div class="p-4 space-y-3 text-xs sm:text-sm">
+                <div class="flex items-center justify-between bg-[#131822] px-3 py-2 rounded-lg border border-slate-800">
+                    <span class="text-slate-400">User</span>
+                    <span class="font-semibold text-white">${escapeHtml(currentUserName || localStorage.getItem('user_name') || '-')}</span>
+                </div>
+                <div class="flex items-center justify-between bg-[#131822] px-3 py-2 rounded-lg border border-slate-800">
+                    <span class="text-slate-400">Composite ID</span>
+                    <span class="font-mono text-emerald-400">${escapeHtml(resolveCompositeUserId() || '-')}</span>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="openAccountsModal(); closeModal('modal-show-settings');" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs">Show Accounts</button>
+                    <button type="button" onclick="closeModal('modal-show-settings')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 font-semibold text-xs">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    openModal(modal.id);
+}
+
+function openMySetModal() {
+    const existingModal =
+        document.getElementById('modal-my-set') ||
+        document.getElementById('mySetModal') ||
+        document.getElementById('userSetModal') ||
+        document.getElementById('modal-password-change');
+    if (existingModal) {
+        openModal(existingModal.id);
+        return;
+    }
+
+    const foundSection = showSectionByIds(['mySetSection', 'userSetSection', 'mySetView', 'userSetView']);
+    if (foundSection) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'modal-my-set';
+    modal.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-black/75 p-4';
+    modal.innerHTML = `
+        <div class="w-full max-w-md rounded-2xl bg-[#0b1120] border border-slate-700 text-slate-100 shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-[#111827]">
+                <h3 class="text-sm sm:text-base font-bold text-emerald-400">My Set</h3>
+                <button type="button" onclick="closeModal('modal-my-set')" class="text-slate-400 hover:text-white text-lg font-bold px-2">×</button>
+            </div>
+            <div class="p-4 space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">New Username (Optional)</label>
+                    <input id="newUsernameInput" type="text" class="w-full rounded-lg bg-[#131822] border border-slate-700 px-3 py-2 text-white" />
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Old Password</label>
+                    <input id="oldPasswordInput" type="password" class="w-full rounded-lg bg-[#131822] border border-slate-700 px-3 py-2 text-white" />
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">New Password</label>
+                    <input id="newPasswordInput" type="password" class="w-full rounded-lg bg-[#131822] border border-slate-700 px-3 py-2 text-white" />
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Confirm Password</label>
+                    <input id="confirmPasswordInput" type="password" class="w-full rounded-lg bg-[#131822] border border-slate-700 px-3 py-2 text-white" />
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="submitUserPasswordChange()" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold">Save</button>
+                    <button type="button" onclick="closeModal('modal-my-set')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 font-semibold">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    openModal(modal.id);
+}
+
 function ensureAccountsModalContainer() {
     let modal = document.getElementById('modal-show-accounts') || document.getElementById('accountsListModal');
     if (modal) return modal;
@@ -1259,10 +1429,57 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('click', (event) => {
-        const btn = event.target.closest('#btn-show-accounts, #showAccountsBtn, [data-action="show-accounts"], [data-toggle="accounts"]');
-        if (btn) {
+        const targetEl = event.target.closest('button, a, [role="tab"], [data-action], [data-tab], [data-target]');
+        if (!targetEl) return;
+
+        const attrHint = [
+            targetEl.id,
+            targetEl.dataset.action,
+            targetEl.dataset.tab,
+            targetEl.dataset.target,
+            targetEl.dataset.section,
+            targetEl.textContent
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+
+        if (
+            targetEl.matches('#btn-show-accounts, #showAccountsBtn, [data-action="show-accounts"], [data-toggle="accounts"]') ||
+            /\bshow\s*accounts\b/.test(attrHint)
+        ) {
             event.preventDefault();
             openAccountsModal();
+            return;
+        }
+
+        if (/\b(show\s*settings|settings)\b/.test(attrHint)) {
+            event.preventDefault();
+            openShowSettingsModal();
+            return;
+        }
+
+        if (/\b(my\s*set|myset)\b/.test(attrHint)) {
+            event.preventDefault();
+            openMySetModal();
+            return;
+        }
+
+        if (/\b(my\s*chat|chat)\b/.test(attrHint)) {
+            event.preventDefault();
+            switchToMyChat();
+            return;
+        }
+
+        if (/\b(cash\s*memo|memo)\b/.test(attrHint)) {
+            event.preventDefault();
+            switchToCashMemo();
+            return;
+        }
+
+        if (/\bdashboard\b/.test(attrHint) && targetEl.closest('nav, [role="tablist"], .nav-bar, .tab-bar, header')) {
+            event.preventDefault();
+            switchToDashboard();
         }
     });
 
