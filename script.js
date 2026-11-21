@@ -554,13 +554,13 @@ function renderMonthlySummaryTable() {
         const yrSurplus = grp.inc - grp.exp;
         rows.push(`
             <tr class="bg-navy-850/90 text-white border-y border-slate-700/70">
-                <td class="py-2.5 pl-3 pr-2 font-mono text-xs sm:text-sm font-bold">
+                <td class="py-2.5 pl-3 pr-2 font-mono text-xs sm:text-sm font-bold whitespace-nowrap">
                     <button type="button" onclick="toggleSummaryYearGroup('${escapeHtml(yr)}')" class="inline-flex items-center justify-center w-5 h-5 mr-2 rounded bg-slate-700 hover:bg-emerald-500 hover:text-slate-950 text-white font-bold text-xs cursor-pointer">${expanded ? '−' : '+'}</button>
                     <span>${escapeHtml(yr)}</span>
                 </td>
-                <td class="py-2.5 px-2.5 font-bold text-emerald-400">${formatMoney(grp.inc)}</td>
-                <td class="py-2.5 px-2.5 font-bold text-rose-400">${formatMoney(grp.exp)}</td>
-                <td class="py-2.5 px-3 text-right font-extrabold ${yrSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(yrSurplus)}</td>
+                <td class="py-2.5 px-2.5 font-bold text-emerald-400 whitespace-nowrap">${formatMoney(grp.inc)}</td>
+                <td class="py-2.5 px-2.5 font-bold text-rose-400 whitespace-nowrap">${formatMoney(grp.exp)}</td>
+                <td class="py-2.5 px-3 text-right font-extrabold whitespace-nowrap ${yrSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(yrSurplus)}</td>
             </tr>
         `);
         if (expanded) {
@@ -569,10 +569,10 @@ function renderMonthlySummaryTable() {
                 const mSurplus = mItem.inc - mItem.exp;
                 rows.push(`
                     <tr class="text-slate-200 hover:bg-navy-850/50">
-                        <td class="py-2 pl-9 pr-2 font-mono text-xs sm:text-sm text-slate-300">${escapeHtml(formatMonthPeriodLabel(yr, m))}</td>
-                        <td class="py-2 px-2.5 font-semibold text-emerald-400">${formatMoney(mItem.inc)}</td>
-                        <td class="py-2 px-2.5 font-semibold text-rose-400">${formatMoney(mItem.exp)}</td>
-                        <td class="py-2 px-3 text-right font-bold ${mSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(mSurplus)}</td>
+                        <td class="py-2 pl-9 pr-2 font-mono text-xs sm:text-sm text-slate-300 whitespace-nowrap">${escapeHtml(formatMonthPeriodLabel(yr, m))}</td>
+                        <td class="py-2 px-2.5 font-semibold text-emerald-400 whitespace-nowrap">${formatMoney(mItem.inc)}</td>
+                        <td class="py-2 px-2.5 font-semibold text-rose-400 whitespace-nowrap">${formatMoney(mItem.exp)}</td>
+                        <td class="py-2 px-3 text-right font-bold whitespace-nowrap ${mSurplus >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${formatMoney(mSurplus)}</td>
                     </tr>
                 `);
             });
@@ -606,14 +606,14 @@ function renderLoanTables() {
             if (!settled) { dueSum += amt; dueCnt += 1; }
             return `
                 <tr class="text-slate-200 hover:bg-navy-850/60">
-                    <td class="py-2 pl-2.5 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-${cat}', 'count-del-${cat}', '.loan-row-cb[data-cat=\\'${cat}\\']')" class="loan-row-cb accent-rose-500" data-cat="${cat}" value="${escapeHtml(l.id || '')}" /></td>
-                    <td class="py-2 px-2 font-semibold">${name}</td>
-                    <td class="py-2 px-2 font-mono font-bold ${amtColor}">${formatMoney(amt)}</td>
-                    <td class="py-2 px-2 font-mono text-[11px] text-slate-400 hidden sm:table-cell">${eDate}</td>
-                    <td class="py-2 px-2 font-mono text-[11px] hidden sm:table-cell ${sDateRaw !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${sDate}</td>
-                    <td class="py-2 px-2 font-mono text-[11px] hidden sm:table-cell ${extra > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extra)}</td>
-                    <td class="py-2 pl-2 pr-2.5 text-right">
-                        ${!settled ? `<button type="button" onclick="${settleFn}('${escapeHtml(l.id)}')" class="${btnClass} font-bold px-2 py-0.5 rounded text-[11px] cursor-pointer">${btnLabel}</button>` : `<span class="text-emerald-400 font-semibold text-[11px]">${escapeHtml(st)}</span>`}
+                    <td class="py-2 pl-2.5 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-${cat}', 'count-del-${cat}', '.loan-row-cb[data-cat=\\'${cat}\\']')" class="loan-row-cb accent-rose-500" data-cat="${cat}" value="${escapeHtml(l.id || '')}" /></td>
+                    <td class="py-2 px-2 font-semibold break-words max-w-[130px] sm:max-w-none">${name}</td>
+                    <td class="py-2 px-2 font-mono font-bold whitespace-nowrap ${amtColor}">${formatMoney(amt)}</td>
+                    <td class="py-2 px-2 font-mono text-[11px] text-slate-400 whitespace-nowrap hidden sm:table-cell">${eDate}</td>
+                    <td class="py-2 px-2 font-mono text-[11px] whitespace-nowrap hidden sm:table-cell ${sDateRaw !== '-' ? 'text-emerald-300 font-semibold' : 'text-slate-400'}">${sDate}</td>
+                    <td class="py-2 px-2 font-mono text-[11px] whitespace-nowrap hidden sm:table-cell ${extra > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}">${formatMoney(extra)}</td>
+                    <td class="py-2 pl-1.5 pr-2 text-right whitespace-nowrap">
+                        ${!settled ? `<button type="button" onclick="${settleFn}('${escapeHtml(l.id)}')" class="${btnClass} font-bold px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] cursor-pointer">${btnLabel}</button>` : `<span class="text-emerald-400 font-semibold text-[10px] sm:text-[11px]">${escapeHtml(st)}</span>`}
                     </td>
                 </tr>
             `;
@@ -650,12 +650,12 @@ function renderMarketExpensesTable() {
         const st = normalizeStatusLabel(m.status ?? m.income_expense_status ?? 'Paid');
         return `
             <tr class="text-slate-200 hover:bg-navy-850/60">
-                <td class="py-2.5 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb')" class="expense-row-cb accent-rose-500" value="${escapeHtml(m.id || '')}" /></td>
-                <td class="py-2.5 px-2.5 font-mono text-xs text-slate-400 hidden sm:table-cell">${d}</td>
-                <td class="py-2.5 px-2.5 font-semibold">${desc}</td>
-                <td class="py-2.5 px-2.5 font-mono text-rose-400 font-bold">${formatMoney(amt)}</td>
-                <td class="py-2.5 pl-2.5 pr-3 text-right">
-                    <button type="button" onclick="toggleMarketStatus('${escapeHtml(m.id)}')" class="${st === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-2 py-0.5 rounded text-[11px] font-bold cursor-pointer">${escapeHtml(st)}</button>
+                <td class="py-2 pl-2.5 pr-1 row-select-cb"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-expenses', 'count-del-expenses', '.expense-row-cb')" class="expense-row-cb accent-rose-500" value="${escapeHtml(m.id || '')}" /></td>
+                <td class="py-2 px-2 font-mono text-xs text-slate-400 whitespace-nowrap hidden sm:table-cell">${d}</td>
+                <td class="py-2 px-2 font-semibold text-xs break-words max-w-[130px] sm:max-w-none">${desc}</td>
+                <td class="py-2 px-2 font-mono text-xs text-rose-400 font-bold whitespace-nowrap">${formatMoney(amt)}</td>
+                <td class="py-2 pl-1.5 pr-2 text-right whitespace-nowrap">
+                    <button type="button" onclick="toggleMarketStatus('${escapeHtml(m.id)}')" class="${st === 'Paid' ? 'bg-emerald-950 text-emerald-400 border-emerald-700/50' : 'bg-amber-950 text-amber-400 border-amber-700/50'} border px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold cursor-pointer">${escapeHtml(st)}</button>
                 </td>
             </tr>
         `;
@@ -803,9 +803,9 @@ function openIncomeListModal() {
             : incomes.map((r) => `
                 <tr>
                     <td class="py-2 pl-3 pr-1"><input type="checkbox" onchange="updateDeleteCounter('btn-delete-incomes', 'count-del-incomes', '.income-row-cb')" class="income-row-cb accent-emerald-500" value="${escapeHtml(r.id || '')}" /></td>
-                    <td class="py-2 px-2.5 font-mono text-xs">${escapeHtml(formatDisplayDate(r.entry_date || r.income_expense_date))}</td>
+                    <td class="py-2 px-2.5 font-mono text-xs whitespace-nowrap">${escapeHtml(formatDisplayDate(r.entry_date || r.income_expense_date))}</td>
                     <td class="py-2 px-2.5">${escapeHtml(r.description || r.income_expense_description || '')}</td>
-                    <td class="py-2 pl-2.5 pr-3 text-right font-bold text-emerald-400">${formatMoney(r.amount ?? r.income_expense_amount ?? 0)}</td>
+                    <td class="py-2 pl-2.5 pr-3 text-right font-bold text-emerald-400 whitespace-nowrap">${formatMoney(r.amount ?? r.income_expense_amount ?? 0)}</td>
                 </tr>
             `).join('');
     }
@@ -1113,7 +1113,7 @@ function renderMemoCart() {
     let grand = 0;
     tbody.innerHTML = memoCart.map((item, idx) => {
         grand += item.total;
-        return `<tr><td class="py-1.5 px-2 text-slate-300">${escapeHtml(item.desc)}</td><td class="py-1.5 px-1 text-center">${escapeHtml(item.qty)}</td><td class="py-1.5 px-1 text-right">৳ ${escapeHtml(item.rate)}</td><td class="py-1.5 px-2 text-right text-emerald-400 font-bold">৳ ${escapeHtml(item.total)}</td><td class="py-1.5 px-1 text-center text-rose-400 cursor-pointer" onclick="memoCart.splice(${idx},1); renderMemoCart();">×</td></tr>`;
+        return `<tr><td class="py-1.5 px-2 text-slate-300">${escapeHtml(item.desc)}</td><td class="py-1.5 px-1 text-center">${escapeHtml(item.qty)}</td><td class="py-1.5 px-1 text-right whitespace-nowrap">৳ ${escapeHtml(item.rate)}</td><td class="py-1.5 px-2 text-right text-emerald-400 font-bold whitespace-nowrap">৳ ${escapeHtml(item.total)}</td><td class="py-1.5 px-1 text-center text-rose-400 cursor-pointer" onclick="memoCart.splice(${idx},1); renderMemoCart();">×</td></tr>`;
     }).join('');
     if (document.getElementById('memoCartGrandTotal')) document.getElementById('memoCartGrandTotal').innerText = formatMoney(grand);
 }
