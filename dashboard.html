@@ -39,6 +39,34 @@
     ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.45); border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
 
+    /* Prevent text overlap across adjacent table cells on all screen sizes */
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    th, td {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      vertical-align: middle;
+    }
+    .cell-nowrap {
+      white-space: nowrap !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+    }
+    .cell-desc {
+      min-width: 120px;
+      max-width: 240px;
+      line-height: 1.35;
+    }
+    @media (max-width: 639px) {
+      .cell-desc {
+        min-width: 105px;
+        max-width: 150px;
+        font-size: 11.5px;
+      }
+    }
+
     .section-fullscreen {
       position: fixed !important;
       inset: 0 !important;
@@ -61,12 +89,14 @@
     }
     .section-fullscreen table {
       width: 100% !important;
-      min-width: 100% !important;
+      min-width: 640px !important;
       table-layout: auto !important;
     }
     .section-fullscreen th,
     .section-fullscreen td {
       white-space: nowrap !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
       vertical-align: middle !important;
       text-align: left !important;
     }
@@ -95,7 +125,7 @@
 
   <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
-  <div id="dashboard-app-shell" class="w-full max-w-3xl mx-auto px-3 sm:px-5 py-4 space-y-4">
+  <div id="dashboard-app-shell" class="w-full max-w-3xl mx-auto px-2.5 sm:px-5 py-3 sm:py-4 space-y-4">
 
     <header id="iframe-top-header" class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-2.5 shadow-xl space-y-2">
       <nav class="grid grid-cols-3 gap-2" aria-label="Primary Navigation">
@@ -131,7 +161,7 @@
 
       <!-- 1. Monthly & Yearly Summary Card -->
       <section id="sec-monthly-summary" data-expandable-section
-        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5 transition-all select-none">
+        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-3.5 sm:p-5 shadow-xl space-y-3.5 transition-all select-none">
         <div class="flex flex-wrap items-center justify-between gap-2.5">
           <div class="flex items-center gap-2.5 min-w-0">
             <span class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-base shrink-0">📈</span>
@@ -146,7 +176,7 @@
               Delete (<span id="count-del-summary">0</span>)
             </button>
             <button type="button" onclick="openIncomeExpenseModal('income')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+              class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer cell-nowrap">
               + New Income/Expense
             </button>
             <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
@@ -156,27 +186,27 @@
           </div>
         </div>
 
-        <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[168px] rounded-xl border border-slate-800/80 bg-navy-950/60">
-          <table class="w-full text-left border-collapse">
+        <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[190px] rounded-xl border border-slate-800/80 bg-navy-950/60">
+          <table class="w-full min-w-[460px] text-left">
             <thead class="sticky top-0 z-10 bg-navy-850">
               <tr class="border-b border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-400">
-                <th class="py-2.5 pl-3 pr-1 w-7 row-select-cb"></th>
-                <th class="py-2.5 pl-3 pr-2">Period</th>
-                <th class="py-2.5 px-2.5">
+                <th class="py-2.5 pl-3 pr-1 w-7 row-select-cb cell-nowrap"></th>
+                <th class="py-2.5 pl-3 pr-2 cell-nowrap">Period</th>
+                <th class="py-2.5 px-2.5 cell-nowrap">
                   <button type="button" onclick="openIncomeListModal()"
-                    class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 underline decoration-emerald-500/40 underline-offset-4 cursor-pointer">
+                    class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 underline decoration-emerald-500/40 underline-offset-4 cursor-pointer cell-nowrap">
                     <span>Total Income (৳)</span>
                     <span class="text-[10px]">↗</span>
                   </button>
                 </th>
-                <th class="py-2.5 px-2.5">
+                <th class="py-2.5 px-2.5 cell-nowrap">
                   <button type="button" onclick="scrollToSection('sec-daily-expenses')"
-                    class="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 underline decoration-rose-500/40 underline-offset-4 cursor-pointer">
+                    class="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 underline decoration-rose-500/40 underline-offset-4 cursor-pointer cell-nowrap">
                     <span>Total Expense (৳)</span>
                     <span class="text-[10px]">↗</span>
                   </button>
                 </th>
-                <th class="py-2.5 px-3 text-right">Net Surplus (৳)</th>
+                <th class="py-2.5 px-3 text-right cell-nowrap">Net Surplus (৳)</th>
               </tr>
             </thead>
             <tbody id="monthly-summary-body" class="divide-y divide-slate-800/60 text-xs sm:text-sm"></tbody>
@@ -186,7 +216,7 @@
 
       <!-- 2. Loan & Credit Records Card -->
       <section id="sec-loan-records"
-        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4 transition-all">
+        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-3.5 sm:p-5 shadow-xl space-y-4 transition-all">
         <div class="flex flex-wrap items-center justify-between gap-2.5">
           <div class="flex items-center gap-2.5 min-w-0">
             <span class="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-base shrink-0">💰</span>
@@ -194,25 +224,25 @@
           </div>
 
           <button type="button" onclick="openLoanEntryModal()"
-            class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-lg shadow-amber-400/20 transition-all cursor-pointer">
+            class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-lg shadow-amber-400/20 transition-all cursor-pointer cell-nowrap">
             + New Entry
           </button>
         </div>
 
         <!-- 2A. Receivable -->
         <div id="sec-receivable-panel" data-expandable-section
-          class="bg-navy-950/70 border border-slate-800/90 rounded-xl p-3 space-y-2.5 transition-all select-none">
+          class="bg-navy-950/70 border border-slate-800/90 rounded-xl p-2.5 sm:p-3 space-y-2.5 transition-all select-none">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="text-xs sm:text-sm font-bold text-emerald-400">Receivable</span>
-              <span id="receivable-due-count-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold"></span>
+              <span id="receivable-due-count-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold cell-nowrap"></span>
             </div>
             <div class="flex items-center gap-2">
               <button id="btn-delete-receivable" type="button" onclick="deleteSelectedLoans('receivable')"
                 class="hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
                 Delete (<span id="count-del-receivable">0</span>)
               </button>
-              <span id="receivable-total-display" class="text-xs sm:text-sm font-bold text-emerald-400">Total Due: ৳ 0.00</span>
+              <span id="receivable-total-display" class="text-xs sm:text-sm font-bold text-emerald-400 cell-nowrap">Total Due: ৳ 0.00</span>
               <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
                 class="fs-exit-btn hidden w-7 h-7 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 flex items-center justify-center cursor-pointer">
                 ✕
@@ -220,17 +250,17 @@
             </div>
           </div>
 
-          <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[164px] rounded-xl border border-slate-800/80 bg-navy-900/70">
-            <table class="w-full text-left border-collapse sm:min-w-[600px]">
+          <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[180px] rounded-xl border border-slate-800/80 bg-navy-900/70">
+            <table class="w-full min-w-[330px] sm:min-w-[620px] text-left">
               <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] font-semibold text-slate-400 border-b border-slate-800">
                 <tr>
-                  <th class="py-2 pl-2.5 pr-1 w-7 row-select-cb"></th>
-                  <th class="py-2 px-2">Description</th>
-                  <th class="py-2 px-2">Amount (৳)</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Receivable Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Received Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Extra (৳)</th>
-                  <th class="py-2 pl-2 pr-2.5 text-right">Status</th>
+                  <th class="py-2 pl-2.5 pr-1 w-7 row-select-cb cell-nowrap"></th>
+                  <th class="py-2 px-2 cell-nowrap">Description</th>
+                  <th class="py-2 px-2 cell-nowrap">Amount (৳)</th>
+                  <th class="py-2 px-2 hidden sm:table-cell cell-nowrap">Receivable Date</th>
+                  <th class="py-2 px-2 hidden sm:table-cell cell-nowrap">Received Date</th>
+                  <th class="py-2 px-2 hidden sm:table-cell cell-nowrap">Extra (৳)</th>
+                  <th class="py-2 pl-2 pr-2.5 text-right cell-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody id="receivable-list-body" class="divide-y divide-slate-800/60 text-xs"></tbody>
@@ -240,18 +270,18 @@
 
         <!-- 2B. Payable -->
         <div id="sec-payable-panel" data-expandable-section
-          class="bg-navy-950/70 border border-slate-800/90 rounded-xl p-3 space-y-2.5 transition-all select-none">
+          class="bg-navy-950/70 border border-slate-800/90 rounded-xl p-2.5 sm:p-3 space-y-2.5 transition-all select-none">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="text-xs sm:text-sm font-bold text-rose-400">Payable</span>
-              <span id="payable-due-count-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold"></span>
+              <span id="payable-due-count-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold cell-nowrap"></span>
             </div>
             <div class="flex items-center gap-2">
               <button id="btn-delete-payable" type="button" onclick="deleteSelectedLoans('payable')"
                 class="hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
                 Delete (<span id="count-del-payable">0</span>)
               </button>
-              <span id="payable-total-display" class="text-xs sm:text-sm font-bold text-rose-400">Total Due: ৳ 0.00</span>
+              <span id="payable-total-display" class="text-xs sm:text-sm font-bold text-rose-400 cell-nowrap">Total Due: ৳ 0.00</span>
               <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
                 class="fs-exit-btn hidden w-7 h-7 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 flex items-center justify-center cursor-pointer">
                 ✕
@@ -259,17 +289,17 @@
             </div>
           </div>
 
-          <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[164px] rounded-xl border border-slate-800/80 bg-navy-900/70">
-            <table class="w-full text-left border-collapse sm:min-w-[600px]">
+          <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[180px] rounded-xl border border-slate-800/80 bg-navy-900/70">
+            <table class="w-full min-w-[330px] sm:min-w-[620px] text-left">
               <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] font-semibold text-slate-400 border-b border-slate-800">
                 <tr>
-                  <th class="py-2 pl-2.5 pr-1 w-7 row-select-cb"></th>
-                  <th class="py-2 px-2">Description</th>
-                  <th class="py-2 px-2">Amount (৳)</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Payable Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Paid Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Extra (৳)</th>
-                  <th class="py-2 pl-2 pr-2.5 text-right">Status</th>
+                  <th class="py-2 pl-2.5 pr-1 w-7 row-select-cb cell-nowrap"></th>
+                  <th class="py-2 px-2 cell-nowrap">Description</th>
+                  <th class="py-2 px-2 cell-nowrap">Amount (৳)</th>
+                  <th class="py-2 px-2 hidden sm:table-cell cell-nowrap">Payable Date</th>
+                  <th class="py-2 px-2 hidden sm:table-cell cell-nowrap">Paid Date</th>
+                  <th class="py-2 px-2 hidden sm:table-cell cell-nowrap">Extra (৳)</th>
+                  <th class="py-2 pl-2 pr-2.5 text-right cell-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody id="payable-list-body" class="divide-y divide-slate-800/60 text-xs"></tbody>
@@ -280,7 +310,7 @@
 
       <!-- 3. Daily Expenses Log Card -->
       <section id="sec-daily-expenses" data-expandable-section
-        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5 transition-all select-none">
+        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-3.5 sm:p-5 shadow-xl space-y-3.5 transition-all select-none">
         <div class="flex flex-wrap items-center justify-between gap-2.5">
           <div class="flex items-center gap-2.5 min-w-0">
             <span class="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 text-violet-300 flex items-center justify-center text-base shrink-0">🛒</span>
@@ -295,7 +325,7 @@
               Delete (<span id="count-del-expenses">0</span>)
             </button>
             <button type="button" onclick="openDailyExpenseModal()"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/20 transition-all cursor-pointer">
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/20 transition-all cursor-pointer cell-nowrap">
               + New Expense Entry
             </button>
             <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
@@ -305,15 +335,15 @@
           </div>
         </div>
 
-        <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[168px] rounded-xl border border-slate-800/80 bg-navy-950/60">
-          <table class="w-full text-left border-collapse sm:min-w-[460px]">
+        <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[200px] rounded-xl border border-slate-800/80 bg-navy-950/60">
+          <table class="w-full min-w-[330px] sm:min-w-[500px] text-left">
             <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] sm:text-xs font-semibold text-slate-400 border-b border-slate-800">
               <tr>
-                <th class="py-2.5 pl-3 pr-1 w-7 row-select-cb"></th>
-                <th class="py-2.5 px-2.5 hidden sm:table-cell">Date</th>
-                <th class="py-2.5 px-2.5">Description</th>
-                <th class="py-2.5 px-2.5">Amount (৳)</th>
-                <th class="py-2.5 pl-2.5 pr-3 text-right">Status &amp; Action</th>
+                <th class="py-2.5 pl-2.5 pr-1 w-7 row-select-cb cell-nowrap"></th>
+                <th class="py-2.5 px-2 hidden sm:table-cell cell-nowrap">Date</th>
+                <th class="py-2.5 px-2 cell-nowrap">Description</th>
+                <th class="py-2.5 px-2 cell-nowrap">Amount (৳)</th>
+                <th class="py-2.5 pl-2 pr-2.5 text-right cell-nowrap">Status &amp; Action</th>
               </tr>
             </thead>
             <tbody id="daily-expenses-body" class="divide-y divide-slate-800/60 text-xs sm:text-sm"></tbody>
@@ -575,13 +605,13 @@
         </div>
       </div>
       <div class="overflow-x-auto overflow-y-auto flex-1 rounded-xl border border-slate-800 bg-navy-950/70">
-        <table class="w-full text-left border-collapse min-w-[460px]">
+        <table class="w-full min-w-[460px] text-left">
           <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] sm:text-xs font-semibold text-slate-400 border-b border-slate-800">
             <tr>
-              <th class="py-2.5 pl-3 pr-1 w-7"></th>
-              <th class="py-2.5 px-2.5">Date</th>
-              <th class="py-2.5 px-2.5">Description</th>
-              <th class="py-2.5 pl-2.5 pr-3 text-right">Amount (৳)</th>
+              <th class="py-2.5 pl-3 pr-1 w-7 cell-nowrap"></th>
+              <th class="py-2.5 px-2.5 cell-nowrap">Date</th>
+              <th class="py-2.5 px-2.5 cell-nowrap">Description</th>
+              <th class="py-2.5 pl-2.5 pr-3 text-right cell-nowrap">Amount (৳)</th>
             </tr>
           </thead>
           <tbody id="income-list-modal-body" class="divide-y divide-slate-800/60 text-xs sm:text-sm"></tbody>
@@ -678,15 +708,41 @@
   <!-- Only Client Script (Server Proxy stays strictly on Backend) -->
   <script src="./script.js"></script>
 
-  <!-- Fullscreen & Checkbox Delete Helpers -->
+  <!-- Table Layout Normalizer, Fullscreen & Checkbox Delete Helpers -->
   <script>
+    function normalizeTableCellsLayout() {
+      const tableConfigs = [
+        { tbodyId: 'monthly-summary-body', descIndex: 1, nowrapIndices: [2, 3, 4] },
+        { tbodyId: 'receivable-list-body', descIndex: 1, nowrapIndices: [2, 3, 4, 5, 6] },
+        { tbodyId: 'payable-list-body', descIndex: 1, nowrapIndices: [2, 3, 4, 5, 6] },
+        { tbodyId: 'daily-expenses-body', descIndex: 2, nowrapIndices: [1, 3, 4] },
+        { tbodyId: 'income-list-modal-body', descIndex: 2, nowrapIndices: [1, 3] }
+      ];
+
+      tableConfigs.forEach((cfg) => {
+        const tbody = document.getElementById(cfg.tbodyId);
+        if (!tbody) return;
+        tbody.querySelectorAll('tr').forEach((tr) => {
+          if (tr.querySelector('td[colspan]')) return;
+          Array.from(tr.cells).forEach((td, idx) => {
+            if (idx === cfg.descIndex) {
+              td.classList.add('cell-desc');
+              td.classList.remove('whitespace-nowrap');
+            } else if (cfg.nowrapIndices.includes(idx)) {
+              td.classList.add('cell-nowrap');
+            }
+          });
+        });
+      });
+    }
+
     function exitFullscreenSection() {
       if (typeof window.switchTopTab === 'function') window.switchTopTab('dashboard');
       document.querySelectorAll('.section-fullscreen').forEach((sec) => {
         sec.classList.remove('section-fullscreen');
         sec.querySelectorAll('.fs-exit-btn').forEach((btn) => btn.classList.add('hidden'));
         const sr = sec.querySelector('.scroll-region');
-        if (sr) { sr.classList.remove('flex-1', 'max-h-none'); sr.classList.add('max-h-[168px]'); }
+        if (sr) { sr.classList.remove('flex-1', 'max-h-none'); sr.classList.add('max-h-[190px]'); }
       });
       if (typeof notifyParentFrameHeight === 'function') notifyParentFrameHeight();
     }
@@ -698,7 +754,7 @@
       sectionEl.classList.add('section-fullscreen');
       sectionEl.querySelectorAll('.fs-exit-btn').forEach((btn) => btn.classList.remove('hidden'));
       const sr = sectionEl.querySelector('.scroll-region');
-      if (sr) { sr.classList.remove('max-h-[168px]', 'max-h-[164px]'); sr.classList.add('flex-1', 'max-h-none'); }
+      if (sr) { sr.classList.remove('max-h-[190px]', 'max-h-[180px]', 'max-h-[200px]'); sr.classList.add('flex-1', 'max-h-none'); }
     }
 
     function bindExpandableDoubleClick() {
@@ -720,6 +776,7 @@
       if (badge) badge.textContent = 'Syncing...';
       try {
         if (typeof window.loadAllDatabaseRecords === 'function') await window.loadAllDatabaseRecords();
+        normalizeTableCellsLayout();
         bindExpandableDoubleClick();
         if (badge) badge.textContent = 'Synced';
       } catch (err) {
@@ -757,7 +814,7 @@
           const hasCb = firstCell?.classList.contains('row-select-cb') && firstCell.querySelector('input[type="checkbox"]');
           if (!hasCb) {
             const td = document.createElement('td');
-            td.className = 'py-2.5 pl-3 pr-1 row-select-cb';
+            td.className = 'py-2.5 pl-2.5 pr-1 row-select-cb cell-nowrap';
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.value = val;
@@ -777,11 +834,13 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       ensureRowCheckboxesForFullscreen();
+      normalizeTableCellsLayout();
       bindExpandableDoubleClick();
       const shell = document.getElementById('dashboard-app-shell');
       if (shell) {
         new MutationObserver(() => {
           ensureRowCheckboxesForFullscreen();
+          normalizeTableCellsLayout();
           bindExpandableDoubleClick();
         }).observe(shell, { childList: true, subtree: true });
       }
