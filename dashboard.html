@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self';" />
   <title>Financial Dashboard &amp; Ledger</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -330,7 +333,7 @@
       </div>
       <div id="chat-messages-list" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1"></div>
       <form id="chat-note-form" onsubmit="handleChatSubmit(event)" class="flex gap-2 pt-1">
-        <input id="chat-note-input" type="text" required placeholder="Write a note..."
+        <input id="chat-note-input" type="text" maxlength="500" required placeholder="Write a note..."
           class="flex-1 bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 outline-none" />
         <button type="submit"
           class="px-4 py-2.5 rounded-xl text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer transition-all">
@@ -399,12 +402,12 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (৳)</label>
-            <input id="ie-amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+            <input id="ie-amount" type="number" step="0.01" min="0.01" max="100000000" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
           </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
-          <input id="ie-description" type="text" required placeholder="e.g., Client Payment / Office Lunch" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+          <input id="ie-description" type="text" maxlength="200" required placeholder="e.g., Client Payment / Office Lunch" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
         </div>
         <div class="flex justify-end gap-2 pt-1">
           <button type="button" onclick="closeModal('modal-income-expense')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">Cancel</button>
@@ -439,12 +442,12 @@
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Description / Party Name</label>
-          <input id="loan-description" type="text" required placeholder="e.g., Mayurganj Loan / Rahim" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+          <input id="loan-description" type="text" maxlength="160" required placeholder="e.g., Mayurganj Loan / Rahim" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (৳)</label>
-            <input id="loan-amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+            <input id="loan-amount" type="number" step="0.01" min="0.01" max="100000000" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
           </div>
           <div>
             <label id="loan-date-label" class="block text-xs font-semibold text-slate-300 mb-1">Receivable Date</label>
@@ -478,7 +481,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Extra Amount (৳)</label>
-            <input id="rec-settle-extra" type="number" step="0.01" min="0" value="0" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+            <input id="rec-settle-extra" type="number" step="0.01" min="0" max="100000000" value="0" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-1">
@@ -509,7 +512,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Extra Amount (৳)</label>
-            <input id="pay-settle-extra" type="number" step="0.01" min="0" value="0" class="w-full bg-navy-950 border border-slate-700 focus:border-rose-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+            <input id="pay-settle-extra" type="number" step="0.01" min="0" max="100000000" value="0" class="w-full bg-navy-950 border border-slate-700 focus:border-rose-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-1">
@@ -534,12 +537,12 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (৳)</label>
-            <input id="dexp-amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+            <input id="dexp-amount" type="number" step="0.01" min="0.01" max="100000000" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
           </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
-          <input id="dexp-description" type="text" required placeholder="e.g., Transport / Grocery / Bill" class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
+          <input id="dexp-description" type="text" maxlength="200" required placeholder="e.g., Transport / Grocery / Bill" class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Status</label>
@@ -587,7 +590,7 @@
     </div>
   </div>
 
-  <!-- Child Iframe Bridge (Same-Origin Protected; ID kept internal only) -->
+  <!-- Child Iframe Bridge (Same-Origin & Source Protected; ID kept internal only) -->
   <script>
     (function initChildIframeBridge() {
       const CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
@@ -596,16 +599,22 @@
 
       if (isEmbedded) document.body.classList.add('in-iframe');
 
+      function sanitizeSafeId(raw) {
+        if (typeof raw !== 'string') return '';
+        return raw.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+      }
+
       function getInitialCompositeUserId() {
         const params = new URLSearchParams(window.location.search);
-        return (params.get('composite_user_id') || window.ACTIVE_COMPOSITE_USER_ID || '').trim();
+        return sanitizeSafeId((params.get('composite_user_id') || window.ACTIVE_COMPOSITE_USER_ID || '').trim());
       }
 
       window.ACTIVE_COMPOSITE_USER_ID = getInitialCompositeUserId();
 
       function applyCompositeUserScope(userId) {
-        if (!userId) return;
-        window.ACTIVE_COMPOSITE_USER_ID = String(userId).trim();
+        const cleanId = sanitizeSafeId(String(userId || '').trim());
+        if (!cleanId) return;
+        window.ACTIVE_COMPOSITE_USER_ID = cleanId;
         if (typeof window.onCompositeUserChanged === 'function') {
           window.onCompositeUserChanged(window.ACTIVE_COMPOSITE_USER_ID);
         }
@@ -634,7 +643,8 @@
       };
 
       window.addEventListener('message', (event) => {
-        if (event.origin !== TRUSTED_ORIGIN) return;
+        if (!event.origin || event.origin !== TRUSTED_ORIGIN) return;
+        if (isEmbedded && event.source !== window.parent) return;
         const data = event.data;
         if (!data || data.channel !== CHANNEL) return;
 
@@ -732,8 +742,8 @@
     function ensureRowCheckboxesForFullscreen() {
       const configs = [
         { tbodyId: 'monthly-summary-body', cbClass: 'summary-row-cb', btnId: 'btn-delete-summary', countId: 'count-del-summary', selector: '.summary-row-cb' },
-        { tbodyId: 'receivable-list-body', cbClass: 'loan-row-cb', btnId: 'btn-delete-receivable', countId: 'count-del-receivable', selector: ".loan-row-cb[data-cat='receivable']", extraAttr: " data-cat='receivable'" },
-        { tbodyId: 'payable-list-body', cbClass: 'loan-row-cb', btnId: 'btn-delete-payable', countId: 'count-del-payable', selector: ".loan-row-cb[data-cat='payable']", extraAttr: " data-cat='payable'" },
+        { tbodyId: 'receivable-list-body', cbClass: 'loan-row-cb', btnId: 'btn-delete-receivable', countId: 'count-del-receivable', selector: ".loan-row-cb[data-cat='receivable']", extraAttr: 'receivable' },
+        { tbodyId: 'payable-list-body', cbClass: 'loan-row-cb', btnId: 'btn-delete-payable', countId: 'count-del-payable', selector: ".loan-row-cb[data-cat='payable']", extraAttr: 'payable' },
         { tbodyId: 'daily-expenses-body', cbClass: 'expense-row-cb', btnId: 'btn-delete-expenses', countId: 'count-del-expenses', selector: '.expense-row-cb' }
       ];
 
@@ -743,12 +753,22 @@
         tbody.querySelectorAll('tr').forEach((tr) => {
           if (tr.querySelector('td[colspan]')) return;
           const firstCell = tr.cells[0];
-          const val = (firstCell?.textContent?.trim()) || tr.dataset.id || '';
+          const val = ((firstCell?.textContent?.trim()) || tr.dataset.id || '').replace(/[^a-zA-Z0-9_.-]/g, '');
           const hasCb = firstCell?.classList.contains('row-select-cb') && firstCell.querySelector('input[type="checkbox"]');
           if (!hasCb) {
             const td = document.createElement('td');
             td.className = 'py-2.5 pl-3 pr-1 row-select-cb';
-            td.innerHTML = `<input type="checkbox" value="${val}"${cfg.extraAttr || ''} class="${cfg.cbClass} accent-rose-500 cursor-pointer" onchange="updateDeleteCounter('${cfg.btnId}', '${cfg.countId}', &quot;${cfg.selector}&quot;)" />`;
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = val;
+            if (cfg.extraAttr) cb.dataset.cat = cfg.extraAttr;
+            cb.className = `${cfg.cbClass} accent-rose-500 cursor-pointer`;
+            cb.addEventListener('change', () => {
+              if (typeof window.updateDeleteCounter === 'function') {
+                window.updateDeleteCounter(cfg.btnId, cfg.countId, cfg.selector);
+              }
+            });
+            td.appendChild(cb);
             tr.insertBefore(td, tr.firstChild);
           }
         });
