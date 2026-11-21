@@ -1101,22 +1101,62 @@ async function handleAddDeviceSubmit(e) {
 /* =========================================================================
  * CHAT & CASH MEMO (Pure Client UI)
  * ========================================================================= */
-function openMyChatModal() { exitIndividualChat(); renderChatUsersList(); renderUniversalMessages(); openModal('myChatModal'); }
+function openMyChatModal() {
+    exitIndividualChat();
+    const searchInput = document.getElementById('chatUserSearchInput');
+    if (searchInput) searchInput.value = '';
+    const resultsBox = document.getElementById('chatSearchResultsContainer');
+    if (resultsBox) {
+        resultsBox.innerHTML = '';
+        resultsBox.classList.add('hidden');
+    }
+    renderUniversalMessages();
+    openModal('myChatModal');
+}
 
-function renderChatUsersList() {
-    const container = document.getElementById('chatUsersListContainer');
-    if (!container) return;
-    const others = accountsMasterRecords.filter((u) => (u.user_name || u.user_id) !== currentUserName);
-    container.innerHTML = others.map((u) => {
-        const partner = sanitizeTextInput(u.user_name || u.user_id || '', 64);
+function handleChatUserSearch() {
+    const input = document.getElementById('chatUserSearchInput');
+    const resultsBox = document.getElementById('chatSearchResultsContainer');
+    if (!input || !resultsBox) return;
+
+    const query = sanitizeTextInput(input.value || '', 64).toLowerCase();
+    if (!query) {
+        resultsBox.innerHTML = '';
+        resultsBox.classList.add('hidden');
+        return;
+    }
+
+    const matched = accountsMasterRecords.filter((u) => {
+        const uname = String(u.user_name || '').toLowerCase();
+        const uid = String(u.user_id || '').toLowerCase();
+        const isSelf = (u.user_name || u.user_id) === currentUserName;
+        return !isSelf && (uname.includes(query) || uid.includes(query));
+    });
+
+    resultsBox.classList.remove('hidden');
+    if (!matched.length) {
+        resultsBox.innerHTML = '<span class="text-[11px] text-slate-400 px-1">কোনো ম্যাচিং ID পাওয়া যায়নি।</span>';
+        return;
+    }
+
+    resultsBox.innerHTML = matched.slice(0, 12).map((u) => {
+        const targetId = sanitizeTextInput(u.user_name || u.user_id || '', 64);
         return `
-            <button type="button" data-partner="${escapeHtml(partner)}" class="js-open-dm-btn shrink-0 bg-[#131822] hover:bg-indigo-950/60 border border-slate-700 rounded-xl px-3 py-1.5 flex items-center space-x-1.5 cursor-pointer">
+            <button type="button" data-partner="${escapeHtml(targetId)}" class="js-open-dm-btn bg-[#131822] hover:bg-indigo-950/70 border border-indigo-500/40 rounded-lg px-2.5 py-1 flex items-center space-x-1.5 cursor-pointer">
                 <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
-                <span class="text-xs font-bold text-slate-200">${escapeHtml(partner)}</span>
+                <span class="text-xs font-bold text-slate-100">${escapeHtml(targetId)}</span>
             </button>
         `;
     }).join('');
-    container.querySelectorAll('.js-open-dm-btn').forEach((btn) => btn.addEventListener('click', () => openIndividualChat(btn.dataset.partner)));
+
+    resultsBox.querySelectorAll('.js-open-dm-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            openIndividualChat(btn.dataset.partner);
+            input.value = '';
+            resultsBox.innerHTML = '';
+            resultsBox.classList.add('hidden');
+        });
+    });
 }
 
 function renderUniversalMessages() {
