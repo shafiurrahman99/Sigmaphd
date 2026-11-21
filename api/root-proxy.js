@@ -1,45 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.SIGMAPHD_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SIGMAPHD_SERVICE_ROLE_KEY;
-const SESSION_SECRET = process.env.SIGMAPHD_JWT_SECRET || SUPABASE_SERVICE_ROLE_KEY || 'sigma-root-proxy-secret';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabaseServer = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const RATE_PER_MONTH = 100; // ১ মাস (৩০ দিন) = ৳১০০
 
-function signSessionToken(payload) {
-    const exp = Date.now() + 24 * 60 * 60 * 1000;
-    const data = Buffer.from(JSON.stringify({ ...payload, exp })).toString('base64url');
-    const sig = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
-    return `${data}.${sig}`;
-}
-
-function verifySessionToken(token) {
-    if (!token || typeof token !== 'string' || !token.includes('.')) return null;
-    const [data, sig] = token.split('.');
-    const expectedSig = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
-    if (!sig || sig.length !== expectedSig.length) return null;
-    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return null;
-
-    try {
-        const parsed = JSON.parse(Buffer.from(data, 'base64url').toString('utf8'));
-        if (!parsed.exp || Date.now() > parsed.exp) return null;
-        return parsed;
-    } catch {
-        return null;
-    }
-}
-
-function extractSessionToken(req, parsedBody, payload) {
-    const authHeader = req.headers?.authorization || req.headers?.Authorization || '';
-    const bearer = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
-        ? authHeader.slice(7).trim()
-        : '';
-    return parsedBody?.session_token || payload?.session_token || bearer || '';
-}
-
+// ১. ডাটাবেজ থেকে অ্যাক্টিভ ডিসকাউন্ট পার্সেন্টেজ আনা
 async function loadDiscountsFromDb(supabase) {
     const { data, error } = await supabase
         .from('validity_discounts')
@@ -55,6 +23,7 @@ async function loadDiscountsFromDb(supabase) {
     return map;
 }
 
+// ২. সার্ভারে কার্টের পূর্ণ হিসাবের ফর্মুলা
 function calculateValidityCart(cartItems = [], discountsMap = {}, useCouponWallet = false, walletBalance = 0) {
     let totalDays = 0;
     let baseTotal = 0;
@@ -102,6 +71,7 @@ function calculateValidityCart(cartItems = [], discountsMap = {}, useCouponWalle
     };
 }
 
+// ৩. ভ্যালিডিটি এক্সপায়ারি টাইমস্ট্যাম্প বের করা
 function getValidityExpiryMs(accountRow = {}) {
     if (accountRow.validity_expires_at) {
         const ts = new Date(accountRow.validity_expires_at).getTime();
@@ -117,6 +87,7 @@ function getValidityExpiryMs(accountRow = {}) {
     return 0;
 }
 
+// ৪. ইউজারের লেটেস্ট অ্যাকাউন্ট রো লোড করা (composite_user_id অথবা payload-এর user_name/composite_user_id দিয়ে)
 async function getTargetAccount(supabase, compositeUserId, fallbackCompanyId, payload = {}) {
     const targetCompId = compositeUserId || payload?.composite_user_id;
 
@@ -156,42 +127,38 @@ function normalizeLoanStatus(rawStatus, settledDate = null) {
     return 'Due';
 }
 
-function mapIncomeExpensePayload(record, compositeUserId) {
+function mapIncomeExpensePayload(record, compositeUserId, companyId) {
     const type = (record.type || record.income_expense_type || 'income').toString().toLowerCase() === 'expense'
         ? 'expense'
         : 'income';
     const rawStatus = String(record.status || record.income_expense_status || 'Paid').trim().toLowerCase();
     const status = rawStatus === 'due' ? 'Due' : 'Paid';
-    const amount = Number(record.amount ?? record.income_expense_amount ?? 0);
-
     return {
         composite_user_id: compositeUserId,
         income_expense_type: type,
-        income_expense_date: record.date || record.income_expense_date || new Date().toISOString().slice(0, 10),
-        income_expense_description: String(record.desc ?? record.description ?? record.income_expense_description ?? '').trim().slice(0, 250),
-        income_expense_amount: Number.isFinite(amount) && amount > 0 ? amount : 0,
+        income_expense_date: record.date || record.income_expense_date,
+        income_expense_description: String(record.desc ?? record.description ?? record.income_expense_description ?? '').trim(),
+        income_expense_amount: Number(record.amount ?? record.income_expense_amount ?? 0) || 0,
         income_expense_status: status
     };
 }
 
 function mapLoanPayload(record, compositeUserId) {
-    const rawDir = String(record.direction || record.loan_category || record.loan_type || record.loan_records_direction || 'receivable').toLowerCase();
+    const rawDir = String(record.direction || record.loan_category || record.loan_records_direction || 'receivable').toLowerCase();
     const direction = rawDir === 'payable' ? 'payable' : 'receivable';
     const settledDate = record.settled_date || record.settle_date || record.loan_records_settled_date || null;
     const status = normalizeLoanStatus(record.status ?? record.loan_records_status ?? 'Due', settledDate);
-    const amount = Number(record.amount ?? record.loan_records_amount ?? 0);
-    const extraAmount = Number(record.extra_amount ?? record.loan_records_extra_amount ?? 0);
 
     return {
         composite_user_id: compositeUserId,
         loan_records_direction: direction,
-        loan_records_description: String(record.description ?? record.person_name ?? record.loan_records_description ?? '').trim().slice(0, 250),
-        loan_records_amount: Number.isFinite(amount) && amount > 0 ? amount : 0,
-        loan_records_entry_date: record.entry_date || record.date || record.loan_records_entry_date || new Date().toISOString().slice(0, 10),
+        loan_records_description: String(record.description ?? record.person_name ?? record.loan_records_description ?? '').trim(),
+        loan_records_amount: Number(record.amount ?? record.loan_records_amount ?? 0) || 0,
+        loan_records_entry_date: record.entry_date || record.date || record.loan_records_entry_date,
         loan_records_settled_date: settledDate,
-        loan_records_extra_amount: Number.isFinite(extraAmount) && extraAmount >= 0 ? extraAmount : 0,
+        loan_records_extra_amount: Number(record.extra_amount ?? record.loan_records_extra_amount ?? 0) || 0,
         loan_records_status: status,
-        loan_records_source: String(record.source ?? record.loan_records_source ?? 'Ledger').trim().slice(0, 60)
+        loan_records_source: String(record.source ?? record.loan_records_source ?? 'Ledger').trim()
     };
 }
 
@@ -237,6 +204,7 @@ export default async function handler(req, res) {
         const parsedBody = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
         const { action, company_id = '101', composite_user_id, payload } = parsedBody;
 
+        // লগইন ছাড়াই যে রিকোয়েস্টগুলো পাস হবে
         const publicActions = [
             'authenticate_user',
             'fetch_dashboard_data',
@@ -246,18 +214,16 @@ export default async function handler(req, res) {
             'register_new_license'
         ];
 
-        const token = extractSessionToken(req, parsedBody, payload);
-        const session = verifySessionToken(token);
-        const effectiveCompositeUserId = session?.composite_user_id || composite_user_id || payload?.composite_user_id;
-        const effectiveRole = session?.role || 'User';
-
-        if (!effectiveCompositeUserId && !publicActions.includes(action)) {
+        if (!composite_user_id && !publicActions.includes(action)) {
             return res.status(401).json({ success: false, message: 'Unauthorized: Missing Composite User ID context.' });
         }
+
+        console.log(`[SECURE PROXY] Action: ${action} | User: ${composite_user_id || payload?.user_name || 'Public/System'}`);
 
         switch (action) {
             case 'authenticate_user': {
                 const { user_name, password } = payload || {};
+
                 if (!user_name || !password) {
                     return res.status(200).json({ success: false, message: 'ইউজারনেম এবং পাসওয়ার্ড উভয়ই প্রদান করুন।' });
                 }
@@ -265,6 +231,7 @@ export default async function handler(req, res) {
                 const cleanUserName = String(user_name).trim();
                 const cleanPassword = String(password).trim();
 
+                // সুপাবেজ থেকে সরাসরি user_name এবং password দিয়ে ভেরিফাই করা
                 const { data, error } = await supabaseServer
                     .from('accounts_master')
                     .select('*')
@@ -274,6 +241,7 @@ export default async function handler(req, res) {
                     .single();
 
                 if (error || !data) {
+                    console.log(`[LOGIN FAILED] User Name: ${cleanUserName} | Error:`, error?.message);
                     return res.status(200).json({ success: false, message: 'ভুল ইউজারনেম অথবা পাসওয়ার্ড!' });
                 }
 
@@ -283,19 +251,11 @@ export default async function handler(req, res) {
 
                 const expiryMs = getValidityExpiryMs(data);
                 const isExpired = !expiryMs || Date.now() >= expiryMs;
-                const sessionToken = signSessionToken({
-                    composite_user_id: data.composite_user_id,
-                    company_id: data.company_id || company_id,
-                    role: data.role || 'User'
-                });
-
-                const { password: _hiddenPassword, ...safeUser } = data;
 
                 return res.status(200).json({
                     success: true,
-                    session_token: sessionToken,
                     user: {
-                        ...safeUser,
+                        ...data,
                         is_validity_expired: isExpired,
                         pending_validity_days: Number(data.pending_validity_days || 0),
                         validity_approval_status: data.validity_approval_status || 'NONE',
@@ -308,25 +268,25 @@ export default async function handler(req, res) {
                     supabaseServer
                         .from('income_expense')
                         .select('*')
-                        .eq('composite_user_id', effectiveCompositeUserId)
+                        .eq('composite_user_id', composite_user_id)
                         .order('income_expense_date', { ascending: false })
                         .order('created_at', { ascending: false }),
                     supabaseServer
                         .from('loan_records')
                         .select('*')
-                        .eq('composite_user_id', effectiveCompositeUserId)
+                        .eq('composite_user_id', composite_user_id)
                         .eq('loan_records_direction', 'receivable')
                         .order('loan_records_entry_date', { ascending: false }),
                     supabaseServer
                         .from('loan_records')
                         .select('*')
-                        .eq('composite_user_id', effectiveCompositeUserId)
+                        .eq('composite_user_id', composite_user_id)
                         .eq('loan_records_direction', 'payable')
                         .order('loan_records_entry_date', { ascending: false }),
                     supabaseServer
                         .from('income_expense')
                         .select('*')
-                        .eq('composite_user_id', effectiveCompositeUserId)
+                        .eq('composite_user_id', composite_user_id)
                         .eq('income_expense_type', 'expense')
                         .order('income_expense_date', { ascending: false })
                         .order('created_at', { ascending: false }),
@@ -364,14 +324,14 @@ export default async function handler(req, res) {
                     supabaseServer
                         .from('income_expense')
                         .select('*')
-                        .eq('composite_user_id', effectiveCompositeUserId)
+                        .eq('composite_user_id', composite_user_id)
                         .order('income_expense_date', { ascending: false })
                         .order('created_at', { ascending: false })
                         .order('id', { ascending: false }),
                     supabaseServer
                         .from('loan_records')
                         .select('*')
-                        .eq('composite_user_id', effectiveCompositeUserId)
+                        .eq('composite_user_id', composite_user_id)
                         .order('loan_records_entry_date', { ascending: false })
                         .order('created_at', { ascending: false })
                         .order('id', { ascending: false })
@@ -388,7 +348,7 @@ export default async function handler(req, res) {
                 return res.status(200).json({
                     ok: true,
                     success: true,
-                    composite_user_id: effectiveCompositeUserId,
+                    composite_user_id,
                     income_expense: ieRows.data || [],
                     loan_records: normalizedLoans
                 });
@@ -396,7 +356,7 @@ export default async function handler(req, res) {
 
             case 'user_password_change': {
                 const { new_username, old_password, new_password, user_id } = payload || {};
-                const targetKey = effectiveCompositeUserId || user_id;
+                const targetKey = composite_user_id || user_id;
 
                 if (!targetKey) {
                     return res.status(200).json({ success: false, message: 'ইউজার আইডেন্টিফায়ার পাওয়া যায়নি।' });
@@ -416,7 +376,7 @@ export default async function handler(req, res) {
                     return res.status(200).json({ success: false, message: 'পুরাতন পাসওয়ার্ডটি ভুল দিয়েছেন!' });
                 }
 
-                const updatedUserName = new_username ? String(new_username).trim() : userRecord.user_name;
+                const updatedUserName = new_username ? new_username.trim() : userRecord.user_name;
 
                 const { error: updateErr } = await supabaseServer
                     .from('accounts_master')
@@ -439,18 +399,13 @@ export default async function handler(req, res) {
             case 'save_income_expense':
             case 'insert_income_expense': {
                 const srcRecord = payload?.record || payload || {};
-                const rowToInsert = mapIncomeExpensePayload(srcRecord, effectiveCompositeUserId);
-                if (rowToInsert.income_expense_amount <= 0) {
-                    return res.status(400).json({ ok: false, success: false, message: 'Valid positive amount is required.' });
-                }
-
+                const rowToInsert = mapIncomeExpensePayload(srcRecord, composite_user_id, company_id);
                 const { data: inserted, error } = await supabaseServer
                     .from('income_expense')
                     .insert([rowToInsert])
                     .select()
                     .single();
                 if (error) throw error;
-
                 return res.status(200).json({
                     ok: true,
                     success: true,
@@ -471,11 +426,12 @@ export default async function handler(req, res) {
                     .from('income_expense')
                     .update({ income_expense_status: status })
                     .eq('id', id)
-                    .eq('composite_user_id', effectiveCompositeUserId)
+                    .eq('composite_user_id', composite_user_id)
                     .select()
                     .single();
                 if (error) throw error;
 
+                // Daily Expense Due থেকে Paid হলে সংশ্লিষ্ট Payable এন্ট্রিও Paid করে দেয়া
                 if (updated && status === 'Paid') {
                     const payableTag = `[ExpDue#${updated.id}]`;
                     const settledDate = new Date().toISOString().slice(0, 10);
@@ -485,7 +441,7 @@ export default async function handler(req, res) {
                             loan_records_status: 'Paid',
                             loan_records_settled_date: settledDate
                         })
-                        .eq('composite_user_id', effectiveCompositeUserId)
+                        .eq('composite_user_id', composite_user_id)
                         .ilike('loan_records_description', `%${payableTag}%`);
                 }
 
@@ -499,7 +455,7 @@ export default async function handler(req, res) {
                     return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
                 }
 
-                const { data, error } = await deleteIncomeExpenseRows(ids, effectiveCompositeUserId);
+                const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id);
                 if (error) throw error;
                 return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
             }
@@ -510,7 +466,7 @@ export default async function handler(req, res) {
                     return res.status(400).json({ ok: false, success: false, message: 'ids array is required.' });
                 }
 
-                const { data, error } = await deleteIncomeExpenseRows(ids, effectiveCompositeUserId, {
+                const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id, {
                     column: 'income_expense_type',
                     value: 'expense'
                 });
@@ -525,7 +481,7 @@ export default async function handler(req, res) {
                     : (Array.isArray(payload?.months) ? payload.months : []);
 
                 if (ids.length > 0) {
-                    const { data, error } = await deleteIncomeExpenseRows(ids, effectiveCompositeUserId);
+                    const { data, error } = await deleteIncomeExpenseRows(ids, composite_user_id);
                     if (error) throw error;
                     return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
                 }
@@ -534,7 +490,7 @@ export default async function handler(req, res) {
                     const { data: rows, error: fetchErr } = await supabaseServer
                         .from('income_expense')
                         .select('id, income_expense_date')
-                        .eq('composite_user_id', effectiveCompositeUserId);
+                        .eq('composite_user_id', composite_user_id);
                     if (fetchErr) throw fetchErr;
 
                     const monthSet = new Set(months.map((m) => String(m).slice(0, 7)));
@@ -546,7 +502,7 @@ export default async function handler(req, res) {
                         return res.status(200).json({ ok: true, success: true, deleted: 0, ids: [] });
                     }
 
-                    const { data, error } = await deleteIncomeExpenseRows(matchedIds, effectiveCompositeUserId);
+                    const { data, error } = await deleteIncomeExpenseRows(matchedIds, composite_user_id);
                     if (error) throw error;
                     return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids: matchedIds });
                 }
@@ -557,11 +513,7 @@ export default async function handler(req, res) {
             case 'save_loan':
             case 'insert_loan_record': {
                 const srcRecord = payload?.record || payload || {};
-                const rowToInsert = mapLoanPayload(srcRecord, effectiveCompositeUserId);
-                if (rowToInsert.loan_records_amount <= 0) {
-                    return res.status(400).json({ ok: false, success: false, message: 'Valid positive loan amount is required.' });
-                }
-
+                const rowToInsert = mapLoanPayload(srcRecord, composite_user_id);
                 const { data: inserted, error } = await supabaseServer
                     .from('loan_records')
                     .insert([rowToInsert])
@@ -569,13 +521,14 @@ export default async function handler(req, res) {
                     .single();
                 if (error) throw error;
 
+                // Receivable নতুন এন্ট্রি হলে Total Income থেকে মূল অ্যামাউন্ট মাইনাস করতে expense রো যুক্ত করা
                 if (inserted.loan_records_direction === 'receivable' && Number(inserted.loan_records_amount || 0) > 0) {
                     const baseAmt = Number(inserted.loan_records_amount);
                     const entryDate = inserted.loan_records_entry_date || new Date().toISOString().slice(0, 10);
                     const descText = `Receivable Out (${inserted.loan_records_description || 'Entry'}) [Loan#${inserted.id}]`;
 
                     await supabaseServer.from('income_expense').insert([{
-                        composite_user_id: effectiveCompositeUserId,
+                        composite_user_id,
                         income_expense_type: 'expense',
                         income_expense_date: entryDate,
                         income_expense_description: descText,
@@ -584,6 +537,7 @@ export default async function handler(req, res) {
                     }]);
                 }
 
+                // Payable নতুন এন্ট্রি শুধু loan_records-এ থাকবে; Income/Expense-এ কোনো যোগ-বিয়োগ হবে না
                 return res.status(200).json({
                     ok: true,
                     success: true,
@@ -604,14 +558,14 @@ export default async function handler(req, res) {
                     .from('loan_records')
                     .select('*')
                     .eq('id', id)
-                    .eq('composite_user_id', effectiveCompositeUserId)
+                    .eq('composite_user_id', composite_user_id)
                     .single();
                 if (fetchLoanErr || !existingLoan) throw fetchLoanErr || new Error('Loan record not found.');
 
                 const rawNextStatus = rec.loan_records_status ?? rec.status ?? 'Paid';
                 const nextSettledDate = rec.loan_records_settled_date || rec.settled_date || rec.settle_date || new Date().toISOString().slice(0, 10);
                 const nextStatus = normalizeLoanStatus(rawNextStatus, nextSettledDate);
-                const nextExtraAmount = Math.max(0, Number(rec.loan_records_extra_amount ?? rec.extra_amount ?? existingLoan.loan_records_extra_amount ?? 0) || 0);
+                const nextExtraAmount = Number(rec.loan_records_extra_amount ?? rec.extra_amount ?? existingLoan.loan_records_extra_amount ?? 0) || 0;
 
                 const { data: updated, error } = await supabaseServer
                     .from('loan_records')
@@ -621,7 +575,7 @@ export default async function handler(req, res) {
                         loan_records_extra_amount: nextExtraAmount
                     })
                     .eq('id', id)
-                    .eq('composite_user_id', effectiveCompositeUserId)
+                    .eq('composite_user_id', composite_user_id)
                     .select()
                     .single();
                 if (error) throw error;
@@ -629,6 +583,7 @@ export default async function handler(req, res) {
                 const isSettledNow = ['Paid', 'Due Received'].includes(String(nextStatus));
                 const principalAmount = Number(updated.loan_records_amount || 0);
 
+                // ১. Receivable Paid/Due Received হলে: মূল অ্যামাউন্ট + অতিরিক্ত অ্যামাউন্ট Income-এ যুক্ত হবে
                 if (updated.loan_records_direction === 'receivable' && isSettledNow) {
                     const totalReceivedIncome = principalAmount + nextExtraAmount;
                     if (totalReceivedIncome > 0) {
@@ -636,12 +591,12 @@ export default async function handler(req, res) {
                         const { data: existingInc } = await supabaseServer
                             .from('income_expense')
                             .select('id')
-                            .eq('composite_user_id', effectiveCompositeUserId)
+                            .eq('composite_user_id', composite_user_id)
                             .ilike('income_expense_description', `%${tag}%`);
 
                         if (!existingInc || existingInc.length === 0) {
                             await supabaseServer.from('income_expense').insert([{
-                                composite_user_id: effectiveCompositeUserId,
+                                composite_user_id,
                                 income_expense_type: 'income',
                                 income_expense_date: nextSettledDate,
                                 income_expense_description: `Receivable Settled (${updated.loan_records_description || 'Loan'}) - Principal + Extra ${tag}`,
@@ -652,6 +607,9 @@ export default async function handler(req, res) {
                     }
                 }
 
+                // ২. Payable Paid/Due Received হলে:
+                // - যদি এটি কোনো Due Expense থেকে আসা Payable হয় [ExpDue#<expId>], তবে সেই Expense রো-টিকে Paid করে মূল অ্যামাউন্ট + এক্সট্রা অ্যামাউন্ট Expense হিসেবে সক্রিয় করা
+                // - সাধারণ Payable হলে অতিরিক্ত অ্যামাউন্ট (০-এর বেশি হলে) Daily Expense-এ যুক্ত হবে
                 if (updated.loan_records_direction === 'payable' && isSettledNow) {
                     const descStr = String(updated.loan_records_description || '');
                     const expDueMatch = descStr.match(/\[ExpDue#([^\]]+)\]/);
@@ -667,18 +625,18 @@ export default async function handler(req, res) {
                                 income_expense_amount: totalExpenseAmt > 0 ? totalExpenseAmt : principalAmount
                             })
                             .eq('id', linkedExpId)
-                            .eq('composite_user_id', effectiveCompositeUserId);
+                            .eq('composite_user_id', composite_user_id);
                     } else if (nextExtraAmount > 0) {
                         const tag = `[PayableExtra#${updated.id}]`;
                         const { data: existingExp } = await supabaseServer
                             .from('income_expense')
                             .select('id')
-                            .eq('composite_user_id', effectiveCompositeUserId)
+                            .eq('composite_user_id', composite_user_id)
                             .ilike('income_expense_description', `%${tag}%`);
 
                         if (!existingExp || existingExp.length === 0) {
                             await supabaseServer.from('income_expense').insert([{
-                                composite_user_id: effectiveCompositeUserId,
+                                composite_user_id,
                                 income_expense_type: 'expense',
                                 income_expense_date: nextSettledDate,
                                 income_expense_description: `Payable Extra Expense (${updated.loan_records_description || 'Payable'}) ${tag}`,
@@ -709,7 +667,7 @@ export default async function handler(req, res) {
                     .from('loan_records')
                     .delete()
                     .in('id', ids)
-                    .eq('composite_user_id', effectiveCompositeUserId)
+                    .eq('composite_user_id', composite_user_id)
                     .select('id');
                 if (error) throw error;
                 return res.status(200).json({ ok: true, success: true, deleted: (data || []).length, ids });
@@ -726,12 +684,9 @@ export default async function handler(req, res) {
                         amount,
                         status: cleanStatus
                     },
-                    effectiveCompositeUserId
+                    composite_user_id,
+                    company_id
                 );
-
-                if (rowToInsert.income_expense_amount <= 0) {
-                    return res.status(200).json({ success: false, message: 'সঠিক পরিমাণ অ্যামাউন্ট প্রদান করুন।' });
-                }
 
                 const { data: insertedExp, error } = await supabaseServer
                     .from('income_expense')
@@ -740,11 +695,12 @@ export default async function handler(req, res) {
                     .single();
                 if (error) throw error;
 
+                // নতুন এক্সপেন্স এন্ট্রি Due হলে: Payable লিস্টে পুরো অ্যামাউন্ট শো করবে এবং Paid না হওয়া পর্যন্ত Expense-এ যোগ হবে না
                 if (cleanStatus === 'Due' && Number(insertedExp.income_expense_amount || 0) > 0) {
                     const expTag = `[ExpDue#${insertedExp.id}]`;
                     const cleanDesc = String(insertedExp.income_expense_description || 'Due Expense').trim();
                     await supabaseServer.from('loan_records').insert([{
-                        composite_user_id: effectiveCompositeUserId,
+                        composite_user_id,
                         loan_records_direction: 'payable',
                         loan_records_description: `${cleanDesc} ${expTag}`,
                         loan_records_amount: Number(insertedExp.income_expense_amount),
@@ -767,22 +723,21 @@ export default async function handler(req, res) {
 
             case 'buy_lot': {
                 const { lot_id, quantity } = payload || {};
-                const qtyNum = Math.min(200, Math.max(1, parseInt(quantity, 10) || 1));
-                const compId = effectiveCompositeUserId ? effectiveCompositeUserId.split('_')[0] : company_id;
-                const ownerId = effectiveCompositeUserId || (compId + '_admin');
+                const compId = composite_user_id ? composite_user_id.split('_')[0] : company_id;
+                const ownerId = composite_user_id || (compId + '_admin');
                 const rowsToInsert = [];
 
-                for (let i = 1; i <= qtyNum; i++) {
-                    const subId = `sub_${String(lot_id || 'LOT').toLowerCase().replace(/[^a-z0-9]/g, '')}_${String(i).padStart(2, '0')}`;
+                for (let i = 1; i <= quantity; i++) {
+                    const subId = `sub_${lot_id.toLowerCase().replace(/-/g, '')}_${String(i).padStart(2, '0')}`;
                     rowsToInsert.push({
                         company_id: compId,
                         user_id: subId,
-                        user_name: 'user_' + crypto.randomInt(1000, 9999),
-                        password: 'pass' + crypto.randomInt(1000, 9999),
+                        user_name: 'user_' + Math.floor(1000 + Math.random() * 9000),
+                        password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                         role: 'User',
                         status: 'In_Stock',
                         request_type: 'Lot',
-                        lot_id: String(lot_id || '').trim(),
+                        lot_id,
                         owner_id: ownerId,
                         upline_id: ownerId,
                         wallet_balance: 0.00
@@ -815,7 +770,7 @@ export default async function handler(req, res) {
 
                 const directBonus = 8.00;
                 const chainPoolTotal = 2.00;
-                let totalSellerNewBalance = Number(sellerData?.wallet_balance || 0) + directBonus;
+                let totalSellerNewBalance = (sellerData?.wallet_balance || 0) + directBonus;
 
                 const uplinesChain = [];
                 let currentUplineId = sellerData?.upline_id;
@@ -845,7 +800,7 @@ export default async function handler(req, res) {
                         const shareAmount = (chainPoolTotal * currentWeight) / totalWeight;
 
                         const targetCompositeId = uplinesChain[i].composite_user_id;
-                        const targetOldBalance = Number(uplinesChain[i].wallet_balance || 0);
+                        const targetOldBalance = uplinesChain[i].wallet_balance || 0;
 
                         await supabaseServer.from('accounts_master')
                             .update({ wallet_balance: targetOldBalance + shareAmount })
@@ -866,14 +821,14 @@ export default async function handler(req, res) {
             case 'register_new_license': {
                 const { name, mobile, email } = payload || {};
                 const compId = company_id || '101';
-                const randomUserName = 'user_' + crypto.randomInt(1000, 9999);
+                const randomUserName = 'user_' + Math.floor(1000 + Math.random() * 9000);
                 const defaultAdminCompositeId = compId + '_admin';
 
                 const { error } = await supabaseServer.from('accounts_master').insert([{
                     company_id: compId,
-                    user_id: 'user_' + crypto.randomInt(1000, 9999),
+                    user_id: 'user_' + Math.floor(1000 + Math.random() * 9000),
                     user_name: randomUserName,
-                    password: 'pass' + crypto.randomInt(1000, 9999),
+                    password: 'pass' + Math.floor(1000 + Math.random() * 9000),
                     role: 'User',
                     status: 'Pending',
                     request_type: 'Single',
@@ -890,7 +845,7 @@ export default async function handler(req, res) {
             }
 
             case 'preview_validity_cart': {
-                const accountRow = await getTargetAccount(supabaseServer, effectiveCompositeUserId, company_id, payload);
+                const accountRow = await getTargetAccount(supabaseServer, composite_user_id, company_id, payload);
 
                 if (!accountRow) {
                     return res.status(200).json({ success: false, message: 'অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
@@ -917,7 +872,7 @@ export default async function handler(req, res) {
             }
 
             case 'buy_validity': {
-                const accountRow = await getTargetAccount(supabaseServer, effectiveCompositeUserId, company_id, payload);
+                const accountRow = await getTargetAccount(supabaseServer, composite_user_id, company_id, payload);
 
                 if (!accountRow) {
                     return res.status(200).json({ success: false, message: 'অ্যাকাউন্ট খুঁজে পাওয়া যায়নি।' });
@@ -991,10 +946,6 @@ export default async function handler(req, res) {
             }
 
             case 'approve_validity_request': {
-                if (session && !['Admin', 'SuperAdmin'].includes(String(effectiveRole))) {
-                    return res.status(403).json({ success: false, message: 'Forbidden: Admin permission required.' });
-                }
-
                 const requestId = Number(payload?.request_id);
                 if (!requestId) {
                     return res.status(200).json({ success: false, message: 'Request ID প্রয়োজন।' });
@@ -1024,7 +975,7 @@ export default async function handler(req, res) {
                 const { data: senderData, error: senderErr } = await supabaseServer
                     .from('accounts_master')
                     .select('wallet_balance, composite_user_id')
-                    .eq('composite_user_id', effectiveCompositeUserId)
+                    .eq('composite_user_id', composite_user_id)
                     .single();
 
                 if (senderErr || !senderData) {
@@ -1043,7 +994,7 @@ export default async function handler(req, res) {
                     .or(`user_name.eq.${recipient_id},user_id.eq.${recipient_id},composite_user_id.eq.${recipient_id}`)
                     .single();
 
-                if (recErr || !recipientData || recipientData.composite_user_id === effectiveCompositeUserId) {
+                if (recErr || !recipientData) {
                     return res.status(200).json({ success: false, message: 'প্রাপক ইউজারনেম সঠিক নয় বা পাওয়া যায়নি।' });
                 }
 
@@ -1052,7 +1003,7 @@ export default async function handler(req, res) {
                 const { error: updateSenderErr } = await supabaseServer
                     .from('accounts_master')
                     .update({ wallet_balance: currentSenderBalance - transferAmount })
-                    .eq('composite_user_id', effectiveCompositeUserId);
+                    .eq('composite_user_id', composite_user_id);
 
                 if (updateSenderErr) throw updateSenderErr;
 
@@ -1071,18 +1022,13 @@ export default async function handler(req, res) {
 
             case 'send_chat': {
                 const { channel, message } = payload || {};
-                const cleanMsg = String(message || '').trim().slice(0, 1000);
-                if (!cleanMsg) {
-                    return res.status(200).json({ success: false, message: 'খালি মেসেজ পাঠানো যাবে না।' });
-                }
-
                 const { error } = await supabaseServer.from('forum_chat').insert([{
-                    company_id: effectiveCompositeUserId?.split('_')[0],
-                    user_id: effectiveCompositeUserId?.split('_')[1],
-                    composite_user_id: effectiveCompositeUserId,
-                    sender_role: effectiveRole || 'User',
-                    chat_channel: channel || 'Public_Forum',
-                    message: cleanMsg
+                    company_id: composite_user_id?.split('_')[0],
+                    user_id: composite_user_id?.split('_')[1],
+                    composite_user_id,
+                    sender_role: 'User',
+                    chat_channel: channel,
+                    message
                 }]);
                 if (error) throw error;
                 return res.status(200).json({ success: true, message: 'Message dispatched.' });
