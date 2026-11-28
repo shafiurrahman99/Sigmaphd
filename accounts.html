@@ -70,7 +70,7 @@
                     </div>
                     <div>
                         <h2 class="text-xs font-bold text-white flex items-center space-x-1">
-                            <span id="activeDeviceCount">1</span> Device Active 
+                            <span id="activeDeviceCount">1</span> Device Active
                             <span class="text-slate-400 font-normal">(Max 2)</span>
                         </h2>
                     </div>
@@ -153,7 +153,7 @@
                         Sub-Users: <strong class="text-emerald-400 font-extrabold text-xs" id="subUserCount">1</strong> active
                     </span>
                 </div>
-                
+
                 <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
                     <div class="flex items-center space-x-2">
                         <span class="text-slate-400 text-xs">Coupon Code:</span>
@@ -186,6 +186,249 @@
                     </div>
                     <div id="lotInventorySummaryList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
                 </div>
+            </div>
+        </div>
+
+        <!-- ================= ACCOUNT MODALS ================= -->
+        <!-- Buy Validity Modal -->
+        <div id="buyValidityModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+            <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-5 shadow-2xl relative space-y-3.5 text-xs">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <h3 class="text-base font-bold text-white">Extend Validity</h3>
+                    <button type="button" onclick="closeBuyValidityModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+
+                <div id="validityModalPendingNotice" class="hidden bg-amber-950/60 border border-amber-500/50 rounded-2xl p-3 text-xs text-amber-300 space-y-1">
+                    <div class="font-extrabold text-amber-400">Wait for Validity Approval</div>
+                    <div id="validityModalPendingDetails" class="text-[11px] text-amber-200/90 font-mono"></div>
+                </div>
+
+                <div class="flex gap-2">
+                    <select id="validityPlanDropdown" class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-emerald-500">
+                        <option value="1">1 Month (30 Days)</option>
+                        <option value="2">2 Months (60 Days)</option>
+                        <option value="3">3 Months (90 Days)</option>
+                        <option value="6">6 Months (180 Days)</option>
+                    </select>
+                    <button type="button" onclick="addValidityToCart()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl transition">+ Add</button>
+                </div>
+
+                <div id="validityCartItems" class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-1.5 max-h-36 overflow-y-auto">
+                    <p class="text-slate-500 text-center py-2">Cart is empty. Select a plan &amp; click Add.</p>
+                </div>
+
+                <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-1.5">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Total Validity:</span>
+                        <span id="validityTotalDaysText" class="font-mono text-amber-400">0 Days</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Base Total:</span>
+                        <span id="validityBasePriceText" class="font-mono">৳ 0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Discount:</span>
+                        <span id="validityDiscountText" class="font-mono text-emerald-400">- ৳ 0.00</span>
+                    </div>
+                    <div class="flex justify-between border-t border-slate-800 pt-1.5 font-semibold">
+                        <span class="text-slate-300">Subtotal:</span>
+                        <span id="validitySubtotalText" class="font-mono text-white">৳ 0.00</span>
+                    </div>
+                    <div class="flex justify-between text-amber-300">
+                        <span>Wallet Deduction:</span>
+                        <span id="validityWalletDeductText" class="font-mono">- ৳ 0.00</span>
+                    </div>
+                    <div class="flex justify-between border-t border-slate-800 pt-1.5 text-sm font-extrabold text-emerald-400">
+                        <span>Grand Total Payable:</span>
+                        <span id="validityPayableText" class="font-mono">৳ 0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-[#080a0f] border border-slate-800 rounded-xl px-3 py-2">
+                    <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="useCouponWalletCheckbox" onchange="refreshValiditySummaryDisplay(validityCart)" class="rounded border-slate-600 bg-slate-800 text-emerald-500">
+                        <span>Use Wallet Balance</span>
+                    </label>
+                    <span class="text-emerald-400 font-mono font-bold">Balance: <span id="validityWalletBalanceText">৳ 0.00</span></span>
+                </div>
+
+                <div id="validityTrxBox">
+                    <label for="validityTrxId" class="block text-slate-400 mb-1">Transaction ID</label>
+                    <input type="text" id="validityTrxId" required maxlength="64" pattern="[A-Za-z0-9_-]+" placeholder="Enter Payment TrxID (bKash/Nagad)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button type="button" onclick="handleCashPayValidity()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition">
+                        Cash Pay
+                    </button>
+                    <button type="button" disabled title="Online payment is currently closed" class="bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2.5 rounded-xl cursor-not-allowed">
+                        Online Pay (Closed)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buy New Lot Modal -->
+        <div id="buyLotModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+            <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
+                <button type="button" onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-boxes-packing text-amber-400"></i>
+                    <span>Buy New Lot</span>
+                </h3>
+
+                <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
+                        <span class="text-slate-400">Lot Number:</span>
+                        <span id="generatedLotNumber" class="text-amber-400 font-mono font-extrabold">LT-9521</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Select Quantity:</span>
+                        <select id="lotQuantitySelect" onchange="calculateLotPrice()" class="bg-[#131822] border border-slate-700 rounded-lg px-2 py-1 text-emerald-400 font-bold">
+                            <option value="5">5 IDs</option>
+                            <option value="10" selected>10 IDs</option>
+                            <option value="20">20 IDs</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>Sub Total:</span>
+                        <span id="lotSubTotalText" class="font-mono">৳ 1,000.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-emerald-400">
+                        <span>Admin Discount:</span>
+                        <span id="lotDiscountText" class="font-mono">- ৳ 200.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-slate-800 pt-1.5 text-sm font-extrabold text-white">
+                        <span>Net Payable:</span>
+                        <span id="lotNetTotalText" class="font-mono">৳ 800.00</span>
+                    </div>
+                </div>
+
+                <button type="button" onclick="handleCashPayLot()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold py-3 rounded-xl text-xs flex items-center justify-center space-x-1 shadow">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                    <span>Confirm &amp; Buy Lot</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sell ID Modal -->
+        <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+            <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
+                <button type="button" onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-paper-plane text-emerald-400"></i>
+                    <span>Sell New ID (From Lot)</span>
+                </h3>
+
+                <div class="bg-[#080a0f] border border-emerald-500/30 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1">
+                    <div class="flex justify-between font-semibold text-emerald-400">
+                        <span>Direct Bonus:</span>
+                        <span>৳ 8.00 (Fixed)</span>
+                    </div>
+                    <div class="flex justify-between text-amber-400">
+                        <span>Chain Pool:</span>
+                        <span>৳ 2.00 (Proportional Ratio)</span>
+                    </div>
+                </div>
+
+                <form onsubmit="handleSellNewIdSubmit(event)" class="space-y-2.5 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Select Lot ID to Sell</label>
+                        <select id="sellLotIdSelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lotPassword">Lot Password</label>
+                        <input type="text" id="lotPassword" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold" placeholder="Password will show here" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Coupon Code (Auto)</label>
+                        <input type="text" id="sellCouponCodeInput" readonly class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-amber-400 font-bold font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Buyer Name</label>
+                        <input type="text" id="sellBuyerName" maxlength="100" placeholder="Buyer Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Buyer Mobile Number</label>
+                        <input type="tel" id="sellBuyerMobile" maxlength="20" pattern="[0-9+\-\s]{7,20}" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Buyer Email Address</label>
+                        <input type="email" id="sellBuyerEmail" maxlength="120" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg mt-1">Submit &amp; Sell ID (৳8 + ৳2 Chain)</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Balance Transfer Modal -->
+        <div id="balanceTransferModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+            <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+                <button type="button" onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-lg font-bold text-white">Balance Transfer</h3>
+                <form onsubmit="handleBalanceTransferSubmit(event)" class="space-y-3 text-xs">
+                    <input type="text" id="transferRecipientId" maxlength="64" pattern="[A-Za-z0-9_@.-]+" placeholder="Recipient ID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400">
+                    <input type="number" id="transferAmount" placeholder="Amount (৳)" min="1" max="10000000" step="0.01" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">Transfer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Device Modal -->
+        <div id="addDeviceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+            <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+                <button type="button" onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-lg font-bold text-white">Add Device</h3>
+                <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 text-xs">
+                    <input type="text" id="deviceNameInput" maxlength="80" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                    <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">Add Device</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- User & Password Change Modal -->
+        <div id="userPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center;">
+            <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 420px; padding: 24px; color: #f8fafc; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 18px; color: #38bdf8;">Account &amp; Password</h3>
+                    <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
+                </div>
+
+                <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #94a3b8;">Account Email:</span>
+                        <span id="modalAutoEmail" style="color: #fbbf24; font-weight: 500;">--</span>
+                    </div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
+                        * পরিবর্তনের কনফার্মেশন নোটিফিকেশন এই ইমেইলে পাঠানো হবে।
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
+                        <input type="text" id="newUsernameInput" maxlength="64" pattern="[A-Za-z0-9_@.-]+" autocomplete="off" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    </div>
+
+                    <div>
+                        <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুরাতন পাসওয়ার্ড (Old Password) *</label>
+                        <input type="password" id="oldPasswordInput" minlength="4" maxlength="128" autocomplete="current-password" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    </div>
+
+                    <div>
+                        <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন পাসওয়ার্ড (New Password) *</label>
+                        <input type="password" id="newPasswordInput" minlength="4" maxlength="128" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    </div>
+
+                    <div>
+                        <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুনরায় নতুন পাসওয়ার্ড (Confirm New Password) *</label>
+                        <input type="password" id="confirmPasswordInput" minlength="4" maxlength="128" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <button type="button" id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                    Accept &amp; Login Again
+                </button>
             </div>
         </div>
     </div>
