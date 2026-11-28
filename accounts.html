@@ -150,14 +150,14 @@
                         <span>Referral Chain &amp; User Sale</span>
                     </span>
                     <span class="bg-indigo-900/40 text-indigo-300 border border-indigo-700/50 px-2 py-0.5 rounded-md text-[10px] font-semibold">
-                        Sub-Users: <strong class="text-emerald-400 font-extrabold text-xs" id="subUserCount">1</strong> active
+                        Sub-Users: <strong class="text-emerald-400 font-extrabold text-xs" id="subUserCount">0</strong> active
                     </span>
                 </div>
 
                 <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
                     <div class="flex items-center space-x-2">
                         <span class="text-slate-400 text-xs">Coupon Code:</span>
-                        <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA_0000</span>
+                        <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30"></span>
                     </div>
                     <button type="button" onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all cursor-pointer">
                         <i class="fa-regular fa-copy"></i>
@@ -195,7 +195,7 @@
             <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-5 shadow-2xl relative space-y-3.5 text-xs">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                     <h3 class="text-base font-bold text-white">Extend Validity</h3>
-                    <button type="button" onclick="closeBuyValidityModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    <button type="button" onclick="closeBuyValidityModal()" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
 
                 <div id="validityModalPendingNotice" class="hidden bg-amber-950/60 border border-amber-500/50 rounded-2xl p-3 text-xs text-amber-300 space-y-1">
@@ -210,7 +210,7 @@
                         <option value="3">3 Months (90 Days)</option>
                         <option value="6">6 Months (180 Days)</option>
                     </select>
-                    <button type="button" onclick="addValidityToCart()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl transition">+ Add</button>
+                    <button type="button" onclick="addValidityToCart()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl transition cursor-pointer">+ Add</button>
                 </div>
 
                 <div id="validityCartItems" class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-1.5 max-h-36 overflow-y-auto">
@@ -258,7 +258,7 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button type="button" onclick="handleCashPayValidity()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition">
+                    <button type="button" onclick="handleCashPayValidity()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition cursor-pointer">
                         Cash Pay
                     </button>
                     <button type="button" disabled title="Online payment is currently closed" class="bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2.5 rounded-xl cursor-not-allowed">
@@ -271,7 +271,7 @@
         <!-- Buy New Lot Modal -->
         <div id="buyLotModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
             <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
-                <button type="button" onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
                 <h3 class="text-base font-bold text-white flex items-center space-x-2">
                     <i class="fa-solid fa-boxes-packing text-amber-400"></i>
                     <span>Buy New Lot</span>
@@ -280,7 +280,7 @@
                 <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
                     <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
                         <span class="text-slate-400">Lot Number:</span>
-                        <span id="generatedLotNumber" class="text-amber-400 font-mono font-extrabold">LT-9521</span>
+                        <span id="generatedLotNumber" class="text-amber-400 font-mono font-extrabold"></span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-slate-400">Select Quantity:</span>
@@ -292,19 +292,19 @@
                     </div>
                     <div class="flex justify-between items-center text-slate-300">
                         <span>Sub Total:</span>
-                        <span id="lotSubTotalText" class="font-mono">৳ 1,000.00</span>
+                        <span id="lotSubTotalText" class="font-mono">৳ 0.00</span>
                     </div>
                     <div class="flex justify-between items-center text-emerald-400">
                         <span>Admin Discount:</span>
-                        <span id="lotDiscountText" class="font-mono">- ৳ 200.00</span>
+                        <span id="lotDiscountText" class="font-mono">- ৳ 0.00</span>
                     </div>
                     <div class="flex justify-between items-center border-t border-slate-800 pt-1.5 text-sm font-extrabold text-white">
                         <span>Net Payable:</span>
-                        <span id="lotNetTotalText" class="font-mono">৳ 800.00</span>
+                        <span id="lotNetTotalText" class="font-mono">৳ 0.00</span>
                     </div>
                 </div>
 
-                <button type="button" onclick="handleCashPayLot()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold py-3 rounded-xl text-xs flex items-center justify-center space-x-1 shadow">
+                <button type="button" onclick="handleCashPayLot()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold py-3 rounded-xl text-xs flex items-center justify-center space-x-1 shadow cursor-pointer">
                     <i class="fa-solid fa-money-bill-wave"></i>
                     <span>Confirm &amp; Buy Lot</span>
                 </button>
@@ -314,7 +314,7 @@
         <!-- Sell ID Modal -->
         <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
             <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
-                <button type="button" onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
                 <h3 class="text-base font-bold text-white flex items-center space-x-2">
                     <i class="fa-solid fa-paper-plane text-emerald-400"></i>
                     <span>Sell New ID (From Lot)</span>
@@ -356,7 +356,7 @@
                         <label class="block text-slate-400 mb-1">Buyer Email Address</label>
                         <input type="email" id="sellBuyerEmail" maxlength="120" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg mt-1">Submit &amp; Sell ID (৳8 + ৳2 Chain)</button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg mt-1 cursor-pointer">Submit &amp; Sell ID (৳8 + ৳2 Chain)</button>
                 </form>
             </div>
         </div>
@@ -364,12 +364,12 @@
         <!-- Balance Transfer Modal -->
         <div id="balanceTransferModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
             <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-                <button type="button" onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
                 <h3 class="text-lg font-bold text-white">Balance Transfer</h3>
                 <form onsubmit="handleBalanceTransferSubmit(event)" class="space-y-3 text-xs">
                     <input type="text" id="transferRecipientId" maxlength="64" pattern="[A-Za-z0-9_@.-]+" placeholder="Recipient ID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400">
                     <input type="number" id="transferAmount" placeholder="Amount (৳)" min="1" max="10000000" step="0.01" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">Transfer</button>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs cursor-pointer">Transfer</button>
                 </form>
             </div>
         </div>
@@ -377,11 +377,11 @@
         <!-- Add Device Modal -->
         <div id="addDeviceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
             <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
-                <button type="button" onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
                 <h3 class="text-lg font-bold text-white">Add Device</h3>
                 <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 text-xs">
                     <input type="text" id="deviceNameInput" maxlength="80" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
-                    <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">Add Device</button>
+                    <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl cursor-pointer">Add Device</button>
                 </form>
             </div>
         </div>
@@ -446,7 +446,7 @@
             function emitHeightToParent() {
                 if (!isEmbedded || !window.parent) return;
                 const shell = document.getElementById('accounts-module-shell');
-                const height = shell ? shell.scrollHeight + 12 : document.documentElement.scrollHeight;
+                const height = shell ? shell.scrollHeight + 16 : document.documentElement.scrollHeight;
                 window.parent.postMessage({
                     channel: CHANNEL,
                     type: 'FRAME_HEIGHT',
@@ -464,6 +464,14 @@
 
                 if (data.type === 'SET_USER_SCOPE') {
                     const nextId = String(data.payload?.composite_user_id || data.compositeUserId || '').trim();
+                    const nextUser = String(data.payload?.user_name || '').trim();
+                    const nextCoupon = String(data.payload?.coupon_code || '').trim();
+                    if (nextUser && document.getElementById('currentLoggedInUser')) {
+                        document.getElementById('currentLoggedInUser').textContent = nextUser;
+                    }
+                    if (nextCoupon && typeof window.setDatabaseCouponCode === 'function') {
+                        window.setDatabaseCouponCode(nextCoupon);
+                    }
                     if (nextId && typeof window.syncCompositeIdToIframe === 'function') {
                         window.syncCompositeIdToIframe(nextId);
                     }
