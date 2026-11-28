@@ -164,20 +164,22 @@ function syncCompositeIdToIframe(compId) {
     if (typeof window.syncDashboardIframeUser === 'function') {
         window.syncDashboardIframeUser(cleanId);
     } else {
-        const frame = document.getElementById('dashboardFrame');
-        frame?.contentWindow?.postMessage({
-            channel: BRIDGE_CHANNEL,
-            type: 'SET_USER_SCOPE',
-            compositeUserId: cleanId,
-            payload: { composite_user_id: cleanId }
-        }, TRUSTED_ORIGIN);
+        ['dashboardFrame', 'accountsFrame'].forEach((frameId) => {
+            const frame = document.getElementById(frameId);
+            frame?.contentWindow?.postMessage({
+                channel: BRIDGE_CHANNEL,
+                type: 'SET_USER_SCOPE',
+                compositeUserId: cleanId,
+                payload: { composite_user_id: cleanId }
+            }, TRUSTED_ORIGIN);
+        });
     }
 }
 
 function notifyParentFrameHeight() {
     if (window.self !== window.top && window.parent) {
-        const shell = document.getElementById('dashboard-app-shell') || document.body;
-        const height = shell ? shell.scrollHeight + 24 : document.documentElement.scrollHeight;
+        const shell = document.getElementById('accounts-module-shell') || document.getElementById('dashboard-app-shell') || document.body;
+        const height = shell ? shell.scrollHeight + 16 : document.documentElement.scrollHeight;
         window.parent.postMessage({
             channel: BRIDGE_CHANNEL,
             type: 'FRAME_HEIGHT',
@@ -185,6 +187,19 @@ function notifyParentFrameHeight() {
             height
         }, TRUSTED_ORIGIN);
     }
+}
+
+function requestParentModal(modalName) {
+    if (window.self !== window.top && window.parent) {
+        window.parent.postMessage({
+            channel: BRIDGE_CHANNEL,
+            type: 'OPEN_MODAL',
+            modal: modalName,
+            compositeUserId: resolveCompositeUserId()
+        }, TRUSTED_ORIGIN);
+        return true;
+    }
+    return false;
 }
 
 /* =========================================================================
@@ -381,6 +396,15 @@ async function handleMainSignIn(e) {
 }
 
 function handleLogOut() {
+    if (window.self !== window.top && window.parent && !document.getElementById('page1')) {
+        window.parent.postMessage({
+            channel: BRIDGE_CHANNEL,
+            type: 'LOGOUT',
+            compositeUserId: resolveCompositeUserId()
+        }, TRUSTED_ORIGIN);
+        return;
+    }
+
     if (validityCountdownTimer) { clearInterval(validityCountdownTimer); validityCountdownTimer = null; }
     isValidityExpiredSession = false;
     validityExpiryTime = 0;
@@ -885,6 +909,7 @@ function openIncomeListModal() {
  * LOT, VALIDITY CART (Server-Priced), TRANSFER, CHAT & CASH MEMO
  * ========================================================================= */
 function openBuyLotModal() {
+    if (requestParentModal('buyLot')) return;
     if (document.getElementById('generatedLotNumber')) document.getElementById('generatedLotNumber').textContent = 'LT-' + Math.floor(1000 + Math.random() * 9000);
     calculateLotPrice();
     openModal('buyLotModal');
@@ -933,6 +958,7 @@ function renderLotInventory() {
 }
 
 function openSellLicenseModal() {
+    if (requestParentModal('sellLicense')) return;
     renderLotInventory();
     if (document.getElementById('sellCouponCodeInput')) document.getElementById('sellCouponCodeInput').value = document.getElementById('userCouponCode')?.textContent || '';
     openModal('sellLicenseModal');
@@ -963,7 +989,11 @@ async function handleSellNewIdSubmit(e) {
     else showToast(res?.message || 'আইডি বিক্রি ব্যর্থ হয়েছে।', 'error');
 }
 
-function openBuyValidityModal() { openModal('buyValidityModal'); refreshValiditySummaryDisplay(validityCart); }
+function openBuyValidityModal() {
+    if (requestParentModal('buyValidity')) return;
+    openModal('buyValidityModal');
+    refreshValiditySummaryDisplay(validityCart);
+}
 function closeBuyValidityModal() {
     closeModal('buyValidityModal');
     if (isValidityExpiredSession) { document.getElementById('page2')?.classList.add('hidden'); document.getElementById('page1')?.classList.remove('hidden'); }
@@ -1041,7 +1071,10 @@ async function handleCashPayValidity() {
     } else showToast(res?.message || 'Validity extension failed.', 'error');
 }
 
-function openBalanceTransferModal() { openModal('balanceTransferModal'); }
+function openBalanceTransferModal() {
+    if (requestParentModal('balanceTransfer')) return;
+    openModal('balanceTransferModal');
+}
 function closeBalanceTransferModal() { closeModal('balanceTransferModal'); }
 
 async function handleBalanceTransferSubmit(e) {
@@ -1083,7 +1116,10 @@ async function handleLandingBuySubmit(e) {
     else showToast(res?.message || 'সাবমিট করতে সমস্যা হয়েছে।', 'error');
 }
 
-function openAddDeviceModal() { openModal('addDeviceModal'); }
+function openAddDeviceModal() {
+    if (requestParentModal('addDevice')) return;
+    openModal('addDeviceModal');
+}
 function closeAddDeviceModal() { closeModal('addDeviceModal'); }
 
 async function handleAddDeviceSubmit(e) {
@@ -1234,8 +1270,21 @@ function toggleAccountsSection() {
     const c = document.getElementById('accountsSectionContainer');
     if (!c) return;
     c.classList.toggle('hidden');
-    if (document.getElementById('accountsToggleText')) document.getElementById('accountsToggleText').textContent = c.classList.contains('hidden') ? 'Show Accounts' : 'Hide Accounts';
+    const isHidden = c.classList.contains('hidden');
+    if (document.getElementById('accountsToggleText')) document.getElementById('accountsToggleText').textContent = isHidden ? 'Show Accounts' : 'Hide Accounts';
+    const icon = document.getElementById('accountsToggleIcon');
+    if (icon) {
+        icon.classList.toggle('fa-chevron-down', isHidden);
+        icon.classList.toggle('fa-chevron-up', !isHidden);
+    }
     notifyParentFrameHeight();
+    if (window.self !== window.top && window.parent) {
+        window.parent.postMessage({
+            channel: BRIDGE_CHANNEL,
+            type: 'ACCOUNTS_STATE_UPDATED',
+            compositeUserId: resolveCompositeUserId()
+        }, TRUSTED_ORIGIN);
+    }
 }
 function copyCouponCode() {
     const code = document.getElementById('userCouponCode')?.textContent || '';
@@ -1307,6 +1356,7 @@ function printMemoPdf() {
  * PASSWORD CHANGE & LISTENERS
  * ========================================================================= */
 function openUserPassModal() {
+    if (requestParentModal('userPass')) return;
     if (document.getElementById('modalAutoEmail')) document.getElementById('modalAutoEmail').textContent = sessionStorage.getItem('buyer_email') || 'N/A';
     if (document.getElementById('newUsernameInput')) document.getElementById('newUsernameInput').value = sessionStorage.getItem('user_name') || currentUserName || '';
     if (document.getElementById('userPassModal')) document.getElementById('userPassModal').style.display = 'flex';
@@ -1336,12 +1386,15 @@ window.addEventListener('message', (event) => {
     if (data.type === 'SET_USER_SCOPE') {
         const nextId = sanitizeSafeId(data.payload?.composite_user_id || data.compositeUserId || '');
         if (nextId) {
-            syncCompositeIdToIframe(nextId);
+            currentCompositeUserId = nextId;
+            window.ACTIVE_COMPOSITE_USER_ID = nextId;
+            try { sessionStorage.setItem('composite_user_id', nextId); } catch (_) {}
             if (
                 document.getElementById('monthly-summary-body') ||
                 document.getElementById('monthlyRowsContainer') ||
                 document.getElementById('receivable-list-body') ||
-                document.getElementById('daily-expenses-body')
+                document.getElementById('daily-expenses-body') ||
+                document.getElementById('accounts-module-shell')
             ) {
                 loadAllDatabaseRecords();
             }
@@ -1364,7 +1417,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const initialCompId = resolveCompositeUserId();
     if (initialCompId) {
         syncCompositeIdToIframe(initialCompId);
-        if (document.getElementById('monthly-summary-body') || document.getElementById('receivable-list-body') || document.getElementById('daily-expenses-body')) {
+        if (document.getElementById('monthly-summary-body') || document.getElementById('receivable-list-body') || document.getElementById('daily-expenses-body') || document.getElementById('accounts-module-shell')) {
             loadAllDatabaseRecords();
         }
     }
