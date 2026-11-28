@@ -11,6 +11,7 @@ const TRUSTED_ORIGIN = window.location.origin;
 let GLOBAL_COMPANY_ID = "101";
 let currentUserName = "";
 let currentCompositeUserId = "";
+let currentDatabaseCouponCode = "";
 let validityExpiryTime = 0;
 let validityCountdownTimer = null;
 let isValidityExpiredSession = false;
@@ -86,6 +87,42 @@ function setSessionToken(token) {
     } catch (_) {}
 }
 
+function extractCouponFromRecord(rec = {}) {
+    return sanitizeTextInput(
+        rec.coupon_code ??
+        rec.couponCode ??
+        rec.referral_code ??
+        rec.referralCode ??
+        rec.user_coupon_code ??
+        rec.coupon ??
+        '',
+        64
+    );
+}
+
+function setDatabaseCouponCode(code) {
+    const clean = sanitizeTextInput(code || '', 64);
+    if (!clean) return;
+    currentDatabaseCouponCode = clean;
+    try { sessionStorage.setItem('db_coupon_code', clean); } catch (_) {}
+    const el = document.getElementById('userCouponCode');
+    if (el) el.textContent = clean;
+    const sellInput = document.getElementById('sellCouponCodeInput');
+    if (sellInput) sellInput.value = clean;
+}
+
+function getStoredCouponCode() {
+    if (currentDatabaseCouponCode) return currentDatabaseCouponCode;
+    try {
+        const saved = sanitizeTextInput(sessionStorage.getItem('db_coupon_code') || '', 64);
+        if (saved) {
+            currentDatabaseCouponCode = saved;
+            return saved;
+        }
+    } catch (_) {}
+    return '';
+}
+
 function formatDisplayDate(rawDate) {
     if (!rawDate) return '-';
     const str = String(rawDate).trim();
@@ -133,7 +170,7 @@ function formatMoney(num) {
 }
 
 /* =========================================================================
- * COMPOSITE USER ID (Hidden from DOM, Kept in Memory/Session) & BRIDGE
+ * COMPOSITE USER ID & BRIDGE SYNC
  * ========================================================================= */
 function resolveCompositeUserId() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -154,15 +191,22 @@ function resolveCompositeUserId() {
     return resolved;
 }
 
-function syncCompositeIdToIframe(compId) {
+function syncCompositeIdToIframe(compId, extraPayload = {}) {
     const cleanId = sanitizeSafeId(String(compId || '').trim());
     if (!cleanId) return;
     currentCompositeUserId = cleanId;
     window.ACTIVE_COMPOSITE_USER_ID = cleanId;
     try { sessionStorage.setItem('composite_user_id', cleanId); } catch (_) {}
 
+    const payload = {
+        composite_user_id: cleanId,
+        user_name: currentUserName || '',
+        coupon_code: getStoredCouponCode() || '',
+        ...extraPayload
+    };
+
     if (typeof window.syncDashboardIframeUser === 'function') {
-        window.syncDashboardIframeUser(cleanId);
+        window.syncDashboardIframeUser(cleanId, payload);
     } else {
         ['dashboardFrame', 'accountsFrame'].forEach((frameId) => {
             const frame = document.getElementById(frameId);
@@ -170,7 +214,7 @@ function syncCompositeIdToIframe(compId) {
                 channel: BRIDGE_CHANNEL,
                 type: 'SET_USER_SCOPE',
                 compositeUserId: cleanId,
-                payload: { composite_user_id: cleanId }
+                payload
             }, TRUSTED_ORIGIN);
         });
     }
@@ -179,7 +223,7 @@ function syncCompositeIdToIframe(compId) {
 function notifyParentFrameHeight() {
     if (window.self !== window.top && window.parent) {
         const shell = document.getElementById('accounts-module-shell') || document.getElementById('dashboard-app-shell') || document.body;
-        const height = shell ? shell.scrollHeight + 16 : document.documentElement.scrollHeight;
+        const height = shell ? shell.scrollHeight + 20 : document.documentElement.scrollHeight;
         window.parent.postMessage({
             channel: BRIDGE_CHANNEL,
             type: 'FRAME_HEIGHT',
@@ -189,21 +233,8 @@ function notifyParentFrameHeight() {
     }
 }
 
-function requestParentModal(modalName) {
-    if (window.self !== window.top && window.parent) {
-        window.parent.postMessage({
-            channel: BRIDGE_CHANNEL,
-            type: 'OPEN_MODAL',
-            modal: modalName,
-            compositeUserId: resolveCompositeUserId()
-        }, TRUSTED_ORIGIN);
-        return true;
-    }
-    return false;
-}
-
 /* =========================================================================
- * API CONNECTOR (Attaches Session Token & Hidden Composite User ID)
+ * API CONNECTOR
  * ========================================================================= */
 async function callBackendApi(action, payload = {}) {
     try {
@@ -291,6 +322,7 @@ function closeModal(modalId) {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     modal.style.display = 'none';
+    notifyParentFrameHeight();
 }
 
 function setIEModalType(type = 'income') {
@@ -365,8 +397,7 @@ async function handleMainSignIn(e) {
 
         currentUserName = sanitizeTextInput(user.user_name || uname, 64);
         currentCompositeUserId = sanitizeSafeId(user.composite_user_id || '');
-        const mobile = sanitizeTextInput(user.buyer_mobile || '', 20);
-        const last4 = mobile.replace(/\D/g, '').slice(-4) || '0000';
+        const dbCoupon = extractCouponFromRecord(user);
 
         try {
             if (currentCompositeUserId) sessionStorage.setItem('composite_user_id', currentCompositeUserId);
@@ -374,11 +405,26 @@ async function handleMainSignIn(e) {
             sessionStorage.setItem('buyer_email', sanitizeTextInput(user.buyer_email || '', 120));
         } catch (_) {}
 
-        if (document.getElementById('currentLoggedInUser')) document.getElementById('currentLoggedInUser').textContent = currentUserName;
-        if (currentCompositeUserId) syncCompositeIdToIframe(currentCompositeUserId);
-        if (document.getElementById('userCouponCode')) document.getElementById('userCouponCode').textContent = 'SIGMA_' + last4;
-        if (document.getElementById('walletBalanceText')) document.getElementById('walletBalanceText').textContent = formatMoney(user.wallet_balance || 0);
-        if (document.getElementById('validityWalletBalanceText')) document.getElementById('validityWalletBalanceText').textContent = formatMoney(user.wallet_balance || 0);
+        if (dbCoupon) {
+            setDatabaseCouponCode(dbCoupon);
+        }
+
+        if (document.getElementById('currentLoggedInUser')) {
+            document.getElementById('currentLoggedInUser').textContent = currentUserName;
+        }
+        if (document.getElementById('walletBalanceText')) {
+            document.getElementById('walletBalanceText').textContent = formatMoney(user.wallet_balance || 0);
+        }
+        if (document.getElementById('validityWalletBalanceText')) {
+            document.getElementById('validityWalletBalanceText').textContent = formatMoney(user.wallet_balance || 0);
+        }
+
+        if (currentCompositeUserId) {
+            syncCompositeIdToIframe(currentCompositeUserId, {
+                user_name: currentUserName,
+                coupon_code: dbCoupon
+            });
+        }
 
         document.getElementById('page1')?.classList.add('hidden');
         document.getElementById('page2')?.classList.remove('hidden');
@@ -410,6 +456,7 @@ function handleLogOut() {
     validityExpiryTime = 0;
     currentUserName = '';
     currentCompositeUserId = '';
+    currentDatabaseCouponCode = '';
     window.ACTIVE_COMPOSITE_USER_ID = '';
     setSessionToken('');
     try {
@@ -515,7 +562,7 @@ function startValidityCountdown() {
 }
 
 /* =========================================================================
- * DATA FETCH & TABLE RENDERERS (Safe Event Delegation + Escaped Content)
+ * DATA FETCH & TABLE RENDERERS
  * ========================================================================= */
 async function loadAllDatabaseRecords() {
     const activeCompId = resolveCompositeUserId();
@@ -536,11 +583,29 @@ async function loadAllDatabaseRecords() {
         accountsMasterRecords = res.accounts || [];
         universalMessages = res.public_chats || [];
 
-        const me = accountsMasterRecords.find((a) => a.composite_user_id === activeCompId);
+        const topCoupon = extractCouponFromRecord(res);
+        if (topCoupon) setDatabaseCouponCode(topCoupon);
+
+        const me = accountsMasterRecords.find((a) =>
+            String(a.composite_user_id || '') === activeCompId ||
+            (currentUserName && String(a.user_name || '') === currentUserName)
+        );
         if (me) {
-            if (document.getElementById('walletBalanceText')) document.getElementById('walletBalanceText').textContent = formatMoney(me.wallet_balance || 0);
-            if (document.getElementById('validityWalletBalanceText')) document.getElementById('validityWalletBalanceText').textContent = formatMoney(me.wallet_balance || 0);
+            const meCoupon = extractCouponFromRecord(me);
+            if (meCoupon) setDatabaseCouponCode(meCoupon);
+            if (me.user_name && document.getElementById('currentLoggedInUser')) {
+                document.getElementById('currentLoggedInUser').textContent = me.user_name;
+            }
+            if (document.getElementById('walletBalanceText')) {
+                document.getElementById('walletBalanceText').textContent = formatMoney(me.wallet_balance || 0);
+            }
+            if (document.getElementById('validityWalletBalanceText')) {
+                document.getElementById('validityWalletBalanceText').textContent = formatMoney(me.wallet_balance || 0);
+            }
             if ((me.validity_expires_at || me.activated_at) && !applyValidityStateFromUser(me)) return;
+        } else {
+            const existingCoupon = getStoredCouponCode();
+            if (existingCoupon) setDatabaseCouponCode(existingCoupon);
         }
     }
     renderMonthlySummaryTable();
@@ -742,7 +807,7 @@ function renderMarketExpensesTable() {
 }
 
 /* =========================================================================
- * FORM SUBMIT & DELETE HANDLERS (Strict Input Validation)
+ * FORM SUBMIT & DELETE HANDLERS
  * ========================================================================= */
 async function handleIncomeExpenseSubmit(e) {
     if (e?.preventDefault) e.preventDefault();
@@ -906,11 +971,12 @@ function openIncomeListModal() {
 }
 
 /* =========================================================================
- * LOT, VALIDITY CART (Server-Priced), TRANSFER, CHAT & CASH MEMO
+ * LOT, VALIDITY CART, TRANSFER, CHAT & CASH MEMO
  * ========================================================================= */
 function openBuyLotModal() {
-    if (requestParentModal('buyLot')) return;
-    if (document.getElementById('generatedLotNumber')) document.getElementById('generatedLotNumber').textContent = 'LT-' + Math.floor(1000 + Math.random() * 9000);
+    if (document.getElementById('generatedLotNumber')) {
+        document.getElementById('generatedLotNumber').textContent = 'LT-' + Math.floor(1000 + Math.random() * 9000);
+    }
     calculateLotPrice();
     openModal('buyLotModal');
 }
@@ -943,6 +1009,7 @@ function renderLotInventory() {
     if (!inStock.length) {
         if (listEl) listEl.innerHTML = '<p class="text-slate-500">No In_Stock IDs available.</p>';
         if (selectEl) selectEl.innerHTML = '<option value="">No Stock Available</option>';
+        if (document.getElementById('lotPassword')) document.getElementById('lotPassword').value = '';
         return;
     }
     if (listEl) listEl.innerHTML = inStock.map((i) => `<div class="flex justify-between items-center bg-[#131822] px-2 py-1 rounded border border-slate-800"><span class="text-amber-400 font-mono">${escapeHtml(i.lot_id)} • ${escapeHtml(i.user_name || i.user_id)}</span><span class="text-emerald-400 font-bold">In_Stock</span></div>`).join('');
@@ -958,9 +1025,11 @@ function renderLotInventory() {
 }
 
 function openSellLicenseModal() {
-    if (requestParentModal('sellLicense')) return;
     renderLotInventory();
-    if (document.getElementById('sellCouponCodeInput')) document.getElementById('sellCouponCodeInput').value = document.getElementById('userCouponCode')?.textContent || '';
+    const coupon = getStoredCouponCode() || document.getElementById('userCouponCode')?.textContent || '';
+    if (document.getElementById('sellCouponCodeInput')) {
+        document.getElementById('sellCouponCodeInput').value = coupon;
+    }
     openModal('sellLicenseModal');
 }
 function closeSellLicenseModal() { closeModal('sellLicenseModal'); }
@@ -971,7 +1040,7 @@ async function handleSellNewIdSubmit(e) {
     const buyerName = sanitizeTextInput(document.getElementById('sellBuyerName')?.value || '', 100);
     const buyerMobile = sanitizeTextInput(document.getElementById('sellBuyerMobile')?.value || '', 20);
     const buyerEmail = sanitizeTextInput(document.getElementById('sellBuyerEmail')?.value || '', 120);
-    const couponCode = sanitizeTextInput(document.getElementById('sellCouponCodeInput')?.value || '', 32);
+    const couponCode = sanitizeTextInput(document.getElementById('sellCouponCodeInput')?.value || getStoredCouponCode(), 64);
 
     if (!soldId || !buyerName || !isValidPhone(buyerMobile) || !isValidEmail(buyerEmail)) {
         showToast('সব তথ্য সঠিকভাবে দিন (সঠিক মোবাইল ও ইমেইল আবশ্যক)।', 'warn');
@@ -990,13 +1059,19 @@ async function handleSellNewIdSubmit(e) {
 }
 
 function openBuyValidityModal() {
-    if (requestParentModal('buyValidity')) return;
     openModal('buyValidityModal');
     refreshValiditySummaryDisplay(validityCart);
 }
 function closeBuyValidityModal() {
     closeModal('buyValidityModal');
-    if (isValidityExpiredSession) { document.getElementById('page2')?.classList.add('hidden'); document.getElementById('page1')?.classList.remove('hidden'); }
+    if (isValidityExpiredSession) {
+        if (window.self !== window.top && window.parent) {
+            window.parent.postMessage({ channel: BRIDGE_CHANNEL, type: 'LOGOUT', compositeUserId: resolveCompositeUserId() }, TRUSTED_ORIGIN);
+        } else {
+            document.getElementById('page2')?.classList.add('hidden');
+            document.getElementById('page1')?.classList.remove('hidden');
+        }
+    }
 }
 
 function addValidityToCart() {
@@ -1071,10 +1146,7 @@ async function handleCashPayValidity() {
     } else showToast(res?.message || 'Validity extension failed.', 'error');
 }
 
-function openBalanceTransferModal() {
-    if (requestParentModal('balanceTransfer')) return;
-    openModal('balanceTransferModal');
-}
+function openBalanceTransferModal() { openModal('balanceTransferModal'); }
 function closeBalanceTransferModal() { closeModal('balanceTransferModal'); }
 
 async function handleBalanceTransferSubmit(e) {
@@ -1116,10 +1188,7 @@ async function handleLandingBuySubmit(e) {
     else showToast(res?.message || 'সাবমিট করতে সমস্যা হয়েছে।', 'error');
 }
 
-function openAddDeviceModal() {
-    if (requestParentModal('addDevice')) return;
-    openModal('addDeviceModal');
-}
+function openAddDeviceModal() { openModal('addDeviceModal'); }
 function closeAddDeviceModal() { closeModal('addDeviceModal'); }
 
 async function handleAddDeviceSubmit(e) {
@@ -1135,7 +1204,7 @@ async function handleAddDeviceSubmit(e) {
 }
 
 /* =========================================================================
- * CHAT & CASH MEMO (Pure Client UI)
+ * CHAT & CASH MEMO
  * ========================================================================= */
 function openMyChatModal() {
     exitIndividualChat();
@@ -1287,7 +1356,7 @@ function toggleAccountsSection() {
     }
 }
 function copyCouponCode() {
-    const code = document.getElementById('userCouponCode')?.textContent || '';
+    const code = document.getElementById('userCouponCode')?.textContent || getStoredCouponCode() || '';
     if (code && navigator.clipboard) navigator.clipboard.writeText(code);
     showToast('Coupon Copied!');
 }
@@ -1356,13 +1425,14 @@ function printMemoPdf() {
  * PASSWORD CHANGE & LISTENERS
  * ========================================================================= */
 function openUserPassModal() {
-    if (requestParentModal('userPass')) return;
     if (document.getElementById('modalAutoEmail')) document.getElementById('modalAutoEmail').textContent = sessionStorage.getItem('buyer_email') || 'N/A';
     if (document.getElementById('newUsernameInput')) document.getElementById('newUsernameInput').value = sessionStorage.getItem('user_name') || currentUserName || '';
     if (document.getElementById('userPassModal')) document.getElementById('userPassModal').style.display = 'flex';
+    notifyParentFrameHeight();
 }
 function closeUserPassModal() {
     if (document.getElementById('userPassModal')) document.getElementById('userPassModal').style.display = 'none';
+    notifyParentFrameHeight();
 }
 async function submitUserPasswordChange() {
     const newUsername = sanitizeTextInput(document.getElementById('newUsernameInput')?.value || '', 64);
@@ -1385,6 +1455,17 @@ window.addEventListener('message', (event) => {
     if (!data || data.channel !== BRIDGE_CHANNEL) return;
     if (data.type === 'SET_USER_SCOPE') {
         const nextId = sanitizeSafeId(data.payload?.composite_user_id || data.compositeUserId || '');
+        const nextUser = sanitizeTextInput(data.payload?.user_name || '', 64);
+        const nextCoupon = extractCouponFromRecord(data.payload || {});
+        if (nextUser) {
+            currentUserName = nextUser;
+            if (document.getElementById('currentLoggedInUser')) {
+                document.getElementById('currentLoggedInUser').textContent = nextUser;
+            }
+        }
+        if (nextCoupon) {
+            setDatabaseCouponCode(nextCoupon);
+        }
         if (nextId) {
             currentCompositeUserId = nextId;
             window.ACTIVE_COMPOSITE_USER_ID = nextId;
@@ -1413,6 +1494,9 @@ window.addEventListener('DOMContentLoaded', () => {
         const el = document.getElementById(id);
         if (el && !el.value) el.value = today;
     });
+
+    const cachedCoupon = getStoredCouponCode();
+    if (cachedCoupon) setDatabaseCouponCode(cachedCoupon);
 
     const initialCompId = resolveCompositeUserId();
     if (initialCompId) {
