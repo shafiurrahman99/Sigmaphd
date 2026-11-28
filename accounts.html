@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; frame-src 'self'; object-src 'none'; base-uri 'self';">
+    <title>User Account &amp; Devices</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Hind Siliguri', sans-serif;
+            background-color: #07090d;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            overflow-x: hidden;
+        }
+        body.in-iframe {
+            background-color: transparent !important;
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-0 bg-[#07090d] text-slate-100 antialiased">
+    <div id="accounts-module-shell" class="w-full space-y-3 p-1">
+        <!-- Accounts Toggle Button Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2.5 shadow-xl flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 flex items-center space-x-2">
+                <i class="fa-solid fa-user-gear text-emerald-400"></i>
+                <span>User Account &amp; Devices</span>
+            </span>
+            <button type="button" onclick="toggleAccountsSection()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1.5 transition-all shadow cursor-pointer">
+                <i class="fa-solid fa-chevron-down" id="accountsToggleIcon"></i>
+                <span id="accountsToggleText">Show Accounts</span>
+            </button>
+        </div>
+
+        <!-- Collapsible Accounts & Devices Section -->
+        <div id="accountsSectionContainer" class="hidden space-y-3">
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between shadow-xl">
+                <div class="flex items-center space-x-3">
+                    <div class="relative cursor-pointer" onclick="openAddDeviceModal()" title="Add New Device">
+                        <div class="w-10 h-10 bg-emerald-950/80 border border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 text-lg">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-slate-950 font-black w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">+</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-bold text-white flex items-center space-x-1">
+                            <span id="activeDeviceCount">1</span> Device Active 
+                            <span class="text-slate-400 font-normal">(Max 2)</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-1.5">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block font-medium">Balance</span>
+                        <span id="walletBalanceText" class="text-emerald-400 font-extrabold text-xs font-mono">৳ 0.00</span>
+                    </div>
+                    <button type="button" onclick="openBalanceTransferModal()" class="w-7 h-7 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center justify-center text-xs shadow transition-all cursor-pointer" title="Balance Transfer to User">
+                        <i class="fa-solid fa-right-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Profile Bar with Live Countdown Clock & Validity Plus Button -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-9 h-9 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 font-bold">
+                            <i class="fa-solid fa-user-check text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-white">User: <strong id="currentLoggedInUser" class="text-emerald-400"></strong></h3>
+                            <p class="text-[10px] text-slate-400 font-medium mt-0.5" id="validityStatusText">Validity Countdown</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button type="button" onclick="openUserPassModal()" class="bg-blue-600 hover:bg-blue-500 text-white border-none py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer shadow">
+                            ⚙️ Password Change
+                        </button>
+
+                        <button type="button" onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all cursor-pointer">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                            <span>Log Out</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Validity Countdown Clock Display with Plus Button -->
+                <div class="bg-[#080a0f] border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-around text-center relative">
+                    <div>
+                        <span id="countdownDays" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Days</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownHours" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Hours</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownMins" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Mins</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownSecs" class="text-emerald-400 font-extrabold text-base block font-mono animate-pulse">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Secs</span>
+                    </div>
+                    <button type="button" onclick="openBuyValidityModal()" class="absolute -top-2.5 -right-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-lg transition-all cursor-pointer" title="Extend Validity">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <!-- Admin Approval Pending Badge near Validity Countdown -->
+                <div id="validityPendingBadge" class="hidden inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-950 text-amber-400 border border-amber-600/50"></div>
+            </div>
+
+            <!-- Referral / Coupon Card -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-300 font-bold flex items-center space-x-1.5">
+                        <i class="fa-solid fa-link text-emerald-400"></i>
+                        <span>Referral Chain &amp; User Sale</span>
+                    </span>
+                    <span class="bg-indigo-900/40 text-indigo-300 border border-indigo-700/50 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                        Sub-Users: <strong class="text-emerald-400 font-extrabold text-xs" id="subUserCount">1</strong> active
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-400 text-xs">Coupon Code:</span>
+                        <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA_0000</span>
+                    </div>
+                    <button type="button" onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all cursor-pointer">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copy</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="openBuyLotModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all cursor-pointer">
+                        <i class="fa-solid fa-boxes-packing text-xs"></i>
+                        <span>Buy New Lot</span>
+                    </button>
+                    <button type="button" onclick="openSellLicenseModal()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all cursor-pointer">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>Sell New ID</span>
+                    </button>
+                </div>
+
+                <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-2">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-300 font-bold flex items-center space-x-1">
+                            <i class="fa-solid fa-layer-group text-amber-400"></i>
+                            <span>My Purchased Lots (In_Stock):</span>
+                        </span>
+                        <span class="text-emerald-400 font-extrabold">Available IDs: <span id="availableLotIdsCount">0</span></span>
+                    </div>
+                    <div id="lotInventorySummaryList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function initAccountsChildBridge() {
+            const CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
+            const TRUSTED_ORIGIN = window.location.origin;
+            const isEmbedded = window.self !== window.top;
+
+            if (isEmbedded) {
+                document.body.classList.add('in-iframe');
+            }
+
+            function emitHeightToParent() {
+                if (!isEmbedded || !window.parent) return;
+                const shell = document.getElementById('accounts-module-shell');
+                const height = shell ? shell.scrollHeight + 12 : document.documentElement.scrollHeight;
+                window.parent.postMessage({
+                    channel: CHANNEL,
+                    type: 'FRAME_HEIGHT',
+                    height
+                }, TRUSTED_ORIGIN);
+            }
+
+            window.notifyParentFrameHeight = emitHeightToParent;
+
+            window.addEventListener('message', (event) => {
+                if (!event.origin || event.origin !== TRUSTED_ORIGIN) return;
+                if (isEmbedded && event.source !== window.parent) return;
+                const data = event.data;
+                if (!data || data.channel !== CHANNEL) return;
+
+                if (data.type === 'SET_USER_SCOPE') {
+                    const nextId = String(data.payload?.composite_user_id || data.compositeUserId || '').trim();
+                    if (nextId && typeof window.syncCompositeIdToIframe === 'function') {
+                        window.syncCompositeIdToIframe(nextId);
+                    }
+                    if (typeof window.loadAllDatabaseRecords === 'function') {
+                        window.loadAllDatabaseRecords();
+                    }
+                    emitHeightToParent();
+                } else if (data.type === 'REQUEST_HEIGHT') {
+                    emitHeightToParent();
+                }
+            });
+
+            window.addEventListener('load', () => {
+                if (isEmbedded && window.parent) {
+                    window.parent.postMessage({ channel: CHANNEL, type: 'REQUEST_USER_SCOPE' }, TRUSTED_ORIGIN);
+                }
+                emitHeightToParent();
+            });
+
+            if (typeof ResizeObserver !== 'undefined') {
+                const shell = document.getElementById('accounts-module-shell');
+                if (shell) new ResizeObserver(() => emitHeightToParent()).observe(shell);
+            }
+        })();
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
