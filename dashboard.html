@@ -39,7 +39,6 @@
     ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.45); border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
 
-    /* Prevent text overlap across adjacent table cells on all screen sizes */
     table {
       border-collapse: separate;
       border-spacing: 0;
@@ -144,7 +143,6 @@
         </button>
       </nav>
 
-      <!-- Composite User ID hidden on frontend; sync controls kept -->
       <div class="flex flex-wrap items-center justify-end gap-2 px-2 py-1 text-[11px] text-slate-400 border-t border-slate-800/70">
         <div class="flex items-center gap-2">
           <span id="sync-status-badge" class="text-slate-400">Bridge Ready</span>
@@ -402,7 +400,7 @@
 
   </div>
 
-  <!-- ==================== MODALS ==================== -->
+  <!-- ==================== DASHBOARD MODALS ==================== -->
   <div id="modal-income-expense" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-3">
     <div class="bg-navy-900 border border-slate-700/90 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
@@ -620,7 +618,7 @@
     </div>
   </div>
 
-  <!-- Child Iframe Bridge (Same-Origin & Source Protected; ID kept internal only) -->
+  <!-- Child Iframe Bridge (Same-Origin & Source Protected) -->
   <script>
     (function initChildIframeBridge() {
       const CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
@@ -705,7 +703,6 @@
     })();
   </script>
 
-  <!-- Only Client Script (Server Proxy stays strictly on Backend) -->
   <script src="./script.js"></script>
 
   <!-- Table Layout Normalizer, Fullscreen & Checkbox Delete Helpers -->
