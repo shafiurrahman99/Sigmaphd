@@ -1,771 +1,839 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Financial Dashboard &amp; Ledger</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: {
-            navy: { 950: '#070b14', 900: '#0c1322', 850: '#111a2e', 800: '#16223b' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; frame-src 'self'; object-src 'none'; base-uri 'self';">
+    <title>My Develop App - Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#07090d',
+                        cardBg: '#131822',
+                        innerDark: '#080a0f',
+                        accentGreen: '#0fa968',
+                        accentOrange: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
+                        bengali: ['Hind Siliguri', 'sans-serif'],
+                    }
+                }
+            }
         }
-      }
-    };
-  </script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #070b14;
-      color: #f1f5f9;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-    }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.45); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
+    </script>
 
-    .section-fullscreen {
-      position: fixed !important;
-      inset: 0 !important;
-      z-index: 60 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      max-width: none !important;
-      margin: 0 !important;
-      border-radius: 0 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      background-color: #0c1322 !important;
-      padding: 0.75rem !important;
-    }
-    .section-fullscreen .scroll-region {
-      flex: 1 1 auto !important;
-      max-height: none !important;
-      width: 100% !important;
-      overflow: auto !important;
-    }
-    .section-fullscreen table {
-      width: 100% !important;
-      min-width: 100% !important;
-      table-layout: auto !important;
-    }
-    .section-fullscreen th,
-    .section-fullscreen td {
-      white-space: nowrap !important;
-      vertical-align: middle !important;
-      text-align: left !important;
-    }
-    .section-fullscreen th.hidden,
-    .section-fullscreen td.hidden {
-      display: table-cell !important;
-    }
-    .section-fullscreen th.row-select-cb,
-    .section-fullscreen td.row-select-cb {
-      display: table-cell !important;
-      width: 2.5rem !important;
-      text-align: center !important;
-    }
-    .section-fullscreen th.text-right,
-    .section-fullscreen td.text-right { text-align: right !important; }
-    @media (orientation: portrait) {
-      .section-fullscreen { padding: 0.85rem 0.65rem !important; }
-    }
-    .row-select-cb { display: none !important; }
-    .section-fullscreen .row-select-cb { display: table-cell !important; }
-    body.in-iframe #iframe-top-header { display: none !important; }
-    body.in-iframe { background-color: transparent !important; }
-  </style>
+    <style>
+        body {
+            font-family: 'Inter', 'Hind Siliguri', sans-serif;
+            background-color: #07090d;
+            color: #e2e8f0;
+            user-select: none;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .buy-btn-gradient {
+            background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 50%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+        .buy-btn-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 10px; }
+        #dashboardFrame {
+            width: 100%;
+            min-height: 780px;
+            border: 0;
+            border-radius: 1.25rem;
+            background: transparent;
+            display: block;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #a4MemoPrintArea, #a4MemoPrintArea * { visibility: visible; }
+            #a4MemoPrintArea {
+                position: fixed; left: 0; top: 0; width: 210mm; min-height: 297mm;
+                margin: 0; padding: 15mm; background: white !important; color: black !important; box-shadow: none !important; z-index: 9999;
+            }
+        }
+    </style>
 </head>
-<body class="bg-navy-950 text-slate-100 min-h-screen antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+<body class="min-h-screen flex flex-col items-center justify-start p-2 sm:p-4 bg-slate-950">
 
-  <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
-
-  <div id="dashboard-app-shell" class="w-full max-w-3xl mx-auto px-3 sm:px-5 py-4 space-y-4">
-
-    <header id="iframe-top-header" class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-2.5 shadow-xl space-y-2">
-      <nav class="grid grid-cols-3 gap-2" aria-label="Primary Navigation">
-        <button id="tab-btn-dashboard" type="button" onclick="switchTopTab('dashboard')"
-          class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 text-slate-950 shadow-md transition-all cursor-pointer">
-          Dashboard
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[120] w-11/12 max-w-md bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between text-sm font-medium transition-all duration-300">
+        <span id="toast-text">Action successful!</span>
+        <button type="button" onclick="hideToast()" class="text-white hover:text-emerald-200 ml-2">
+            <i class="fa-solid fa-xmark text-base"></i>
         </button>
-        <button id="tab-btn-chat" type="button" onclick="switchTopTab('chat')"
-          class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold bg-navy-850 hover:bg-navy-800 text-slate-200 border border-slate-800/70 cursor-pointer transition-all">
-          My Chat
-        </button>
-        <button id="tab-btn-memo" type="button" onclick="switchTopTab('memo')"
-          class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold bg-navy-850 hover:bg-navy-800 text-slate-200 border border-slate-800/70 cursor-pointer transition-all flex items-center justify-center gap-1.5">
-          <span>🧾</span>
-          <span>Cash Memo</span>
-        </button>
-      </nav>
+    </div>
 
-      <!-- Composite User ID hidden on frontend; sync controls kept -->
-      <div class="flex flex-wrap items-center justify-end gap-2 px-2 py-1 text-[11px] text-slate-400 border-t border-slate-800/70">
-        <div class="flex items-center gap-2">
-          <span id="sync-status-badge" class="text-slate-400">Bridge Ready</span>
-          <button type="button" onclick="syncLedgerWithRemote()"
-            class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-navy-850 hover:bg-navy-800 text-slate-200 border border-slate-700 cursor-pointer transition-colors">
-            ↻ Sync
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <!-- ==================== DASHBOARD VIEW ==================== -->
-    <main id="view-dashboard" class="space-y-4">
-
-      <!-- 1. Monthly & Yearly Summary Card -->
-      <section id="sec-monthly-summary" data-expandable-section
-        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5 transition-all select-none">
-        <div class="flex flex-wrap items-center justify-between gap-2.5">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-base shrink-0">📈</span>
-            <h2 class="text-sm sm:text-base font-bold text-slate-100 leading-tight truncate">
-              Monthly Summary (Income, Expense, Surplus)
-            </h2>
-          </div>
-
-          <div class="flex items-center gap-2 shrink-0">
-            <button id="btn-delete-summary" type="button" onclick="deleteSelectedSummary()"
-              class="hidden px-2.5 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
-              Delete (<span id="count-del-summary">0</span>)
-            </button>
-            <button type="button" onclick="openIncomeExpenseModal('income')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-              + New Income/Expense
-            </button>
-            <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
-              class="fs-exit-btn hidden w-8 h-8 rounded-lg text-sm font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 flex items-center justify-center cursor-pointer transition-colors">
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[168px] rounded-xl border border-slate-800/80 bg-navy-950/60">
-          <table class="w-full text-left border-collapse">
-            <thead class="sticky top-0 z-10 bg-navy-850">
-              <tr class="border-b border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-400">
-                <th class="py-2.5 pl-3 pr-1 w-7 row-select-cb"></th>
-                <th class="py-2.5 pl-3 pr-2">Period</th>
-                <th class="py-2.5 px-2.5">
-                  <button type="button" onclick="openIncomeListModal()"
-                    class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 underline decoration-emerald-500/40 underline-offset-4 cursor-pointer">
-                    <span>Total Income (৳)</span>
-                    <span class="text-[10px]">↗</span>
-                  </button>
-                </th>
-                <th class="py-2.5 px-2.5">
-                  <button type="button" onclick="scrollToSection('sec-daily-expenses')"
-                    class="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 underline decoration-rose-500/40 underline-offset-4 cursor-pointer">
-                    <span>Total Expense (৳)</span>
-                    <span class="text-[10px]">↗</span>
-                  </button>
-                </th>
-                <th class="py-2.5 px-3 text-right">Net Surplus (৳)</th>
-              </tr>
-            </thead>
-            <tbody id="monthly-summary-body" class="divide-y divide-slate-800/60 text-xs sm:text-sm"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- 2. Loan & Credit Records Card -->
-      <section id="sec-loan-records"
-        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4 transition-all">
-        <div class="flex flex-wrap items-center justify-between gap-2.5">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-base shrink-0">💰</span>
-            <h2 class="text-sm sm:text-base font-bold text-slate-100 leading-tight">Loan &amp; Credit Records</h2>
-          </div>
-
-          <button type="button" onclick="openLoanEntryModal()"
-            class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-lg shadow-amber-400/20 transition-all cursor-pointer">
-            + New Entry
-          </button>
-        </div>
-
-        <!-- 2A. Receivable -->
-        <div id="sec-receivable-panel" data-expandable-section
-          class="bg-navy-950/70 border border-slate-800/90 rounded-xl p-3 space-y-2.5 transition-all select-none">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs sm:text-sm font-bold text-emerald-400">Receivable</span>
-              <span id="receivable-due-count-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold"></span>
+    <!-- ================= PAGE 1: LOGIN & LANDING ================= -->
+    <div id="page1" class="w-full max-w-md mx-auto space-y-4 my-auto py-4">
+        <div class="bg-[#131822] rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-800/80 relative overflow-hidden">
+            <div class="flex items-start justify-between mb-5">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">My Personal ERP</h1>
+                    <p class="font-bengali text-emerald-400 font-semibold text-sm mt-0.5 tracking-wide"> </p>
+                </div>
+                <div class="text-right">
+                    <span class="gradient-text font-black text-lg italic tracking-wider block">Sigma PhD™</span>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-              <button id="btn-delete-receivable" type="button" onclick="deleteSelectedLoans('receivable')"
-                class="hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
-                Delete (<span id="count-del-receivable">0</span>)
-              </button>
-              <span id="receivable-total-display" class="text-xs sm:text-sm font-bold text-emerald-400">Total Due: ৳ 0.00</span>
-              <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
-                class="fs-exit-btn hidden w-7 h-7 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 flex items-center justify-center cursor-pointer">
-                ✕
-              </button>
-            </div>
-          </div>
 
-          <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[164px] rounded-xl border border-slate-800/80 bg-navy-900/70">
-            <table class="w-full text-left border-collapse sm:min-w-[600px]">
-              <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] font-semibold text-slate-400 border-b border-slate-800">
-                <tr>
-                  <th class="py-2 pl-2.5 pr-1 w-7 row-select-cb"></th>
-                  <th class="py-2 px-2">Description</th>
-                  <th class="py-2 px-2">Amount (৳)</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Receivable Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Received Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Extra (৳)</th>
-                  <th class="py-2 pl-2 pr-2.5 text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody id="receivable-list-body" class="divide-y divide-slate-800/60 text-xs"></tbody>
-            </table>
-          </div>
-        </div>
+            <!-- Sign In Form (No hardcoded default credentials) -->
+            <form onsubmit="handleMainSignIn(event)" class="space-y-4" autocomplete="off">
+                <div>
+                    <input type="text" id="mainUserName" required maxlength="64" pattern="[A-Za-z0-9_@.-]+" autocomplete="username" placeholder="Enter Username"
+                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-wide focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                </div>
+                <div>
+                    <input type="password" id="mainUserPassword" required minlength="4" maxlength="128" autocomplete="current-password" placeholder="Enter Password"
+                        class="w-full bg-[#080a0f] border border-slate-700/60 rounded-2xl py-3 px-4 text-emerald-400 font-medium tracking-widest focus:outline-none focus:border-emerald-500 transition-all text-sm">
+                </div>
 
-        <!-- 2B. Payable -->
-        <div id="sec-payable-panel" data-expandable-section
-          class="bg-navy-950/70 border border-slate-800/90 rounded-xl p-3 space-y-2.5 transition-all select-none">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs sm:text-sm font-bold text-rose-400">Payable</span>
-              <span id="payable-due-count-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold"></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <button id="btn-delete-payable" type="button" onclick="deleteSelectedLoans('payable')"
-                class="hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
-                Delete (<span id="count-del-payable">0</span>)
-              </button>
-              <span id="payable-total-display" class="text-xs sm:text-sm font-bold text-rose-400">Total Due: ৳ 0.00</span>
-              <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
-                class="fs-exit-btn hidden w-7 h-7 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 flex items-center justify-center cursor-pointer">
-                ✕
-              </button>
-            </div>
-          </div>
+                <button type="submit" 
+                    class="w-full bg-[#0fa968] hover:bg-[#0c8e57] text-slate-950 font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-lg shadow-emerald-900/20 text-base mt-2">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+            </form>
 
-          <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[164px] rounded-xl border border-slate-800/80 bg-navy-900/70">
-            <table class="w-full text-left border-collapse sm:min-w-[600px]">
-              <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] font-semibold text-slate-400 border-b border-slate-800">
-                <tr>
-                  <th class="py-2 pl-2.5 pr-1 w-7 row-select-cb"></th>
-                  <th class="py-2 px-2">Description</th>
-                  <th class="py-2 px-2">Amount (৳)</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Payable Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Paid Date</th>
-                  <th class="py-2 px-2 hidden sm:table-cell">Extra (৳)</th>
-                  <th class="py-2 pl-2 pr-2.5 text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody id="payable-list-body" class="divide-y divide-slate-800/60 text-xs"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+            <div class="my-4 border-t border-slate-800"></div>
 
-      <!-- 3. Daily Expenses Log Card -->
-      <section id="sec-daily-expenses" data-expandable-section
-        class="bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3.5 transition-all select-none">
-        <div class="flex flex-wrap items-center justify-between gap-2.5">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 text-violet-300 flex items-center justify-center text-base shrink-0">🛒</span>
-            <h2 class="text-sm sm:text-base font-bold text-slate-100 leading-tight">
-              Daily Expenses Log (Auto Expense Sync)
-            </h2>
-          </div>
-
-          <div class="flex items-center gap-2 shrink-0">
-            <button id="btn-delete-expenses" type="button" onclick="deleteSelectedExpenses()"
-              class="hidden px-2.5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
-              Delete (<span id="count-del-expenses">0</span>)
+            <button type="button" onclick="openBuyLicenseLandingModal()" 
+                class="w-full buy-btn-gradient text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 text-base">
+                <i class="fa-solid fa-credit-card text-base text-slate-900"></i>
+                <span>Buy New ID</span>
             </button>
-            <button type="button" onclick="openDailyExpenseModal()"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/20 transition-all cursor-pointer">
-              + New Expense Entry
+        </div>
+    </div>
+
+    <!-- ================= PAGE 2: DASHBOARD ================= -->
+    <div id="page2" class="hidden w-full max-w-3xl mx-auto space-y-4 py-2">
+        <!-- Accounts Toggle Button Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2.5 shadow-xl flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 flex items-center space-x-2">
+                <i class="fa-solid fa-user-gear text-emerald-400"></i>
+                <span>User Account & Devices</span>
+            </span>
+            <button type="button" onclick="toggleAccountsSection()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1.5 transition-all shadow">
+                <i class="fa-solid fa-chevron-down" id="accountsToggleIcon"></i>
+                <span id="accountsToggleText">Show Accounts</span>
             </button>
-            <button type="button" onclick="exitFullscreenSection()" aria-label="Close Fullscreen"
-              class="fs-exit-btn hidden w-8 h-8 rounded-lg text-sm font-bold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 flex items-center justify-center cursor-pointer">
-              ✕
+        </div>
+
+        <!-- Collapsible Accounts & Devices Section -->
+        <div id="accountsSectionContainer" class="hidden space-y-4">
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between shadow-xl">
+                <div class="flex items-center space-x-3">
+                    <div class="relative cursor-pointer" onclick="openAddDeviceModal()" title="Add New Device">
+                        <div class="w-10 h-10 bg-emerald-950/80 border border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 text-lg">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-slate-950 font-black w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md">+</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-bold text-white flex items-center space-x-1">
+                            <span id="activeDeviceCount">1</span> Device Active 
+                            <span class="text-slate-400 font-normal">(Max 2)</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-1.5">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block font-medium">Balance</span>
+                        <span id="walletBalanceText" class="text-emerald-400 font-extrabold text-xs font-mono">৳ 0.00</span>
+                    </div>
+                    <button type="button" onclick="openBalanceTransferModal()" class="w-7 h-7 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center justify-center text-xs shadow transition-all" title="Balance Transfer to User">
+                        <i class="fa-solid fa-right-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Profile Bar with Live Countdown Clock & Validity Plus Button -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-9 h-9 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 font-bold">
+                            <i class="fa-solid fa-user-check text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-white">User: <strong id="currentLoggedInUser" class="text-emerald-400"></strong></h3>
+                            <p class="text-[10px] text-slate-400 font-medium mt-0.5" id="validityStatusText">Validity Countdown</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button type="button" onclick="openUserPassModal()" class="bg-blue-600 hover:bg-blue-500 text-white border-none py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer shadow">
+                            ⚙️ Password Change
+                        </button>
+
+                        <button type="button" onclick="handleLogOut()" class="bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center space-x-1 transition-all">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                            <span>Log Out</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Validity Countdown Clock Display with Plus Button -->
+                <div class="bg-[#080a0f] border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-around text-center relative">
+                    <div>
+                        <span id="countdownDays" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Days</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownHours" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Hours</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownMins" class="text-amber-400 font-extrabold text-base block font-mono">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Mins</span>
+                    </div>
+                    <span class="text-slate-600 font-bold text-sm">:</span>
+                    <div>
+                        <span id="countdownSecs" class="text-emerald-400 font-extrabold text-base block font-mono animate-pulse">00</span>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Secs</span>
+                    </div>
+                    <button type="button" onclick="openBuyValidityModal()" class="absolute -top-2.5 -right-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black w-7 h-7 rounded-full flex items-center justify-center text-xs shadow-lg transition-all" title="Extend Validity">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <!-- Admin Approval Pending Badge near Validity Countdown -->
+                <div id="validityPendingBadge" class="hidden inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-950 text-amber-400 border border-amber-600/50"></div>
+            </div>
+
+            <!-- Referral / Coupon Card -->
+            <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-3.5 shadow-xl space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-300 font-bold flex items-center space-x-1.5">
+                        <i class="fa-solid fa-link text-emerald-400"></i>
+                        <span>Referral Chain & User Sale</span>
+                    </span>
+                    <span class="bg-indigo-900/40 text-indigo-300 border border-indigo-700/50 px-2 py-0.5 rounded-md text-[10px] font-semibold">
+                        Sub-Users: <strong class="text-emerald-400 font-extrabold text-xs" id="subUserCount">1</strong> active
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between bg-[#080a0f] border border-slate-700/80 rounded-xl p-2.5">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-400 text-xs">Coupon Code:</span>
+                        <span id="userCouponCode" class="text-amber-400 font-extrabold tracking-widest text-sm bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">SIGMA_0000</span>
+                    </div>
+                    <button type="button" onclick="copyCouponCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center space-x-1 transition-all">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copy</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="openBuyLotModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                        <i class="fa-solid fa-boxes-packing text-xs"></i>
+                        <span>Buy New Lot</span>
+                    </button>
+                    <button type="button" onclick="openSellLicenseModal()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 shadow-lg transition-all">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>Sell New ID</span>
+                    </button>
+                </div>
+
+                <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-2">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-300 font-bold flex items-center space-x-1">
+                            <i class="fa-solid fa-layer-group text-amber-400"></i>
+                            <span>My Purchased Lots (In_Stock):</span>
+                        </span>
+                        <span class="text-emerald-400 font-extrabold">Available IDs: <span id="availableLotIdsCount">0</span></span>
+                    </div>
+                    <div id="lotInventorySummaryList" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="bg-[#131822] border border-slate-800/80 rounded-2xl p-2 shadow-xl">
+            <div class="grid grid-cols-3 gap-1 text-xs">
+                <button type="button" onclick="setDashboardFrameTab('dashboard')" class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-center shadow-md">Dashboard</button>
+                <button type="button" onclick="openMyChatModal()" class="bg-[#1a2130] hover:bg-slate-800 text-slate-300 font-medium py-2 rounded-xl text-center border border-slate-700/50">My Chat</button>
+                <button type="button" onclick="openCashMemoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-center shadow-md flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Cash Memo</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Embedded Dashboard Section via Iframe Bridge -->
+        <div id="dashboardIframeSection" class="bg-[#131822]/70 border border-slate-800/80 rounded-3xl p-1.5 sm:p-2 shadow-2xl overflow-hidden">
+            <iframe
+                id="dashboardFrame"
+                src="dashboard.html"
+                title="Financial Dashboard & Ledger"
+                sandbox="allow-scripts allow-same-origin allow-forms"
+                loading="eager"></iframe>
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    <!-- Buy Validity Modal -->
+    <div id="buyValidityModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-5 shadow-2xl relative space-y-3.5 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-base font-bold text-white">Extend Validity</h3>
+                <button type="button" onclick="closeBuyValidityModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="validityModalPendingNotice" class="hidden bg-amber-950/60 border border-amber-500/50 rounded-2xl p-3 text-xs text-amber-300 space-y-1">
+                <div class="font-extrabold text-amber-400">Wait for Validity Approval</div>
+                <div id="validityModalPendingDetails" class="text-[11px] text-amber-200/90 font-mono"></div>
+            </div>
+
+            <div class="flex gap-2">
+                <select id="validityPlanDropdown" class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-emerald-500">
+                    <option value="1">1 Month (30 Days)</option>
+                    <option value="2">2 Months (60 Days)</option>
+                    <option value="3">3 Months (90 Days)</option>
+                    <option value="6">6 Months (180 Days)</option>
+                </select>
+                <button type="button" onclick="addValidityToCart()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl transition">+ Add</button>
+            </div>
+
+            <div id="validityCartItems" class="bg-[#080a0f] border border-slate-800 rounded-xl p-2.5 space-y-1.5 max-h-36 overflow-y-auto">
+                <p class="text-slate-500 text-center py-2">Cart is empty. Select a plan & click Add.</p>
+            </div>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-xl p-3 space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Total Validity:</span>
+                    <span id="validityTotalDaysText" class="font-mono text-amber-400">0 Days</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Base Total:</span>
+                    <span id="validityBasePriceText" class="font-mono">৳ 0.00</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Discount:</span>
+                    <span id="validityDiscountText" class="font-mono text-emerald-400">- ৳ 0.00</span>
+                </div>
+                <div class="flex justify-between border-t border-slate-800 pt-1.5 font-semibold">
+                    <span class="text-slate-300">Subtotal:</span>
+                    <span id="validitySubtotalText" class="font-mono text-white">৳ 0.00</span>
+                </div>
+                <div class="flex justify-between text-amber-300">
+                    <span>Wallet Deduction:</span>
+                    <span id="validityWalletDeductText" class="font-mono">- ৳ 0.00</span>
+                </div>
+                <div class="flex justify-between border-t border-slate-800 pt-1.5 text-sm font-extrabold text-emerald-400">
+                    <span>Grand Total Payable:</span>
+                    <span id="validityPayableText" class="font-mono">৳ 0.00</span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between bg-[#080a0f] border border-slate-800 rounded-xl px-3 py-2">
+                <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                    <input type="checkbox" id="useCouponWalletCheckbox" onchange="refreshValiditySummaryDisplay(validityCart)" class="rounded border-slate-600 bg-slate-800 text-emerald-500">
+                    <span>Use Wallet Balance</span>
+                </label>
+                <span class="text-emerald-400 font-mono font-bold">Balance: <span id="validityWalletBalanceText">৳ 0.00</span></span>
+            </div>
+
+            <div id="validityTrxBox">
+                <label for="validityTrxId" class="block text-slate-400 mb-1">Transaction ID</label>
+                <input type="text" id="validityTrxId" required maxlength="64" pattern="[A-Za-z0-9_-]+" placeholder="Enter Payment TrxID (bKash/Nagad)" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="handleCashPayValidity()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl transition">
+                    Cash Pay
+                </button>
+                <button type="button" disabled title="Online payment is currently closed" class="bg-slate-800 text-slate-500 border border-slate-700 font-bold py-2.5 rounded-xl cursor-not-allowed">
+                    Online Pay (Closed)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settle Loan Modal -->
+    <div id="settleLoanModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button type="button" onclick="closeSettleModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Settle Loan Record</h3>
+            <form onsubmit="handleSettleLoanSubmit(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="settleLoanId">
+                <div>
+                    <label class="block text-slate-400 mb-1">Settlement Date (Paid Date)</label>
+                    <input type="date" id="settleDate" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Extra Amount (Added to Expense if Payable)</label>
+                    <input type="number" id="settleExtraAmount" placeholder="0.00" value="0" min="0" max="100000000" step="0.01" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-rose-400 font-bold">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-xs">Confirm Settle</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Buy New Lot Modal -->
+    <div id="buyLotModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3">
+            <button type="button" onclick="closeBuyLotModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-boxes-packing text-amber-400"></i>
+                <span>Buy New Lot</span>
+            </h3>
+
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
+                    <span class="text-slate-400">Lot Number:</span>
+                    <span id="generatedLotNumber" class="text-amber-400 font-mono font-extrabold">LT-9521</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Select Quantity:</span>
+                    <select id="lotQuantitySelect" onchange="calculateLotPrice()" class="bg-[#131822] border border-slate-700 rounded-lg px-2 py-1 text-emerald-400 font-bold">
+                        <option value="5">5 IDs</option>
+                        <option value="10" selected>10 IDs</option>
+                        <option value="20">20 IDs</option>
+                    </select>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                    <span>Sub Total:</span>
+                    <span id="lotSubTotalText" class="font-mono">৳ 1,000.00</span>
+                </div>
+                <div class="flex justify-between items-center text-emerald-400">
+                    <span>Admin Discount:</span>
+                    <span id="lotDiscountText" class="font-mono">- ৳ 200.00</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-800 pt-1.5 text-sm font-extrabold text-white">
+                    <span>Net Payable:</span>
+                    <span id="lotNetTotalText" class="font-mono">৳ 800.00</span>
+                </div>
+            </div>
+
+            <button type="button" onclick="handleCashPayLot()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold py-3 rounded-xl text-xs flex items-center justify-center space-x-1 shadow">
+                <i class="fa-solid fa-money-bill-wave"></i>
+                <span>Confirm & Buy Lot</span>
             </button>
-          </div>
         </div>
-
-        <div class="scroll-region overflow-x-auto overflow-y-auto max-h-[168px] rounded-xl border border-slate-800/80 bg-navy-950/60">
-          <table class="w-full text-left border-collapse sm:min-w-[460px]">
-            <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] sm:text-xs font-semibold text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-2.5 pl-3 pr-1 w-7 row-select-cb"></th>
-                <th class="py-2.5 px-2.5 hidden sm:table-cell">Date</th>
-                <th class="py-2.5 px-2.5">Description</th>
-                <th class="py-2.5 px-2.5">Amount (৳)</th>
-                <th class="py-2.5 pl-2.5 pr-3 text-right">Status &amp; Action</th>
-              </tr>
-            </thead>
-            <tbody id="daily-expenses-body" class="divide-y divide-slate-800/60 text-xs sm:text-sm"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <!-- ==================== MY CHAT VIEW ==================== -->
-    <section id="view-chat" class="hidden bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div>
-          <h2 class="text-base font-bold text-slate-100">Ledger Notes &amp; Quick Log</h2>
-          <p class="text-xs text-slate-400">Keep quick financial notes or reminders alongside your ledger.</p>
-        </div>
-        <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold">Active</span>
-      </div>
-      <div id="chat-messages-list" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1"></div>
-      <form id="chat-note-form" onsubmit="handleChatSubmit(event)" class="flex gap-2 pt-1">
-        <input id="chat-note-input" type="text" required placeholder="Write a note..."
-          class="flex-1 bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 outline-none" />
-        <button type="submit"
-          class="px-4 py-2.5 rounded-xl text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer transition-all">
-          Send
-        </button>
-      </form>
-    </section>
-
-    <!-- ==================== CASH MEMO VIEW ==================== -->
-    <section id="view-memo" class="hidden bg-navy-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
-      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
-        <div>
-          <h2 class="text-base font-bold text-slate-100">Cash Memo &amp; Ledger Summary</h2>
-          <p class="text-xs text-slate-400">Synced securely with backend ledger.</p>
-        </div>
-        <button type="button" onclick="syncLedgerWithRemote()"
-          class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer transition-all">
-          Refresh Summary
-        </button>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div class="bg-navy-950/80 border border-slate-800 rounded-xl p-3.5">
-          <p class="text-xs text-slate-400">Total Income</p>
-          <p id="memo-total-income" class="text-lg font-extrabold text-emerald-400 mt-1">৳ 0.00</p>
-        </div>
-        <div class="bg-navy-950/80 border border-slate-800 rounded-xl p-3.5">
-          <p class="text-xs text-slate-400">Total Paid Expense</p>
-          <p id="memo-total-expense" class="text-lg font-extrabold text-rose-400 mt-1">৳ 0.00</p>
-        </div>
-        <div class="bg-navy-950/80 border border-slate-800 rounded-xl p-3.5">
-          <p class="text-xs text-slate-400">Net Surplus</p>
-          <p id="memo-net-surplus" class="text-lg font-extrabold text-sky-400 mt-1">৳ 0.00</p>
-        </div>
-      </div>
-    </section>
-
-  </div>
-
-  <!-- ==================== MODALS ==================== -->
-  <div id="modal-income-expense" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-3">
-    <div class="bg-navy-900 border border-slate-700/90 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-slate-100">+ New Income / Expense</h3>
-        <button type="button" onclick="closeModal('modal-income-expense')" class="text-slate-400 hover:text-white text-lg leading-none cursor-pointer">✕</button>
-      </div>
-      <form id="form-income-expense" onsubmit="handleIncomeExpenseSubmit(event)" class="space-y-3.5">
-        <div class="grid grid-cols-2 gap-2 bg-navy-950 p-1 rounded-xl border border-slate-800">
-          <button id="btn-type-income" type="button" onclick="setIEModalType('income')"
-            class="py-2 rounded-lg text-xs sm:text-sm font-bold bg-emerald-500 text-slate-950 cursor-pointer transition-all">+ Income</button>
-          <button id="btn-type-expense" type="button" onclick="setIEModalType('expense')"
-            class="py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white cursor-pointer transition-all">− Expense (Paid)</button>
-        </div>
-        <div id="income-list-radio-box" class="bg-navy-950/80 border border-emerald-500/25 rounded-xl p-2.5 flex items-center justify-between gap-2">
-          <label class="flex items-center gap-2 text-xs font-semibold text-emerald-300 cursor-pointer">
-            <input id="radio-view-income-list" type="radio" name="incomeViewRadio"
-              onchange="if (this.checked) { closeModal('modal-income-expense'); openIncomeListModal(); this.checked = false; }"
-              class="w-4 h-4 accent-emerald-400 cursor-pointer" />
-            <span>View Date-wise Total Income Entries List</span>
-          </label>
-          <span class="text-[11px] text-slate-400">List ↗</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Date</label>
-            <input id="ie-date" type="date" required class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (৳)</label>
-            <input id="ie-amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
-          <input id="ie-description" type="text" required placeholder="e.g., Client Payment / Office Lunch" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <button type="button" onclick="closeModal('modal-income-expense')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer">Save Entry</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <div id="modal-loan-entry" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-3">
-    <div class="bg-navy-900 border border-slate-700/90 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-slate-100">+ New Loan / Credit Entry</h3>
-        <button type="button" onclick="closeModal('modal-loan-entry')" class="text-slate-400 hover:text-white text-lg leading-none cursor-pointer">✕</button>
-      </div>
-      <form id="form-loan-entry" onsubmit="handleLoanEntrySubmit(event)" class="space-y-3.5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Record Type</label>
-            <select id="loan-direction" onchange="updateLoanEntryHint()" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none">
-              <option value="receivable">Receivable</option>
-              <option value="payable">Payable</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Status</label>
-            <select id="loan-status" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none">
-              <option value="Due">Due</option>
-              <option value="Paid">Paid</option>
-            </select>
-          </div>
+    <!-- Sell ID Modal -->
+    <div id="sellLicenseModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
+            <button type="button" onclick="closeSellLicenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-paper-plane text-emerald-400"></i>
+                <span>Sell New ID (From Lot)</span>
+            </h3>
+
+            <div class="bg-[#080a0f] border border-emerald-500/30 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1">
+                <div class="flex justify-between font-semibold text-emerald-400">
+                    <span>Direct Bonus:</span>
+                    <span>৳ 8.00 (Fixed)</span>
+                </div>
+                <div class="flex justify-between text-amber-400">
+                    <span>Chain Pool:</span>
+                    <span>৳ 2.00 (Proportional Ratio)</span>
+                </div>
+            </div>
+
+            <form onsubmit="handleSellNewIdSubmit(event)" class="space-y-2.5 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Select Lot ID to Sell</label>
+                    <select id="sellLotIdSelect" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold"></select>
+                </div>
+                <div class="form-group">
+                    <label for="lotPassword">Lot Password</label>
+                    <input type="text" id="lotPassword" class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-emerald-400 font-bold" placeholder="Password will show here" readonly>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Coupon Code (Auto)</label>
+                    <input type="text" id="sellCouponCodeInput" readonly class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-amber-400 font-bold font-mono">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Name</label>
+                    <input type="text" id="sellBuyerName" maxlength="100" placeholder="Buyer Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Mobile Number</label>
+                    <input type="tel" id="sellBuyerMobile" maxlength="20" pattern="[0-9+\-\s]{7,20}" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Email Address</label>
+                    <input type="email" id="sellBuyerEmail" maxlength="120" placeholder="buyer@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg mt-1">Submit & Sell ID (৳8 + ৳2 Chain)</button>
+            </form>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Description / Party Name</label>
-          <input id="loan-description" type="text" required placeholder="e.g., Mayurganj Loan / Rahim" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (৳)</label>
-            <input id="loan-amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-          <div>
-            <label id="loan-date-label" class="block text-xs font-semibold text-slate-300 mb-1">Receivable Date</label>
-            <input id="loan-date" type="date" required class="w-full bg-navy-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <button type="button" onclick="closeModal('modal-loan-entry')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 cursor-pointer">Save Entry</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <div id="modal-receivable-settle" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-3">
-    <div class="bg-navy-900 border border-slate-700/90 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-emerald-400">Receive Due Amount</h3>
-        <button type="button" onclick="closeModal('modal-receivable-settle')" class="text-slate-400 hover:text-white text-lg leading-none cursor-pointer">✕</button>
-      </div>
-      <form id="form-receivable-settle" onsubmit="handleReceivableSettleSubmit(event)" class="space-y-3.5">
-        <input id="rec-settle-id" type="hidden" />
-        <div class="bg-navy-950/90 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
-          <div class="flex justify-between"><span class="text-slate-400">Description:</span><span id="rec-settle-desc" class="font-bold text-slate-100"></span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Principal Amount:</span><span id="rec-settle-principal" class="font-bold text-emerald-400"></span></div>
+    <!-- Balance Transfer Modal -->
+    <div id="balanceTransferModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button type="button" onclick="closeBalanceTransferModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Balance Transfer</h3>
+            <form onsubmit="handleBalanceTransferSubmit(event)" class="space-y-3 text-xs">
+                <input type="text" id="transferRecipientId" maxlength="64" pattern="[A-Za-z0-9_@.-]+" placeholder="Recipient ID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-emerald-400">
+                <input type="number" id="transferAmount" placeholder="Amount (৳)" min="1" max="10000000" step="0.01" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-amber-400">
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs">Transfer</button>
+            </form>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Receive Date</label>
-            <input id="rec-settle-date" type="date" required class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Extra Amount (৳)</label>
-            <input id="rec-settle-extra" type="number" step="0.01" min="0" value="0" class="w-full bg-navy-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <button type="button" onclick="closeModal('modal-receivable-settle')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer">Confirm</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <div id="modal-payable-settle" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-3">
-    <div class="bg-navy-900 border border-slate-700/90 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-rose-400">Payable Due Payment</h3>
-        <button type="button" onclick="closeModal('modal-payable-settle')" class="text-slate-400 hover:text-white text-lg leading-none cursor-pointer">✕</button>
-      </div>
-      <form id="form-payable-settle" onsubmit="handlePayableSettleSubmit(event)" class="space-y-3.5">
-        <input id="pay-settle-id" type="hidden" />
-        <div class="bg-navy-950/90 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
-          <div class="flex justify-between"><span class="text-slate-400">Description:</span><span id="pay-settle-desc" class="font-bold text-slate-100"></span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Principal Amount:</span><span id="pay-settle-principal" class="font-bold text-rose-400"></span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Source:</span><span id="pay-settle-source" class="font-semibold text-slate-300"></span></div>
+    <!-- Buy License Landing Modal -->
+    <div id="buyLicenseLandingModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-3 text-xs">
+            <button type="button" onclick="closeBuyLicenseLandingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white">Buy New ID / License</h3>
+            
+            <form onsubmit="handleLandingBuySubmit(event)" class="space-y-2.5">
+                <div>
+                    <label class="block text-slate-400 mb-1">Buyer Name</label>
+                    <input type="text" id="landingBuyerName" maxlength="100" placeholder="Full Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Mobile Number</label>
+                    <input type="tel" id="landingBuyMobile" maxlength="20" pattern="[0-9+\-\s]{7,20}" placeholder="01XXXXXXXXX" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Email Address</label>
+                    <input type="email" id="landingBuyEmail" maxlength="120" placeholder="email@domain.com" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Payment TrxID</label>
+                    <input type="text" id="landingBuyPaymentId" maxlength="64" pattern="[A-Za-z0-9_-]+" placeholder="TrxID" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+                <button type="submit" class="w-full buy-btn-gradient text-slate-950 font-black py-3 rounded-xl mt-2">Complete Payment</button>
+            </form>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Date</label>
-            <input id="pay-settle-date" type="date" required class="w-full bg-navy-950 border border-slate-700 focus:border-rose-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Extra Amount (৳)</label>
-            <input id="pay-settle-extra" type="number" step="0.01" min="0" value="0" class="w-full bg-navy-950 border border-slate-700 focus:border-rose-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <button type="button" onclick="closeModal('modal-payable-settle')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-rose-500 hover:bg-rose-400 text-white cursor-pointer">Confirm</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <div id="modal-daily-expense" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-3">
-    <div class="bg-navy-900 border border-slate-700/90 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-violet-300">+ Daily Expense Entry</h3>
-        <button type="button" onclick="closeModal('modal-daily-expense')" class="text-slate-400 hover:text-white text-lg leading-none cursor-pointer">✕</button>
-      </div>
-      <form id="form-daily-expense" onsubmit="handleDailyExpenseSubmit(event)" class="space-y-3.5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Date</label>
-            <input id="dexp-date" type="date" required class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Amount (৳)</label>
-            <input id="dexp-amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-          </div>
+    <!-- Add Device Modal -->
+    <div id="addDeviceModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <button type="button" onclick="closeAddDeviceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white">Add Device</h3>
+            <form onsubmit="handleAddDeviceSubmit(event)" class="space-y-3 text-xs">
+                <input type="text" id="deviceNameInput" maxlength="80" placeholder="Device Name" required class="w-full bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200">
+                <button type="submit" class="w-full bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">Add Device</button>
+            </form>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
-          <input id="dexp-description" type="text" required placeholder="e.g., Transport / Grocery / Bill" class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Status</label>
-          <select id="dexp-status" class="w-full bg-navy-950 border border-slate-700 focus:border-violet-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none">
-            <option value="Paid">Paid</option>
-            <option value="Due">Due</option>
-          </select>
-        </div>
-        <div class="flex justify-end gap-2 pt-1">
-          <button type="button" onclick="closeModal('modal-daily-expense')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white cursor-pointer">Save Expense</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <div id="modal-income-list" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-3">
-    <div class="bg-navy-900 border border-slate-700/90 rounded-2xl w-full max-w-2xl p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
-      <div class="flex items-center justify-between gap-2">
-        <div>
-          <h3 class="text-base font-bold text-emerald-400">All Total Income Entries (Date-wise)</h3>
-          <p class="text-[11px] text-slate-400">Select rows with checkbox to delete from ledger</p>
+    <!-- My Chat Modal -->
+    <div id="myChatModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-md rounded-3xl p-4 sm:p-5 shadow-2xl relative flex flex-col h-[500px] max-h-[88vh]">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                <div class="flex items-center space-x-2">
+                    <button type="button" id="chatBackBtn" onclick="exitIndividualChat()" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-400 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 transition-all">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Exit</span>
+                    </button>
+                    <h3 id="chatModalTitle" class="text-sm sm:text-base font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-comments text-emerald-400"></i>
+                        <span>My Chat (Universal & Users)</span>
+                    </h3>
+                </div>
+                <button type="button" onclick="closeModal('myChatModal')" class="text-slate-400 hover:text-white p-1 cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="universalChatView" class="flex-1 flex flex-col overflow-hidden space-y-3">
+                <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-2.5 space-y-2">
+                    <div class="relative">
+                        <input type="text" id="chatUserSearchInput" maxlength="64" oninput="handleChatUserSearch()" placeholder="Search User ID to start private chat..."
+                            class="w-full bg-[#131822] border border-slate-700 focus:border-indigo-500 rounded-xl py-2 px-3 text-slate-200 text-xs outline-none">
+                    </div>
+                    <div id="chatSearchResultsContainer" class="hidden flex flex-wrap gap-1.5 max-h-20 overflow-y-auto pt-0.5"></div>
+                </div>
+
+                <div class="flex-1 bg-[#080a0f] border border-slate-800 rounded-2xl p-3 overflow-y-auto space-y-2.5 text-xs" id="universalChatBox"></div>
+
+                <form onsubmit="sendUniversalMessage(event)" class="flex items-center space-x-2">
+                    <input type="text" id="universalMsgInput" maxlength="500" placeholder="Write to Universal Chat..." required
+                        class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center space-x-1 shadow">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div id="individualChatView" class="hidden flex-1 flex flex-col overflow-hidden space-y-3">
+                <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-indigo-300 font-semibold flex items-center space-x-1.5">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                        <span>Private Chat with <strong id="activeChatPartnerName" class="text-white">User</strong></span>
+                    </span>
+                    <button type="button" onclick="exitIndividualChat()" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/30 px-2.5 py-0.5 rounded-lg text-[11px] font-bold">
+                        Exit Chat
+                    </button>
+                </div>
+
+                <div class="flex-1 bg-[#080a0f] border border-slate-800 rounded-2xl p-3 overflow-y-auto space-y-2.5 text-xs" id="individualChatBox"></div>
+
+                <form onsubmit="sendIndividualMessage(event)" class="flex items-center space-x-2">
+                    <input type="text" id="individualMsgInput" maxlength="500" placeholder="Write a private message..." required
+                        class="flex-1 bg-[#080a0f] border border-slate-700 rounded-xl py-2.5 px-3 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center space-x-1 shadow">
+                        <span>Send</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button id="btn-delete-incomes" type="button" onclick="deleteSelectedIncomes()"
-            class="hidden px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer transition-all">
-            Delete (<span id="count-del-incomes">0</span>)
-          </button>
-          <button type="button" onclick="closeModal('modal-income-list')" class="text-slate-400 hover:text-white text-lg leading-none px-2 py-1 cursor-pointer">✕</button>
-        </div>
-      </div>
-      <div class="overflow-x-auto overflow-y-auto flex-1 rounded-xl border border-slate-800 bg-navy-950/70">
-        <table class="w-full text-left border-collapse min-w-[460px]">
-          <thead class="sticky top-0 z-10 bg-navy-850 text-[11px] sm:text-xs font-semibold text-slate-400 border-b border-slate-800">
-            <tr>
-              <th class="py-2.5 pl-3 pr-1 w-7"></th>
-              <th class="py-2.5 px-2.5">Date</th>
-              <th class="py-2.5 px-2.5">Description</th>
-              <th class="py-2.5 pl-2.5 pr-3 text-right">Amount (৳)</th>
-            </tr>
-          </thead>
-          <tbody id="income-list-modal-body" class="divide-y divide-slate-800/60 text-xs sm:text-sm"></tbody>
-        </table>
-      </div>
     </div>
-  </div>
 
-  <!-- Child Iframe Bridge (Same-Origin Protected; ID kept internal only) -->
-  <script>
-    (function initChildIframeBridge() {
-      const CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
-      const TRUSTED_ORIGIN = window.location.origin;
-      const isEmbedded = window.self !== window.top;
+    <!-- Cash Memo Builder Modal -->
+    <div id="cashMemoModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-[#131822] border border-slate-700 w-full max-w-lg rounded-3xl p-4 sm:p-5 shadow-2xl relative space-y-3 my-auto max-h-[92vh] overflow-y-auto">
+            <button type="button" onclick="closeModal('cashMemoModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fa-solid fa-receipt text-indigo-400"></i>
+                <span>Custom Cash Memo Builder (Cart System)</span>
+            </h3>
 
-      if (isEmbedded) document.body.classList.add('in-iframe');
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <div class="flex justify-between items-center">
+                    <p class="text-amber-400 font-bold text-[11px] uppercase tracking-wider">Business Setup (One-Time Header & Footer)</p>
+                    <button type="button" id="lockBusinessSetupBtn" onclick="lockBusinessSetup()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px]">Lock Setup</button>
+                </div>
+                <div class="space-y-1.5">
+                    <input type="text" id="memoHeaderConfig" maxlength="160" placeholder="Company Name & Address (Centered Header)" value="My Develop App Store | Dhaka, Bangladesh" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="text" id="memoFooterConfig" maxlength="160" placeholder="Mobile & Web Address (Centered Footer)" value="Mobile: 01818 589423 | Web: mydevelopapp.com" class="w-full bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-300">
+                </div>
+            </div>
 
-      function getInitialCompositeUserId() {
-        const params = new URLSearchParams(window.location.search);
-        return (params.get('composite_user_id') || window.ACTIVE_COMPOSITE_USER_ID || '').trim();
-      }
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <p class="text-emerald-400 font-bold text-[11px] uppercase tracking-wider">Customer Details (Open)</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input type="text" id="memoCustomerName" maxlength="100" placeholder="Customer Name" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                    <input type="tel" id="memoCustomerMobile" maxlength="20" pattern="[0-9+\-\s]{7,20}" placeholder="Customer Mobile" required class="bg-[#131822] border border-slate-700 rounded-xl py-2 px-3 text-slate-200">
+                </div>
+            </div>
 
-      window.ACTIVE_COMPOSITE_USER_ID = getInitialCompositeUserId();
+            <div class="bg-[#080a0f] border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                <p class="text-indigo-400 font-bold text-[11px] uppercase tracking-wider">Add Product (Open)</p>
+                <div class="grid grid-cols-12 gap-1.5">
+                    <input type="text" id="memoProdDesc" maxlength="140" placeholder="Description" class="col-span-6 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-slate-200">
+                    <input type="number" id="memoProdQty" placeholder="Qty" min="1" max="100000" value="1" class="col-span-2 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2 text-center text-slate-200">
+                    <input type="number" id="memoProdRate" placeholder="Rate" min="0" max="100000000" step="0.01" class="col-span-4 bg-[#131822] border border-slate-700 rounded-xl py-2 px-2.5 text-emerald-400">
+                </div>
+                <button type="button" onclick="addProductToMemoCart()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs">Add Item to Cart</button>
 
-      function applyCompositeUserScope(userId) {
-        if (!userId) return;
-        window.ACTIVE_COMPOSITE_USER_ID = String(userId).trim();
-        if (typeof window.onCompositeUserChanged === 'function') {
-          window.onCompositeUserChanged(window.ACTIVE_COMPOSITE_USER_ID);
-        }
-      }
+                <div class="overflow-x-auto border border-slate-800 rounded-xl mt-2">
+                    <table class="w-full text-left text-[11px]">
+                        <thead class="bg-[#131822] text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="py-1.5 px-2">Item</th>
+                                <th class="py-1.5 px-1 text-center">Qty</th>
+                                <th class="py-1.5 px-1 text-right">Rate</th>
+                                <th class="py-1.5 px-2 text-right">Total</th>
+                                <th class="py-1.5 px-1 text-center">×</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memoCartTableBody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between items-center pt-1 font-extrabold text-sm">
+                    <span class="text-slate-300">Grand Total:</span>
+                    <span id="memoCartGrandTotal" class="text-emerald-400 font-mono">৳ 0.00</span>
+                </div>
+            </div>
 
-      function emitHeightToParent() {
-        if (!isEmbedded || !window.parent) return;
-        const shell = document.getElementById('dashboard-app-shell');
-        const height = shell ? shell.scrollHeight + 24 : document.documentElement.scrollHeight;
-        window.parent.postMessage({
-          channel: CHANNEL,
-          type: 'FRAME_HEIGHT',
-          compositeUserId: window.ACTIVE_COMPOSITE_USER_ID,
-          height
-        }, TRUSTED_ORIGIN);
-      }
+            <button type="button" onclick="openA4PdfPreview()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-file-pdf"></i><span>PDF Preview (A4 Size)</span>
+            </button>
+        </div>
+    </div>
 
-      window.bridgeNotifyParent = function bridgeNotifyParent(type, payload = {}) {
-        if (!isEmbedded || !window.parent) return;
-        window.parent.postMessage({
-          channel: CHANNEL,
-          type,
-          compositeUserId: window.ACTIVE_COMPOSITE_USER_ID,
-          ...payload
-        }, TRUSTED_ORIGIN);
-      };
+    <!-- A4 PDF Preview Modal -->
+    <div id="a4PdfPreviewModal" class="hidden fixed inset-0 z-[110] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white text-black w-full max-w-2xl rounded-2xl p-6 shadow-2xl relative space-y-4 my-auto">
+            <button type="button" onclick="document.getElementById('a4PdfPreviewModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-700 hover:text-black text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <div id="a4PdfContentBox" class="border border-slate-300 p-6 rounded-xl bg-white shadow-inner space-y-4 text-sm font-sans"></div>
+            <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-200">
+                <button type="button" onclick="saveMemoToDevice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center space-x-1.5 shadow">
+                    <i class="fa-solid fa-download"></i><span>Save in Device</span>
+                </button>
+                <button type="button" onclick="printMemoPdf()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center space-x-1.5 shadow">
+                    <i class="fa-solid fa-print"></i><span>Print</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
-      window.addEventListener('message', (event) => {
-        if (event.origin !== TRUSTED_ORIGIN) return;
-        const data = event.data;
-        if (!data || data.channel !== CHANNEL) return;
+    <!-- User & Password Change Modal -->
+    <div id="userPassModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 90%; max-width: 420px; padding: 24px; color: #f8fafc; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 18px; color: #38bdf8;">Account & Password</h3>
+                <span onclick="closeUserPassModal()" style="cursor: pointer; font-size: 20px; color: #94a3b8;">&times;</span>
+            </div>
 
-        if (data.type === 'SET_USER_SCOPE') {
-          const nextId = (data.payload && data.payload.composite_user_id) || data.compositeUserId;
-          applyCompositeUserScope(nextId);
-          emitHeightToParent();
-        } else if (data.type === 'SWITCH_TAB' && data.payload?.tab) {
-          if (typeof window.switchTopTab === 'function') window.switchTopTab(data.payload.tab);
-          emitHeightToParent();
-        } else if (data.type === 'REQUEST_HEIGHT') {
-          emitHeightToParent();
-        }
-      });
+            <div style="background: #0f172a; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #94a3b8;">Account Email:</span>
+                    <span id="modalAutoEmail" style="color: #fbbf24; font-weight: 500;">--</span>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
+                    * পরিবর্তনের কনফার্মেশন নোটিফিকেশন এই ইমেইলে পাঠানো হবে।
+                </div>
+            </div>
 
-      window.addEventListener('load', () => {
-        if (window.ACTIVE_COMPOSITE_USER_ID) applyCompositeUserScope(window.ACTIVE_COMPOSITE_USER_ID);
-        if (isEmbedded && window.parent) {
-          window.parent.postMessage({ channel: CHANNEL, type: 'REQUEST_USER_SCOPE' }, TRUSTED_ORIGIN);
-        }
-        emitHeightToParent();
-      });
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন ইউজারনেম (New Username)</label>
+                    <input type="text" id="newUsernameInput" maxlength="64" pattern="[A-Za-z0-9_@.-]+" autocomplete="off" placeholder="নতুন ইউজারনেম লিখুন" style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
 
-      if (typeof ResizeObserver !== 'undefined') {
-        const shell = document.getElementById('dashboard-app-shell');
-        if (shell) new ResizeObserver(() => emitHeightToParent()).observe(shell);
-      }
-    })();
-  </script>
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুরাতন পাসওয়ার্ড (Old Password) *</label>
+                    <input type="password" id="oldPasswordInput" minlength="4" maxlength="128" autocomplete="current-password" placeholder="বর্তমান পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
 
-  <!-- Only Client Script (Server Proxy stays strictly on Backend) -->
-  <script src="./script.js"></script>
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">নতুন পাসওয়ার্ড (New Password) *</label>
+                    <input type="password" id="newPasswordInput" minlength="4" maxlength="128" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ড দিন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
 
-  <!-- Fullscreen & Checkbox Delete Helpers -->
-  <script>
-    function exitFullscreenSection() {
-      if (typeof window.switchTopTab === 'function') window.switchTopTab('dashboard');
-      document.querySelectorAll('.section-fullscreen').forEach((sec) => {
-        sec.classList.remove('section-fullscreen');
-        sec.querySelectorAll('.fs-exit-btn').forEach((btn) => btn.classList.add('hidden'));
-        const sr = sec.querySelector('.scroll-region');
-        if (sr) { sr.classList.remove('flex-1', 'max-h-none'); sr.classList.add('max-h-[168px]'); }
-      });
-      if (typeof notifyParentFrameHeight === 'function') notifyParentFrameHeight();
-    }
+                <div>
+                    <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">পুনরায় নতুন পাসওয়ার্ড (Confirm New Password) *</label>
+                    <input type="password" id="confirmPasswordInput" minlength="4" maxlength="128" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ডটি আবার লিখুন" required style="width: 100%; padding: 9px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box;">
+                </div>
+            </div>
 
-    function enterFullscreenSection(sectionEl) {
-      if (!sectionEl) return;
-      if (typeof window.switchTopTab === 'function') window.switchTopTab('dashboard');
-      exitFullscreenSection();
-      sectionEl.classList.add('section-fullscreen');
-      sectionEl.querySelectorAll('.fs-exit-btn').forEach((btn) => btn.classList.remove('hidden'));
-      const sr = sectionEl.querySelector('.scroll-region');
-      if (sr) { sr.classList.remove('max-h-[168px]', 'max-h-[164px]'); sr.classList.add('flex-1', 'max-h-none'); }
-    }
+            <button type="button" id="btnAcceptLoginAgain" onclick="submitUserPasswordChange()" style="width: 100%; margin-top: 20px; padding: 11px; background: #10b981; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                Accept & Login Again
+            </button>
 
-    function bindExpandableDoubleClick() {
-      document.querySelectorAll('[data-expandable-section], [data-expandable-section] .scroll-region, [data-expandable-section] tbody').forEach((el) => {
-        if (el.dataset.dblBound === '1') return;
-        el.dataset.dblBound = '1';
-        el.addEventListener('dblclick', (e) => {
-          if (e.target.closest('button, input, select, textarea, a, label')) return;
-          e.stopPropagation();
-          const sec = el.matches('[data-expandable-section]') ? el : el.closest('[data-expandable-section]');
-          if (!sec) return;
-          sec.classList.contains('section-fullscreen') ? exitFullscreenSection() : enterFullscreenSection(sec);
-        });
-      });
-    }
+        </div>
+    </div>
 
-    async function syncLedgerWithRemote() {
-      const badge = document.getElementById('sync-status-badge');
-      if (badge) badge.textContent = 'Syncing...';
-      try {
-        if (typeof window.loadAllDatabaseRecords === 'function') await window.loadAllDatabaseRecords();
-        bindExpandableDoubleClick();
-        if (badge) badge.textContent = 'Synced';
-      } catch (err) {
-        console.warn('Sync warning:', err);
-        if (badge) badge.textContent = 'Bridge Ready';
-      }
-    }
+    <!-- Hidden A4 Print Area -->
+    <div id="a4MemoPrintArea" class="hidden"></div>
 
-    async function deleteSelectedSummary() {
-      const periods = Array.from(document.querySelectorAll('.summary-row-cb:checked')).map((cb) => cb.value);
-      if (!periods.length || typeof window.callBackendApi !== 'function') return;
-      const res = await window.callBackendApi('delete_monthly_summary', { periods });
-      if (res?.success && typeof window.loadAllDatabaseRecords === 'function') {
-        await window.loadAllDatabaseRecords();
-      } else if (res?.message && typeof showToast === 'function') {
-        showToast(res.message, 'error');
-      }
-    }
+    <!-- Secure Iframe Bridge Controller (Parent <-> dashboard.html) -->
+    <script>
+        (function initParentIframeBridge() {
+            const CHANNEL = 'SIGMAPHD_DASHBOARD_BRIDGE';
+            const frame = document.getElementById('dashboardFrame');
+            let activeScopeKey = '101_admin';
 
-    function ensureRowCheckboxesForFullscreen() {
-      const configs = [
-        { tbodyId: 'monthly-summary-body', cbClass: 'summary-row-cb', btnId: 'btn-delete-summary', countId: 'count-del-summary', selector: '.summary-row-cb' },
-        { tbodyId: 'receivable-list-body', cbClass: 'loan-row-cb', btnId: 'btn-delete-receivable', countId: 'count-del-receivable', selector: ".loan-row-cb[data-cat='receivable']", extraAttr: " data-cat='receivable'" },
-        { tbodyId: 'payable-list-body', cbClass: 'loan-row-cb', btnId: 'btn-delete-payable', countId: 'count-del-payable', selector: ".loan-row-cb[data-cat='payable']", extraAttr: " data-cat='payable'" },
-        { tbodyId: 'daily-expenses-body', cbClass: 'expense-row-cb', btnId: 'btn-delete-expenses', countId: 'count-del-expenses', selector: '.expense-row-cb' }
-      ];
+            function sanitizeIdentifier(raw) {
+                if (typeof raw !== 'string') return '';
+                return raw.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64);
+            }
 
-      configs.forEach((cfg) => {
-        const tbody = document.getElementById(cfg.tbodyId);
-        if (!tbody) return;
-        tbody.querySelectorAll('tr').forEach((tr) => {
-          if (tr.querySelector('td[colspan]')) return;
-          const firstCell = tr.cells[0];
-          const val = (firstCell?.textContent?.trim()) || tr.dataset.id || '';
-          const hasCb = firstCell?.classList.contains('row-select-cb') && firstCell.querySelector('input[type="checkbox"]');
-          if (!hasCb) {
-            const td = document.createElement('td');
-            td.className = 'py-2.5 pl-3 pr-1 row-select-cb';
-            td.innerHTML = `<input type="checkbox" value="${val}"${cfg.extraAttr || ''} class="${cfg.cbClass} accent-rose-500 cursor-pointer" onchange="updateDeleteCounter('${cfg.btnId}', '${cfg.countId}', &quot;${cfg.selector}&quot;)" />`;
-            tr.insertBefore(td, tr.firstChild);
-          }
-        });
-      });
-    }
+            function getActiveScopeKey() {
+                const userEl = document.getElementById('currentLoggedInUser');
+                const cleanUser = sanitizeIdentifier(userEl && userEl.textContent ? userEl.textContent.trim() : '');
+                if (activeScopeKey && activeScopeKey !== '101_admin') {
+                    return activeScopeKey;
+                }
+                return cleanUser ? `101_${cleanUser}` : '101_admin';
+            }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      ensureRowCheckboxesForFullscreen();
-      bindExpandableDoubleClick();
-      const shell = document.getElementById('dashboard-app-shell');
-      if (shell) {
-        new MutationObserver(() => {
-          ensureRowCheckboxesForFullscreen();
-          bindExpandableDoubleClick();
-        }).observe(shell, { childList: true, subtree: true });
-      }
-    });
-  </script>
+            function postToFrame(type, payload = {}) {
+                if (!frame || !frame.contentWindow) return;
+                frame.contentWindow.postMessage({
+                    channel: CHANNEL,
+                    type,
+                    scopeKey: getActiveScopeKey(),
+                    payload
+                }, window.location.origin);
+            }
+
+            window.syncDashboardIframeUser = function syncDashboardIframeUser(scopeKey) {
+                const cleanKey = sanitizeIdentifier(scopeKey);
+                if (cleanKey) {
+                    activeScopeKey = cleanKey;
+                }
+                if (frame) {
+                    const currentSrc = frame.getAttribute('src') || '';
+                    if (!currentSrc.startsWith('dashboard.html')) {
+                        frame.setAttribute('src', 'dashboard.html');
+                    }
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
+                }
+            };
+
+            window.setDashboardFrameTab = function setDashboardFrameTab(tabName) {
+                const allowedTabs = ['dashboard', 'ledger', 'reports', 'loans'];
+                const safeTab = allowedTabs.includes(tabName) ? tabName : 'dashboard';
+                postToFrame('SWITCH_TAB', { tab: safeTab });
+            };
+
+            if (frame) {
+                frame.addEventListener('load', () => {
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
+                    postToFrame('REQUEST_HEIGHT');
+                });
+            }
+
+            window.addEventListener('message', (event) => {
+                if (!event.origin || event.origin !== window.location.origin) {
+                    return;
+                }
+                if (frame && frame.contentWindow && event.source !== frame.contentWindow) {
+                    return;
+                }
+
+                const data = event.data;
+                if (!data || data.channel !== CHANNEL) return;
+
+                if (data.type === 'FRAME_HEIGHT' && frame && typeof data.height === 'number' && Number.isFinite(data.height)) {
+                    const safeHeight = Math.min(4000, Math.max(520, Math.ceil(data.height) + 16));
+                    frame.style.height = `${safeHeight}px`;
+                } else if (data.type === 'TOAST' && typeof window.showToast === 'function') {
+                    const safeMsg = typeof data.message === 'string' ? data.message.slice(0, 200) : 'Updated';
+                    const allowedVariants = ['success', 'error', 'warning', 'info', 'warn'];
+                    const safeVariant = allowedVariants.includes(data.variant) ? data.variant : 'success';
+                    window.showToast(safeMsg, safeVariant);
+                } else if (data.type === 'OPEN_MODAL') {
+                    if (data.modal === 'chat' && typeof window.openMyChatModal === 'function') window.openMyChatModal();
+                    if (data.modal === 'memo' && typeof window.openCashMemoModal === 'function') window.openCashMemoModal();
+                } else if (data.type === 'REQUEST_USER_SCOPE') {
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
+                }
+            });
+
+            // Sync when logged-in username changes
+            const userEl = document.getElementById('currentLoggedInUser');
+            if (userEl && typeof MutationObserver !== 'undefined') {
+                new MutationObserver(() => {
+                    const cleanUser = sanitizeIdentifier(userEl.textContent ? userEl.textContent.trim() : '');
+                    activeScopeKey = cleanUser ? `101_${cleanUser}` : '101_admin';
+                    postToFrame('SET_USER_SCOPE', { scopeKey: getActiveScopeKey() });
+                }).observe(userEl, { childList: true, characterData: true, subtree: true });
+            }
+        })();
+    </script>
+    
+    <!-- External Script Integration -->
+    <script src="script.js"></script>
 </body>
 </html>
